@@ -2,6 +2,7 @@
 
 import { PenTool } from 'lucide-react'
 import { motion } from 'framer-motion'
+import Link from 'next/link'
 
 export default function HomePage() {
   return (
@@ -16,86 +17,112 @@ export default function HomePage() {
               </h1>
             </div>
 
-            <motion.button
-              whileHover={{ scale: 1.05, y: -2 }}
-              whileTap={{ scale: 0.95 }}
-              className="glass flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/20 lg:text-base"
-            >
-              <PenTool size={20} />
-              Write
-            </motion.button>
+            <Link href="/create">
+              <motion.button
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                className="glass flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-white/20"
+              >
+                <PenTool className="h-4 w-4" />
+                Write
+              </motion.button>
+            </Link>
           </nav>
         </div>
       </header>
 
-      {/* Hero Section */}
-      <main className="container mx-auto px-6 py-16 lg:py-24">
-        <div className="mx-auto max-w-4xl text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            <h1 className="mb-6 text-4xl font-extrabold tracking-tight text-white lg:text-6xl">
-              <span className="block">Read Stories,</span>
-              <span className="block">Earn Tokens,</span>
-              <span className="block">Create with AI</span>
-            </h1>
-          </motion.div>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="mb-8 text-lg text-white/90 lg:text-xl"
-          >
-            First 3 chapters FREE. Earn $TIP tokens while reading.
-            <br className="hidden sm:block" />
-            Remix content and earn from your creativity.
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="mb-8 flex flex-col gap-4 sm:flex-row sm:justify-center"
-          >
-            <motion.button
-              whileHover={{ scale: 1.05, y: -2 }}
-              whileTap={{ scale: 0.95 }}
-              className="rounded-full bg-brand-accent px-8 py-4 text-lg font-semibold text-white shadow-xl transition-all duration-300 hover:bg-amber-600 hover:shadow-2xl"
+      {/* Main Content */}
+      <main className="relative">
+        <div className="container mx-auto px-6 py-20">
+          <div className="mx-auto max-w-4xl text-center">
+            {/* Hero Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              className="mb-16"
             >
-              Start Reading Free
-            </motion.button>
+              <h1 className="mb-6 text-4xl font-bold text-white lg:text-6xl">
+                Read Stories, Earn Tokens,{' '}
+                <span className="bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">
+                  Create with AI
+                </span>
+              </h1>
 
-            <motion.button
-              whileHover={{ scale: 1.05, y: -2 }}
-              whileTap={{ scale: 0.95 }}
-              className="glass rounded-full px-8 py-4 text-lg font-semibold text-white transition-all duration-300 hover:bg-white/20"
+              <p className="mb-8 text-xl text-white/90 lg:text-2xl">
+                First 3 chapters FREE. Earn $TIP tokens while reading.
+                <br />
+                Remix content and earn from your creativity.
+              </p>
+
+              <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="rounded-full bg-white px-8 py-4 text-lg font-semibold text-gray-800 shadow-lg transition-all hover:shadow-xl"
+                >
+                  Start Reading Free
+                </motion.button>
+
+                <Link href="/create">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="glass rounded-full border border-white/30 px-8 py-4 text-lg font-semibold text-white transition-all hover:bg-white/20"
+                  >
+                    Create Your Story
+                  </motion.button>
+                </Link>
+              </div>
+            </motion.div>
+
+            {/* Features Grid */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="grid gap-8 md:grid-cols-3"
             >
-              Create Your Story
-            </motion.button>
-          </motion.div>
+              <div className="glass rounded-xl p-6 text-white">
+                <div className="mb-4 text-4xl">📚</div>
+                <h3 className="mb-2 text-xl font-bold">Read & Earn</h3>
+                <p className="text-white/80">
+                  Earn $TIP tokens for every chapter you read. Your reading pays for itself!
+                </p>
+              </div>
 
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            className="text-sm text-white/80 lg:text-base"
-          >
-            No wallet needed to start • Powered by Story Protocol
-          </motion.p>
+              <div className="glass rounded-xl p-6 text-white">
+                <div className="mb-4 text-4xl">🤖</div>
+                <h3 className="mb-2 text-xl font-bold">AI-Powered Writing</h3>
+                <p className="text-white/80">
+                  Create stories with AI assistance. Multi-modal inputs bring your ideas to life.
+                </p>
+              </div>
+
+              <div className="glass rounded-xl p-6 text-white">
+                <div className="mb-4 text-4xl">🔄</div>
+                <h3 className="mb-2 text-xl font-bold">Remix & Earn</h3>
+                <p className="text-white/80">
+                  Remix existing stories and earn licensing fees. Recursive creativity economy.
+                </p>
+              </div>
+            </motion.div>
+
+            {/* Story Protocol Badge */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              className="mt-16"
+            >
+              <p className="text-white/60">Built on</p>
+              <div className="mt-2 text-2xl font-bold text-white">
+                Story Protocol Layer 1
+              </div>
+            </motion.div>
+          </div>
         </div>
       </main>
-
-      {/* Footer */}
-      <footer className="border-t border-white/10">
-        <div className="container mx-auto px-6 py-8 text-center">
-          <p className="text-sm text-white/70">
-            © 2025 StoryHouse.vip - Built on Story Protocol
-          </p>
-        </div>
-      </footer>
     </div>
   )
 }
