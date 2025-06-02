@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -16,9 +16,14 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'StoryHouse.vip - Read Stories, Earn Tokens, Create with AI',
-    description: 'Revolutionary AI-assisted writing platform built on Story Protocol.',
+    description: 'Revolutionary AI-assisted writing platform built on Story Protocol. Read, earn, and create with blockchain technology.',
   },
-  viewport: 'width=device-width, initial-scale=1',
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
   themeColor: '#667eea',
 }
 
