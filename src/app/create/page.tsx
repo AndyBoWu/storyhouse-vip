@@ -1,9 +1,17 @@
 'use client'
 
 import { useState } from 'react'
-import { ArrowLeft, Save, Sparkles, Image, Smile, Palette, Wand2 } from 'lucide-react'
+import { ArrowLeft, Save, Sparkles, Image, Smile, Palette, Wand2, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
+
+interface GeneratedStory {
+  title: string
+  content: string
+  wordCount: number
+  readingTime: number
+  themes: string[]
+}
 
 export default function CreateStoryPage() {
   const [plotDescription, setPlotDescription] = useState('')
@@ -11,8 +19,9 @@ export default function CreateStoryPage() {
   const [selectedEmojis, setSelectedEmojis] = useState<string[]>([])
   const [selectedGenres, setSelectedGenres] = useState<string[]>([])
   const [isGenerating, setIsGenerating] = useState(false)
-  const [generatedContent, setGeneratedContent] = useState('')
+  const [generatedStory, setGeneratedStory] = useState<GeneratedStory | null>(null)
   const [showMultiModal, setShowMultiModal] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const genres = ['Mystery', 'Romance', 'Sci-Fi', 'Fantasy', 'Horror', 'Comedy', 'Adventure', 'Drama']
   const moods = ['Dark & Gritty', 'Light & Whimsical', 'Epic Adventure', 'Romantic', 'Suspenseful', 'Humorous']
@@ -30,30 +39,49 @@ export default function CreateStoryPage() {
     if (!plotDescription.trim()) return
 
     setIsGenerating(true)
+    setError(null)
 
-    // Simulate AI generation - replace with actual AI API call
-    await new Promise(resolve => setTimeout(resolve, 3000))
+    try {
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          plotDescription: plotDescription.trim(),
+          genres: selectedGenres,
+          moods: selectedMoods,
+          emojis: selectedEmojis,
+          chapterNumber: 1
+        })
+      })
 
-    const mockGenerated = `Chapter 1: The Discovery
+      const result = await response.json()
 
-Detective Sarah Chen had always found comfort in the familiar creaks and whispers of her grandmother's old Victorian house. But today, as she climbed the narrow staircase to the attic, something felt different.
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to generate story')
+      }
 
-The wooden steps groaned under her weight, each one seeming to echo with memories of countless trips to this forgotten space. Sarah pulled the cord for the single bulb that lit the cramped attic, and gasped.
+      if (result.success && result.data) {
+        setGeneratedStory(result.data)
+      } else {
+        throw new Error('Invalid response from AI service')
+      }
+    } catch (err) {
+      console.error('Generation error:', err)
+      setError(err instanceof Error ? err.message : 'Failed to generate story. Please try again.')
+    } finally {
+      setIsGenerating(false)
+    }
+  }
 
-Where once stood dusty cardboard boxes and old furniture now pulsed a shimmering, ethereal doorway made of pure light. The portal hummed with an otherworldly energy that made the hair on her arms stand on end.
+  const handleRegenerate = () => {
+    setGeneratedStory(null)
+    handleGenerate()
+  }
 
-"This can't be real," she whispered, reaching out tentatively toward the glowing threshold.
-
-As her fingers approached the light, she felt a gentle tug, as if the portal was calling to her. Through the shimmering surface, she could make out shapes and colors that belonged to no world she knew. Rolling hills of purple grass beneath a sky with two moons, strange crystalline structures that defied gravity, and in the distance, what looked like a city floating among the clouds.
-
-The sound of her phone ringing downstairs snapped her back to reality. But as she turned to leave, a piece of parchment materialized at her feet, covered in symbols she'd never seen before, yet somehow understood perfectly:
-
-"The chosen one has found the way. The realm of Aethermoor awaits its protector. Step through, Detective Chen, for only you can prevent the coming darkness."
-
-Sarah's hand trembled as she picked up the mysterious message. Behind her, the portal pulsed brighter, as if urging her forward into an adventure that would change everything.`
-
-    setGeneratedContent(mockGenerated)
-    setIsGenerating(false)
+  const handleEdit = () => {
+    setGeneratedStory(null)
   }
 
   return (
@@ -76,7 +104,7 @@ Sarah's hand trembled as she picked up the mysterious message. Behind her, the p
       </header>
 
       <div className="container mx-auto px-6 py-8">
-        {!generatedContent ? (
+        {!generatedStory ? (
           /* Story Creation Interface */
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -95,6 +123,27 @@ Sarah's hand trembled as she picked up the mysterious message. Behind her, the p
               <p className="text-gray-600 text-lg">Let AI help you bring your imagination to life</p>
             </div>
 
+            {/* Error Display */}
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3"
+              >
+                <AlertCircle className="w-5 h-5 text-red-500 mt-0.5" />
+                <div>
+                  <h4 className="text-red-800 font-medium">Generation Failed</h4>
+                  <p className="text-red-700 text-sm mt-1">{error}</p>
+                  <button
+                    onClick={() => setError(null)}
+                    className="text-red-600 text-sm underline mt-2 hover:text-red-800"
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              </motion.div>
+            )}
+
             {/* Plot Description */}
             <div className="bg-white rounded-xl shadow-lg p-8 mb-6">
               <label className="block text-lg font-semibold text-gray-800 mb-4">
@@ -105,6 +154,7 @@ Sarah's hand trembled as she picked up the mysterious message. Behind her, the p
                 onChange={(e) => setPlotDescription(e.target.value)}
                 placeholder="A young detective discovers a hidden portal in their grandmother's attic that leads to..."
                 className="w-full h-32 p-4 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                maxLength={500}
               />
               <div className="flex items-center justify-between mt-4">
                 <span className="text-sm text-gray-500">{plotDescription.length}/500 characters</span>
@@ -132,14 +182,14 @@ Sarah's hand trembled as she picked up the mysterious message. Behind her, the p
                   {/* Image Upload */}
                   <div className="mb-6">
                     <label className="block text-md font-medium text-gray-700 mb-3">
-                      📷 Upload Images
+                      📷 Upload Images (Coming Soon)
                     </label>
                     <div className="flex gap-4">
                       {[1, 2, 3].map((i) => (
-                        <div key={i} className="w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center hover:border-purple-400 cursor-pointer transition-colors">
+                        <div key={i} className="w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center opacity-50 cursor-not-allowed">
                           <div className="text-center">
                             <Image className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                            <span className="text-sm text-gray-500">Add Image</span>
+                            <span className="text-sm text-gray-500">Coming Soon</span>
                           </div>
                         </div>
                       ))}
@@ -220,8 +270,8 @@ Sarah's hand trembled as she picked up the mysterious message. Behind her, the p
               <motion.button
                 onClick={handleGenerate}
                 disabled={!plotDescription.trim() || isGenerating}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={plotDescription.trim() && !isGenerating ? { scale: 1.05 } : {}}
+                whileTap={plotDescription.trim() && !isGenerating ? { scale: 0.95 } : {}}
                 className={`inline-flex items-center gap-3 px-8 py-4 rounded-xl text-lg font-semibold transition-all ${
                   plotDescription.trim() && !isGenerating
                     ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700 shadow-lg'
@@ -245,7 +295,7 @@ Sarah's hand trembled as she picked up the mysterious message. Behind her, the p
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: '100%' }}
-                    transition={{ duration: 3 }}
+                    transition={{ duration: 15, ease: "easeInOut" }}
                     className="bg-gradient-to-r from-purple-600 to-blue-600 h-3 rounded-full"
                   />
                 </div>
@@ -267,7 +317,7 @@ Sarah's hand trembled as she picked up the mysterious message. Behind her, the p
           >
             <div className="flex items-center justify-between mb-6">
               <button
-                onClick={() => setGeneratedContent('')}
+                onClick={handleEdit}
                 className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />
@@ -287,25 +337,46 @@ Sarah's hand trembled as she picked up the mysterious message. Behind her, the p
             {/* Generated Chapter */}
             <div className="bg-white rounded-xl shadow-lg p-8">
               <h1 className="text-2xl font-bold text-center mb-8 text-gray-800">
-                Chapter 1: The Discovery
+                {generatedStory.title}
               </h1>
 
               <div className="prose prose-lg max-w-none">
-                {generatedContent.split('\n\n').map((paragraph, index) => (
+                {generatedStory.content.split('\n\n').map((paragraph, index) => (
                   <p key={index} className="mb-4 text-gray-700 leading-relaxed">
                     {paragraph}
                   </p>
                 ))}
               </div>
 
+              {/* Story Metadata */}
               <div className="mt-8 pt-6 border-t border-gray-200">
-                <div className="flex items-center justify-between text-sm text-gray-500 mb-6">
-                  <span>Word count: 1,247</span>
-                  <span>Estimated reading time: 5 min</span>
+                <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+                  <span>Word count: {generatedStory.wordCount.toLocaleString()}</span>
+                  <span>Estimated reading time: {generatedStory.readingTime} min</span>
                 </div>
 
+                {/* Themes */}
+                {generatedStory.themes.length > 0 && (
+                  <div className="mb-6">
+                    <p className="text-sm text-gray-600 mb-2">Story themes:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {generatedStory.themes.map((theme) => (
+                        <span
+                          key={theme}
+                          className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm capitalize"
+                        >
+                          {theme}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div className="flex items-center justify-center gap-4">
-                  <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+                  <button
+                    onClick={handleRegenerate}
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                  >
                     🔄 Regenerate
                   </button>
                   <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
