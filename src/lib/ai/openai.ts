@@ -1,8 +1,15 @@
 import OpenAI from 'openai'
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-})
+let openai: OpenAI | null = null
+
+function getOpenAIClient(): OpenAI {
+  if (!openai) {
+    openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY
+    })
+  }
+  return openai
+}
 
 export interface StoryGenerationRequest {
   plotDescription: string
@@ -79,7 +86,8 @@ Plot context: "${plotDescription}"
 Build on the established story while advancing the plot and deepening character development. End with a compelling cliffhanger or revelation.`
 
   try {
-    const completion = await openai.chat.completions.create({
+    const openaiClient = getOpenAIClient()
+    const completion = await openaiClient.chat.completions.create({
       model: "gpt-4o",
       messages: [
         { role: "system", content: systemPrompt },
@@ -155,7 +163,8 @@ GUIDELINES:
   const userPrompt = `Generate a compelling title for a ${genres.join(', ')} story with this plot: "${plotDescription}"`
 
   try {
-    const completion = await openai.chat.completions.create({
+    const openaiClient = getOpenAIClient()
+    const completion = await openaiClient.chat.completions.create({
       model: "gpt-4o",
       messages: [
         { role: "system", content: systemPrompt },
