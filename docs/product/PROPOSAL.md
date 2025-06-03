@@ -154,26 +154,123 @@ StoryHouse.vip is a revolutionary AI-assisted writing and publication platform b
 
 ## Development Roadmap
 
-**Phase 1: Foundation**
+### **Phase 1: Foundation (Current - Q2 2025)**
 
-- AI content generation MVP development
-- Basic publication platform infrastructure
-- TIP token smart contract deployment and integration
-- Community testing and feedback
+#### Core Platform Development
+- ✅ **AI Content Generation MVP**: GPT-4o integration with production-ready prompts
+- ✅ **Basic Publication Platform**: Landing page and creator interface deployed
+- ✅ **Domain & Hosting**: testnet.storyhouse.vip live with Vercel deployment
+- 🔄 **MetaMask Integration**: Story Protocol testnet wallet connection
+- 🔄 **Social Authentication**: Google SSO for seamless user onboarding
 
-**Phase 2: Enhancement**
+#### User Experience & Authentication
+- **Wallet Integration**: MetaMask connection for Story Protocol testnet
+- **Social Login System**: Google OAuth 2.0 integration for Web2 users
+- **Hybrid Authentication**: Support both Web3 wallets and social logins
+- **User Profile Management**: Cross-platform identity synchronization
 
-- Advanced AI features and customization
-- Community pooling and governance features
-- Mobile application development
-- Partnership integrations
+#### TIP Token Infrastructure
+- **Smart Contract Development**: TIP token deployment on Story Protocol L1
+- **Token Distribution Logic**: Read-to-earn reward mechanisms
+- **Chapter Payment System**: Pay-per-chapter unlock with TIP tokens
+- **Community Testing**: Beta testing with select users and feedback collection
 
-**Phase 3: Expansion**
+### **Phase 2: Enhancement (Q3-Q4 2025)**
 
-- Cross-chain compatibility for TIP token
-- Advanced analytics and creator tools
-- Marketplace for story elements and templates
-- Enterprise and educational partnerships
+#### Advanced Features
+- **Enhanced AI Capabilities**: Multi-modal input processing (images, emojis, GIFs)
+- **Content Remixing System**: Derivative work creation and licensing
+- **Mobile Application**: iOS and Android apps with full feature parity
+- **Advanced Analytics**: Creator dashboards and reader engagement metrics
+
+#### Social & Community Features
+- **Community Governance**: TIP token-based voting on platform decisions
+- **Social Features**: Reader comments, author interactions, story discussions
+- **Discovery Engine**: AI-powered content recommendations
+- **Creator Collaboration**: Multi-author story creation tools
+
+#### Economic Enhancements
+- **Remix Licensing Marketplace**: Automated licensing fee distribution
+- **Staking Mechanisms**: TIP token staking for reduced fees and premium features
+- **IP Token Bridge**: Seamless TIP ↔ IP token conversion
+- **Creator Monetization Tools**: Advanced revenue tracking and payout systems
+
+### **Phase 3: Expansion (2026)**
+
+#### Cross-Chain & Integrations
+- **Cross-Chain Compatibility**: TIP token availability on multiple networks
+- **Partnership Integrations**: Integration with other Story Protocol dApps
+- **Enterprise Solutions**: White-label publishing tools for organizations
+- **Educational Partnerships**: Partnerships with writing schools and institutions
+
+#### Advanced Platform Features
+- **AI Voice Narration**: Audio chapter generation and podcast integration
+- **NFT Integration**: Story elements and characters as tradeable NFTs
+- **VR/AR Experience**: Immersive story consumption in virtual environments
+- **Advanced Creator Tools**: Professional editing suite and collaboration features
+
+#### Global Expansion
+- **Multi-Language Support**: AI content generation in multiple languages
+- **Regional Marketplaces**: Localized content discovery and pricing
+- **Creator Fund**: Investment program for promising authors and stories
+- **International Partnerships**: Global publisher and platform integrations
+
+## Authentication & User Experience Strategy
+
+### **Dual Authentication System**
+
+#### Web3 Native (MetaMask Integration)
+- **Target Users**: Crypto-savvy users familiar with Web3
+- **Benefits**: Direct blockchain interaction, token custody, decentralized identity
+- **User Flow**: Connect MetaMask → Story Protocol testnet → immediate TIP token access
+- **Implementation**: wagmi/viem integration with RainbowKit UI components
+
+#### Web2 Friendly (Google SSO)
+- **Target Users**: Traditional readers unfamiliar with Web3
+- **Benefits**: Familiar login experience, reduced friction, instant onboarding
+- **User Flow**: Google login → read free chapters → optional wallet creation for paid content
+- **Implementation**: NextAuth.js with Google OAuth 2.0 provider
+
+### **Hybrid User Journey**
+
+1. **Discovery Phase**:
+   - No authentication required for landing page
+   - Browse story previews and platform features
+
+2. **Engagement Phase**:
+   - Google SSO for first 3 free chapters
+   - Social login provides seamless reading experience
+   - User profile creation with reading preferences
+
+3. **Monetization Phase**:
+   - MetaMask connection required for chapter 4+ access
+   - TIP token purchase/earning for continued reading
+   - Optional: Convert Google users to Web3 with guided wallet setup
+
+4. **Creator Phase**:
+   - Enhanced authentication for story publishing
+   - Both social and wallet authentication supported
+   - Creator verification and royalty distribution setup
+
+### **Technical Implementation Priority**
+
+#### Sprint 1: MetaMask Integration (Week 1-2)
+- Story Protocol testnet configuration
+- Wallet connection UI components
+- Network switching and error handling
+- TIP token balance display
+
+#### Sprint 2: Google SSO (Week 3-4)
+- NextAuth.js setup with Google provider
+- User session management
+- Database integration for user profiles
+- Social login UI components
+
+#### Sprint 3: Hybrid Authentication (Week 5-6)
+- Cross-authentication user linking
+- Wallet-less user upgrade flow
+- Session persistence and security
+- User experience optimization
 
 ## TO-DO: Strategic Analysis & Market Research
 

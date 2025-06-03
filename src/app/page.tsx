@@ -3,6 +3,8 @@
 import { PenTool } from 'lucide-react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
+import WalletConnect, { NetworkChecker } from '@/components/WalletConnect'
+import FaucetHelper from '@/components/FaucetHelper'
 
 export default function HomePage() {
   return (
@@ -17,24 +19,31 @@ export default function HomePage() {
               </h1>
             </div>
 
-            <Link href="/create">
-              <motion.button
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                className="glass flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-white/20"
-              >
-                <PenTool className="h-4 w-4" />
-                Write
-              </motion.button>
-            </Link>
+            <div className="flex items-center gap-4">
+              <WalletConnect />
+
+              <Link href="/create">
+                <motion.button
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="glass flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-white/20"
+                >
+                  <PenTool className="h-4 w-4" />
+                  Write
+                </motion.button>
+              </Link>
+            </div>
           </nav>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="relative">
-        <div className="container mx-auto px-6 py-20">
-          <div className="mx-auto max-w-4xl text-center">
+        <div className="container mx-auto px-6 py-8">
+          <NetworkChecker />
+          <FaucetHelper />
+
+          <div className="mx-auto max-w-4xl text-center py-12">
             {/* Hero Section */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
