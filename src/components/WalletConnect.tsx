@@ -1,7 +1,6 @@
 'use client'
 
-import { useAccount, useConnect, useDisconnect, useBalance } from 'wagmi'
-import { injected } from 'wagmi/connectors'
+import { useAccount, useDisconnect, useBalance } from 'wagmi'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { Wallet, LogOut, AlertCircle, CheckCircle, Copy } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -10,9 +9,18 @@ import { storyProtocolTestnet, TIP_TOKEN_CONFIG } from '@/lib/web3/config'
 // Global connection state to prevent duplicate requests across all instances
 let globalConnectionInProgress = false
 
+// Type declaration for MetaMask ethereum object
+declare global {
+  interface Window {
+    ethereum?: {
+      request: (args: { method: string; params?: any[] }) => Promise<any>
+      isMetaMask?: boolean
+    }
+  }
+}
+
 export default function WalletConnect() {
-  const { address, isConnecting, isConnected } = useAccount()
-  const { connect, error } = useConnect()
+  const { address, isConnected } = useAccount()
   const { disconnect } = useDisconnect()
   const [showDetails, setShowDetails] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -36,27 +44,19 @@ export default function WalletConnect() {
 
   const handleConnect = useCallback(async () => {
     // Multiple layers of duplicate prevention
-    if (isConnecting || isConnectingLocal || isConnected || globalConnectionInProgress) {
-      console.log('Connection already in progress, skipping...')
+    if (isConnectingLocal || isConnected || globalConnectionInProgress) {
+      console.log('Connection already in progress or connected, skipping...')
       return
     }
 
-    // Check if MetaMask is already processing a request
-    if (typeof window !== 'undefined' && window.ethereum) {
-      try {
-        // Check if there's already a pending request
-        const pendingRequests = (window.ethereum as any)._metamask?.isUnlocked?.()
-        if (pendingRequests === false) {
-          console.log('MetaMask is locked or has pending requests')
-          return
-        }
-      } catch (e) {
-        // Continue if we can't check the state
-      }
+    // Check if MetaMask is available
+    if (typeof window === 'undefined' || !window.ethereum) {
+      alert('Please install MetaMask to connect your wallet')
+      return
     }
 
     try {
-      console.log('Starting wallet connection...')
+      console.log('Starting direct MetaMask connection...')
       globalConnectionInProgress = true
       setIsConnectingLocal(true)
 
@@ -72,15 +72,43 @@ export default function WalletConnect() {
         console.log('Connection timeout, resetting state')
       }, 30000) // 30 second timeout
 
-      await connect({ connector: injected() })
-      console.log('Wallet connection successful')
+      // Direct MetaMask connection request
+      const accounts = await window.ethereum.request({
+        method: 'eth_requestAccounts',
+      })
 
-    } catch (err) {
+      if (accounts && accounts.length > 0) {
+        console.log('Wallet connected successfully:', accounts[0])
+
+        // Check and switch to correct network if needed
+        try {
+          await window.ethereum.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: `0x${storyProtocolTestnet.id.toString(16)}` }],
+          })
+        } catch (switchError: any) {
+          // If the network doesn't exist, add it
+          if (switchError.code === 4902) {
+            await window.ethereum.request({
+              method: 'wallet_addEthereumChain',
+              params: [{
+                chainId: `0x${storyProtocolTestnet.id.toString(16)}`,
+                chainName: storyProtocolTestnet.name,
+                nativeCurrency: storyProtocolTestnet.nativeCurrency,
+                rpcUrls: [storyProtocolTestnet.rpcUrls.default.http[0]],
+                blockExplorerUrls: [storyProtocolTestnet.blockExplorers?.default?.url],
+              }],
+            })
+          }
+        }
+      }
+
+    } catch (err: any) {
       console.error('Wallet connection error:', err)
 
-      // Check if it's the duplicate request error
-      if (err instanceof Error && err.message.includes('already pending')) {
-        console.log('Duplicate request detected, ignoring...')
+      // Don't show error for user rejection
+      if (err.code !== 4001) {
+        alert('Failed to connect wallet. Please try again.')
       }
     } finally {
       globalConnectionInProgress = false
@@ -90,7 +118,7 @@ export default function WalletConnect() {
         clearTimeout(connectionTimeoutRef.current)
       }
     }
-  }, [connect, isConnecting, isConnectingLocal, isConnected])
+  }, [isConnectingLocal, isConnected])
 
   const handleDisconnect = useCallback(() => {
     disconnect()
@@ -114,14 +142,6 @@ export default function WalletConnect() {
     return parseFloat(balance.formatted).toFixed(4)
   }
 
-  // Reset local connecting state when wagmi connecting state changes
-  useEffect(() => {
-    if (!isConnecting) {
-      setIsConnectingLocal(false)
-      globalConnectionInProgress = false
-    }
-  }, [isConnecting])
-
   // Handle successful connection
   useEffect(() => {
     if (isConnected) {
@@ -132,19 +152,6 @@ export default function WalletConnect() {
       }
     }
   }, [isConnected])
-
-  // Show error message if connection fails
-  useEffect(() => {
-    if (error) {
-      console.error('Wallet connection error:', error)
-      globalConnectionInProgress = false
-      setIsConnectingLocal(false)
-
-      if (connectionTimeoutRef.current) {
-        clearTimeout(connectionTimeoutRef.current)
-      }
-    }
-  }, [error])
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -268,7 +275,7 @@ export default function WalletConnect() {
     )
   }
 
-  const isCurrentlyConnecting = isConnecting || isConnectingLocal || globalConnectionInProgress
+  const isCurrentlyConnecting = isConnectingLocal || globalConnectionInProgress
 
   return (
     <motion.button
