@@ -7,6 +7,11 @@ export const metadata: Metadata = {
   description: 'First 3 chapters FREE. Earn $TIP tokens while reading. Remix content and earn from your creativity. Built on Story Protocol.',
   keywords: ['AI writing', 'blockchain publishing', 'read to earn', 'story protocol', 'content creation'],
   authors: [{ name: 'StoryHouse.vip Team' }],
+  icons: {
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
   openGraph: {
     title: 'StoryHouse.vip - Read Stories, Earn Tokens, Create with AI',
     description: 'Revolutionary AI-assisted writing platform built on Story Protocol. Read, earn, and create with blockchain technology.',
