@@ -2,17 +2,18 @@
 
 import { useAccount, useConnect, useDisconnect, useBalance } from 'wagmi'
 import { injected } from 'wagmi/connectors'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Wallet, LogOut, AlertCircle, CheckCircle, Copy } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { storyProtocolTestnet, TIP_TOKEN_CONFIG } from '@/lib/web3/config'
 
 export default function WalletConnect() {
   const { address, isConnecting, isConnected } = useAccount()
-  const { connect } = useConnect()
+  const { connect, error } = useConnect()
   const { disconnect } = useDisconnect()
   const [showDetails, setShowDetails] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [isConnectingLocal, setIsConnectingLocal] = useState(false)
 
   // Get native token balance
   const { data: balance } = useBalance({
@@ -29,14 +30,25 @@ export default function WalletConnect() {
     chainId: storyProtocolTestnet.id,
   })
 
-  const handleConnect = () => {
-    connect({ connector: injected() })
-  }
+  const handleConnect = useCallback(async () => {
+    if (isConnecting || isConnectingLocal || isConnected) {
+      return // Prevent duplicate connection attempts
+    }
 
-  const handleDisconnect = () => {
+    try {
+      setIsConnectingLocal(true)
+      await connect({ connector: injected() })
+    } catch (err) {
+      console.error('Wallet connection error:', err)
+    } finally {
+      setIsConnectingLocal(false)
+    }
+  }, [connect, isConnecting, isConnectingLocal, isConnected])
+
+  const handleDisconnect = useCallback(() => {
     disconnect()
     setShowDetails(false)
-  }
+  }, [disconnect])
 
   const copyAddress = async () => {
     if (address) {
@@ -54,6 +66,21 @@ export default function WalletConnect() {
     if (!balance) return '0'
     return parseFloat(balance.formatted).toFixed(4)
   }
+
+  // Reset local connecting state when wagmi connecting state changes
+  useEffect(() => {
+    if (!isConnecting) {
+      setIsConnectingLocal(false)
+    }
+  }, [isConnecting])
+
+  // Show error message if connection fails
+  useEffect(() => {
+    if (error) {
+      console.error('Wallet connection error:', error)
+      setIsConnectingLocal(false)
+    }
+  }, [error])
 
   if (isConnected && address) {
     return (
@@ -168,19 +195,21 @@ export default function WalletConnect() {
     )
   }
 
+  const isCurrentlyConnecting = isConnecting || isConnectingLocal
+
   return (
     <motion.button
       onClick={handleConnect}
-      disabled={isConnecting}
-      whileHover={!isConnecting ? { scale: 1.05 } : {}}
-      whileTap={!isConnecting ? { scale: 0.95 } : {}}
+      disabled={isCurrentlyConnecting}
+      whileHover={!isCurrentlyConnecting ? { scale: 1.05 } : {}}
+      whileTap={!isCurrentlyConnecting ? { scale: 0.95 } : {}}
       className={`flex items-center gap-3 px-6 py-3 rounded-lg font-semibold transition-all ${
-        isConnecting
+        isCurrentlyConnecting
           ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
           : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg'
       }`}
     >
-      {isConnecting ? (
+      {isCurrentlyConnecting ? (
         <>
           <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
           Connecting...
