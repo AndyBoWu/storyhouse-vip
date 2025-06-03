@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
+import Web3Provider from '@/components/Web3Provider'
 
 export const metadata: Metadata = {
   title: 'StoryHouse.vip - Read Stories, Earn Tokens, Create with AI',
@@ -35,7 +36,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <body className="min-h-screen font-sans antialiased">
-        {children}
+        <Web3Provider>
+          {children}
+        </Web3Provider>
       </body>
     </html>
   )
