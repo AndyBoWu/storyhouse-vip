@@ -2,10 +2,13 @@
 
 import { useAccount, useConnect, useDisconnect, useBalance } from 'wagmi'
 import { injected } from 'wagmi/connectors'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Wallet, LogOut, AlertCircle, CheckCircle, Copy } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { storyProtocolTestnet, TIP_TOKEN_CONFIG } from '@/lib/web3/config'
+
+// Global connection state to prevent duplicate requests across all instances
+let globalConnectionInProgress = false
 
 export default function WalletConnect() {
   const { address, isConnecting, isConnected } = useAccount()
@@ -14,6 +17,7 @@ export default function WalletConnect() {
   const [showDetails, setShowDetails] = useState(false)
   const [copied, setCopied] = useState(false)
   const [isConnectingLocal, setIsConnectingLocal] = useState(false)
+  const connectionTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Get native token balance
   const { data: balance } = useBalance({
@@ -31,17 +35,60 @@ export default function WalletConnect() {
   })
 
   const handleConnect = useCallback(async () => {
-    if (isConnecting || isConnectingLocal || isConnected) {
-      return // Prevent duplicate connection attempts
+    // Multiple layers of duplicate prevention
+    if (isConnecting || isConnectingLocal || isConnected || globalConnectionInProgress) {
+      console.log('Connection already in progress, skipping...')
+      return
+    }
+
+    // Check if MetaMask is already processing a request
+    if (typeof window !== 'undefined' && window.ethereum) {
+      try {
+        // Check if there's already a pending request
+        const pendingRequests = (window.ethereum as any)._metamask?.isUnlocked?.()
+        if (pendingRequests === false) {
+          console.log('MetaMask is locked or has pending requests')
+          return
+        }
+      } catch (e) {
+        // Continue if we can't check the state
+      }
     }
 
     try {
+      console.log('Starting wallet connection...')
+      globalConnectionInProgress = true
       setIsConnectingLocal(true)
+
+      // Clear any existing timeout
+      if (connectionTimeoutRef.current) {
+        clearTimeout(connectionTimeoutRef.current)
+      }
+
+      // Set a timeout to reset the connection state
+      connectionTimeoutRef.current = setTimeout(() => {
+        globalConnectionInProgress = false
+        setIsConnectingLocal(false)
+        console.log('Connection timeout, resetting state')
+      }, 30000) // 30 second timeout
+
       await connect({ connector: injected() })
+      console.log('Wallet connection successful')
+
     } catch (err) {
       console.error('Wallet connection error:', err)
+
+      // Check if it's the duplicate request error
+      if (err instanceof Error && err.message.includes('already pending')) {
+        console.log('Duplicate request detected, ignoring...')
+      }
     } finally {
+      globalConnectionInProgress = false
       setIsConnectingLocal(false)
+
+      if (connectionTimeoutRef.current) {
+        clearTimeout(connectionTimeoutRef.current)
+      }
     }
   }, [connect, isConnecting, isConnectingLocal, isConnected])
 
@@ -71,16 +118,42 @@ export default function WalletConnect() {
   useEffect(() => {
     if (!isConnecting) {
       setIsConnectingLocal(false)
+      globalConnectionInProgress = false
     }
   }, [isConnecting])
+
+  // Handle successful connection
+  useEffect(() => {
+    if (isConnected) {
+      globalConnectionInProgress = false
+      setIsConnectingLocal(false)
+      if (connectionTimeoutRef.current) {
+        clearTimeout(connectionTimeoutRef.current)
+      }
+    }
+  }, [isConnected])
 
   // Show error message if connection fails
   useEffect(() => {
     if (error) {
       console.error('Wallet connection error:', error)
+      globalConnectionInProgress = false
       setIsConnectingLocal(false)
+
+      if (connectionTimeoutRef.current) {
+        clearTimeout(connectionTimeoutRef.current)
+      }
     }
   }, [error])
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (connectionTimeoutRef.current) {
+        clearTimeout(connectionTimeoutRef.current)
+      }
+    }
+  }, [])
 
   if (isConnected && address) {
     return (
@@ -195,7 +268,7 @@ export default function WalletConnect() {
     )
   }
 
-  const isCurrentlyConnecting = isConnecting || isConnectingLocal
+  const isCurrentlyConnecting = isConnecting || isConnectingLocal || globalConnectionInProgress
 
   return (
     <motion.button
