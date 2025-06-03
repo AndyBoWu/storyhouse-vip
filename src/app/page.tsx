@@ -4,7 +4,6 @@ import { PenTool } from 'lucide-react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import WalletConnect, { NetworkChecker } from '@/components/WalletConnect'
-import FaucetHelper from '@/components/FaucetHelper'
 
 export default function HomePage() {
   return (
@@ -41,7 +40,6 @@ export default function HomePage() {
       <main className="relative">
         <div className="container mx-auto px-6 py-8">
           <NetworkChecker />
-          <FaucetHelper />
 
           <div className="mx-auto max-w-4xl text-center py-12">
             {/* Hero Section */}
