@@ -1,13 +1,17 @@
-# 📚 StoryHouse.vip - **PoC DEMO READY!** 🚀
+# 📚 StoryHouse.vip - **LIVE TESTNET READY!** 🚀
 
 **Revolutionary Web3 Storytelling Platform** built on Story Protocol enabling **chapter-level IP asset management**
 
-## 🎯 **PoC STATUS: PRODUCTION OPTIMIZED**
+## 🌐 **LIVE TESTNET DEPLOYMENT**
+
+🚀 **Try it now**: [https://testnet.storyhouse.vip/](https://testnet.storyhouse.vip/)
+
+## 🎯 **STATUS: PRODUCTION OPTIMIZED**
 
 ✅ **Phase 4.4 COMPLETE** - Real blockchain integration with Story Protocol
 ✅ **Monorepo OPTIMIZED** - Clean architecture, 0 vulnerabilities, 99% test coverage
 ✅ **Core Innovation Working** - Chapter-level IP registration ($50-500 vs $1000+ books)
-✅ **Live Demo Ready** - Full user journey with real blockchain transactions
+✅ **Live Testnet** - Full user journey with real blockchain transactions
 
 ---
 
@@ -36,7 +40,7 @@ storyhouse-vip/
 ├── packages/
 │   ├── contracts/              # Hardhat smart contracts (131/132 tests ✅)
 │   └── shared/                 # TypeScript utilities & Story Protocol
-├── docs/                       # Comprehensive documentation
+├── docs/                       # Comprehensive documentation (12 files)
 └── package.json               # Root workspace configuration
 ```
 
@@ -74,7 +78,7 @@ storyhouse-vip/
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/storyhouse-vip.git
+git clone https://github.com/AndyBoWu/storyhouse-vip.git
 cd storyhouse-vip
 
 # Install dependencies
@@ -89,6 +93,75 @@ npm run dev
 ```
 
 **Visit**: `http://localhost:3000`
+
+---
+
+## 📚 **Documentation**
+
+Comprehensive documentation has been organized for easy navigation:
+
+### **🎯 Getting Started**
+
+- **[Development Setup](./docs/setup/DEVELOPMENT.md)** - Complete development environment setup
+- **[Environment Configuration](./docs/setup/ENVIRONMENT_SETUP.md)** - Environment variables and configuration
+
+### **🏗️ Architecture & Technical**
+
+- **[Technical Overview](./docs/technical/OVERVIEW.md)** - Architecture and technical stack
+- **[API Documentation](./docs/technical/API.md)** - REST API endpoints and usage
+- **[Smart Contracts](./docs/technical/CONTRACTS.md)** - Contract architecture and testing
+- **[Story Protocol Integration](./docs/technical/STORY_PROTOCOL.md)** - Blockchain integration details
+
+### **📋 Project Management**
+
+- **[Project Overview](./docs/project/OVERVIEW.md)** - Vision, goals, and current status
+- **[Roadmap](./docs/project/ROADMAP.md)** - Development phases and milestones
+- **[Deployment Guide](./docs/project/DEPLOYMENT.md)** - Production deployment instructions
+
+### **🎨 Design & Product**
+
+- **[Product Specification](./docs/product/SPECIFICATION.md)** - Feature requirements and user flows
+- **[UI/UX Design](./docs/product/DESIGN.md)** - Interface design and wireframes
+
+### **📖 Quick Navigation**
+
+- **[Documentation Hub](./docs/README.md)** - Complete documentation navigation
+
+---
+
+## 🚢 **Deployment**
+
+### **Live Testnet Deployment**
+
+🌐 **Current Status**: **LIVE and FUNCTIONAL**
+🔗 **URL**: [https://testnet.storyhouse.vip/](https://testnet.storyhouse.vip/)
+
+### **Features Available on Testnet**
+
+- ✅ **Read & Earn**: Earn $TIP tokens for every chapter you read
+- ✅ **AI-Powered Writing**: Create stories with AI assistance
+- ✅ **Remix & Earn**: Remix existing stories and earn licensing fees
+- ✅ **Wallet Integration**: Connect wallet for blockchain transactions
+- ✅ **Story Protocol**: Built on Story Protocol Layer 1
+
+### **Local Development**
+
+```bash
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Run tests
+npm run test
+```
+
+### **Production Deployment (Future)**
+
+For detailed deployment instructions, see:
+
+- **[Deployment Guide](./docs/project/DEPLOYMENT.md)** - Complete production deployment guide
 
 ---
 
@@ -203,22 +276,6 @@ NEXT_PUBLIC_MOCK_BLOCKCHAIN_DELAY=2000
 
 ---
 
-## 🚢 **Deployment**
-
-### **Vercel (Recommended)**
-
-```bash
-# Deploy to Vercel
-vercel --prod
-
-# Set environment variables in Vercel dashboard
-# Visit deployed URL for live demo
-```
-
-### **Demo URL**: Coming soon...
-
----
-
 ## 🎯 **Post-PoC Roadmap**
 
 ### **Phase 5: Production Foundation** (Post-Demo)
@@ -253,13 +310,13 @@ git push origin feature/enhancement
 
 ---
 
-## 📞 **Demo Requests**
+## 📞 **Try the Live Demo**
 
 Ready to see **chapter-level IP monetization** in action?
 
-- **Live Demo**: [Coming Soon]
-- **Technical Demo**: Schedule with team
-- **Investment Pitch**: Full PoC presentation available
+- **🌐 Live Testnet**: [https://testnet.storyhouse.vip/](https://testnet.storyhouse.vip/)
+- **📖 Documentation**: [./docs/README.md](./docs/README.md)
+- **🚀 Quick Start**: [./docs/setup/DEVELOPMENT.md](./docs/setup/DEVELOPMENT.md)
 
 ---
 
@@ -277,4 +334,4 @@ Every chapter tells a story. Every story deserves to be monetized from day one.
 **🎯 Target**: 50M+ writers worldwide seeking better monetization
 **💡 Innovation**: First platform enabling chapter-level IP management
 
-**Ready to revolutionize publishing? The future starts with Chapter 1.**
+**Ready to revolutionize publishing? Start with Chapter 1 at [https://testnet.storyhouse.vip/](https://testnet.storyhouse.vip/)**
