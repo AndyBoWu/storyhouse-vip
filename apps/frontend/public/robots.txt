@@ -1,0 +1,81 @@
+# StoryHouse.vip - Content Protection
+# This site contains premium content that should not be crawled or scraped
+
+# Block all crawlers from the entire site
+User-agent: *
+Disallow: /
+
+# Specifically block common scrapers and crawlers
+User-agent: Googlebot
+Disallow: /
+
+User-agent: Bingbot
+Disallow: /
+
+User-agent: Slurp
+Disallow: /
+
+User-agent: DuckDuckBot
+Disallow: /
+
+User-agent: Baiduspider
+Disallow: /
+
+User-agent: YandexBot
+Disallow: /
+
+User-agent: facebookexternalhit
+Disallow: /
+
+User-agent: Twitterbot
+Disallow: /
+
+User-agent: LinkedInBot
+Disallow: /
+
+User-agent: WhatsApp
+Disallow: /
+
+User-agent: Applebot
+Disallow: /
+
+# Block common scraping tools
+User-agent: wget
+Disallow: /
+
+User-agent: curl
+Disallow: /
+
+User-agent: HTTrack
+Disallow: /
+
+User-agent: ia_archiver
+Disallow: /
+
+User-agent: Wayback
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+# Block headless browsers often used for scraping
+User-agent: HeadlessChrome
+Disallow: /
+
+User-agent: PhantomJS
+Disallow: /
+
+User-agent: Selenium
+Disallow: /
+
+# No sitemap provided to prevent discovery
+# Sitemap: 
