@@ -124,8 +124,11 @@ contract AccessControlManager is AccessControl, Pausable {
         uint256 expiry = roleExpiry[role][account];
         require(expiry > 0 && block.timestamp >= expiry, "AccessControl: role not expired");
 
-        _revokeRole(role, account);
+        // First delete the expiry mapping to ensure hasRole returns false
         delete roleExpiry[role][account];
+        
+        // Then revoke the role from OpenZeppelin's storage
+        _revokeRole(role, account);
 
         emit RoleRevokedDueToExpiry(role, account);
     }
@@ -231,12 +234,14 @@ contract AccessControlManager is AccessControl, Pausable {
      * @dev Override to check role expiry before granting permissions
      */
     function hasRole(bytes32 role, address account) public view override returns (bool) {
-        if (!super.hasRole(role, account)) {
+        // Check expiry first - if role has expired, always return false
+        uint256 expiry = roleExpiry[role][account];
+        if (expiry > 0 && block.timestamp >= expiry) {
             return false;
         }
 
-        uint256 expiry = roleExpiry[role][account];
-        return expiry == 0 || block.timestamp < expiry;
+        // If not expired (or no expiry), check OpenZeppelin's role storage
+        return super.hasRole(role, account);
     }
 
     /**
