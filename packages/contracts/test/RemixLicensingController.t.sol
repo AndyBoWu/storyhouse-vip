@@ -208,6 +208,9 @@ contract RemixLicensingControllerTest is Test {
         // Distribute royalties
         uint256 revenue = 1000 * 10 ** 18;
         uint256 expectedRoyalty = (revenue * 500) / 10000; // 5% of revenue
+        uint256 licenseFee = 100 * 10 ** 18; // Previous license fee
+        uint256 totalExpectedRevenue = licenseFee + expectedRoyalty;
+        uint256 totalExpectedCreatorRoyalties = licenseFee + expectedRoyalty;
 
         uint256 initialCreatorBalance = tipToken.balanceOf(creator);
 
@@ -218,8 +221,8 @@ contract RemixLicensingControllerTest is Test {
         remixLicensing.distributeRemixRoyalties(remixStoryId, revenue);
 
         assertEq(tipToken.balanceOf(creator), initialCreatorBalance + expectedRoyalty);
-        assertEq(remixLicensing.storyTotalRevenue(originalStoryId), expectedRoyalty);
-        assertEq(remixLicensing.creatorTotalRoyalties(creator), expectedRoyalty);
+        assertEq(remixLicensing.storyTotalRevenue(originalStoryId), totalExpectedRevenue);
+        assertEq(remixLicensing.creatorTotalRoyalties(creator), totalExpectedCreatorRoyalties);
     }
 
     function testDistributeRemixRoyaltiesUnauthorized() public {
@@ -434,7 +437,7 @@ contract RemixLicensingControllerTest is Test {
         remixLicensing.pause();
 
         vm.prank(remixer);
-        vm.expectRevert("EnforcedPause");
+        vm.expectRevert(abi.encodeWithSelector(Pausable.EnforcedPause.selector));
         remixLicensing.purchaseRemixLicense(originalStoryId, remixStoryId);
     }
 

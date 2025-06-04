@@ -137,12 +137,8 @@ contract AccessControlManager is AccessControl, Pausable {
      * @return isValidRole Whether the account has a valid (non-expired) role
      */
     function hasValidRole(bytes32 role, address account) external view returns (bool isValidRole) {
-        if (!hasRole(role, account)) {
-            return false;
-        }
-
-        uint256 expiry = roleExpiry[role][account];
-        return expiry == 0 || block.timestamp < expiry;
+        // Use the overridden hasRole which already checks both existence and expiry
+        return hasRole(role, account);
     }
 
     /**

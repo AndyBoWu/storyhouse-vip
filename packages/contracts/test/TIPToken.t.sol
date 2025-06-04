@@ -125,7 +125,7 @@ contract TIPTokenTest is Test {
     function testMintWhenPaused() public {
         token.pause();
 
-        vm.expectRevert("EnforcedPause");
+        vm.expectRevert(abi.encodeWithSelector(Pausable.EnforcedPause.selector));
         token.mint(user, 1000 * 10 ** 18);
     }
 
@@ -195,7 +195,7 @@ contract TIPTokenTest is Test {
 
         // Try to transfer when paused
         vm.prank(user);
-        vm.expectRevert("EnforcedPause");
+        vm.expectRevert(abi.encodeWithSelector(Pausable.EnforcedPause.selector));
         token.transfer(owner, transferAmount);
     }
 
@@ -213,7 +213,7 @@ contract TIPTokenTest is Test {
     function testBurnWhenPaused() public {
         token.pause();
 
-        vm.expectRevert("EnforcedPause");
+        vm.expectRevert(abi.encodeWithSelector(Pausable.EnforcedPause.selector));
         token.burn(1000 * 10 ** 18);
     }
 
