@@ -10,6 +10,7 @@ import IPRegistrationSection from '../../components/creator/IPRegistrationSectio
 import CollectionSection from '../../components/creator/CollectionSection'
 import IPStatusIndicator from '../../components/creator/IPStatusIndicator'
 import StoryContentDisplay from '../../components/ui/StoryContentDisplay'
+import PublishingModal from '../../components/publishing/PublishingModal'
 import type {
   EnhancedGeneratedStory,
   EnhancedStoryCreationParams
@@ -50,6 +51,9 @@ export default function CreateStoryPage() {
   const [generatedStory, setGeneratedStory] = useState<GeneratedStory | null>(null)
   const [showMultiModal, setShowMultiModal] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Publishing modal state
+  const [isPublishingModalOpen, setIsPublishingModalOpen] = useState(false)
 
   // Advanced options (hidden by default)
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false)
@@ -679,10 +683,7 @@ export default function CreateStoryPage() {
           </motion.button>
 
           <motion.button
-            onClick={() => {
-              // Redirect to publishing flow with deferred IP registration
-              alert('Redirecting to simplified publishing flow...')
-            }}
+            onClick={() => setIsPublishingModalOpen(true)}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-semibold hover:from-green-700 hover:to-emerald-700 transition-all"
@@ -785,6 +786,17 @@ export default function CreateStoryPage() {
           renderGeneratedContent()
         )}
       </div>
+
+      {/* Publishing Modal */}
+      {generatedStory && (
+        <PublishingModal
+          isOpen={isPublishingModalOpen}
+          onClose={() => setIsPublishingModalOpen(false)}
+          story={generatedStory}
+          chapterNumber={chapterNumber}
+          storyTitle={selectedStory ? selectedStory.title : storyTitle}
+        />
+      )}
     </div>
   )
 }
