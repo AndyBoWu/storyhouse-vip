@@ -1,624 +1,558 @@
-# 📡 StoryHouse.vip API Documentation
+# 🔧 StoryHouse.vip API Documentation
 
-Complete API reference for StoryHouse.vip's enhanced storytelling and IP management platform.
+## 🌟 **Overview**
 
-## 🏗 **Base Configuration**
+StoryHouse.vip provides a comprehensive RESTful API for creating, managing, and licensing intellectual property assets on the blockchain. With **Phase 4.4 complete**, all endpoints now feature **real Story Protocol blockchain integration**.
 
-```typescript
-Base URL: https://storyhouse.vip/api
-Development: http://localhost:3000/api
+### **Base URL**
 
-Headers:
-{
-  "Content-Type": "application/json",
-  "Authorization": "Bearer <token>" // When authentication is required
-}
 ```
+Production: https://storyhouse.vip/api
+Development: http://localhost:3000/api
+```
+
+### **Authentication**
+
+Currently using session-based authentication. API keys coming in Phase 5.
+
+---
+
+## 🔗 **Real Blockchain Integration Status**
+
+**✅ Phase 4.4 COMPLETE**: All API endpoints now use **real Story Protocol SDK calls**:
+
+- ✅ **Real IP Asset Registration** via `mintAndRegisterIp()`
+- ✅ **Smart Contract Licensing** via `registerPILTerms()`
+- ✅ **Blockchain Transaction Processing** with gas optimization
+- ✅ **Error Handling & Retry Logic** for network failures
+- ✅ **Multi-Tier Licensing** (Standard, Premium, Exclusive)
+- ✅ **Automatic Royalty Distribution** via smart contracts
+
+---
 
 ## 📚 **Story Generation API**
 
-### **Generate Enhanced Story**
+### **Enhanced Story Generation**
 
-Create AI-powered stories with optional IP registration and collection management.
+Generate AI-powered stories with built-in IP asset metadata and blockchain registration options.
 
-```typescript
+```http
 POST /api/generate
+```
 
-Request Body:
+**Request Body:**
+
+```json
 {
-  "plotDescription": string;        // Required: 1-1000 characters
-  "genres": string[];              // Optional: ["fantasy", "mystery"]
-  "moods": string[];               // Optional: ["epic", "dark"]
-  "emojis": string[];              // Optional: ["🌟", "⚔️"]
-  "chapterNumber": number;         // Optional: default 1
-  "previousContent": string;       // Optional: for multi-chapter stories
-
-  // Enhanced IP Options
+  "plotDescription": "A young detective discovers ancient magic in modern London",
+  "genres": ["mystery", "fantasy", "urban"],
+  "mood": "mysterious",
+  "authorSettings": {
+    "name": "Author Name",
+    "walletAddress": "0x1234567890123456789012345678901234567890"
+  },
   "ipOptions": {
-    "registerAsIP": boolean;
-    "licenseType": "standard" | "premium" | "exclusive" | "custom";
-    "commercialRights": boolean;
-    "derivativeRights": boolean;
-    "customLicense": {             // Required if licenseType === "custom"
-      "price": number;
-      "royaltyPercentage": number;
-      "terms": {
-        "commercialUse": boolean;
-        "derivativesAllowed": boolean;
-        "attribution": boolean;
-        "shareAlike": boolean;
-        "exclusivity": boolean;
-        "territories": string[];
-        "contentRestrictions": string[];
-      }
-    }
-  };
-
-  // Collection Options
+    "registerAsIP": true,
+    "licenseType": "premium",
+    "commercialRights": true,
+    "derivativeRights": true,
+    "autoRegister": false
+  },
   "collectionOptions": {
-    "addToCollection": string;     // Existing collection ID
-    "createNewCollection": {
-      "name": string;
-      "description": string;
-      "isPublic": boolean;
-      "revenueShare": {
-        "creator": number;         // Percentage (0-100)
-        "collection": number;      // Percentage (0-100)
-        "platform": number;        // Percentage (0-100)
-      }
-    }
-  }
-}
-
-Response: EnhancedApiResponse<EnhancedGeneratedStory>
-{
-  "success": true,
-  "data": {
-    "title": string;
-    "content": string;
-    "wordCount": number;
-    "readingTime": number;
-    "themes": string[];
-
-    // Enhanced metadata
-    "suggestedTags": string[];
-    "suggestedGenre": string;
-    "contentRating": "G" | "PG" | "PG-13" | "R";
-    "language": string;
-    "qualityScore": number;        // 0-100
-    "originalityScore": number;    // 0-100
-    "commercialViability": number; // 0-100
+    "addToCollection": "col-fantasy-mysteries",
+    "createNewCollection": false
   },
-  "message": string;
-  "ipData": {                     // Present if IP registration requested
-    "operationId": string;
-    "transactionHash": string;
-    "ipAssetId": string;
-    "gasUsed": bigint;
-  }
-}
-```
-
-**Error Responses:**
-
-- `400`: Invalid input (plot too long, invalid license type)
-- `503`: AI service unavailable
-- `429`: Rate limit exceeded
-- `500`: Internal server error
-
-## 🛡 **IP Asset Management API**
-
-### **Register IP Asset**
-
-Register a story as an IP asset on Story Protocol blockchain.
-
-```typescript
-POST /api/ip/register
-
-Request Body:
-{
-  "storyId": string;              // Required
-  "storyTitle": string;           // Required
-  "storyContent": string;         // Required
-  "authorAddress": string;        // Required: Valid Ethereum address
-  "licenseType": "standard" | "premium" | "exclusive" | "custom";
-  "commercialRights": boolean;
-  "derivativeRights": boolean;
-  "customLicense": {             // Required if licenseType === "custom"
-    "price": number;
-    "royaltyPercentage": number;  // 0-100
-    "terms": {
-      "commercialUse": boolean;
-      "derivativesAllowed": boolean;
-      "attribution": boolean;
-      "shareAlike": boolean;
-      "exclusivity": boolean;
-      "territories": string[];
-      "contentRestrictions": string[];
-    }
-  }
-}
-
-Response: EnhancedApiResponse<RegisterIPAssetResponse>
-{
-  "success": true,
-  "data": {
-    "ipAssetId": string;          // Story Protocol IP Asset ID
-    "transactionHash": string;    // Blockchain transaction hash
-    "licenseTermsId": string;     // License terms identifier
-    "registrationCost": bigint;   // Cost in wei
-    "estimatedGas": bigint;
-    "gasUsed": bigint;
-    "blockNumber": bigint;
-    "licenseTier": {
-      "name": string;
-      "displayName": string;
-      "price": bigint;
-      "royaltyPercentage": number;
-      "terms": LicenseTerms;
-    }
-  },
-  "message": "IP asset registration initiated successfully",
-  "ipData": {
-    "operationId": string;
-    "transactionHash": string;
-    "ipAssetId": string;
-    "gasUsed": bigint;
-  }
-}
-```
-
-### **Check IP Registration Status**
-
-Query the status of an IP registration operation.
-
-```typescript
-GET /api/ip/register?operationId={operationId}
-GET /api/ip/register?storyId={storyId}
-
-Response:
-{
-  "success": true,
-  "data": {
-    "id": string;
-    "storyId": string;
-    "operationType": "register";
-    "status": "pending" | "success" | "failed";
-    "createdAt": string;
-    "updatedAt": string;
-    "ipAssetId": string;          // Present if successful
-    "licenseTokenId": string;     // Present if applicable
-    "parentIpAssetId": string;    // Present if derivative
-    "royaltyAmount": bigint;      // Present if royalties earned
-    "collectionId": string;       // Present if part of collection
-  }
-}
-```
-
-**Error Responses:**
-
-- `400`: Missing required parameters, invalid Ethereum address
-- `402`: Insufficient funds for registration
-- `404`: Operation not found
-- `503`: Network error
-- `500`: Registration failed
-
-## 📁 **Collections Management API**
-
-### **Create Collection**
-
-Create a new story collection with revenue sharing configuration.
-
-```typescript
-POST /api/collections
-
-Request Body:
-{
-  "name": string;                 // Required: Collection name
-  "description": string;          // Required: Collection description
-  "creatorAddress": string;       // Required: Valid Ethereum address
-  "isPublic": boolean;            // Required: Public visibility
-  "allowContributions": boolean;  // Required: Allow others to add stories
-  "requireApproval": boolean;     // Required: Require approval for additions
-  "revenueShare": {              // Required: Must total 100%
-    "creator": number;            // Percentage for individual creators
-    "collection": number;         // Percentage for collection pool
-    "platform": number;           // Percentage for platform
-  },
-  "genre": string;               // Optional: Collection genre
-  "theme": string;               // Optional: Collection theme
-  "tags": string[];              // Optional: Collection tags
-}
-
-Response: EnhancedApiResponse<StoryCollection>
-{
-  "success": true,
-  "data": {
-    "id": string;
-    "name": string;
-    "description": string;
-    "creatorAddress": string;
-    "isPublic": boolean;
-    "allowContributions": boolean;
-    "requireApproval": boolean;
-    "revenueShare": RevenueShare;
-    "creators": string[];          // Array of creator addresses
-    "stories": string[];           // Array of story IDs
-    "ipAssets": string[];          // Array of IP asset IDs
-    "genre": string;
-    "theme": string;
-    "tags": string[];
-    "totalEarnings": number;
-    "memberCount": number;
-    "storyCount": number;
-    "totalReads": number;
-    "createdAt": Date;
-    "updatedAt": Date;
-  },
-  "message": "Collection created successfully"
-}
-```
-
-### **Search Collections**
-
-Search and filter collections with pagination.
-
-```typescript
-GET /api/collections?creator={address}&public={boolean}&search={term}&genre={genre}&limit={number}&offset={number}
-
-Query Parameters:
-- creator: Filter by creator address
-- public: Filter by public/private status
-- search: Text search in name/description
-- genre: Filter by genre
-- limit: Number of results (default: 20, max: 100)
-- offset: Pagination offset (default: 0)
-
-Response:
-{
-  "success": true,
-  "data": StoryCollection[];
-  "pagination": {
-    "limit": number;
-    "offset": number;
-    "total": number;
-    "hasMore": boolean;
-  }
-}
-```
-
-### **Add Story to Collection**
-
-Add a story to an existing collection.
-
-```typescript
-PUT /api/collections
-
-Request Body:
-{
-  "collectionId": string;         // Required: Target collection ID
-  "storyId": string;              // Required: Story to add
-  "authorAddress": string;        // Required: Story author address
-}
-
-Response: EnhancedApiResponse<StoryCollection>
-{
-  "success": true,
-  "data": StoryCollection;        // Updated collection data
-  "message": "Story added to collection successfully"
-}
-```
-
-**Error Responses:**
-
-- `400`: Missing required fields, invalid addresses, revenue share ≠ 100%
-- `403`: No permission to add to collection
-- `404`: Collection not found
-- `409`: Story already in collection
-- `500`: Operation failed
-
-## 📜 **Licensing Management API**
-
-### **Create License Terms**
-
-Create licensing terms for an IP asset.
-
-```typescript
-POST /api/ip/license
-
-Request Body:
-{
-  "ipAssetId": string;            // Required: IP asset identifier
-  "licenseType": "standard" | "premium" | "exclusive" | "custom";
-  "price": number;                // Required: License price in TIP tokens
-  "royaltyPercentage": number;    // Required: 0-100
-  "terms": {                     // Required: License terms
-    "commercialUse": boolean;
-    "derivativesAllowed": boolean;
-    "attribution": boolean;
-    "shareAlike": boolean;
-    "exclusivity": boolean;
-    "territories": string[];      // Optional: Geographic restrictions
-    "contentRestrictions": string[]; // Optional: Content usage restrictions
-  },
-  "authorAddress": string;        // Required: IP asset owner
-}
-
-Response: EnhancedApiResponse<LicenseResponse>
-{
-  "success": true,
-  "data": {
-    "licenseTokenId": string;
-    "ipAssetId": string;
-    "licenseTermsId": string;
-    "price": bigint;              // Price in wei
-    "royaltyPercentage": number;
-    "terms": LicenseTerms;
-    "status": "active" | "expired" | "revoked";
-    "transactionHash": string;
-    "blockNumber": bigint;
-    "createdAt": string;
-    "expiresAt": string;          // Optional
-  },
-  "message": "License terms created successfully",
-  "ipData": {
-    "operationId": string;
-    "transactionHash": string;
-    "ipAssetId": string;
-    "gasUsed": bigint;
-  }
-}
-```
-
-### **Purchase License**
-
-Purchase a license for an IP asset.
-
-```typescript
-PUT /api/ip/license
-
-Request Body:
-{
-  "ipAssetId": string;            // Required
-  "licenseTermsId": string;       // Required
-  "buyerAddress": string;         // Required: Valid Ethereum address
-  "licenseType": string;          // Required: License type being purchased
-}
-
-Response: EnhancedApiResponse<LicenseResponse>
-{
-  "success": true,
-  "data": {
-    "licenseTokenId": string;     // Unique license token ID
-    "ipAssetId": string;
-    "licenseTermsId": string;
-    "price": bigint;
-    "royaltyPercentage": number;
-    "terms": LicenseTerms;
-    "status": "active";
-    "purchaser": string;          // Buyer address
-    "transactionHash": string;
-    "blockNumber": bigint;
-    "createdAt": string;
-  },
-  "message": "License purchased successfully",
-  "ipData": {
-    "operationId": string;
-    "transactionHash": string;
-    "ipAssetId": string;
-    "gasUsed": bigint;
-  }
-}
-```
-
-### **Get License Information**
-
-Retrieve license information and ownership details.
-
-```typescript
-GET /api/ip/license?ipAssetId={id}
-GET /api/ip/license?licenseTokenId={id}
-GET /api/ip/license?owner={address}
-
-Response:
-{
-  "success": true,
-  "data": LicenseResponse[];
-}
-```
-
-**Error Responses:**
-
-- `400`: Missing required fields, invalid pricing
-- `402`: Insufficient funds for license purchase
-- `404`: License terms not found
-- `500`: License operation failed
-
-## 🚀 **Coming Soon: Chapter-Level IP API**
-
-### **Register Chapter as IP Asset**
-
-```typescript
-POST /api/chapters/{chapterId}/register-ip
-
-Request Body:
-{
-  "licenseType": "standard" | "premium" | "exclusive";
-  "pricing": {
-    "standardLicense": number;
-    "premiumLicense": number;
-    "exclusiveLicense": number;
-  },
-  "licenseConfig": {
-    "allowIndividualLicensing": boolean;
-    "requiresParentContext": boolean;
-    "crossChapterDerivatives": boolean;
-  },
-  "authorAddress": string;
-}
-```
-
-### **License Individual Chapter**
-
-```typescript
-POST /api/chapters/{chapterId}/license
-
-Request Body:
-{
-  "licenseType": "standard" | "premium" | "exclusive";
-  "buyerAddress": string;
-  "intendedUse": "translation" | "adaptation" | "derivative" | "commercial";
-  "bundleWith": string[];         // Optional: Bundle with other chapters
-}
-```
-
-### **Chapter Bundle Licensing**
-
-```typescript
-POST /api/chapters/bundle-license
-
-Request Body:
-{
-  "chapterIds": string[];
-  "licenseType": "premium";
-  "buyerAddress": string;
-  "applyBundleDiscount": boolean;
-}
-```
-
-## 🔧 **Common Types**
-
-### **EnhancedApiResponse<T>**
-
-```typescript
-interface EnhancedApiResponse<T> {
-  success: boolean;
-  data: T;
-  message?: string;
-  ipData?: {
-    operationId: string;
-    transactionHash?: string;
-    ipAssetId?: string;
-    gasUsed?: bigint;
-  };
-}
-```
-
-### **LicenseTerms**
-
-```typescript
-interface LicenseTerms {
-  commercialUse: boolean;
-  derivativesAllowed: boolean;
-  attribution: boolean;
-  shareAlike: boolean;
-  exclusivity: boolean;
-  territories?: string[];
-  contentRestrictions?: string[];
-}
-```
-
-### **RevenueShare**
-
-```typescript
-interface RevenueShare {
-  creator: number; // 0-100
-  collection: number; // 0-100
-  platform: number; // 0-100
-  // Note: creator + collection + platform must equal 100
-}
-```
-
-## 🚨 **Error Handling**
-
-All API endpoints follow consistent error response format:
-
-```typescript
-interface ErrorResponse {
-  error: string; // Human-readable error message
-  code?: string; // Optional error code
-  details?: any; // Optional additional error details
-}
-```
-
-### **Common HTTP Status Codes**
-
-- `200`: Success
-- `201`: Created successfully
-- `202`: Accepted (async operation initiated)
-- `400`: Bad Request (validation errors)
-- `401`: Unauthorized (authentication required)
-- `403`: Forbidden (insufficient permissions)
-- `404`: Not Found
-- `409`: Conflict (resource already exists)
-- `402`: Payment Required (insufficient funds)
-- `429`: Too Many Requests (rate limited)
-- `503`: Service Unavailable (external service down)
-- `500`: Internal Server Error
-
-## 🔐 **Authentication**
-
-Currently, authentication is handled via Ethereum wallet signatures. Future versions will include:
-
-- JWT token-based authentication
-- OAuth integration
-- Role-based access control
-- API key management
-
-## 🚦 **Rate Limiting**
-
-Current rate limits (subject to change):
-
-- **Story Generation**: 10 requests per minute per IP
-- **IP Registration**: 5 requests per minute per wallet
-- **Collection Operations**: 20 requests per minute per wallet
-- **License Operations**: 15 requests per minute per wallet
-
-## 📊 **Response Examples**
-
-### **Successful Story Generation**
-
-```json
-{
-  "success": true,
-  "data": {
-    "title": "The Mystic Portal",
-    "content": "In the heart of the ancient forest...",
-    "wordCount": 1247,
-    "readingTime": 5,
-    "themes": ["adventure", "magic", "discovery"],
-    "suggestedTags": ["fantasy", "portal", "adventure"],
-    "suggestedGenre": "Fantasy",
-    "contentRating": "PG",
+  "enhancedMetadata": {
+    "targetWordCount": 2000,
+    "contentRating": "PG-13",
     "language": "en",
-    "qualityScore": 85,
-    "originalityScore": 78,
-    "commercialViability": 82
-  },
-  "message": "Story generated with IP registration metadata",
-  "ipData": {
-    "operationId": "gen-1703123456789-abc123",
-    "transactionHash": "0x...",
-    "ipAssetId": "0x...",
-    "gasUsed": "142350"
+    "serializable": true
   }
 }
 ```
 
-### **Error Response**
+**Response:**
 
 ```json
 {
-  "error": "Plot description must be under 1000 characters",
-  "code": "VALIDATION_ERROR",
-  "details": {
-    "field": "plotDescription",
-    "currentLength": 1247,
-    "maxLength": 1000
+  "success": true,
+  "story": {
+    "id": "story_1703123456",
+    "title": "The Shadowbrook Mysteries",
+    "content": "Detective Sarah Chen never believed in magic...",
+    "author": "0x1234567890123456789012345678901234567890",
+    "genre": "mystery",
+    "mood": "mysterious",
+    "emoji": "🔍",
+    "createdAt": "2024-12-21T10:30:00Z",
+    "metadata": {
+      "wordCount": 1987,
+      "readingTime": 8,
+      "contentRating": "PG-13",
+      "qualityScore": 87,
+      "commercialViability": 92,
+      "uniquenessScore": 94
+    },
+    "ipRegistrationStatus": "ready",
+    "licenseStatus": "pending",
+    "availableLicenseTypes": ["standard", "premium", "exclusive"]
+  },
+  "ipMetadata": {
+    "readyForRegistration": true,
+    "estimatedRegistrationCost": "0.05 ETH",
+    "suggestedLicensePrice": 250
   }
 }
 ```
 
 ---
 
-This API documentation covers all current endpoints and provides a foundation for the upcoming chapter-level IP features! 🚀
+## 🏛️ **IP Asset Management API**
+
+### **Register Story as IP Asset**
+
+Register stories as legally-enforceable IP assets on Story Protocol blockchain.
+
+```http
+POST /api/ip/register
+```
+
+**Request Body:**
+
+```json
+{
+  "storyId": "story_1703123456",
+  "storyTitle": "The Shadowbrook Mysteries",
+  "storyContent": "Detective Sarah Chen never believed in magic...",
+  "authorAddress": "0x1234567890123456789012345678901234567890",
+  "licenseType": "premium",
+  "commercialRights": true,
+  "derivativeRights": true,
+  "customLicense": {
+    "price": 500,
+    "royaltyPercentage": 12,
+    "terms": {
+      "commercialUse": true,
+      "derivativesAllowed": true,
+      "attribution": true,
+      "shareAlike": false,
+      "exclusivity": false,
+      "territories": ["US", "EU", "CA"],
+      "contentRestrictions": ["no-adult-content"]
+    }
+  }
+}
+```
+
+**Response (Real Blockchain):**
+
+```json
+{
+  "success": true,
+  "ipAsset": {
+    "id": "0xa1b2c3d4e5f6789012345678901234567890abcd",
+    "address": "0xc32A8a0FF3beDDDa58393d022aF433e78739FAbc",
+    "tokenId": "12345",
+    "metadata": {
+      "mediaType": "text/story",
+      "title": "The Shadowbrook Mysteries",
+      "description": "Detective Sarah Chen never believed in magic...",
+      "genre": "mystery",
+      "wordCount": 1987,
+      "language": "en",
+      "tags": ["mystery", "fantasy", "urban"],
+      "createdAt": "2024-12-21T10:30:00Z",
+      "author": "0x1234567890123456789012345678901234567890"
+    },
+    "licenseTermsIds": ["0xdef456..."]
+  },
+  "licenseTerms": {
+    "id": "0xdef456789012345678901234567890123456789abc",
+    "transferable": true,
+    "royaltyPolicy": "0xBe54FB168b3c982b7AaE60dB6CF75Bd8447b390E",
+    "defaultMintingFee": "500000000000000000000",
+    "commercialUse": true,
+    "derivativesAllowed": true
+  },
+  "transactionHashes": {
+    "ipRegistration": "0x1a2b3c4d5e6f789012345678901234567890abcdef123456789",
+    "licenseCreation": "0x2b3c4d5e6f789012345678901234567890abcdef1234567890",
+    "licenseAttachment": "0x3c4d5e6f789012345678901234567890abcdef12345678901"
+  },
+  "blockchainStatus": {
+    "connected": true,
+    "network": "odyssey",
+    "blockNumber": 1234567,
+    "gasUsed": "245821",
+    "gasCost": "0.0012 ETH"
+  }
+}
+```
+
+### **Check IP Registration Status**
+
+```http
+GET /api/ip/register?storyId=story_1703123456
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "reg_1703123456_story_001",
+    "storyId": "story_1703123456",
+    "operationType": "register",
+    "status": "success",
+    "createdAt": "2024-12-21T10:30:00Z",
+    "updatedAt": "2024-12-21T10:32:15Z",
+    "ipAssetId": "0xa1b2c3d4e5f6789012345678901234567890abcd",
+    "transactionHash": "0x1a2b3c4d5e6f789012345678901234567890abcdef123456789",
+    "blockNumber": 1234567,
+    "networkFees": "0.0012 ETH"
+  }
+}
+```
+
+---
+
+## 📄 **Licensing API**
+
+### **Create and Purchase Licenses**
+
+Create license terms and purchase licensing rights for derivative works.
+
+```http
+POST /api/ip/license
+```
+
+**Request Body:**
+
+```json
+{
+  "ipAssetId": "0xa1b2c3d4e5f6789012345678901234567890abcd",
+  "licenseType": "premium",
+  "buyerAddress": "0x9876543210987654321098765432109876543210",
+  "customTerms": {
+    "price": 750,
+    "royaltyPercentage": 15,
+    "usageScope": ["film", "game", "book"],
+    "territory": "worldwide",
+    "duration": "perpetual"
+  }
+}
+```
+
+**Response (Real Blockchain):**
+
+```json
+{
+  "success": true,
+  "licenseToken": {
+    "id": "67890",
+    "licenseTermsId": "0xdef456789012345678901234567890123456789abc",
+    "licensorIpId": "0xa1b2c3d4e5f6789012345678901234567890abcd",
+    "transferable": true,
+    "mintingFee": "750000000000000000000",
+    "owner": "0x9876543210987654321098765432109876543210"
+  },
+  "transactionHash": "0x4d5e6f789012345678901234567890abcdef1234567890123",
+  "blockchainStatus": {
+    "confirmed": true,
+    "blockNumber": 1234568,
+    "gasUsed": "156342",
+    "gasCost": "0.0008 ETH"
+  },
+  "licenseDetails": {
+    "licenseType": "premium",
+    "commercialUse": true,
+    "derivativesAllowed": true,
+    "royaltyPercentage": 15,
+    "territory": "worldwide",
+    "validUntil": null
+  }
+}
+```
+
+### **Get License Information**
+
+```http
+GET /api/ip/license?ipAssetId=0xa1b2c3d4e5f6789012345678901234567890abcd
+```
+
+---
+
+## 📚 **Collections API**
+
+### **Create IP Collection**
+
+Create collections for organizing related IP assets with shared revenue models.
+
+```http
+POST /api/collections
+```
+
+**Request Body:**
+
+```json
+{
+  "name": "Urban Fantasy Mystery Series",
+  "description": "Modern mysteries with magical elements set in contemporary cities",
+  "creatorAddress": "0x1234567890123456789012345678901234567890",
+  "isPublic": true,
+  "revenueShare": {
+    "creator": 70,
+    "collection": 20,
+    "platform": 10
+  },
+  "licenseDefaults": {
+    "standardPrice": 150,
+    "premiumPrice": 400,
+    "exclusivePrice": 1200
+  },
+  "metadata": {
+    "genre": "urban-fantasy",
+    "tags": ["mystery", "magic", "contemporary"],
+    "targetAudience": "adult",
+    "contentRating": "PG-13"
+  }
+}
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "collection": {
+    "id": "col_urban_fantasy_001",
+    "name": "Urban Fantasy Mystery Series",
+    "description": "Modern mysteries with magical elements...",
+    "creator": "0x1234567890123456789012345678901234567890",
+    "isPublic": true,
+    "storyCount": 0,
+    "totalRevenue": 0,
+    "revenueShare": {
+      "creator": 70,
+      "collection": 20,
+      "platform": 10
+    },
+    "createdAt": "2024-12-21T10:35:00Z"
+  }
+}
+```
+
+### **Search Collections**
+
+```http
+GET /api/collections?genre=fantasy&public=true&limit=10&offset=0
+```
+
+### **Add Story to Collection**
+
+```http
+PUT /api/collections/col_urban_fantasy_001/stories
+```
+
+**Request Body:**
+
+```json
+{
+  "storyId": "story_1703123456",
+  "royaltyShare": 5
+}
+```
+
+---
+
+## 🔍 **Real Blockchain Operations**
+
+### **Test Connection**
+
+Verify Story Protocol blockchain connectivity and configuration.
+
+```http
+GET /api/blockchain/test
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "network": {
+    "name": "Story Protocol Odyssey",
+    "chainId": 1513,
+    "rpcUrl": "https://testnet.storyrpc.io",
+    "blockNumber": 1234567,
+    "connected": true
+  },
+  "sdk": {
+    "version": "1.0.0",
+    "initialized": true,
+    "account": "0x1234567890123456789012345678901234567890"
+  },
+  "contracts": {
+    "ipAssetRegistry": "0x...",
+    "licensingModule": "0x...",
+    "royaltyModule": "0x..."
+  }
+}
+```
+
+### **Gas Estimation**
+
+```http
+POST /api/blockchain/estimate-gas
+```
+
+**Request Body:**
+
+```json
+{
+  "operation": "register-ip",
+  "storyLength": 2000,
+  "licenseType": "premium"
+}
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "estimation": {
+    "gasLimit": 245821,
+    "gasPrice": "20000000000",
+    "estimatedCost": "0.0049 ETH",
+    "estimatedCostUSD": 12.25
+  }
+}
+```
+
+---
+
+## 📊 **License Tiers & Pricing**
+
+### **Standard Tier**
+
+```json
+{
+  "name": "standard",
+  "displayName": "Standard License",
+  "priceRange": "$50-150",
+  "royaltyPercentage": 5,
+  "terms": {
+    "commercialUse": true,
+    "derivativesAllowed": true,
+    "attribution": true,
+    "shareAlike": false,
+    "exclusivity": false
+  }
+}
+```
+
+### **Premium Tier**
+
+```json
+{
+  "name": "premium",
+  "displayName": "Premium License",
+  "priceRange": "$200-500",
+  "royaltyPercentage": 10,
+  "terms": {
+    "commercialUse": true,
+    "derivativesAllowed": true,
+    "attribution": true,
+    "shareAlike": false,
+    "exclusivity": false
+  }
+}
+```
+
+### **Exclusive Tier**
+
+```json
+{
+  "name": "exclusive",
+  "displayName": "Exclusive License",
+  "priceRange": "$1000+",
+  "royaltyPercentage": 20,
+  "terms": {
+    "commercialUse": true,
+    "derivativesAllowed": true,
+    "attribution": true,
+    "shareAlike": false,
+    "exclusivity": true
+  }
+}
+```
+
+---
+
+## ⚠️ **Error Handling**
+
+### **Blockchain Error Responses**
+
+```json
+{
+  "success": false,
+  "error": "Insufficient funds for gas fees",
+  "blockchainStatus": {
+    "connected": true,
+    "error": "INSUFFICIENT_FUNDS"
+  },
+  "details": {
+    "required": "0.005 ETH",
+    "available": "0.002 ETH",
+    "shortfall": "0.003 ETH"
+  },
+  "suggestedAction": "Add more tokens to your wallet and try again"
+}
+```
+
+### **Common Error Codes**
+
+| Error Code                    | Description                         | Retryable |
+| ----------------------------- | ----------------------------------- | --------- |
+| `RPC_ERROR`                   | Blockchain RPC failure              | ✅ Yes    |
+| `INSUFFICIENT_FUNDS`          | Not enough tokens for gas           | ❌ No     |
+| `GAS_LIMIT_EXCEEDED`          | Operation requires more gas         | ✅ Yes    |
+| `TRANSACTION_REVERTED`        | Smart contract rejected transaction | ❌ No     |
+| `NETWORK_UNAVAILABLE`         | Cannot connect to blockchain        | ✅ Yes    |
+| `IP_ASSET_ALREADY_REGISTERED` | Content already registered          | ❌ No     |
+
+---
+
+## 🔧 **Rate Limiting**
+
+| Endpoint                | Rate Limit   | Window   |
+| ----------------------- | ------------ | -------- |
+| `POST /api/generate`    | 10 requests  | 1 minute |
+| `POST /api/ip/register` | 5 requests   | 1 minute |
+| `POST /api/ip/license`  | 20 requests  | 1 minute |
+| `POST /api/collections` | 10 requests  | 1 minute |
+| `GET` endpoints         | 100 requests | 1 minute |
+
+---
+
+## 📋 **API Status**
+
+| Feature          | Status  | Blockchain |
+| ---------------- | ------- | ---------- |
+| Story Generation | ✅ Live | N/A        |
+| IP Registration  | ✅ Live | ✅ Real    |
+| License Creation | ✅ Live | ✅ Real    |
+| License Purchase | ✅ Live | ✅ Real    |
+| Collections      | ✅ Live | ✅ Real    |
+| Royalty Claims   | ✅ Live | ✅ Real    |
+| Derivatives      | ✅ Live | ✅ Real    |
+
+---
+
+**API Version**: 4.4 - Real Blockchain Integration ✅
+
+**Last Updated**: December 2024
+
+**Next Update**: Phase 5 - Production Optimization 🚀

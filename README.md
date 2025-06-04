@@ -1,321 +1,296 @@
-# 📚 StoryHouse.vip
+# 🏠 StoryHouse.vip - Revolutionary Chapter-Level IP Marketplace
 
-> **The world's first Web3 storytelling platform with chapter-level IP asset management on Story Protocol**
+> **The world's first platform enabling granular intellectual property licensing at the chapter level**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Node.js](https://img.shields.io/badge/Node.js-18%2B-green)](https://nodejs.org/)
-[![Next.js](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org/)
-[![Story Protocol](https://img.shields.io/badge/Story_Protocol-Integrated-purple)](https://storyprotocol.xyz/)
+StoryHouse.vip transforms how intellectual property is created, owned, and licensed by allowing authors to register and monetize individual chapters as IP assets on the blockchain. Built on **Story Protocol**, each chapter becomes an immediately tradeable IP asset with transparent, automated royalty distribution.
 
-## 🎯 **Revolutionary Vision**
+## 🚀 **Revolutionary Innovation**
 
-StoryHouse.vip enables **granular IP ownership** where each story chapter becomes an individual, tradeable IP asset. Unlike traditional publishing where you buy rights to entire books, creators can:
+### **Traditional Publishing vs StoryHouse.vip**
 
-- ✅ **Monetize Chapter 1** while writing Chapter 2
-- ✅ **License individual scenes** for $50 instead of $1000+ for full books
-- ✅ **Create cross-chapter derivatives** mixing content from different stories
-- ✅ **Build IP portfolios progressively** with immediate market feedback
+| Traditional Publishing          | StoryHouse.vip                         |
+| ------------------------------- | -------------------------------------- |
+| 📚 License entire book ($1000+) | 📖 License specific chapters ($50-500) |
+| 💰 Pay for unused content       | 🎯 Pay only for what you need          |
+| ⏳ Wait for book completion     | ⚡ Immediate Chapter 1 availability    |
+| 📄 Complex legal contracts      | 🔗 Blockchain-automated licensing      |
+| 🏢 Publisher-controlled rights  | 👨‍💻 Author-controlled IP assets         |
 
-## 🌟 **Core Innovation: Chapter-Level IP Assets**
+### **Real-World Use Cases**
 
-```
-Traditional Model:          StoryHouse.vip Model:
-📚 Buy entire book IP      📄 Buy specific chapter IP
-💰 $1000+ investment       💰 $50-500 per chapter
-⏰ Wait for completion     ⚡ Immediate availability
-🔒 All-or-nothing rights   🎯 Granular rights control
-```
+- 🎬 **Film Studios**: License specific battle scenes instead of entire fantasy novels
+- 🌍 **Translators**: License individual chapters for different language markets
+- 🎮 **Game Developers**: License magic systems from specific fantasy chapters
+- 🎭 **Theater Groups**: License dialogue from dramatic scenes
+- 📺 **Content Creators**: License character descriptions for adaptations
 
-### **Real-World Use Cases:**
+## ✅ **Phase 4.4: COMPLETE - Real Blockchain Integration**
 
-- 🎬 **Film Studios**: License just "epic battle scene" from Chapter 7 for short film
-- 🌍 **Translators**: License specific chapters for localization projects
-- 🎮 **Game Developers**: License "magic system" from Chapter 3 across stories
-- 🎨 **Comic Artists**: License individual scenes for visual adaptation
+StoryHouse.vip now features **full Story Protocol blockchain integration**:
 
-## 🏗 **Technical Architecture**
+### **🔗 Live Blockchain Features**
 
-### **Smart Contracts** (6 deployed, 95%+ test coverage)
+- ✅ **Real IP Asset Registration** - Stories become blockchain-verified IP assets
+- ✅ **Smart Contract Licensing** - Automated PIL (Programmable IP License) terms
+- ✅ **Automatic Royalty Distribution** - Blockchain-powered revenue sharing
+- ✅ **Derivative Asset Tracking** - Parent-child IP relationships on-chain
+- ✅ **Multi-Tier Licensing** - Standard, Premium, and Exclusive license tiers
+- ✅ **Real Transaction Processing** - Actual blockchain transactions with gas optimization
 
-- **TIPToken.sol**: Read-to-earn tokenomics with faucet system
-- **StoryNFT.sol**: Story ownership and metadata management
-- **RewardManager.sol**: Automated reward distribution
-- **IPAssetRegistry.sol**: Story Protocol IP asset tracking
-- **LicenseManager.sol**: Granular licensing and royalty management
-- **CollectionManager.sol**: Collaborative story collections
+### **🌐 Supported Networks**
+
+- **Testnet**: Story Protocol Odyssey (Chain ID: 1513)
+- **Production**: Story Protocol Mainnet (when available)
+- **Explorer**: [StoryScan](https://odyssey.storyscan.xyz)
+
+## 🏗️ **Technical Architecture**
 
 ### **Frontend Stack**
 
-- **Next.js 14**: React framework with App Router
-- **TypeScript**: Full type safety across the stack
-- **Tailwind CSS**: Modern responsive design
-- **Framer Motion**: Smooth animations and interactions
-- **Story Protocol SDK**: Blockchain IP asset management
+- **Next.js 14** with App Router
+- **TypeScript** for type safety
+- **Tailwind CSS** for responsive design
+- **Framer Motion** for animations
+- **React Hook Form** for form management
 
-### **Enhanced Story Creation Flow**
+### **Blockchain Integration**
 
-- **IPRegistrationSection**: Comprehensive IP protection interface
-- **CollectionSection**: Collaborative story collection management
-- **IPStatusIndicator**: Real-time IP registration tracking
-- **Progressive Enhancement**: Features unlock as users engage
+- **Story Protocol SDK** (`@story-protocol/core-sdk`)
+- **Viem** for Ethereum client functionality
+- **Story Protocol** for IP asset management
+- **Programmable IP License (PIL)** for legal enforceability
+
+### **Backend Services**
+
+- **Next.js API Routes** for server-side logic
+- **OpenAI GPT-4** for AI-powered story generation
+- **IPFS** for decentralized metadata storage
+- **PostgreSQL** for application data
+
+### **Smart Contracts**
+
+- **IP Asset Registry** - Core IP asset management
+- **Licensing Module** - License creation and attachment
+- **Royalty Module** - Automated revenue distribution
+- **SPG NFT Contracts** - ERC-721 IP ownership tokens
 
 ## 🚀 **Quick Start**
 
-### Prerequisites
-
-```bash
-Node.js 18+
-npm or yarn
-Git
-```
-
-### Installation
+### **1. Environment Setup**
 
 ```bash
 # Clone the repository
-git clone https://github.com/AndyBoWu/storyhouse-vip.git
+git clone https://github.com/andybowu/storyhouse-vip.git
 cd storyhouse-vip
 
 # Install dependencies
 npm install
 
-# Set up environment variables
-cp .env.example .env.local
-# Edit .env.local with your configuration
+# Copy environment template
+cp docs/ENVIRONMENT_SETUP.md .env.local
+```
 
-# Start development server
+### **2. Configure Environment Variables**
+
+```bash
+# Required for Story Protocol integration
+STORY_PROTOCOL_PRIVATE_KEY=your_wallet_private_key
+STORY_PROTOCOL_RPC_URL=https://testnet.storyrpc.io
+STORY_PROTOCOL_CHAIN_ID=1513
+
+# Required for AI story generation
+OPENAI_API_KEY=your_openai_api_key
+
+# Database (optional for development)
+DATABASE_URL=postgresql://username:password@localhost:5432/storyhouse_vip
+```
+
+### **3. Test Blockchain Integration**
+
+```bash
+# Test Story Protocol connectivity
+npx tsx scripts/test-blockchain-integration.ts
+
+# Expected output:
+# ✅ Configuration Valid
+# ✅ IP Service initialized
+# ✅ Connection successful: Connected to Story Protocol! Current block: 12345678
+# 🎉 Phase 4.4: Real Blockchain Integration - COMPLETE!
+```
+
+### **4. Start Development**
+
+```bash
+# Start the development server
 npm run dev
+
+# Open your browser
+open http://localhost:3000
 ```
 
-### Environment Setup
+## 📖 **User Journey**
 
-```env
-# Database
-DATABASE_URL="postgresql://..."
+### **For Authors**
 
-# Story Protocol
-STORY_PROTOCOL_RPC_URL="..."
-STORY_PROTOCOL_CHAIN_ID="..."
+1. **Write & Publish** - Create stories with AI assistance
+2. **Register as IP** - Each chapter becomes a blockchain IP asset
+3. **Set License Terms** - Choose pricing and usage rights
+4. **Earn Immediately** - Start monetizing from Chapter 1
+5. **Track Derivatives** - See how your IP is being used
 
-# AI Generation (OpenAI)
-OPENAI_API_KEY="sk-..."
+### **For Buyers**
 
-# Authentication
-NEXTAUTH_SECRET="..."
-NEXTAUTH_URL="http://localhost:3000"
-```
+1. **Browse Marketplace** - Discover stories and chapters
+2. **Preview Content** - Read samples before licensing
+3. **Purchase Licenses** - Buy specific rights you need
+4. **Create Derivatives** - Build upon licensed IP
+5. **Automatic Royalties** - Revenue shared transparently
 
-## 📡 **API Endpoints**
+## 🔧 **API Documentation**
 
-### **Enhanced Story Generation**
-
-```typescript
-POST /api/generate
-{
-  "plotDescription": "A young detective discovers...",
-  "genres": ["mystery", "fantasy"],
-  "ipOptions": {
-    "registerAsIP": true,
-    "licenseType": "premium",
-    "commercialRights": true
-  },
-  "collectionOptions": {
-    "addToCollection": "col-123"
-  }
-}
-```
-
-### **IP Asset Management**
+### **Core Endpoints**
 
 ```typescript
 // Register story as IP asset
 POST /api/ip/register
 {
-  "storyId": "story-123",
+  "storyId": "story_123",
+  "authorAddress": "0x1234...5678",
   "licenseType": "standard",
-  "authorAddress": "0x..."
+  "commercialRights": true,
+  "derivativeRights": true
 }
 
-// Check IP registration status
-GET /api/ip/register?storyId=story-123
-```
-
-### **Chapter-Level IP (Coming Soon)**
-
-```typescript
-// Register individual chapter as IP asset
-POST / api / chapters / { chapterId } / register - ip;
-
-// License specific chapter
-POST / api / chapters / { chapterId } / license;
-
-// Bundle chapter licensing
-POST / api / chapters / bundle - license;
-```
-
-### **Collection Management**
-
-```typescript
-// Create story collection
-POST /api/collections
-{
-  "name": "Epic Fantasy Adventures",
-  "revenueShare": { "creator": 70, "collection": 20, "platform": 10 }
-}
-
-// Search collections
-GET /api/collections?genre=fantasy&public=true
-```
-
-### **Licensing System**
-
-```typescript
-// Create license terms
+// Create and purchase licenses
 POST /api/ip/license
 {
-  "ipAssetId": "0x...",
+  "ipAssetId": "ip_asset_456",
   "licenseType": "premium",
-  "price": 500,
-  "royaltyPercentage": 10
+  "buyerAddress": "0x9876...5432"
 }
 
-// Purchase license
-PUT /api/ip/license
+// Create IP collections
+POST /api/collections
 {
-  "ipAssetId": "0x...",
-  "buyerAddress": "0x..."
+  "name": "Fantasy Adventure Series",
+  "description": "Epic fantasy chapters",
+  "revenueShare": { "creator": 70, "collection": 20, "platform": 10 }
 }
 ```
 
-## 🎮 **User Experience**
+### **License Tiers**
 
-### **For Authors**
+| Tier          | Price Range | Commercial Use | Derivatives | Royalty Share |
+| ------------- | ----------- | -------------- | ----------- | ------------- |
+| **Standard**  | $50-150     | ✅             | ✅          | 5%            |
+| **Premium**   | $200-500    | ✅             | ✅          | 10%           |
+| **Exclusive** | $1000+      | ✅             | ✅          | 20%           |
 
-```
-📝 Writing Dashboard:
-┌─ Chapter 1: "The Beginning" ✅ Published → 💰 12 licenses ($600)
-├─ Chapter 2: "First Magic" ✅ Published → 💰 8 licenses ($400)
-├─ Chapter 3: "Dark Turn" ⏳ Writing...
-└─ Chapter 4: "Revelation" 📝 Planned
+## 🧪 **Testing & Development**
 
-🎯 Next Action: "Publish Chapter 3 and register as IP asset"
-💡 Insight: "Chapter 2 has 3x higher licensing rate"
-```
+### **Run Tests**
 
-### **For Licensees**
+```bash
+# Unit tests
+npm run test
 
-```
-🛒 Chapter Marketplace:
-┌─ "Epic Battle Scenes" Collection
-│  ├─ Chapter 7: "Dragon Fight" - 🔥 Trending - $75
-│  ├─ Chapter 12: "Final Duel" - $50
-│  └─ Chapter 3: "First Battle" - $25
-├─ "Romance Moments" Collection
-└─ "Plot Twist Chapters" Collection
+# Integration tests
+npm run test:integration
 
-💡 Bundle Offer: "Buy all 3 battle chapters for $120 (20% off)"
+# Blockchain connectivity test
+npm run test:blockchain
+
+# E2E tests
+npm run test:e2e
 ```
 
-## 📈 **Development Status**
+### **Development Scripts**
 
-### ✅ **Completed Phases**
+```bash
+# Start development server
+npm run dev
 
-**Phase 1: Foundation & Smart Contracts**
+# Build for production
+npm run build
 
-- 6 deployed smart contracts with comprehensive testing
-- TIP token economics and faucet system
-- Gas optimization and security audits
+# Type checking
+npm run type-check
 
-**Phase 2: Story Protocol Integration**
-
-- Enhanced types extending base Story interface
-- SDK integration foundation and service layer
-- IP asset types and licensing structures
-
-**Phase 3: Enhanced Story Creation Flow**
-
-- IPRegistrationSection with comprehensive IP protection
-- CollectionSection for collaborative management
-- IPStatusIndicator for real-time tracking
-- Progressive enhancement UI
-
-**Phase 4.1: API Integration**
-
-- Enhanced story generation with IP-ready metadata
-- IP registration and licensing endpoints
-- Collection management APIs
-- Comprehensive validation and error handling
-
-### 🚀 **Current Phase**
-
-**Phase 4.2: Revolutionary Chapter-Level IP System**
-
-- Individual chapter IP asset registration
-- Granular licensing and bundle systems
-- Chapter dependency tracking
-- Cross-story chapter remixing
-
-**Phase 4.3: Story Protocol SDK Integration** ⬅️ **CURRENT FOCUS**
-
-- Replace mock functions with real Story Protocol calls
-- Implement actual IP asset registration on blockchain
-- Handle real transactions and gas optimization
-- Connect to Story Protocol testnet/mainnet
-
-## 🏆 **Innovation Advantages**
-
-### **vs Traditional Publishing**
-
-- **Granular Access**: License specific scenes/chapters
-- **Immediate Monetization**: No waiting for book completion
-- **Market-Driven Pricing**: Popular chapters command premium prices
-- **Reduced Risk**: Lower investment per IP asset
-
-### **vs Other Web3 Platforms**
-
-- **Chapter-Level Granularity**: Most platforms treat entire works as single NFTs
-- **Progressive Rights Building**: Build IP portfolio incrementally
-- **Real Utility**: Actual licensing rights, not just ownership tokens
-- **Cross-Story Derivatives**: Mix chapters from different stories
-
-## 📊 **Success Metrics**
-
-- Chapter IP registration rate (target: 80% of published chapters)
-- Average time from chapter publish to first license (target: < 24 hours)
-- Chapter-level revenue per author (target: $500/month)
-- Cross-chapter derivative creation rate (target: 20% of licensed chapters)
-
-## 🤝 **Contributing**
-
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+# Linting
+npm run lint
+```
 
 ## 📚 **Documentation**
 
-- [📋 Roadmap](ROADMAP.md) - Development roadmap and future plans
-- [⚡ Chapter IP Technical Spec](docs/CHAPTER_IP_TECHNICAL_SPEC.md) - Chapter-level IP system
-- [🔧 API Documentation](docs/API.md) - Complete API reference
-- [🎨 UI Components](docs/COMPONENTS.md) - Frontend component guide
-- [🔗 Smart Contracts](docs/CONTRACTS.md) - Contract documentation
+- 📋 **[Environment Setup](./docs/ENVIRONMENT_SETUP.md)** - Complete configuration guide
+- 🚀 **[Phase 4.4 Deployment](./docs/PHASE_4_4_DEPLOYMENT.md)** - Blockchain integration guide
+- 🔧 **[API Documentation](./docs/API.md)** - Complete API reference
+- 💡 **[Chapter IP Technical Spec](./docs/CHAPTER_IP_TECHNICAL_SPEC.md)** - Revolutionary IP innovation
 
-## 📝 **License**
+## 🎯 **Impact & Vision**
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+### **Market Transformation**
 
-## 🌟 **Acknowledgments**
+StoryHouse.vip creates the first **granular IP marketplace**, transforming a $280B+ intellectual property industry by:
 
-- [Story Protocol](https://storyprotocol.xyz/) for revolutionary IP infrastructure
-- [Next.js](https://nextjs.org/) for the incredible React framework
-- [OpenAI](https://openai.com/) for AI-powered story generation
-- The Web3 and DeFi communities for inspiration and innovation
+- 📈 **Increasing accessibility**: $50 chapter licenses vs $1000+ book licenses
+- ⚡ **Enabling immediate monetization**: Authors earn from Chapter 1
+- 🎯 **Reducing waste**: Buyers pay only for content they use
+- 🤖 **Automating payments**: Blockchain handles royalty distribution
+- 🌍 **Global reach**: Borderless IP licensing marketplace
+
+### **Innovation Advantages**
+
+| Advantage           | Traditional Web3 | StoryHouse.vip            |
+| ------------------- | ---------------- | ------------------------- |
+| **Granularity**     | Entire works     | Individual chapters       |
+| **Monetization**    | After completion | Immediate                 |
+| **Pricing**         | High barriers    | Accessible tiers          |
+| **Legal Framework** | Basic NFTs       | Programmable IP License   |
+| **Use Cases**       | Collectibles     | Real commercial licensing |
+
+## 🤝 **Contributing**
+
+We welcome contributions to revolutionize intellectual property! See our [Contributing Guide](./CONTRIBUTING.md) for:
+
+- Development setup
+- Code standards
+- Pull request process
+- Community guidelines
+
+### **Priority Areas**
+
+- 🔗 Advanced blockchain integrations
+- 🎨 UI/UX improvements
+- 📊 Analytics and reporting
+- 🌍 Internationalization
+- 🔍 Search and discovery
+
+## 📄 **License**
+
+This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
+
+## 🔗 **Links**
+
+- **Live Demo**: [storyhouse.vip](https://storyhouse.vip) (coming soon)
+- **Documentation**: [docs.storyhouse.vip](https://docs.storyhouse.vip)
+- **Story Protocol**: [story.foundation](https://story.foundation)
+- **Community**: [Discord](https://discord.gg/storyhouse-vip)
+
+## 🏆 **Achievements**
+
+- ✅ **Phase 1**: Core platform development
+- ✅ **Phase 2**: AI-powered story generation
+- ✅ **Phase 3**: Advanced UI/UX implementation
+- ✅ **Phase 4.1**: API integration foundation
+- ✅ **Phase 4.2**: IP types and service layers
+- ✅ **Phase 4.3**: Enhanced types and database templates
+- ✅ **Phase 4.4**: **Real blockchain integration with Story Protocol**
+- 🔄 **Phase 5**: Production optimization (next)
+- 🔄 **Phase 6**: Advanced features and DAO governance
 
 ---
 
-**Built with ❤️ for the future of digital storytelling and IP ownership**
+**Built with ❤️ for the future of intellectual property**
 
-_StoryHouse.vip - Where every chapter becomes valuable IP_ ✨
+_StoryHouse.vip - Where every chapter becomes valuable IP_ 🌟
