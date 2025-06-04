@@ -50,12 +50,26 @@ export default function ObfuscatedContent({ content, className = '' }: Obfuscate
   // Anti-bot measures: check for common bot user agents
   useEffect(() => {
     const userAgent = navigator.userAgent.toLowerCase()
-    const botPatterns = [
-      'bot', 'crawler', 'spider', 'scraper', 'curl', 'wget', 
-      'python', 'requests', 'headless', 'phantomjs', 'selenium'
+    
+    // Check for legitimate browsers first
+    const legitimateBrowsers = [
+      'mozilla/', 'chrome/', 'safari/', 'firefox/', 'edge/', 'opera/'
     ]
 
-    const isBot = botPatterns.some(pattern => userAgent.includes(pattern))
+    const isLegitmateBrowser = legitimateBrowsers.some(browser => 
+      userAgent.includes(browser) && 
+      (userAgent.includes('mozilla/') || userAgent.includes('webkit'))
+    )
+
+    // More precise bot patterns
+    const botPatterns = [
+      'googlebot', 'bingbot', 'slurp', 'duckduckbot', 'baiduspider', 'yandexbot',
+      'crawler', 'spider', 'scraper', 'curl', 'wget', 
+      'python-requests', 'python-urllib', 'headless', 'phantomjs', 'selenium',
+      'puppeteer', 'playwright'
+    ]
+
+    const isBot = !isLegitmateBrowser && botPatterns.some(pattern => userAgent.includes(pattern))
     
     if (isBot) {
       setDecodedContent('⚠️ Automated access detected. Please access this content through a regular browser.')
