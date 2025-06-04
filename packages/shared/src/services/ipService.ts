@@ -300,7 +300,7 @@ export class IPService {
         })
 
         const licenseTerms: LicenseTerms = {
-          id: licenseResult.licenseTermsId || `license_${tier.name}_${Date.now()}`,
+          id: (licenseResult.licenseTermsId || `license_${tier.name}_${Date.now()}`).toString(),
           transferable: true,
           royaltyPolicy: royaltyPolicyAddress,
           defaultMintingFee: tier.price,
@@ -478,12 +478,12 @@ export class IPService {
         return {
           success: true,
           derivative: {
-            childIpId: derivativeResult.ipId || `child_${Date.now()}`,
+            childIpId: (derivativeResult as any).childIpId || (derivativeResult as any).ipId || `child_${Date.now()}`,
             parentIpId: parentIpAssetIds[0] || '',
             licenseTermsId: '',
             licenseTokenId: licenseTokenIds[0] || ''
           },
-          transactionHash: derivativeResult.txHash as Hash
+          transactionHash: (derivativeResult as any).txHash as Hash
         }
       }
 
@@ -525,18 +525,17 @@ export class IPService {
         }, this.blockchainConfig)
 
         const claimResult = await this.storyClient!.royalty.claimAllRevenue({
-          ipId: ipAssetId as Address,
+          ancestorIpId: ipAssetId as Address,
           claimer: recipient,
           childIpIds: [],
           royaltyPolicies: [],
-          currencyTokens,
-          txOptions: { waitForTransaction: true }
+          currencyTokens
         })
 
         return {
           success: true,
           amount: claimResult.claimedTokens?.[0]?.amount || BigInt('1000000000000000000'), // 1 ETH mock amount
-          transactionHash: claimResult.txHash as Hash
+          transactionHash: claimResult.txHashes?.[0] as Hash
         }
       }
 

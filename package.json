@@ -1,69 +1,46 @@
 {
   "name": "storyhouse-vip",
   "version": "1.0.0",
-  "description": "AI-assisted writing platform built on Story Protocol with read-to-earn tokenomics",
+  "description": "Revolutionary Web3 Storytelling Platform built on Story Protocol",
   "private": true,
   "workspaces": [
     "apps/*",
     "packages/*"
   ],
   "scripts": {
-    "dev": "npm run dev --workspace=apps/frontend",
-    "build": "npm run build --workspace=apps/frontend",
-    "build:all": "npm run build --workspaces",
-    "test": "npm run test --workspaces",
-    "lint": "npm run lint --workspaces",
-    "clean": "rm -rf node_modules apps/*/node_modules packages/*/node_modules",
-    "contracts:compile": "npm run compile --workspace=packages/contracts",
-    "contracts:deploy": "npm run deploy --workspace=packages/contracts",
-    "contracts:test": "npm run test --workspace=packages/contracts"
-  },
-  "dependencies": {
-    "@metamask/detect-provider": "^2.0.0",
-    "@tanstack/react-query": "^5.80.2",
-    "autoprefixer": "^10.4.16",
-    "clsx": "^2.0.0",
-    "framer-motion": "^10.16.0",
-    "lucide-react": "^0.300.0",
-    "next": "15.0.3",
-    "openai": "^5.0.2",
-    "postcss": "^8.4.32",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "tailwind-merge": "^2.0.0",
-    "tailwindcss": "^3.4.0",
-    "viem": "^2.30.6",
-    "wagmi": "^2.15.4"
+    "dev": "npm run dev --workspace=@storyhouse/frontend",
+    "build": "npm run build --workspace=@storyhouse/shared && npm run build --workspace=@storyhouse/contracts && npm run build --workspace=@storyhouse/frontend",
+    "start": "npm run start --workspace=@storyhouse/frontend",
+    "clean": "rm -rf node_modules && rm -rf apps/*/node_modules && rm -rf packages/*/node_modules",
+    "install:clean": "npm run clean && npm install",
+    "test": "npm run test --workspace=@storyhouse/contracts",
+    "lint": "npm run lint --workspace=@storyhouse/frontend",
+    "type-check": "npm run type-check --workspace=@storyhouse/shared && npm run type-check --workspace=@storyhouse/frontend"
   },
   "devDependencies": {
-    "@types/node": "^18.0.0",
-    "@types/react": "^18.2.0",
-    "@types/react-dom": "^18.2.0",
-    "@typescript-eslint/eslint-plugin": "^6.13.0",
-    "@typescript-eslint/parser": "^6.13.0",
-    "eslint": "^8.55.0",
-    "eslint-config-next": "15.0.3",
-    "prettier": "^3.1.0",
-    "prettier-plugin-tailwindcss": "^0.5.0",
-    "typescript": "^5.0.0"
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "prettier": "^3.5.3",
+    "prettier-plugin-tailwindcss": "^0.5.14",
+    "typescript": "^5.8.3"
   },
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=8.0.0"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/AndyBoWu/storyhouse-vip.git"
-  },
   "keywords": [
-    "ai",
-    "writing",
-    "blockchain",
+    "web3",
+    "storytelling",
     "story-protocol",
-    "read-to-earn",
     "nft",
-    "web3"
+    "ip-assets",
+    "blockchain",
+    "publishing"
   ],
   "author": "StoryHouse.vip Team",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/storyhouse-vip.git"
+  }
 }
