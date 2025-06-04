@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import type {
   EnhancedApiResponse
 } from '@storyhouse/shared'
+import type { Hash } from 'viem'
 
 interface CreateLicenseRequest {
   ipAssetId: string
@@ -88,7 +89,7 @@ export async function POST(request: NextRequest) {
       message: 'License terms created successfully',
       ipData: {
         operationId: licenseTermsId,
-        transactionHash: licenseResult.transactionHash,
+        transactionHash: licenseResult.transactionHash as Hash,
         ipAssetId: body.ipAssetId,
         gasUsed: BigInt(120000)
       }
@@ -144,7 +145,7 @@ export async function PUT(request: NextRequest) {
       message: 'License purchased successfully',
       ipData: {
         operationId: licenseTokenId,
-        transactionHash: purchaseResult.transactionHash,
+        transactionHash: purchaseResult.transactionHash as Hash,
         ipAssetId: body.ipAssetId,
         gasUsed: BigInt(180000)
       }

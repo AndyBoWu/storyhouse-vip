@@ -4,12 +4,10 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createIPService, defaultStoryProtocolConfig } from '@storyhouse/shared'
-import type {
-  EnhancedApiResponse,
-  StoryWithIP
-} from '@storyhouse/shared'
+import { createIPService, defaultStoryProtocolConfig, type StoryWithIP } from '@storyhouse/shared'
 import { parseBlockchainError } from '@shared/utils/blockchainErrors'
+import { ipService } from '@/lib/ipServiceConfig'
+import type { Address } from 'viem'
 
 interface IPRegistrationRequest {
   storyId: string
@@ -60,9 +58,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
-
-    // Initialize Story Protocol service
-    const ipService = createIPService()
 
     // Check if service is available
     if (!ipService.isAvailable()) {
@@ -145,7 +140,7 @@ export async function POST(request: NextRequest) {
         },
         blockchainStatus: {
           connected: true,
-          network: ipService.getConfig().network || 'aeneid'
+          network: 'aeneid' // Use static network name for PoC
         }
       })
 
