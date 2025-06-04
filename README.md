@@ -1,172 +1,282 @@
 # StoryHouse.vip
 
-AI-powered storytelling platform built on Story Protocol Layer 1 blockchain with read-to-earn tokenomics.
+AI-powered storytelling platform built on Story Protocol Layer 1 blockchain with read-to-earn tokenomics using $TIP tokens.
 
-## Features
+## ✨ Features
 
-- **Read & Earn**: Earn $TIP tokens for every chapter you read
-- **AI-Powered Writing**: Create stories with GPT-4o assistance and multi-modal inputs
-- **Remix & Earn**: Remix existing stories and earn licensing fees through recursive creativity
-- **Progressive Paywall**: First 3 chapters free, chapter 4+ require $TIP tokens
-- **MetaMask Integration**: Seamless Web3 wallet connection for token transactions
+- **📚 Read & Earn**: Earn $TIP tokens for every chapter you read with anti-gaming mechanisms
+- **🤖 AI-Powered Writing**: Create stories with GPT-4o assistance and multi-modal inputs
+- **🔄 Remix & Earn**: Remix existing stories and earn licensing fees through recursive creativity
+- **💰 Progressive Paywall**: First 3 chapters free, chapter 4+ require token payments
+- **⚔️ Reading Streaks**: Bonus rewards for consecutive daily reading
+- **🔗 MetaMask Integration**: Seamless Web3 wallet connection on Story Protocol testnet
 
-## Live Demo
+## 🌐 Live Demo
 
 - **Production**: [https://testnet.storyhouse.vip](https://testnet.storyhouse.vip)
 - **Creator Interface**: [/create](https://testnet.storyhouse.vip/create)
 
-## Tech Stack
+## 🏗️ Monorepo Structure
 
-- **Frontend**: Next.js 15, React 18, TypeScript, Tailwind CSS, Framer Motion
+```
+storyhouse-vip/
+├── apps/
+│   └── frontend/              # Next.js web application
+├── packages/
+│   ├── contracts/            # Foundry smart contracts
+│   ├── shared/              # Shared types & utilities
+│   └── sdk/                 # Contract interaction SDK (planned)
+├── tools/
+│   └── scripts/             # Deployment & automation
+└── docs/                    # Comprehensive documentation
+```
+
+## 🔧 Tech Stack
+
+### Frontend (apps/frontend)
+
+- **Framework**: Next.js 15, React 18, TypeScript
+- **Styling**: Tailwind CSS, Framer Motion animations
+- **Web3**: Wagmi, Viem for Story Protocol integration
 - **AI**: OpenAI GPT-4o for story generation
-- **Blockchain**: Story Protocol Layer 1 (planned)
-- **Deployment**: Vercel with custom domain
 - **Icons**: Lucide React
 
-## Getting Started
+### Smart Contracts (packages/contracts)
+
+- **Framework**: Foundry for development & testing
+- **Language**: Solidity ^0.8.20
+- **Standards**: OpenZeppelin contracts
+- **Network**: Story Protocol testnet (Chain ID: 1315)
+
+### Shared (packages/shared)
+
+- **Types**: Comprehensive TypeScript interfaces
+- **Constants**: Network configs, validation patterns
+- **Utils**: Token formatting, address truncation
+
+## 💎 Smart Contract Architecture
+
+### Core Contracts
+
+1. **TIPToken.sol** - ERC-20 token with controlled minting
+
+   - Supply cap management (10B max, 1B initial)
+   - Authorized minter system
+   - Pausable transfers
+   - Burn functionality
+
+2. **RewardsManager.sol** - Central reward orchestration
+
+   - Unified reward distribution
+   - Cross-controller state management
+   - Global statistics tracking
+   - Batch operations for gas efficiency
+
+3. **ReadRewardsController.sol** - Chapter reading rewards
+   - Anti-gaming mechanisms (time limits, daily caps)
+   - Reading streak bonuses (up to 100% extra)
+   - Chapter metadata tracking
+   - Session-based reward claiming
+
+### Planned Contracts
+
+- **CreatorRewardsController.sol** - Story creation & engagement rewards
+- **RemixLicensingController.sol** - Remix fee distribution
+- **ContentNFT.sol** - Story NFTs as IP assets
+
+## 🚀 Getting Started
 
 ### Prerequisites
 
 - Node.js 18+ and npm
-- OpenAI API key (for AI story generation)
+- Foundry (for smart contract development)
+- OpenAI API key
+- MetaMask wallet
 
 ### Installation
 
-1. Clone the repository:
+1. **Clone and install:**
 
 ```bash
 git clone https://github.com/AndyBoWu/storyhouse-vip.git
 cd storyhouse-vip
-```
-
-2. Install dependencies:
-
-```bash
 npm install
 ```
 
-3. Set up environment variables:
+2. **Environment setup:**
 
 ```bash
-# Create .env.local file
-echo "OPENAI_API_KEY=your_openai_api_key_here" > .env.local
+# Frontend environment
+cd apps/frontend
+cp .env.example .env.local
+# Add your OPENAI_API_KEY
+
+# Smart contracts environment
+cd ../../packages/contracts
+cp .env.example .env
+# Add your PRIVATE_KEY for deployments
 ```
 
-4. Run the development server:
+3. **Development servers:**
 
 ```bash
+# Frontend development
 npm run dev
+
+# Smart contract compilation
+npm run contracts:build
+
+# Run tests
+npm run contracts:test
 ```
 
-5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+### Smart Contract Development
 
-### Environment Variables
+```bash
+# Navigate to contracts package
+cd packages/contracts
 
-The following environment variables are required:
+# Install Foundry dependencies
+forge install
 
-- `OPENAI_API_KEY`: Your OpenAI API key for story generation
-  - Get it from: [https://platform.openai.com/api-keys](https://platform.openai.com/api-keys)
-  - Add billing information to your OpenAI account
-  - The app uses GPT-4o model for high-quality story generation
+# Compile contracts
+forge build
 
-## API Endpoints
+# Run tests with gas reporting
+forge test --gas-report
 
-### POST `/api/generate`
+# Deploy to Story Protocol testnet
+forge script script/Deploy.s.sol --rpc-url $STORY_RPC_URL --broadcast
+```
 
-Generate a story chapter using AI.
+## 📋 Workspace Commands
 
-**Request Body:**
+```bash
+# Frontend development
+npm run dev                    # Start Next.js dev server
+npm run build                  # Build frontend for production
 
-```json
-{
-  "plotDescription": "A young detective discovers a hidden portal...",
-  "genres": ["Mystery", "Fantasy"],
-  "moods": ["Suspenseful", "Epic Adventure"],
-  "emojis": ["🔍", "✨", "🚪"],
-  "chapterNumber": 1,
-  "previousContent": "Previous chapter summary..."
+# Smart contract operations
+npm run contracts:build        # Compile all contracts
+npm run contracts:test         # Run Foundry test suite
+npm run contracts:deploy       # Deploy to testnet
+
+# Shared package
+npm run build:all             # Build all packages
+npm run clean                 # Clean all node_modules
+```
+
+## 🔗 Story Protocol Integration
+
+### Network Configuration
+
+- **Chain ID**: 1315 (Aeneid testnet)
+- **RPC URL**: https://aeneid.storyrpc.io
+- **Explorer**: https://aeneid.storyscan.xyz
+- **Faucet**: Available for testnet IP tokens
+
+### Token Economics
+
+- **Base Reward**: 10 TIP per chapter read
+- **Daily Limit**: 20 chapters max per user
+- **Streak Bonus**: 10% per consecutive day (max 100%)
+- **Creator Royalty**: 5% of remix fees
+- **Supply Cap**: 10B TIP tokens maximum
+
+## 📖 API Reference
+
+### Story Generation API
+
+**POST** `/api/generate`
+
+```typescript
+interface GenerateRequest {
+  plotDescription: string; // Max 500 characters
+  genre: string; // From predefined list
+  mood: string; // From predefined list
+  emoji: string; // Selected emoji
+  chapterNumber?: number; // For multi-chapter stories
+}
+
+interface GenerateResponse {
+  success: boolean;
+  data: {
+    title: string;
+    content: string;
+    wordCount: number;
+    readingTime: number;
+    themes: string[];
+  };
 }
 ```
 
-**Response:**
+## 🧪 Testing Strategy
 
-```json
-{
-  "success": true,
-  "data": {
-    "title": "The Discovery",
-    "content": "Detective Sarah Chen had always found comfort...",
-    "wordCount": 1247,
-    "readingTime": 6,
-    "themes": ["mystery", "portal", "adventure", "discovery"]
-  }
-}
-```
+### Smart Contract Tests
 
-## Project Structure
+- **Unit Tests**: Individual contract functionality
+- **Integration Tests**: Cross-contract interactions
+- **Fuzz Testing**: Edge case discovery
+- **Gas Optimization**: Efficient operations
 
-```
-src/
-├── app/
-│   ├── api/generate/          # AI story generation API
-│   ├── create/                # Story creation interface
-│   ├── globals.css           # Global styles
-│   ├── layout.tsx            # Root layout
-│   └── page.tsx              # Landing page
-├── lib/
-│   └── ai/
-│       └── openai.ts         # OpenAI integration
-└── components/               # Reusable UI components (planned)
-```
+### Frontend Tests
 
-## Deployment
+- **Component Tests**: UI component behavior
+- **Integration Tests**: Web3 wallet interactions
+- **E2E Tests**: Complete user workflows
 
-The app is automatically deployed to Vercel via GitHub integration:
+## 📁 Documentation
 
-1. Push changes to the `main` branch
-2. Vercel automatically builds and deploys
-3. Set environment variables in Vercel dashboard
-4. Custom domain configured at `testnet.storyhouse.vip`
+Comprehensive documentation available in the `/docs` folder:
 
-### Vercel Environment Variables
+- **📋 Product**: [`PROPOSAL.md`](./docs/product/PROPOSAL.md) - Product vision & roadmap
+- **🎨 Design**: [`WIREFRAMES.md`](./docs/design/WIREFRAMES.md) - UI/UX specifications
+- **⚙️ Technical**: [`TECHSTACK.md`](./docs/technical/TECHSTACK.md) - Technical architecture
+- **🖥️ Frontend**: [`FRONTEND.md`](./docs/design/FRONTEND.md) - Frontend implementation guide
 
-In your Vercel dashboard, add:
+## 🛠️ Development Workflow
 
-- `OPENAI_API_KEY`: Your OpenAI API key
+1. **Smart Contract Development**
 
-## Story Creation Workflow
+   - Write contracts in `packages/contracts/src/`
+   - Add comprehensive tests in `test/`
+   - Use Foundry for compilation and testing
 
-1. **Plot Input**: Authors describe their story concept (500 char limit)
-2. **Creative Elements**: Optional genre, mood, and emoji selection
-3. **AI Generation**: GPT-4o creates engaging chapters with:
-   - Compelling hooks and cliffhangers
-   - Rich sensory details and character development
-   - Platform-optimized length (800-1500 words)
-   - Monetization-aware structure
-4. **Preview & Edit**: Authors can regenerate, edit, or publish
-5. **Publication**: Stories go live with tokenized access model
+2. **Frontend Development**
 
-## AI Prompt Engineering
+   - Build UI components in `apps/frontend/src/`
+   - Use shared types from `packages/shared/`
+   - Integrate with contracts via generated ABIs
 
-The story generation uses carefully crafted prompts that:
+3. **Deployment Process**
+   - Deploy contracts to Story Protocol testnet
+   - Update contract addresses in shared constants
+   - Deploy frontend to Vercel with automatic CD
 
-- Emphasize reader engagement and monetization context
-- Create platform-specific content (free chapters 1-3, paid 4+)
-- Include cliffhangers to drive continued reading
-- Optimize for $TIP token earning mechanics
-- Adapt to user-selected genres, moods, and themes
+## 🎯 Current Development Status
 
-## Future Roadmap
+### ✅ Completed
 
-- [ ] Story Protocol blockchain integration
-- [ ] $TIP token smart contracts
-- [ ] MetaMask wallet connection
-- [ ] User authentication and story management
-- [ ] Advanced AI features (image generation, voice narration)
-- [ ] Community features and story remixing
-- [ ] Revenue sharing and creator analytics
+- Monorepo architecture with npm workspaces
+- Core smart contracts (TIP token, rewards system)
+- Frontend with AI story generation
+- MetaMask integration for Story Protocol
+- Foundry development environment
 
-## Contributing
+### 🚧 In Progress
+
+- Creator & remix reward controllers
+- Smart contract testing suite
+- SDK package for contract interactions
+
+### 📋 Planned
+
+- Story Protocol testnet deployment
+- End-to-end reward claiming flow
+- Story NFT minting as IP assets
+- Advanced creator tools & analytics
+
+## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/amazing-feature`
@@ -174,11 +284,23 @@ The story generation uses carefully crafted prompts that:
 4. Push to branch: `git push origin feature/amazing-feature`
 5. Open a Pull Request
 
-## License
+### Development Guidelines
 
-This project is licensed under the MIT License.
+- Follow TypeScript strict mode
+- Write comprehensive tests for smart contracts
+- Use conventional commit messages
+- Update documentation for new features
 
-## Contact
+## 📄 License
 
-- GitHub: [@AndyBoWu](https://github.com/AndyBoWu)
-- Project: [StoryHouse.vip](https://testnet.storyhouse.vip)
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 📞 Contact
+
+- **GitHub**: [@AndyBoWu](https://github.com/AndyBoWu)
+- **Live Site**: [testnet.storyhouse.vip](https://testnet.storyhouse.vip)
+- **Documentation**: [docs/](./docs/)
+
+---
+
+_Built with ❤️ for the Story Protocol ecosystem_
