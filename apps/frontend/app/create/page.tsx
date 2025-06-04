@@ -5,6 +5,15 @@ import { ArrowLeft, Save, Sparkles, Image, Smile, Palette, Wand2, AlertCircle } 
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 
+// Import enhanced components
+import IPRegistrationSection from '../../components/creator/IPRegistrationSection'
+import CollectionSection from '../../components/creator/CollectionSection'
+import IPStatusIndicator from '../../components/creator/IPStatusIndicator'
+import type {
+  EnhancedGeneratedStory,
+  EnhancedStoryCreationParams
+} from '@storyhouse/shared'
+
 interface GeneratedStory {
   title: string
   content: string
@@ -23,6 +32,44 @@ export default function CreateStoryPage() {
   const [showMultiModal, setShowMultiModal] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // Enhanced story creation options
+  const [ipOptions, setIPOptions] = useState<Partial<EnhancedStoryCreationParams>>({
+    registerAsIP: false,
+    licenseType: 'standard',
+    commercialRights: true,
+    derivativeRights: true
+  })
+
+  const [collectionOptions, setCollectionOptions] = useState<Partial<EnhancedStoryCreationParams>>({})
+
+  // Mock enhanced story for demonstration
+  const [mockEnhancedStory] = useState({
+    id: 'demo-story',
+    title: 'Demo Story',
+    description: 'A demo story for testing',
+    content: 'Demo content',
+    author: 'Demo Author',
+    authorAddress: '0x123...',
+    genre: 'Fantasy',
+    mood: 'Epic Adventure',
+    emoji: '🌟',
+    chapters: [],
+    isRemix: false,
+    tags: [],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    wordCount: 1000,
+    readingTime: 5,
+    totalRewards: 0,
+    isPublished: true,
+    ipRegistrationStatus: 'none' as const,
+    licenseStatus: 'none' as const,
+    availableLicenseTypes: [],
+    royaltyEarnings: 0,
+    hasClaimableRoyalties: false,
+    collections: []
+  })
+
   const genres = ['Mystery', 'Romance', 'Sci-Fi', 'Fantasy', 'Horror', 'Comedy', 'Adventure', 'Drama']
   const moods = ['Dark & Gritty', 'Light & Whimsical', 'Epic Adventure', 'Romantic', 'Suspenseful', 'Humorous']
   const emojiOptions = ['😊', '😢', '😱', '😍', '🔥', '⚡', '🌟', '💀', '🦸', '👑', '🎭', '🎪', '🌙', '⭐', '💎', '🚀']
@@ -35,6 +82,14 @@ export default function CreateStoryPage() {
     }
   }
 
+  const handleIPOptionsChange = (options: Partial<EnhancedStoryCreationParams>) => {
+    setIPOptions(prev => ({ ...prev, ...options }))
+  }
+
+  const handleCollectionOptionsChange = (options: Partial<EnhancedStoryCreationParams>) => {
+    setCollectionOptions(prev => ({ ...prev, ...options }))
+  }
+
   const handleGenerate = async () => {
     if (!plotDescription.trim()) return
 
@@ -42,6 +97,22 @@ export default function CreateStoryPage() {
     setError(null)
 
     try {
+      // Combine all options for enhanced story creation
+      const enhancedParams: EnhancedStoryCreationParams = {
+        plotDescription: plotDescription.trim(),
+        genre: selectedGenres[0] || 'Adventure',
+        mood: selectedMoods[0] || 'Epic Adventure',
+        emoji: selectedEmojis[0] || '🌟',
+        maxWords: 1000,
+        registerAsIP: ipOptions.registerAsIP || false,
+        licenseType: ipOptions.licenseType || 'standard',
+        commercialRights: ipOptions.commercialRights ?? true,
+        derivativeRights: ipOptions.derivativeRights ?? true,
+        ...collectionOptions
+      }
+
+      console.log('Enhanced story creation params:', enhancedParams)
+
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: {
@@ -52,7 +123,9 @@ export default function CreateStoryPage() {
           genres: selectedGenres,
           moods: selectedMoods,
           emojis: selectedEmojis,
-          chapterNumber: 1
+          chapterNumber: 1,
+          // Pass enhanced options to API
+          ipOptions: enhancedParams.registerAsIP ? enhancedParams : undefined
         })
       })
 
@@ -84,6 +157,30 @@ export default function CreateStoryPage() {
     setGeneratedStory(null)
   }
 
+  const handlePublish = async () => {
+    if (!generatedStory) return
+
+    try {
+      // Enhanced publish with IP options
+      const publishData = {
+        ...generatedStory,
+        genres: selectedGenres,
+        moods: selectedMoods,
+        emojis: selectedEmojis,
+        ipOptions: ipOptions.registerAsIP ? ipOptions : undefined,
+        collectionOptions
+      }
+
+      console.log('Publishing enhanced story:', publishData)
+
+      // TODO: Implement actual publish API call
+      alert('Story published with enhanced features! (Demo mode)')
+    } catch (err) {
+      console.error('Publish error:', err)
+      setError('Failed to publish story. Please try again.')
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
       {/* Header */}
@@ -105,7 +202,7 @@ export default function CreateStoryPage() {
 
       <div className="container mx-auto px-6 py-8">
         {!generatedStory ? (
-          /* Story Creation Interface */
+          /* Enhanced Story Creation Interface */
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -120,7 +217,7 @@ export default function CreateStoryPage() {
                 <Sparkles className="w-8 h-8 text-purple-600" />
                 Create Your Story
               </motion.div>
-              <p className="text-gray-600 text-lg">Let AI help you bring your imagination to life</p>
+              <p className="text-gray-600 text-lg">Let AI help you bring your imagination to life with enhanced IP protection</p>
             </div>
 
             {/* Error Display */}
@@ -265,6 +362,24 @@ export default function CreateStoryPage() {
               )}
             </AnimatePresence>
 
+            {/* IP Registration Section */}
+            <div className="mb-6">
+              <IPRegistrationSection
+                onIPOptionsChange={handleIPOptionsChange}
+                initialOptions={ipOptions}
+                isCollapsed={!plotDescription.trim()}
+              />
+            </div>
+
+            {/* Collection Section */}
+            <div className="mb-6">
+              <CollectionSection
+                onCollectionOptionsChange={handleCollectionOptionsChange}
+                initialOptions={collectionOptions}
+                isCollapsed={!plotDescription.trim()}
+              />
+            </div>
+
             {/* Generate Button */}
             <div className="text-center">
               <motion.button
@@ -279,9 +394,46 @@ export default function CreateStoryPage() {
                 }`}
               >
                 <Wand2 className="w-5 h-5" />
-                {isGenerating ? 'Generating Chapter 1...' : 'Generate Chapter 1'}
+                {isGenerating ? 'Generating Enhanced Chapter...' : 'Generate Enhanced Chapter 1'}
               </motion.button>
             </div>
+
+            {/* Enhanced Creation Summary */}
+            {(ipOptions.registerAsIP || collectionOptions.addToCollection || collectionOptions.createNewCollection) && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-6 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl p-6"
+              >
+                <h4 className="font-semibold text-blue-800 mb-3">Enhanced Story Features</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  {ipOptions.registerAsIP && (
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      <span className="text-blue-700">
+                        IP Protection: {ipOptions.licenseType} license ({ipOptions.licenseType === 'standard' ? '100' : ipOptions.licenseType === 'premium' ? '500' : '2000'} TIP)
+                      </span>
+                    </div>
+                  )}
+                  {collectionOptions.addToCollection && (
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                      <span className="text-purple-700">
+                        Joining existing collection
+                      </span>
+                    </div>
+                  )}
+                  {collectionOptions.createNewCollection && (
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="text-green-700">
+                        Creating new collection: {collectionOptions.createNewCollection.name}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
 
             {/* Generation Progress */}
             {isGenerating && (
@@ -299,17 +451,18 @@ export default function CreateStoryPage() {
                     className="bg-gradient-to-r from-purple-600 to-blue-600 h-3 rounded-full"
                   />
                 </div>
-                <p className="text-gray-600">Creating your story chapter...</p>
+                <p className="text-gray-600">Creating your enhanced story chapter...</p>
                 <div className="mt-4 text-sm text-gray-500">
                   <p>💡 Your plot: "{plotDescription.slice(0, 50)}..."</p>
                   {selectedGenres.length > 0 && <p>🎭 Genres: {selectedGenres.join(', ')}</p>}
                   {selectedMoods.length > 0 && <p>🎨 Mood: {selectedMoods.join(', ')}</p>}
+                  {ipOptions.registerAsIP && <p>🛡️ IP Protection: Enabled</p>}
                 </div>
               </motion.div>
             )}
           </motion.div>
         ) : (
-          /* Generated Content Preview */
+          /* Generated Content Preview with IP Status */
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -325,14 +478,25 @@ export default function CreateStoryPage() {
               </button>
 
               <motion.button
+                onClick={handlePublish}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-semibold hover:from-green-700 hover:to-emerald-700 transition-all"
               >
                 <span>🚀</span>
-                Publish
+                Publish Enhanced Story
               </motion.button>
             </div>
+
+            {/* IP Status Indicator */}
+            {ipOptions.registerAsIP && (
+              <div className="mb-6">
+                <IPStatusIndicator
+                  story={mockEnhancedStory}
+                  compact={true}
+                />
+              </div>
+            )}
 
             {/* Generated Chapter */}
             <div className="bg-white rounded-xl shadow-lg p-8">
@@ -348,7 +512,7 @@ export default function CreateStoryPage() {
                 ))}
               </div>
 
-              {/* Story Metadata */}
+              {/* Enhanced Story Metadata */}
               <div className="mt-8 pt-6 border-t border-gray-200">
                 <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
                   <span>Word count: {generatedStory.wordCount.toLocaleString()}</span>
@@ -368,6 +532,24 @@ export default function CreateStoryPage() {
                           {theme}
                         </span>
                       ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Enhanced Features Summary */}
+                {(ipOptions.registerAsIP || collectionOptions.addToCollection || collectionOptions.createNewCollection) && (
+                  <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+                    <h4 className="font-medium text-blue-800 mb-2">Enhanced Features Applied:</h4>
+                    <div className="space-y-1 text-sm">
+                      {ipOptions.registerAsIP && (
+                        <div className="text-blue-700">✓ IP Asset Registration: {ipOptions.licenseType} license</div>
+                      )}
+                      {collectionOptions.addToCollection && (
+                        <div className="text-purple-700">✓ Added to existing collection</div>
+                      )}
+                      {collectionOptions.createNewCollection && (
+                        <div className="text-green-700">✓ New collection created: {collectionOptions.createNewCollection.name}</div>
+                      )}
                     </div>
                   </div>
                 )}
