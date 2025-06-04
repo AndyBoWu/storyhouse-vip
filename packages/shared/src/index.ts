@@ -1,3 +1,40 @@
+/**
+ * @fileoverview Main entry point for @storyhouse/shared package
+ * Exports types, services, and utilities for StoryHouse.vip
+ */
+
+// Export all IP-related types
+export type {
+  IPAsset,
+  IPMetadata,
+  LicenseTerms,
+  LicenseToken,
+  Derivative,
+  RoyaltyDistribution,
+  StoryWithIP,
+  ChapterWithIP,
+  LicenseTier,
+  StoryCollection,
+  IPOperation,
+  StoryProtocolConfig,
+  RegisterIPAssetResponse,
+  CreateLicenseResponse,
+  PurchaseLicenseResponse,
+  CreateDerivativeResponse,
+  ClaimRoyaltyResponse,
+  IPAssetEvent
+} from './types/ip'
+
+// Export IP service
+export {
+  IPService,
+  createIPService,
+  defaultStoryProtocolConfig
+} from './services/ipService'
+
+// Re-export viem types for convenience
+export type { Address, Hash } from 'viem'
+
 // Export all types
 export * from './types';
 
