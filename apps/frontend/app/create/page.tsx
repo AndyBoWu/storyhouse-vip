@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
-import { ArrowLeft, Save, Sparkles, Image, Smile, Palette, Wand2, AlertCircle } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { ArrowLeft, Save, Sparkles, Image, Smile, Palette, Wand2, AlertCircle, BookOpen, Plus, List, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 
-// Import enhanced components
+// Import enhanced components (only used in advanced mode)
 import IPRegistrationSection from '../../components/creator/IPRegistrationSection'
 import CollectionSection from '../../components/creator/CollectionSection'
 import IPStatusIndicator from '../../components/creator/IPStatusIndicator'
@@ -22,8 +22,26 @@ interface GeneratedStory {
   themes: string[]
 }
 
+interface ExistingStory {
+  id: string
+  title: string
+  genre: string
+  chapters: number
+  lastUpdated: string
+  earnings: number
+  preview: string
+}
+
+type CreationMode = 'select' | 'new' | 'continue' | 'browse'
+
 export default function CreateStoryPage() {
+  const [creationMode, setCreationMode] = useState<CreationMode>('select')
   const [plotDescription, setPlotDescription] = useState('')
+  const [storyTitle, setStoryTitle] = useState('')
+  const [selectedStory, setSelectedStory] = useState<ExistingStory | null>(null)
+  const [chapterNumber, setChapterNumber] = useState(1)
+  
+  // Existing state for multimodal inputs
   const [selectedMoods, setSelectedMoods] = useState<string[]>([])
   const [selectedEmojis, setSelectedEmojis] = useState<string[]>([])
   const [selectedGenres, setSelectedGenres] = useState<string[]>([])
@@ -32,47 +50,93 @@ export default function CreateStoryPage() {
   const [showMultiModal, setShowMultiModal] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Enhanced story creation options
+  // Advanced options (hidden by default)
+  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false)
   const [ipOptions, setIPOptions] = useState<Partial<EnhancedStoryCreationParams>>({
     registerAsIP: false,
     licenseType: 'standard',
     commercialRights: true,
     derivativeRights: true
   })
-
   const [collectionOptions, setCollectionOptions] = useState<Partial<EnhancedStoryCreationParams>>({})
 
-  // Mock enhanced story for demonstration
-  const [mockEnhancedStory] = useState({
-    id: 'demo-story',
-    title: 'Demo Story',
-    description: 'A demo story for testing',
-    content: 'Demo content',
-    author: 'Demo Author',
-    authorAddress: '0x123...',
-    genre: 'Fantasy',
-    mood: 'Epic Adventure',
-    emoji: '🌟',
-    chapters: [],
-    isRemix: false,
-    tags: [],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    wordCount: 1000,
-    readingTime: 5,
-    totalRewards: 0,
-    isPublished: true,
-    ipRegistrationStatus: 'none' as const,
-    licenseStatus: 'none' as const,
-    availableLicenseTypes: [],
-    royaltyEarnings: 0,
-    hasClaimableRoyalties: false,
-    collections: []
-  })
+  // Mock existing stories for demo
+  const [existingStories] = useState<ExistingStory[]>([
+    {
+      id: '1',
+      title: 'The Detective\'s Portal',
+      genre: 'Mystery',
+      chapters: 3,
+      lastUpdated: '2 days ago',
+      earnings: 0.3,
+      preview: 'Sarah stepped through the portal...'
+    },
+    {
+      id: '2',
+      title: 'Space Pirates Adventure',
+      genre: 'Sci-Fi',
+      chapters: 7,
+      lastUpdated: '1 week ago',
+      earnings: 1.2,
+      preview: 'Captain Nova faced the alien fleet...'
+    },
+    {
+      id: '3',
+      title: 'Magic Academy Chronicles',
+      genre: 'Fantasy',
+      chapters: 12,
+      lastUpdated: '3 weeks ago',
+      earnings: 2.8,
+      preview: 'The final exam would determine...'
+    }
+  ])
 
   const genres = ['Mystery', 'Romance', 'Sci-Fi', 'Fantasy', 'Horror', 'Comedy', 'Adventure', 'Drama']
   const moods = ['Dark & Gritty', 'Light & Whimsical', 'Epic Adventure', 'Romantic', 'Suspenseful', 'Humorous']
   const emojiOptions = ['😊', '😢', '😱', '😍', '🔥', '⚡', '🌟', '💀', '🦸', '👑', '🎭', '🎪', '🌙', '⭐', '💎', '🚀']
+
+  // Auto-save functionality
+  useEffect(() => {
+    if (plotDescription.trim() || storyTitle.trim()) {
+      const saveTimer = setTimeout(() => {
+        // Auto-save to localStorage
+        localStorage.setItem('storyhouse_draft', JSON.stringify({
+          plotDescription,
+          storyTitle,
+          selectedGenres,
+          selectedMoods,
+          selectedEmojis,
+          creationMode,
+          selectedStory,
+          timestamp: Date.now()
+        }))
+      }, 2000)
+
+      return () => clearTimeout(saveTimer)
+    }
+  }, [plotDescription, storyTitle, selectedGenres, selectedMoods, selectedEmojis, creationMode, selectedStory])
+
+  // Load draft on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('storyhouse_draft')
+    if (saved) {
+      try {
+        const draft = JSON.parse(saved)
+        // Only load if less than 24 hours old
+        if (Date.now() - draft.timestamp < 24 * 60 * 60 * 1000) {
+          setPlotDescription(draft.plotDescription || '')
+          setStoryTitle(draft.storyTitle || '')
+          setSelectedGenres(draft.selectedGenres || [])
+          setSelectedMoods(draft.selectedMoods || [])
+          setSelectedEmojis(draft.selectedEmojis || [])
+          if (draft.creationMode) setCreationMode(draft.creationMode)
+          if (draft.selectedStory) setSelectedStory(draft.selectedStory)
+        }
+      } catch (e) {
+        console.log('Could not load draft:', e)
+      }
+    }
+  }, [])
 
   const toggleSelection = (item: string, currentSelection: string[], setSelection: (items: string[]) => void) => {
     if (currentSelection.includes(item)) {
@@ -82,12 +146,12 @@ export default function CreateStoryPage() {
     }
   }
 
-  const handleIPOptionsChange = (options: Partial<EnhancedStoryCreationParams>) => {
-    setIPOptions(prev => ({ ...prev, ...options }))
-  }
-
-  const handleCollectionOptionsChange = (options: Partial<EnhancedStoryCreationParams>) => {
-    setCollectionOptions(prev => ({ ...prev, ...options }))
+  const handleSelectStory = (story: ExistingStory) => {
+    setSelectedStory(story)
+    setChapterNumber(story.chapters + 1)
+    setCreationMode('continue')
+    // Pre-fill with continuation context
+    setPlotDescription(`Continue the story where ${story.preview}`)
   }
 
   const handleGenerate = async () => {
@@ -97,22 +161,6 @@ export default function CreateStoryPage() {
     setError(null)
 
     try {
-      // Combine all options for enhanced story creation
-      const enhancedParams: EnhancedStoryCreationParams = {
-        plotDescription: plotDescription.trim(),
-        genre: selectedGenres[0] || 'Adventure',
-        mood: selectedMoods[0] || 'Epic Adventure',
-        emoji: selectedEmojis[0] || '🌟',
-        maxWords: 1000,
-        registerAsIP: ipOptions.registerAsIP || false,
-        licenseType: ipOptions.licenseType || 'standard',
-        commercialRights: ipOptions.commercialRights ?? true,
-        derivativeRights: ipOptions.derivativeRights ?? true,
-        ...collectionOptions
-      }
-
-      console.log('Enhanced story creation params:', enhancedParams)
-
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: {
@@ -120,12 +168,14 @@ export default function CreateStoryPage() {
         },
         body: JSON.stringify({
           plotDescription: plotDescription.trim(),
+          storyTitle: storyTitle.trim(),
           genres: selectedGenres,
           moods: selectedMoods,
           emojis: selectedEmojis,
-          chapterNumber: 1,
-          // Pass enhanced options to API
-          ipOptions: enhancedParams.registerAsIP ? enhancedParams : undefined
+          chapterNumber,
+          isNewStory: creationMode === 'new',
+          isContinuation: creationMode === 'continue',
+          existingStoryId: selectedStory?.id
         })
       })
 
@@ -157,29 +207,571 @@ export default function CreateStoryPage() {
     setGeneratedStory(null)
   }
 
-  const handlePublish = async () => {
-    if (!generatedStory) return
+  const renderModeSelector = () => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="max-w-4xl mx-auto"
+    >
+      <div className="text-center mb-8">
+        <motion.div
+          initial={{ scale: 0.8 }}
+          animate={{ scale: 1 }}
+          className="inline-flex items-center gap-2 text-3xl font-bold text-gray-800 mb-4"
+        >
+          <Sparkles className="w-8 h-8 text-purple-600" />
+          Create Your Story
+        </motion.div>
+        <p className="text-gray-600 text-lg">Let AI help you bring imagination to life</p>
+      </div>
 
-    try {
-      // Enhanced publish with IP options
-      const publishData = {
-        ...generatedStory,
-        genres: selectedGenres,
-        moods: selectedMoods,
-        emojis: selectedEmojis,
-        ipOptions: ipOptions.registerAsIP ? ipOptions : undefined,
-        collectionOptions
-      }
+      {/* Scenario Selection */}
+      <div className="grid md:grid-cols-3 gap-6 mb-8">
+        <motion.button
+          onClick={() => setCreationMode('new')}
+          whileHover={{ scale: 1.02 }}
+          className="bg-white rounded-xl shadow-lg p-6 text-left hover:shadow-xl transition-all border-2 border-transparent hover:border-purple-200"
+        >
+          <div className="text-4xl mb-4">📝</div>
+          <h3 className="text-xl font-semibold text-gray-800 mb-2">New Story</h3>
+          <p className="text-gray-600 mb-4">Start fresh with AI help</p>
+          <div className="inline-flex items-center gap-2 text-purple-600 font-medium">
+            <span>Start Writing</span>
+            <ChevronRight className="w-4 h-4" />
+          </div>
+        </motion.button>
 
-      console.log('Publishing enhanced story:', publishData)
+        <motion.button
+          onClick={() => setCreationMode('continue')}
+          whileHover={{ scale: 1.02 }}
+          className="bg-white rounded-xl shadow-lg p-6 text-left hover:shadow-xl transition-all border-2 border-transparent hover:border-blue-200"
+        >
+          <div className="text-4xl mb-4">➕</div>
+          <h3 className="text-xl font-semibold text-gray-800 mb-2">Continue Existing Story</h3>
+          <p className="text-gray-600 mb-4">Add next chapter</p>
+          <div className="inline-flex items-center gap-2 text-blue-600 font-medium">
+            <span>Add Chapter</span>
+            <ChevronRight className="w-4 h-4" />
+          </div>
+        </motion.button>
 
-      // TODO: Implement actual publish API call
-      alert('Story published with enhanced features! (Demo mode)')
-    } catch (err) {
-      console.error('Publish error:', err)
-      setError('Failed to publish story. Please try again.')
-    }
-  }
+        <motion.button
+          onClick={() => setCreationMode('browse')}
+          whileHover={{ scale: 1.02 }}
+          className="bg-white rounded-xl shadow-lg p-6 text-left hover:shadow-xl transition-all border-2 border-transparent hover:border-green-200"
+        >
+          <div className="text-4xl mb-4">📚</div>
+          <h3 className="text-xl font-semibold text-gray-800 mb-2">My Stories</h3>
+          <p className="text-gray-600 mb-4">View all drafts & published</p>
+          <div className="inline-flex items-center gap-2 text-green-600 font-medium">
+            <span>Browse All</span>
+            <ChevronRight className="w-4 h-4" />
+          </div>
+        </motion.button>
+      </div>
+
+      {/* Help Text */}
+      <div className="text-center bg-purple-50 rounded-lg p-4">
+        <p className="text-purple-800">
+          💡 Don't worry about blockchain stuff yet - just focus on creating great content! 
+          We'll handle IP protection later.
+        </p>
+      </div>
+    </motion.div>
+  )
+
+  const renderContinueStoryMode = () => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="max-w-4xl mx-auto"
+    >
+      <div className="flex items-center gap-4 mb-8">
+        <button
+          onClick={() => setCreationMode('select')}
+          className="flex items-center gap-2 text-gray-600 hover:text-gray-800"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back
+        </button>
+        <h2 className="text-2xl font-bold text-gray-800">➕ Continue Your Story</h2>
+      </div>
+
+      {/* Story Selection */}
+      <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+        <h3 className="text-lg font-semibold text-gray-800 mb-4">📚 Select story to continue:</h3>
+        
+        <div className="space-y-3">
+          {existingStories.map((story) => (
+            <motion.button
+              key={story.id}
+              onClick={() => handleSelectStory(story)}
+              whileHover={{ scale: 1.01 }}
+              className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
+                selectedStory?.id === story.id
+                  ? 'border-purple-400 bg-purple-50'
+                  : 'border-gray-200 hover:border-gray-300'
+              }`}
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className={`w-3 h-3 rounded-full ${
+                      selectedStory?.id === story.id ? 'bg-purple-600' : 'bg-gray-300'
+                    }`} />
+                    <h4 className="font-semibold text-gray-800">{story.title}</h4>
+                    <span className="text-sm text-gray-500">📊 {story.chapters} chap</span>
+                    <span className="text-sm text-green-600">💰 {story.earnings} $TIP</span>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-1">{story.genre} • Last updated {story.lastUpdated}</p>
+                  <p className="text-sm text-gray-500 italic">"{story.preview}"</p>
+                </div>
+              </div>
+            </motion.button>
+          ))}
+        </div>
+      </div>
+
+      {/* Continue Writing Interface */}
+      {selectedStory && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          className="bg-white rounded-xl shadow-lg p-6"
+        >
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">
+            ✨ What happens next in "{selectedStory.title}"?
+          </h3>
+          
+          <textarea
+            value={plotDescription}
+            onChange={(e) => setPlotDescription(e.target.value)}
+            placeholder={`Continue from: "${selectedStory.preview}"\n\nDescribe what happens in Chapter ${chapterNumber}...`}
+            className="w-full h-32 p-4 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-purple-500 focus:border-transparent mb-4"
+            maxLength={500}
+          />
+          
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-500">{plotDescription.length}/500 characters</span>
+            <button
+              onClick={handleGenerate}
+              disabled={!plotDescription.trim() || isGenerating}
+              className={`inline-flex items-center gap-2 px-6 py-2 rounded-lg font-semibold transition-all ${
+                plotDescription.trim() && !isGenerating
+                  ? 'bg-purple-600 text-white hover:bg-purple-700'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
+            >
+              <Wand2 className="w-4 h-4" />
+              {isGenerating ? 'Generating...' : `Generate Chapter ${chapterNumber} with AI`}
+            </button>
+          </div>
+        </motion.div>
+      )}
+    </motion.div>
+  )
+
+  const renderNewStoryMode = () => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="max-w-4xl mx-auto"
+    >
+      <div className="flex items-center gap-4 mb-8">
+        <button
+          onClick={() => setCreationMode('select')}
+          className="flex items-center gap-2 text-gray-600 hover:text-gray-800"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back
+        </button>
+        <h2 className="text-2xl font-bold text-gray-800">📝 Start Your New Story</h2>
+      </div>
+
+      {/* Error Display */}
+      {error && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3"
+        >
+          <AlertCircle className="w-5 h-5 text-red-500 mt-0.5" />
+          <div>
+            <h4 className="text-red-800 font-medium">Generation Failed</h4>
+            <p className="text-red-700 text-sm mt-1">{error}</p>
+            <button
+              onClick={() => setError(null)}
+              className="text-red-600 text-sm underline mt-2 hover:text-red-800"
+            >
+              Dismiss
+            </button>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Story Title */}
+      <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+        <label className="block text-lg font-semibold text-gray-800 mb-4">
+          📖 Story Title (optional):
+        </label>
+        <input
+          type="text"
+          value={storyTitle}
+          onChange={(e) => setStoryTitle(e.target.value)}
+          placeholder="The Detective's Portal"
+          className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+          maxLength={100}
+        />
+      </div>
+
+      {/* Plot Description */}
+      <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+        <label className="block text-lg font-semibold text-gray-800 mb-4">
+          📝 Describe your story plot:
+        </label>
+        <textarea
+          value={plotDescription}
+          onChange={(e) => setPlotDescription(e.target.value)}
+          placeholder="A young detective discovers a hidden portal in their grandmother's attic that leads to..."
+          className="w-full h-32 p-4 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+          maxLength={500}
+        />
+        <div className="flex items-center justify-between mt-4">
+          <span className="text-sm text-gray-500">{plotDescription.length}/500 characters</span>
+          <button
+            onClick={() => setShowMultiModal(!showMultiModal)}
+            className="flex items-center gap-2 px-4 py-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+          >
+            <Palette className="w-4 h-4" />
+            Add Inspiration
+          </button>
+        </div>
+      </div>
+
+      {/* Multi-Modal Input Panel */}
+      <AnimatePresence>
+        {showMultiModal && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="bg-white rounded-xl shadow-lg p-6 mb-6"
+          >
+            <h3 className="text-lg font-semibold text-gray-800 mb-6">🎨 Add inspiration (optional):</h3>
+
+            {/* Emoji Selection */}
+            <div className="mb-6">
+              <label className="block text-md font-medium text-gray-700 mb-3">
+                😀 Emoji
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {emojiOptions.slice(0, 8).map((emoji) => (
+                  <button
+                    key={emoji}
+                    onClick={() => toggleSelection(emoji, selectedEmojis, setSelectedEmojis)}
+                    className={`p-2 text-xl rounded-lg transition-all ${
+                      selectedEmojis.includes(emoji)
+                        ? 'bg-purple-100 border-2 border-purple-400 scale-110'
+                        : 'bg-gray-50 border-2 border-transparent hover:bg-gray-100'
+                    }`}
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Genre Selection */}
+            <div className="mb-6">
+              <label className="block text-md font-medium text-gray-700 mb-3">
+                🎭 Genre
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {genres.map((genre) => (
+                  <button
+                    key={genre}
+                    onClick={() => toggleSelection(genre, selectedGenres, setSelectedGenres)}
+                    className={`px-3 py-1 rounded-full text-sm font-medium transition-all ${
+                      selectedGenres.includes(genre)
+                        ? 'bg-purple-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {genre}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Style Selection */}
+            <div>
+              <label className="block text-md font-medium text-gray-700 mb-3">
+                🎨 Style
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {moods.map((mood) => (
+                  <button
+                    key={mood}
+                    onClick={() => toggleSelection(mood, selectedMoods, setSelectedMoods)}
+                    className={`px-3 py-1 rounded-full text-sm font-medium transition-all ${
+                      selectedMoods.includes(mood)
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {mood}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Generate Button */}
+      <div className="text-center mb-6">
+        <motion.button
+          onClick={handleGenerate}
+          disabled={!plotDescription.trim() || isGenerating}
+          whileHover={plotDescription.trim() && !isGenerating ? { scale: 1.05 } : {}}
+          whileTap={plotDescription.trim() && !isGenerating ? { scale: 0.95 } : {}}
+          className={`inline-flex items-center gap-3 px-8 py-4 rounded-xl text-lg font-semibold transition-all ${
+            plotDescription.trim() && !isGenerating
+              ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700 shadow-lg'
+              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+          }`}
+        >
+          <Wand2 className="w-5 h-5" />
+          {isGenerating ? 'Generating Chapter 1...' : '✨ Generate Chapter 1 with AI'}
+        </motion.button>
+        
+        {plotDescription.trim() && (
+          <p className="text-sm text-gray-500 mt-2">💡 This will be Chapter 1 of your new story</p>
+        )}
+      </div>
+
+      {/* Advanced Options Toggle */}
+      <div className="text-center">
+        <button
+          onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
+          className="text-sm text-gray-600 hover:text-gray-800 underline"
+        >
+          🤔 Questions? Advanced Options?
+        </button>
+      </div>
+
+      {/* Advanced Options (Collapsed by default) */}
+      <AnimatePresence>
+        {showAdvancedOptions && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="mt-6 space-y-4"
+          >
+            <div className="bg-blue-50 rounded-lg p-4">
+              <h4 className="font-medium text-blue-800 mb-2">📚 What are Story Collections?</h4>
+              <p className="text-sm text-blue-700">Group stories together for shared themes and revenue. Perfect for series or related content.</p>
+            </div>
+            <div className="bg-purple-50 rounded-lg p-4">
+              <h4 className="font-medium text-purple-800 mb-2">🛡️ What is IP Protection?</h4>
+              <p className="text-sm text-purple-700">Register your story on the blockchain for enhanced copyright protection and licensing control. You can add this later!</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  )
+
+  const renderBrowseMode = () => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="max-w-4xl mx-auto"
+    >
+      <div className="flex items-center gap-4 mb-8">
+        <button
+          onClick={() => setCreationMode('select')}
+          className="flex items-center gap-2 text-gray-600 hover:text-gray-800"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back
+        </button>
+        <h2 className="text-2xl font-bold text-gray-800">📚 My Stories</h2>
+      </div>
+
+      {/* Stories Grid */}
+      <div className="grid md:grid-cols-2 gap-6 mb-6">
+        {existingStories.map((story) => (
+          <motion.div
+            key={story.id}
+            whileHover={{ scale: 1.02 }}
+            className="bg-white rounded-xl shadow-lg p-6 border border-gray-200"
+          >
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-1">{story.title}</h3>
+                <p className="text-sm text-gray-600">{story.genre} • {story.chapters} chapters</p>
+                <p className="text-sm text-gray-500 mt-1">Last updated {story.lastUpdated}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-green-600 font-medium">💰 {story.earnings} $TIP</p>
+              </div>
+            </div>
+            
+            <p className="text-sm text-gray-600 italic mb-4">"{story.preview}"</p>
+            
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => handleSelectStory(story)}
+                className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+              >
+                ➕ Continue
+              </button>
+              <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm">
+                📖 Read
+              </button>
+              <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm">
+                ⚙️
+              </button>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Quick Actions */}
+      <div className="text-center">
+        <button
+          onClick={() => setCreationMode('new')}
+          className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 transition-all"
+        >
+          <Sparkles className="w-5 h-5" />
+          Create New Story
+        </button>
+      </div>
+    </motion.div>
+  )
+
+  const renderGeneratedContent = () => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="max-w-4xl mx-auto"
+    >
+      <div className="flex items-center justify-between mb-6">
+        <button
+          onClick={handleEdit}
+          className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Edit Input
+        </button>
+
+        <div className="flex items-center gap-3">
+          <motion.button
+            onClick={handleRegenerate}
+            whileHover={{ scale: 1.05 }}
+            className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+          >
+            🔄 Regenerate
+          </motion.button>
+          
+          <motion.button
+            onClick={() => {
+              // Redirect to publishing flow with deferred IP registration
+              alert('Redirecting to simplified publishing flow...')
+            }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-semibold hover:from-green-700 hover:to-emerald-700 transition-all"
+          >
+            <span>🎉</span>
+            Publish Chapter
+          </motion.button>
+        </div>
+      </div>
+
+      {/* Generated Chapter */}
+      <div className="bg-white rounded-xl shadow-lg p-8">
+        <h1 className="text-2xl font-bold text-center mb-8 text-gray-800">
+          {generatedStory?.title || `Chapter ${chapterNumber}${selectedStory ? `: ${selectedStory.title}` : ''}`}
+        </h1>
+
+        <div className="prose prose-lg max-w-none">
+          {generatedStory?.content.split('\n\n').map((paragraph, index) => (
+            <p key={index} className="mb-4 text-gray-700 leading-relaxed">
+              {paragraph}
+            </p>
+          ))}
+        </div>
+
+        {/* Story Metadata */}
+        <div className="mt-8 pt-6 border-t border-gray-200">
+          <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+            <span>Word count: {generatedStory?.wordCount.toLocaleString()}</span>
+            <span>Estimated reading time: {generatedStory?.readingTime} min</span>
+          </div>
+
+          {/* Themes */}
+          {generatedStory?.themes && generatedStory.themes.length > 0 && (
+            <div className="mb-6">
+              <p className="text-sm text-gray-600 mb-2">Story themes:</p>
+              <div className="flex flex-wrap gap-2">
+                {generatedStory.themes.map((theme) => (
+                  <span
+                    key={theme}
+                    className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm capitalize"
+                  >
+                    {theme}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Publishing Options Preview */}
+          <div className="mb-6 p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-green-200">
+            <h4 className="font-medium text-green-800 mb-2">🚀 Ready to publish?</h4>
+            <p className="text-sm text-green-700 mb-3">
+              You can publish immediately or add IP protection later. Both options earn $TIP tokens!
+            </p>
+            <div className="space-y-2 text-sm">
+              <div className="text-green-700">✅ Simple Publish: Start earning immediately</div>
+              <div className="text-blue-700">🛡️ IP Protection: Enhanced licensing (add later)</div>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-center gap-4">
+            <button
+              onClick={handleRegenerate}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+            >
+              🔄 Regenerate
+            </button>
+            <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+              ✏️ Edit
+            </button>
+            <button
+              onClick={() => {
+                if (selectedStory) {
+                  setCreationMode('continue')
+                  setPlotDescription('')
+                  setChapterNumber(chapterNumber + 1)
+                } else {
+                  setCreationMode('new')
+                  setPlotDescription('')
+                }
+                setGeneratedStory(null)
+              }}
+              className="flex items-center gap-2 px-4 py-2 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-lg transition-colors"
+            >
+              ➕ Continue Story
+            </button>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  )
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
@@ -202,378 +794,14 @@ export default function CreateStoryPage() {
 
       <div className="container mx-auto px-6 py-8">
         {!generatedStory ? (
-          /* Enhanced Story Creation Interface */
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-4xl mx-auto"
-          >
-            <div className="text-center mb-8">
-              <motion.div
-                initial={{ scale: 0.8 }}
-                animate={{ scale: 1 }}
-                className="inline-flex items-center gap-2 text-3xl font-bold text-gray-800 mb-4"
-              >
-                <Sparkles className="w-8 h-8 text-purple-600" />
-                Create Your Story
-              </motion.div>
-              <p className="text-gray-600 text-lg">Let AI help you bring your imagination to life with enhanced IP protection</p>
-            </div>
-
-            {/* Error Display */}
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3"
-              >
-                <AlertCircle className="w-5 h-5 text-red-500 mt-0.5" />
-                <div>
-                  <h4 className="text-red-800 font-medium">Generation Failed</h4>
-                  <p className="text-red-700 text-sm mt-1">{error}</p>
-                  <button
-                    onClick={() => setError(null)}
-                    className="text-red-600 text-sm underline mt-2 hover:text-red-800"
-                  >
-                    Dismiss
-                  </button>
-                </div>
-              </motion.div>
-            )}
-
-            {/* Plot Description */}
-            <div className="bg-white rounded-xl shadow-lg p-8 mb-6">
-              <label className="block text-lg font-semibold text-gray-800 mb-4">
-                📝 Describe your story plot:
-              </label>
-              <textarea
-                value={plotDescription}
-                onChange={(e) => setPlotDescription(e.target.value)}
-                placeholder="A young detective discovers a hidden portal in their grandmother's attic that leads to..."
-                className="w-full h-32 p-4 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                maxLength={500}
-              />
-              <div className="flex items-center justify-between mt-4">
-                <span className="text-sm text-gray-500">{plotDescription.length}/500 characters</span>
-                <button
-                  onClick={() => setShowMultiModal(!showMultiModal)}
-                  className="flex items-center gap-2 px-4 py-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
-                >
-                  <Palette className="w-4 h-4" />
-                  Add Inspiration
-                </button>
-              </div>
-            </div>
-
-            {/* Multi-Modal Input Panel */}
-            <AnimatePresence>
-              {showMultiModal && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="bg-white rounded-xl shadow-lg p-8 mb-6"
-                >
-                  <h3 className="text-lg font-semibold text-gray-800 mb-6">Add Creative Elements</h3>
-
-                  {/* Image Upload */}
-                  <div className="mb-6">
-                    <label className="block text-md font-medium text-gray-700 mb-3">
-                      📷 Upload Images (Coming Soon)
-                    </label>
-                    <div className="flex gap-4">
-                      {[1, 2, 3].map((i) => (
-                        <div key={i} className="w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center opacity-50 cursor-not-allowed">
-                          <div className="text-center">
-                            <Image className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                            <span className="text-sm text-gray-500">Coming Soon</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Emoji Selection */}
-                  <div className="mb-6">
-                    <label className="block text-md font-medium text-gray-700 mb-3">
-                      😀 Choose Emojis
-                    </label>
-                    <div className="flex flex-wrap gap-2">
-                      {emojiOptions.map((emoji) => (
-                        <button
-                          key={emoji}
-                          onClick={() => toggleSelection(emoji, selectedEmojis, setSelectedEmojis)}
-                          className={`p-2 text-2xl rounded-lg transition-all ${
-                            selectedEmojis.includes(emoji)
-                              ? 'bg-purple-100 border-2 border-purple-400 scale-110'
-                              : 'bg-gray-50 border-2 border-transparent hover:bg-gray-100'
-                          }`}
-                        >
-                          {emoji}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Genre Selection */}
-                  <div className="mb-6">
-                    <label className="block text-md font-medium text-gray-700 mb-3">
-                      🎭 Select Genre
-                    </label>
-                    <div className="flex flex-wrap gap-2">
-                      {genres.map((genre) => (
-                        <button
-                          key={genre}
-                          onClick={() => toggleSelection(genre, selectedGenres, setSelectedGenres)}
-                          className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                            selectedGenres.includes(genre)
-                              ? 'bg-purple-600 text-white'
-                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                          }`}
-                        >
-                          {genre}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Mood Selection */}
-                  <div>
-                    <label className="block text-md font-medium text-gray-700 mb-3">
-                      🎨 Style Preferences
-                    </label>
-                    <div className="flex flex-wrap gap-2">
-                      {moods.map((mood) => (
-                        <button
-                          key={mood}
-                          onClick={() => toggleSelection(mood, selectedMoods, setSelectedMoods)}
-                          className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                            selectedMoods.includes(mood)
-                              ? 'bg-blue-600 text-white'
-                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                          }`}
-                        >
-                          {mood}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* IP Registration Section */}
-            <div className="mb-6">
-              <IPRegistrationSection
-                onIPOptionsChange={handleIPOptionsChange}
-                initialOptions={ipOptions}
-                isCollapsed={!plotDescription.trim()}
-              />
-            </div>
-
-            {/* Collection Section */}
-            <div className="mb-6">
-              <CollectionSection
-                onCollectionOptionsChange={handleCollectionOptionsChange}
-                initialOptions={collectionOptions}
-                isCollapsed={!plotDescription.trim()}
-              />
-            </div>
-
-            {/* Generate Button */}
-            <div className="text-center">
-              <motion.button
-                onClick={handleGenerate}
-                disabled={!plotDescription.trim() || isGenerating}
-                whileHover={plotDescription.trim() && !isGenerating ? { scale: 1.05 } : {}}
-                whileTap={plotDescription.trim() && !isGenerating ? { scale: 0.95 } : {}}
-                className={`inline-flex items-center gap-3 px-8 py-4 rounded-xl text-lg font-semibold transition-all ${
-                  plotDescription.trim() && !isGenerating
-                    ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700 shadow-lg'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
-              >
-                <Wand2 className="w-5 h-5" />
-                {isGenerating ? 'Generating Enhanced Chapter...' : 'Generate Enhanced Chapter 1'}
-              </motion.button>
-            </div>
-
-            {/* Enhanced Creation Summary */}
-            {(ipOptions.registerAsIP || collectionOptions.addToCollection || collectionOptions.createNewCollection) && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mt-6 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl p-6"
-              >
-                <h4 className="font-semibold text-blue-800 mb-3">Enhanced Story Features</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                  {ipOptions.registerAsIP && (
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                      <span className="text-blue-700">
-                        IP Protection: {ipOptions.licenseType} license ({ipOptions.licenseType === 'standard' ? '100' : ipOptions.licenseType === 'premium' ? '500' : '2000'} TIP)
-                      </span>
-                    </div>
-                  )}
-                  {collectionOptions.addToCollection && (
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                      <span className="text-purple-700">
-                        Joining existing collection
-                      </span>
-                    </div>
-                  )}
-                  {collectionOptions.createNewCollection && (
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="text-green-700">
-                        Creating new collection: {collectionOptions.createNewCollection.name}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </motion.div>
-            )}
-
-            {/* Generation Progress */}
-            {isGenerating && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mt-8 bg-white rounded-xl shadow-lg p-8 text-center"
-              >
-                <div className="text-2xl mb-4">🤖 AI Writing...</div>
-                <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: '100%' }}
-                    transition={{ duration: 15, ease: "easeInOut" }}
-                    className="bg-gradient-to-r from-purple-600 to-blue-600 h-3 rounded-full"
-                  />
-                </div>
-                <p className="text-gray-600">Creating your enhanced story chapter...</p>
-                <div className="mt-4 text-sm text-gray-500">
-                  <p>💡 Your plot: "{plotDescription.slice(0, 50)}..."</p>
-                  {selectedGenres.length > 0 && <p>🎭 Genres: {selectedGenres.join(', ')}</p>}
-                  {selectedMoods.length > 0 && <p>🎨 Mood: {selectedMoods.join(', ')}</p>}
-                  {ipOptions.registerAsIP && <p>🛡️ IP Protection: Enabled</p>}
-                </div>
-              </motion.div>
-            )}
-          </motion.div>
+          <>
+            {creationMode === 'select' && renderModeSelector()}
+            {creationMode === 'continue' && renderContinueStoryMode()}
+            {creationMode === 'new' && renderNewStoryMode()}
+            {creationMode === 'browse' && renderBrowseMode()}
+          </>
         ) : (
-          /* Generated Content Preview with IP Status */
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-4xl mx-auto"
-          >
-            <div className="flex items-center justify-between mb-6">
-              <button
-                onClick={handleEdit}
-                className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Edit Input
-              </button>
-
-              <motion.button
-                onClick={handlePublish}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-semibold hover:from-green-700 hover:to-emerald-700 transition-all"
-              >
-                <span>🚀</span>
-                Publish Enhanced Story
-              </motion.button>
-            </div>
-
-            {/* IP Status Indicator */}
-            {ipOptions.registerAsIP && (
-              <div className="mb-6">
-                <IPStatusIndicator
-                  story={mockEnhancedStory}
-                  compact={true}
-                />
-              </div>
-            )}
-
-            {/* Generated Chapter */}
-            <div className="bg-white rounded-xl shadow-lg p-8">
-              <h1 className="text-2xl font-bold text-center mb-8 text-gray-800">
-                {generatedStory.title}
-              </h1>
-
-              <div className="prose prose-lg max-w-none">
-                {generatedStory.content.split('\n\n').map((paragraph, index) => (
-                  <p key={index} className="mb-4 text-gray-700 leading-relaxed">
-                    {paragraph}
-                  </p>
-                ))}
-              </div>
-
-              {/* Enhanced Story Metadata */}
-              <div className="mt-8 pt-6 border-t border-gray-200">
-                <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                  <span>Word count: {generatedStory.wordCount.toLocaleString()}</span>
-                  <span>Estimated reading time: {generatedStory.readingTime} min</span>
-                </div>
-
-                {/* Themes */}
-                {generatedStory.themes.length > 0 && (
-                  <div className="mb-6">
-                    <p className="text-sm text-gray-600 mb-2">Story themes:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {generatedStory.themes.map((theme) => (
-                        <span
-                          key={theme}
-                          className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm capitalize"
-                        >
-                          {theme}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Enhanced Features Summary */}
-                {(ipOptions.registerAsIP || collectionOptions.addToCollection || collectionOptions.createNewCollection) && (
-                  <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
-                    <h4 className="font-medium text-blue-800 mb-2">Enhanced Features Applied:</h4>
-                    <div className="space-y-1 text-sm">
-                      {ipOptions.registerAsIP && (
-                        <div className="text-blue-700">✓ IP Asset Registration: {ipOptions.licenseType} license</div>
-                      )}
-                      {collectionOptions.addToCollection && (
-                        <div className="text-purple-700">✓ Added to existing collection</div>
-                      )}
-                      {collectionOptions.createNewCollection && (
-                        <div className="text-green-700">✓ New collection created: {collectionOptions.createNewCollection.name}</div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex items-center justify-center gap-4">
-                  <button
-                    onClick={handleRegenerate}
-                    className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-                  >
-                    🔄 Regenerate
-                  </button>
-                  <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
-                    ✏️ Edit
-                  </button>
-                  <button className="flex items-center gap-2 px-4 py-2 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-lg transition-colors">
-                    ➕ Continue Story
-                  </button>
-                  <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
-                    📊 Analytics
-                  </button>
-                </div>
-              </div>
-            </div>
-          </motion.div>
+          renderGeneratedContent()
         )}
       </div>
     </div>
