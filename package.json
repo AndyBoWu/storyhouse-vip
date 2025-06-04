@@ -1,13 +1,22 @@
 {
   "name": "storyhouse-vip",
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "description": "AI-assisted writing platform built on Story Protocol with read-to-earn tokenomics",
   "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "type-check": "tsc --noEmit"
+    "dev": "npm run dev --workspace=apps/frontend",
+    "build": "npm run build --workspace=apps/frontend",
+    "build:all": "npm run build --workspaces",
+    "test": "npm run test --workspaces",
+    "lint": "npm run lint --workspaces",
+    "clean": "rm -rf node_modules apps/*/node_modules packages/*/node_modules",
+    "contracts:compile": "npm run compile --workspace=packages/contracts",
+    "contracts:deploy": "npm run deploy --workspace=packages/contracts",
+    "contracts:test": "npm run test --workspace=packages/contracts"
   },
   "dependencies": {
     "@metamask/detect-provider": "^2.0.0",
@@ -27,7 +36,7 @@
     "wagmi": "^2.15.4"
   },
   "devDependencies": {
-    "@types/node": "^20.10.0",
+    "@types/node": "^18.0.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "@typescript-eslint/eslint-plugin": "^6.13.0",
@@ -36,11 +45,25 @@
     "eslint-config-next": "15.0.3",
     "prettier": "^3.1.0",
     "prettier-plugin-tailwindcss": "^0.5.0",
-    "typescript": "^5.3.0"
+    "typescript": "^5.0.0"
   },
   "engines": {
     "node": ">=18.0.0",
-    "pnpm": ">=8.0.0"
+    "npm": ">=8.0.0"
   },
-  "packageManager": "pnpm@8.15.0"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AndyBoWu/storyhouse-vip.git"
+  },
+  "keywords": [
+    "ai",
+    "writing",
+    "blockchain",
+    "story-protocol",
+    "read-to-earn",
+    "nft",
+    "web3"
+  ],
+  "author": "StoryHouse.vip Team",
+  "license": "MIT"
 }

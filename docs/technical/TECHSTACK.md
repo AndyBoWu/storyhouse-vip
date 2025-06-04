@@ -1,342 +1,354 @@
-# StoryHouse.vip Technical Stack
+# StoryHouse.vip Technical Architecture
 
-Owner: @Andy Wu
-Date: June 1, 2025
-Version: 1.0
+**Owner**: @Andy Wu
+**Date**: Updated December 2024
+**Version**: 2.0 - Monorepo with Smart Contracts
 
 ## **Overview**
 
-StoryHouse.vip is an AI-assisted writing and publication platform built on Story Protocol's Layer 1 blockchain. This document outlines the complete technical stack required to build and deploy the platform.
+StoryHouse.vip is an AI-assisted storytelling platform built on Story Protocol's Layer 1 blockchain with read-to-earn tokenomics. This document outlines the complete technical architecture implemented as a modular monorepo.
 
 ---
 
-## **Frontend Stack**
+## **🏗️ Monorepo Architecture**
+
+### **Project Structure**
+
+```
+storyhouse-vip/
+├── apps/
+│   └── frontend/              # Next.js web application
+├── packages/
+│   ├── contracts/            # Foundry smart contracts
+│   ├── shared/              # Shared types & utilities
+│   └── sdk/                 # Contract interaction SDK (planned)
+├── tools/
+│   └── scripts/             # Deployment & automation
+└── docs/                    # Comprehensive documentation
+```
+
+### **Package Management**
+
+- **npm workspaces** - Monorepo dependency management
+- **Shared dependencies** - Common packages across workspaces
+- **Independent versioning** - Each package maintains its own version
+- **Cross-package imports** - Type-safe imports between packages
+
+---
+
+## **💎 Smart Contract Stack (packages/contracts)**
+
+### **Development Framework**
+
+- **Foundry** - Fast, portable, and modular toolkit
+  - **forge** - Solidity compilation and testing
+  - **cast** - Swiss Army knife for interacting with EVM
+  - **anvil** - Local Ethereum node for development
+  - **chisel** - Fast, utilitarian, and verbose Solidity REPL
+
+### **Core Contracts**
+
+#### **TIPToken.sol** - ERC-20 Token with Controlled Minting
+
+```solidity
+- Supply cap management (10B max, 1B initial)
+- Authorized minter system for reward controllers
+- Pausable transfers for emergency situations
+- Burn functionality for deflationary mechanics
+- OpenZeppelin security standards
+```
+
+#### **RewardsManager.sol** - Central Reward Orchestration
+
+```solidity
+- Unified reward distribution across all controllers
+- Cross-controller state management and coordination
+- Global statistics tracking and analytics
+- Batch operations for gas efficiency
+- Comprehensive event logging
+```
+
+#### **ReadRewardsController.sol** - Chapter Reading Rewards
+
+```solidity
+- Anti-gaming mechanisms (time limits, daily caps)
+- Reading streak bonuses (up to 100% extra rewards)
+- Chapter metadata tracking (word count, read time)
+- Session-based reward claiming system
+- Daily limits and anti-farming protection
+```
+
+### **Planned Contracts**
+
+- **CreatorRewardsController.sol** - Story creation & engagement rewards
+- **RemixLicensingController.sol** - Remix fee distribution & royalties
+- **ContentNFT.sol** - Story NFTs as IP assets on Story Protocol
+
+### **Security & Standards**
+
+- **OpenZeppelin Contracts ^5.0.0** - Battle-tested security
+- **Solidity ^0.8.20** - Latest language features and optimizations
+- **Access Control** - Role-based permissions with Ownable
+- **Reentrancy Protection** - ReentrancyGuard for all critical functions
+- **Pausable Contracts** - Emergency stop functionality
+
+### **Testing & Quality**
+
+- **Foundry Testing** - Fast Solidity-native testing
+- **Fuzz Testing** - Property-based testing for edge cases
+- **Gas Optimization** - Gas reports and optimization analysis
+- **Coverage Reports** - Comprehensive test coverage tracking
+
+---
+
+## **🖥️ Frontend Stack (apps/frontend)**
 
 ### **Core Framework**
 
 - **Next.js 15** - React framework with App Router
-  - Server-side rendering (SSR)
-  - Static site generation (SSG)
-  - API routes for backend integration
+  - Server-side rendering (SSR) for SEO
+  - API routes for AI story generation
   - Built-in optimization and performance
-
-### **Styling & UI**
-
-- **Tailwind CSS 4.0** - Utility-first CSS framework
-  - Responsive design system
-  - Custom design tokens for StoryHouse branding
-  - Dark/light mode support
-- **Headless UI** - Unstyled, accessible UI components
-- **Framer Motion** - Animation library for micro-interactions
-
-### **State Management**
-
-- **Zustand** - Lightweight state management
-- **TanStack Query** - Server state management and caching
-- **Valtio** - Proxy-based state management for wallet integration
+  - TypeScript strict mode
 
 ### **Web3 Integration**
 
-- **wagmi** - React hooks for Ethereum
-- **viem** - TypeScript interface for Ethereum
-- **ConnectKit** - Wallet connection UI components
-- **MetaMask SDK** - Enhanced MetaMask integration
+- **Wagmi v2** - React hooks for Ethereum
+- **Viem** - TypeScript interface for Ethereum
+- **Custom Web3 Provider** - Direct MetaMask integration
+- **Story Protocol Support** - Chain ID 1315 (Aeneid testnet)
+
+### **Styling & UI**
+
+- **Tailwind CSS** - Utility-first CSS framework
+- **Framer Motion** - Smooth animations and transitions
+- **Lucide React** - Beautiful icon library
+- **Responsive Design** - Mobile-first approach
+
+### **AI Integration**
+
+- **OpenAI GPT-4o** - Primary story generation
+- **Vercel AI SDK** - Streamlined AI integration
+- **TypeScript Types** - Strict typing for AI responses
 
 ---
 
-## **Backend & API Stack**
+## **📦 Shared Package (packages/shared)**
 
-### **API Framework**
+### **Type System**
 
-- **Next.js API Routes** - Serverless API endpoints
-- **tRPC** - End-to-end typesafe APIs
-- **Zod** - TypeScript-first schema declaration and validation
+```typescript
+// Core entity types
+interface Story, Chapter, User, Rewards
 
-### **Database**
+// API response types
+interface GenerateRequest, GenerateResponse
 
-- **PostgreSQL** - Primary database for user data, content metadata
-- **Prisma ORM** - Database toolkit and ORM
-- **Redis** - Caching and session management
-- **IPFS** - Decentralized storage for content and metadata
+// Contract interaction types
+interface ContractConfig, NetworkConfig
+```
 
-### **Authentication & Authorization**
+### **Constants & Configuration**
 
-- **NextAuth.js** - Authentication for Web3 and traditional login
-- **Iron Session** - Secure, stateless session management
-- **JWT** - Token-based authentication for API access
+```typescript
+// Network configurations
+STORY_TESTNET_CONFIG = {
+  chainId: 1315,
+  rpcUrl: "https://aeneid.storyrpc.io",
+  explorer: "https://aeneid.storyscan.xyz",
+};
 
----
+// Token economics
+REWARD_AMOUNTS = {
+  baseChapterReward: "10000000000000000000", // 10 TIP
+  maxDailyChapters: 20,
+  streakBonusPercentage: 10,
+};
+```
 
-## **Blockchain & Web3 Stack**
+### **Utility Functions**
 
-### **Core Blockchain**
+```typescript
+// Token formatting
+formatTipTokens(amount: bigint): string
+parseEtherAmount(value: string): bigint
 
-- **Story Protocol Layer 1** - Primary blockchain for IP management
-- **Ethereum Mainnet** - Secondary chain for broader DeFi integration
-- **Base** - L2 for lower gas fees and faster transactions
+// Address handling
+truncateAddress(address: string): string
+isValidAddress(address: string): boolean
 
-### **Smart Contracts**
-
-- **Solidity 0.8.19+** - Smart contract development
-- **Hardhat** - Development environment and testing framework
-- **OpenZeppelin Contracts** - Secure, audited contract libraries
-- **Foundry** - Additional testing and deployment tools
-
-### **Token Standards**
-
-- **ERC-20** - $TIP token implementation
-- **ERC-721** - NFTs for story chapters and remixes
-- **ERC-1155** - Multi-token standard for complex licensing
-
-### **Web3 Libraries**
-
-- **ethers.js** - Ethereum library for wallet interaction
-- **web3.js** - Alternative Ethereum library
-- **@story-protocol/core-sdk** - Story Protocol integration
-
----
-
-## **AI & Machine Learning Stack**
-
-### **Large Language Models**
-
-- **OpenAI GPT-4o** - Primary content generation
-- **Anthropic Claude 3.5 Sonnet** - Alternative LLM for content variation
-- **Cohere** - Text analysis and content optimization
-
-### **AI Infrastructure**
-
-- **Vercel AI SDK** - Streamlined AI integration for Next.js
-- **LangChain** - LLM application framework
-- **Pinecone** - Vector database for content similarity and search
-
-### **Content Processing**
-
-- **Sharp** - Image processing and optimization
-- **FFmpeg** - Media file processing
-- **Tesseract.js** - OCR for image-to-text conversion
+// Time calculations
+calculateReadingTime(wordCount: number): number
+getDaysSinceEpoch(): number
+```
 
 ---
 
-## **Hosting & Infrastructure**
+## **🔗 Blockchain Integration**
 
-### **Primary Hosting**
+### **Story Protocol Layer 1**
 
-- **Vercel** - Frontend deployment and serverless functions
-  - Edge runtime for global performance
-  - Preview deployments for staging
-  - Built-in analytics and monitoring
+- **Chain ID**: 1315 (Aeneid testnet)
+- **RPC URL**: https://aeneid.storyrpc.io
+- **Block Explorer**: https://aeneid.storyscan.xyz
+- **Testnet Faucet**: Available for IP tokens
 
-### **CDN & Edge**
+### **Token Economics**
 
-- **Cloudflare** - CDN, DDoS protection, and edge computing
-  - Global edge locations
-  - Web Application Firewall (WAF)
-  - DNS management
-  - R2 storage for static assets
+- **Base Reward**: 10 TIP per chapter read
+- **Supply Cap**: 10B TIP tokens maximum
+- **Initial Supply**: 1B TIP tokens
+- **Daily Reading Limit**: 20 chapters per user
+- **Streak Bonus**: 10% per consecutive day (max 100%)
 
-### **Database Hosting**
+### **Contract Deployment Strategy**
 
-- **Supabase** - PostgreSQL hosting with real-time features
-- **Upstash** - Redis hosting with global edge
-- **PlanetScale** - Alternative MySQL hosting option
+```bash
+# Local development with Anvil
+forge script script/Deploy.s.sol --rpc-url http://localhost:8545
 
-### **File Storage**
-
-- **Cloudflare R2** - S3-compatible object storage
-- **IPFS (Pinata)** - Decentralized storage for immutable content
-- **Arweave** - Permanent storage for critical content
+# Story Protocol testnet deployment
+forge script script/Deploy.s.sol --rpc-url $STORY_RPC_URL --broadcast --verify
+```
 
 ---
 
-## **Analytics & Monitoring**
+## **🧪 Testing Strategy**
 
-### **User Analytics**
+### **Smart Contract Testing**
 
-- **Vercel Analytics** - Built-in performance and user analytics
-- **PostHog** - Product analytics and feature flags
-- **Google Analytics 4** - Traditional web analytics
+- **Unit Tests**: Individual contract functionality
+- **Integration Tests**: Cross-contract interactions
+- **Fuzz Testing**: Property-based edge case discovery
+- **Gas Optimization**: Efficiency analysis and reporting
+- **Security Testing**: Reentrancy, overflow, access control
+
+### **Frontend Testing**
+
+- **Component Tests**: UI component behavior
+- **Integration Tests**: Web3 wallet interactions
+- **E2E Tests**: Complete user workflows
+- **API Tests**: Story generation endpoints
+
+---
+
+## **🚀 Deployment & DevOps**
+
+### **Smart Contract Deployment**
+
+- **Foundry Scripts** - Automated deployment with verification
+- **Environment Management** - Separate configs for testnet/mainnet
+- **Contract Verification** - Source code verification on block explorers
+- **Upgrade Patterns** - Proxy patterns for contract upgrades
+
+### **Frontend Deployment**
+
+- **Vercel** - Automatic deployments from GitHub
+- **Environment Variables** - Secure API key management
+- **Preview Deployments** - Branch-based staging environments
+- **Custom Domain** - testnet.storyhouse.vip
+
+### **CI/CD Pipeline**
+
+```yaml
+# GitHub Actions workflow
+- Contract compilation and testing
+- Frontend build and type checking
+- Automated security checks
+- Deployment to staging/production
+```
+
+---
+
+## **📊 Monitoring & Analytics**
+
+### **Smart Contract Monitoring**
+
+- **Event Indexing** - Track all reward distributions
+- **Gas Usage Analytics** - Optimize transaction costs
+- **Contract State Monitoring** - Track token supplies and rewards
+- **Security Alerts** - Monitor for unusual activity
 
 ### **Application Monitoring**
 
-- **Sentry** - Error tracking and performance monitoring
-- **Uptime Robot** - Uptime monitoring and alerting
-- **LogRocket** - Session replay and debugging
-
-### **Blockchain Analytics**
-
-- **Dune Analytics** - On-chain data analysis
-- **The Graph** - Indexing blockchain data
-- **Alchemy** - Blockchain infrastructure and analytics
+- **Vercel Analytics** - Performance and user analytics
+- **Error Tracking** - Sentry for error monitoring
+- **User Behavior** - Reading patterns and engagement
+- **Token Metrics** - Reward distribution analytics
 
 ---
 
-## **Development Tools**
-
-### **Code Quality**
-
-- **TypeScript 5.0+** - Type safety and developer experience
-- **ESLint** - Code linting and style enforcement
-- **Prettier** - Code formatting
-- **Husky** - Git hooks for pre-commit checks
-
-### **Testing**
-
-- **Vitest** - Unit testing framework
-- **Playwright** - End-to-end testing
-- **Jest** - Alternative testing framework
-- **Testing Library** - React component testing
-
-### **Build & Deployment**
-
-- **Turborepo** - Monorepo management
-- **GitHub Actions** - CI/CD pipelines
-- **Docker** - Containerization for complex deployments
-- **Kubernetes** - Container orchestration (if needed)
-
----
-
-## **Security Stack**
-
-### **Web Security**
-
-- **Cloudflare Security** - DDoS protection, WAF, bot management
-- **OWASP** - Security best practices compliance
-- **Helmet.js** - Security headers for Express.js
+## **🔒 Security Considerations**
 
 ### **Smart Contract Security**
 
-- **OpenZeppelin Defender** - Smart contract security monitoring
-- **Slither** - Static analysis for Solidity
-- **MythX** - Security analysis platform
+- **OpenZeppelin Standards** - Battle-tested contract libraries
+- **Access Controls** - Role-based permissions and modifiers
+- **Reentrancy Protection** - Guards against common attacks
+- **Emergency Pausing** - Circuit breakers for critical functions
+- **Supply Cap Enforcement** - Prevent infinite token minting
 
-### **Data Protection**
+### **Frontend Security**
 
-- **bcrypt** - Password hashing
-- **crypto** - Node.js cryptographic functionality
-- **GDPR compliance tools** - For EU user protection
-
----
-
-## **Third-Party Integrations**
-
-### **Payment Processing**
-
-- **Stripe** - Traditional payment processing for $TIP purchases
-- **Circle USDC** - Stablecoin integration
-- **Coinbase Commerce** - Cryptocurrency payments
-
-### **Communication**
-
-- **SendGrid** - Email delivery service
-- **Twilio** - SMS and communication APIs
-- **Discord API** - Community integration
-
-### **Content Delivery**
-
-- **Cloudinary** - Image and video optimization
-- **AWS S3** - Backup storage solution
-- **YouTube API** - Video content integration
+- **Environment Variables** - Secure API key storage
+- **Input Validation** - Sanitize all user inputs
+- **HTTPS Enforcement** - Secure data transmission
+- **Content Security Policy** - XSS protection
 
 ---
 
-## **Development Environment**
+## **🛠️ Development Tools**
+
+### **Code Quality**
+
+- **TypeScript 5.0+** - Strict type checking across monorepo
+- **ESLint** - Consistent code style and error detection
+- **Prettier** - Automated code formatting
+- **Husky** - Pre-commit hooks for quality gates
 
 ### **Package Management**
 
-- **pnpm** - Fast, disk space efficient package manager
-- **Node.js 18+** - JavaScript runtime environment
-
-### **Code Editor Setup**
-
-- **VS Code** - Recommended IDE
-- **Cursor** - AI-assisted development (current setup)
-- **ESLint + Prettier extensions** - Code quality tools
-
-### **Version Control**
-
-- **Git** - Version control system
-- **GitHub** - Repository hosting and collaboration
-- **Conventional Commits** - Commit message standards
+- **npm workspaces** - Efficient dependency management
+- **Shared configurations** - Consistent tooling across packages
+- **Version synchronization** - Coordinated releases
 
 ---
 
-## **Performance Requirements**
+## **🎯 Current Implementation Status**
 
-### **Core Web Vitals Targets**
+### **✅ Completed**
 
-- **Largest Contentful Paint (LCP)** < 2.5s
-- **First Input Delay (FID)** < 100ms
-- **Cumulative Layout Shift (CLS)** < 0.1
+- ✅ Monorepo architecture with npm workspaces
+- ✅ Core smart contracts (TIP token, rewards system)
+- ✅ Foundry development environment
+- ✅ Frontend with AI story generation
+- ✅ MetaMask integration for Story Protocol
+- ✅ Shared type system and utilities
 
-### **Scalability Targets**
+### **🚧 In Progress**
 
-- **100k+ concurrent readers**
-- **10k+ concurrent writers**
-- **1M+ transactions per day**
-- **99.9% uptime SLA**
+- 🚧 Creator & remix reward controllers
+- 🚧 Comprehensive smart contract testing
+- 🚧 Contract deployment scripts
+- 🚧 SDK package for contract interactions
 
----
+### **📋 Planned**
 
-## **Migration Path**
-
-### **Phase 1: MVP (Current)**
-
-- Next.js + Tailwind CSS
-- Basic MetaMask integration
-- OpenAI API for content generation
-- Vercel deployment
-
-### **Phase 2: Beta**
-
-- Story Protocol integration
-- Complete read-to-earn mechanics
-- Advanced AI features
-- Cloudflare optimization
-
-### **Phase 3: Production**
-
-- Full blockchain integration
-- Enterprise-grade monitoring
-- Global CDN deployment
-- Advanced analytics
+- 📋 Story Protocol testnet deployment
+- 📋 End-to-end reward claiming flow
+- 📋 Story NFT minting as IP assets
+- 📋 Advanced analytics and creator tools
+- 📋 Multi-chain support (Ethereum, Base)
 
 ---
 
-## **Cost Estimation (Monthly)**
+## **📚 Additional Resources**
 
-### **Development Phase**
-
-- **Vercel Pro**: $20/month
-- **OpenAI API**: $500-2000/month (usage-based)
-- **Supabase**: $25/month
-- **Cloudflare**: $20/month
-- **Total**: ~$565-2065/month
-
-### **Production Phase**
-
-- **Vercel Enterprise**: $400/month
-- **AI Services**: $5000-15000/month
-- **Infrastructure**: $1000-3000/month
-- **Monitoring & Analytics**: $500/month
-- **Total**: ~$6900-18900/month
+- **Foundry Documentation**: [book.getfoundry.sh](https://book.getfoundry.sh)
+- **Story Protocol Docs**: [docs.story.foundation](https://docs.story.foundation)
+- **OpenZeppelin Contracts**: [docs.openzeppelin.com](https://docs.openzeppelin.com)
+- **Wagmi Documentation**: [wagmi.sh](https://wagmi.sh)
 
 ---
 
-## **Risk Mitigation**
-
-### **Technical Risks**
-
-- **AI API Rate Limits**: Multiple LLM providers for redundancy
-- **Blockchain Congestion**: Multi-chain deployment strategy
-- **Scaling Issues**: Microservices architecture planning
-
-### **Security Risks**
-
-- **Smart Contract Vulnerabilities**: Comprehensive auditing
-- **Data Breaches**: End-to-end encryption
-- **DDoS Attacks**: Cloudflare protection layers
-
----
-
-This technical stack provides a robust, scalable foundation for StoryHouse.vip while maintaining flexibility for future enhancements and integrations.
+_This document is updated regularly to reflect the evolving technical architecture of StoryHouse.vip_
