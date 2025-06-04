@@ -86,7 +86,7 @@ contract ReadRewardsControllerTest is Test {
         bytes32 storyId = keccak256("test_story");
 
         vm.prank(reader);
-        vm.expectRevert("EnforcedPause");
+        vm.expectRevert(abi.encodeWithSelector(Pausable.EnforcedPause.selector));
         readRewards.startReading(storyId, 1);
     }
 
@@ -128,9 +128,13 @@ contract ReadRewardsControllerTest is Test {
         bytes32 storyId = keccak256("test_story");
         uint256 baseReward = readRewards.baseRewardPerChapter();
 
+        // Start from a base timestamp
+        uint256 baseTime = 1000000; // arbitrary starting point
+
         // Read for consecutive days to build up streak
         for (uint256 day = 0; day < 3; day++) {
-            vm.warp(block.timestamp + day * 1 days);
+            // Set timestamp to consecutive days
+            vm.warp(baseTime + day * 1 days);
 
             vm.prank(owner);
             readRewards.setChapterMetadata(storyId, day + 1, 1000);
@@ -138,7 +142,8 @@ contract ReadRewardsControllerTest is Test {
             vm.prank(reader);
             readRewards.startReading(storyId, day + 1);
 
-            vm.warp(block.timestamp + 300);
+            // Add time for reading
+            vm.warp(baseTime + day * 1 days + 300);
 
             vm.prank(reader);
             readRewards.claimChapterReward(storyId, day + 1);

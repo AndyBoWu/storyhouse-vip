@@ -47,6 +47,7 @@ contract CreatorRewardsController is Ownable, Pausable, ReentrancyGuard {
     mapping(address => uint256) public totalEngagementEarned;
     mapping(bytes32 => uint256) public storyQualityScores;
     mapping(bytes32 => uint256) public storyReadCounts;
+    mapping(bytes32 => address) public storyCreators; // Track story creators
 
     // Milestones
     mapping(address => mapping(string => bool)) public milestonesAchieved;
@@ -78,8 +79,9 @@ contract CreatorRewardsController is Ownable, Pausable, ReentrancyGuard {
         require(storyId != bytes32(0), "CreatorRewards: invalid story ID");
         require(!hasClaimedCreationReward[msg.sender][storyId], "CreatorRewards: already claimed");
 
-        // Mark as claimed
+        // Mark as claimed and track story creator
         hasClaimedCreationReward[msg.sender][storyId] = true;
+        storyCreators[storyId] = msg.sender;
         totalStoriesCreated[msg.sender]++;
 
         // Distribute reward
@@ -211,13 +213,10 @@ contract CreatorRewardsController is Ownable, Pausable, ReentrancyGuard {
     }
 
     /**
-     * @dev Get story creator (placeholder - would need to be implemented based on your story tracking)
+     * @dev Get story creator
      */
-    function _getStoryCreator(bytes32 storyId) internal pure returns (address) {
-        // TODO: Implement story creator lookup
-        // This could query from a separate Story registry contract
-        storyId; // Suppress unused variable warning
-        return address(0);
+    function _getStoryCreator(bytes32 storyId) internal view returns (address) {
+        return storyCreators[storyId];
     }
 
     // Admin functions

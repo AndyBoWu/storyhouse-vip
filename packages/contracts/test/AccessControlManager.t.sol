@@ -73,13 +73,18 @@ contract AccessControlManagerTest is Test {
         vm.warp(expiry + 1);
         assertFalse(accessControl.hasValidRole(role, user1));
 
+        // Check the OpenZeppelin hasRole directly before revocation
+        assertFalse(accessControl.hasRole(role, user1)); // Should be false due to expiry in our override
+
         // Anyone can revoke expired role
         vm.prank(user2);
         vm.expectEmit(true, true, false, false);
         emit RoleRevokedDueToExpiry(role, user1);
 
         accessControl.revokeExpiredRole(role, user1);
-        // After revocation, hasValidRole should return false (which is the important check)
+        
+        // After revocation, both should return false
+        assertFalse(accessControl.hasRole(role, user1));
         assertFalse(accessControl.hasValidRole(role, user1));
     }
 
@@ -214,7 +219,11 @@ contract AccessControlManagerTest is Test {
 
     function testGrantRoleWithInvalidExpiry() public {
         bytes32 role = accessControl.MINTER_ROLE();
-        uint256 pastExpiry = 100; // Very early timestamp
+        
+        // Fast forward time so we have a meaningful current timestamp
+        vm.warp(1000);
+        
+        uint256 pastExpiry = 100; // Now truly in the past
 
         vm.expectRevert("AccessControl: invalid expiry");
         accessControl.grantRoleWithExpiry(role, user1, pastExpiry);

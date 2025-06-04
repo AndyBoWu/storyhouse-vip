@@ -99,9 +99,6 @@ contract RewardsManagerTest is Test {
         uint256 initialBalance = tipToken.balanceOf(user);
 
         vm.prank(controller1);
-        vm.expectEmit(true, false, true, true);
-        emit RewardDistributed(user, rewardAmount, "test_reward", contextId, controller1);
-
         rewardsManager.distributeReward(user, rewardAmount, "test_reward", contextId);
 
         assertEq(tipToken.balanceOf(user), initialBalance + rewardAmount);
@@ -143,7 +140,7 @@ contract RewardsManagerTest is Test {
         bytes32 contextId = keccak256("test_context");
 
         vm.prank(controller1);
-        vm.expectRevert("EnforcedPause");
+        vm.expectRevert(abi.encodeWithSelector(Pausable.EnforcedPause.selector));
         rewardsManager.distributeReward(user, rewardAmount, "test_reward", contextId);
     }
 

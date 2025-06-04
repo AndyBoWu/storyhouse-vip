@@ -52,6 +52,8 @@ contract CreatorRewardsControllerTest is Test {
     function testClaimStoryCreationReward() public {
         bytes32 storyId = keccak256("test_story");
         uint256 expectedReward = creatorRewards.storyCreationReward();
+        uint256 milestoneBonus = creatorRewards.milestoneRewards("first_story");
+        uint256 totalExpected = expectedReward + milestoneBonus;
 
         uint256 initialBalance = tipToken.balanceOf(creator);
 
@@ -61,9 +63,10 @@ contract CreatorRewardsControllerTest is Test {
 
         creatorRewards.claimStoryCreationReward(storyId);
 
-        assertEq(tipToken.balanceOf(creator), initialBalance + expectedReward);
+        assertEq(tipToken.balanceOf(creator), initialBalance + totalExpected);
         assertTrue(creatorRewards.hasClaimedCreationReward(creator, storyId));
         assertEq(creatorRewards.totalStoriesCreated(creator), 1);
+        assertTrue(creatorRewards.milestonesAchieved(creator, "first_story"));
     }
 
     function testClaimStoryCreationRewardInvalidStory() public {
@@ -85,11 +88,10 @@ contract CreatorRewardsControllerTest is Test {
 
     function testClaimStoryCreationRewardWhenPaused() public {
         creatorRewards.pause();
-        bytes32 storyId = keccak256("test_story");
 
         vm.prank(creator);
-        vm.expectRevert("EnforcedPause");
-        creatorRewards.claimStoryCreationReward(storyId);
+        vm.expectRevert(abi.encodeWithSelector(Pausable.EnforcedPause.selector));
+        creatorRewards.claimStoryCreationReward("story1");
     }
 
     function testClaimChapterCreationReward() public {
@@ -113,6 +115,8 @@ contract CreatorRewardsControllerTest is Test {
         bytes32 storyId = keccak256("test_story");
         uint256 readCount = 100;
         uint256 expectedReward = readCount * creatorRewards.readEngagementRate();
+        uint256 milestoneBonus = creatorRewards.milestoneRewards("hundred_readers");
+        uint256 totalExpected = expectedReward + milestoneBonus;
 
         uint256 initialBalance = tipToken.balanceOf(creator);
 
@@ -122,9 +126,10 @@ contract CreatorRewardsControllerTest is Test {
 
         creatorRewards.distributeEngagementReward(creator, storyId, readCount);
 
-        assertEq(tipToken.balanceOf(creator), initialBalance + expectedReward);
+        assertEq(tipToken.balanceOf(creator), initialBalance + totalExpected);
         assertEq(creatorRewards.storyReadCounts(storyId), readCount);
         assertEq(creatorRewards.totalEngagementEarned(creator), expectedReward);
+        assertTrue(creatorRewards.milestonesAchieved(creator, "hundred_readers"));
     }
 
     function testDistributeEngagementRewardUnauthorized() public {
@@ -156,6 +161,10 @@ contract CreatorRewardsControllerTest is Test {
     function testSetQualityScore() public {
         bytes32 storyId = keccak256("test_story");
         uint256 qualityScore = 85;
+
+        // First create the story so we have a valid creator
+        vm.prank(creator);
+        creatorRewards.claimStoryCreationReward(storyId);
 
         vm.prank(authorizedCaller);
         creatorRewards.setQualityScore(storyId, qualityScore);
@@ -295,6 +304,10 @@ contract CreatorRewardsControllerTest is Test {
         bytes32 storyId = keccak256("test_story");
         uint256 qualityScore = 85;
         uint256 readCount = 100;
+
+        // First create the story so we have a valid creator
+        vm.prank(creator);
+        creatorRewards.claimStoryCreationReward(storyId);
 
         // Set quality score
         vm.prank(authorizedCaller);
