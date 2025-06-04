@@ -1,1 +1,1 @@
-testBurnWhenPaused|testMintWhenPaused|testTransferWhenPaused
+testGrantRoleWithInvalidExpiry|testRoleExpiry

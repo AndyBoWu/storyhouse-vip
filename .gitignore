@@ -29,6 +29,15 @@ dist/
 *.tsbuildinfo
 next-env.d.ts
 
+# Foundry & Smart Contracts
+cache/
+out/
+broadcast/
+deployments/
+artifacts/
+typechain/
+.openzeppelin/
+
 # OS generated files
 .DS_Store
 .DS_Store?

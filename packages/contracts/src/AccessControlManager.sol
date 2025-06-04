@@ -134,9 +134,9 @@ contract AccessControlManager is AccessControl, Pausable {
      * @dev Check if an account has a role and it hasn't expired
      * @param role Role to check
      * @param account Account to check
-     * @return hasValidRole Whether the account has a valid (non-expired) role
+     * @return isValidRole Whether the account has a valid (non-expired) role
      */
-    function hasValidRole(bytes32 role, address account) external view returns (bool hasValidRole) {
+    function hasValidRole(bytes32 role, address account) external view returns (bool isValidRole) {
         if (!hasRole(role, account)) {
             return false;
         }
