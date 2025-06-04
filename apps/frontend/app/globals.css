@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@300;400;700;900&display=swap');
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
@@ -30,6 +33,84 @@
   }
 
   .glass {
-    @apply backdrop-blur-md bg-white/10 border border-white/20;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
   }
+}
+
+/* Custom CSS for StoryHouse.vip */
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.bg-brand-gradient {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Enhanced reading experience defaults */
+.story-content {
+  font-size: 18px;
+  line-height: 1.7;
+  color: #1f2937;
+  max-width: none;
+}
+
+.story-content p {
+  margin-bottom: 1.5rem;
+}
+
+.story-content h1,
+.story-content h2,
+.story-content h3 {
+  font-weight: 700;
+  color: #111827;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.story-content blockquote,
+.story-content .dialogue {
+  font-style: italic;
+  border-left: 4px solid #e5e7eb;
+  padding-left: 1rem;
+  margin: 1.5rem 0;
+}
+
+/* Reading preferences animations */
+.reading-preferences-enter {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.95);
+}
+
+.reading-preferences-enter-active {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition: all 200ms ease-out;
+}
+
+.reading-preferences-exit {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.reading-preferences-exit-active {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.95);
+  transition: all 200ms ease-in;
+}
+
+/* Ensure fonts are loaded */
+.font-inter {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.font-georgia {
+  font-family: 'Georgia', 'Times New Roman', serif;
+}
+
+.font-merriweather {
+  font-family: 'Merriweather', Georgia, serif;
 }

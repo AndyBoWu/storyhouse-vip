@@ -39,6 +39,10 @@ const config: Config = {
           'Cantarell',
           'sans-serif',
         ],
+        // Reading-optimized fonts for story content
+        inter: ['var(--font-inter)', 'sans-serif'],
+        georgia: ['Georgia', 'Times New Roman', 'serif'],
+        merriweather: ['var(--font-merriweather)', 'serif'],
       },
       backgroundImage: {
         'gradient-brand': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',

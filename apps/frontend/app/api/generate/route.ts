@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { generateStoryChapter, StoryGenerationRequest } from '@/lib/ai/openai'
+import { generateMockStory } from '@/lib/ai/mockStoryGenerator'
 import type {
   EnhancedStoryCreationParams,
   EnhancedGeneratedStory,
@@ -62,8 +63,21 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Generate the story content
-    const storyResult = await generateStoryChapter(generationRequest)
+    // Generate the story content - use mock generator if OpenAI is not configured
+    let storyResult
+    try {
+      if (!process.env.OPENAI_API_KEY) {
+        console.log('🎭 Using mock story generator (OpenAI API key not configured)')
+        storyResult = await generateMockStory(generationRequest)
+      } else {
+        storyResult = await generateStoryChapter(generationRequest)
+      }
+    } catch (error) {
+      console.error('Story generation error:', error)
+      // Fallback to mock generator if OpenAI fails
+      console.log('🎭 Falling back to mock story generator')
+      storyResult = await generateMockStory(generationRequest)
+    }
 
     // Enhanced story result with IP-ready metadata
     const enhancedResult: EnhancedGeneratedStory = {
