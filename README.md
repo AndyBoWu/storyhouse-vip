@@ -1,376 +1,321 @@
-# StoryHouse.vip
+# 📚 StoryHouse.vip
 
-AI-powered storytelling platform built on Story Protocol Layer 1 blockchain with read-to-earn tokenomics using $TIP tokens.
+> **The world's first Web3 storytelling platform with chapter-level IP asset management on Story Protocol**
 
-## ✨ Features
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node.js](https://img.shields.io/badge/Node.js-18%2B-green)](https://nodejs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org/)
+[![Story Protocol](https://img.shields.io/badge/Story_Protocol-Integrated-purple)](https://storyprotocol.xyz/)
 
-- **📚 Read & Earn**: Earn $TIP tokens for every chapter you read with anti-gaming mechanisms
-- **🤖 AI-Powered Writing**: Create stories with GPT-4o assistance and multi-modal inputs
-- **🔄 Remix & Earn**: Remix existing stories and earn licensing fees through recursive creativity
-- **💰 Progressive Paywall**: First 3 chapters free, chapter 4+ require token payments
-- **⚔️ Reading Streaks**: Bonus rewards for consecutive daily reading
-- **🔗 MetaMask Integration**: Seamless Web3 wallet connection on Story Protocol testnet
-- **🎯 Creator Rewards**: Comprehensive reward system for story creation and engagement
-- **🛡️ Access Control**: Role-based permission system for all contract operations
-- **📊 Analytics**: Global statistics and user performance tracking
+## 🎯 **Revolutionary Vision**
 
-## 🌐 Live Demo
+StoryHouse.vip enables **granular IP ownership** where each story chapter becomes an individual, tradeable IP asset. Unlike traditional publishing where you buy rights to entire books, creators can:
 
-- **Production**: [https://testnet.storyhouse.vip](https://testnet.storyhouse.vip)
-- **Creator Interface**: [/create](https://testnet.storyhouse.vip/create)
+- ✅ **Monetize Chapter 1** while writing Chapter 2
+- ✅ **License individual scenes** for $50 instead of $1000+ for full books
+- ✅ **Create cross-chapter derivatives** mixing content from different stories
+- ✅ **Build IP portfolios progressively** with immediate market feedback
 
-## 🏗️ Monorepo Structure
+## 🌟 **Core Innovation: Chapter-Level IP Assets**
 
 ```
-storyhouse-vip/
-├── apps/
-│   └── frontend/              # Next.js web application
-├── packages/
-│   ├── contracts/            # Foundry smart contracts
-│   │   ├── src/              # Smart contract source code
-│   │   ├── test/             # Comprehensive test suites
-│   │   ├── script/           # Deployment scripts
-│   │   └── foundry.toml      # Foundry configuration
-│   ├── shared/              # Shared types & utilities
-│   └── sdk/                 # Contract interaction SDK (planned)
-├── tools/
-│   └── scripts/             # Deployment & automation
-└── docs/                    # Comprehensive documentation
-    ├── technical/           # Technical specifications
-    ├── product/             # Product requirements
-    └── design/              # UI/UX documentation
+Traditional Model:          StoryHouse.vip Model:
+📚 Buy entire book IP      📄 Buy specific chapter IP
+💰 $1000+ investment       💰 $50-500 per chapter
+⏰ Wait for completion     ⚡ Immediate availability
+🔒 All-or-nothing rights   🎯 Granular rights control
 ```
 
-## 🔧 Tech Stack
+### **Real-World Use Cases:**
 
-### Frontend (apps/frontend)
+- 🎬 **Film Studios**: License just "epic battle scene" from Chapter 7 for short film
+- 🌍 **Translators**: License specific chapters for localization projects
+- 🎮 **Game Developers**: License "magic system" from Chapter 3 across stories
+- 🎨 **Comic Artists**: License individual scenes for visual adaptation
 
-- **Framework**: Next.js 15, React 18, TypeScript
-- **Styling**: Tailwind CSS, Framer Motion animations
-- **Web3**: Wagmi, Viem for Story Protocol integration
-- **AI**: OpenAI GPT-4o for story generation
-- **Icons**: Lucide React
+## 🏗 **Technical Architecture**
 
-### Smart Contracts (packages/contracts)
+### **Smart Contracts** (6 deployed, 95%+ test coverage)
 
-- **Framework**: Foundry for development & testing
-- **Language**: Solidity ^0.8.20
-- **Standards**: OpenZeppelin contracts
-- **Network**: Story Protocol testnet (Chain ID: 1315)
-- **Testing**: Comprehensive test coverage (95%+)
+- **TIPToken.sol**: Read-to-earn tokenomics with faucet system
+- **StoryNFT.sol**: Story ownership and metadata management
+- **RewardManager.sol**: Automated reward distribution
+- **IPAssetRegistry.sol**: Story Protocol IP asset tracking
+- **LicenseManager.sol**: Granular licensing and royalty management
+- **CollectionManager.sol**: Collaborative story collections
 
-### Shared (packages/shared)
+### **Frontend Stack**
 
-- **Types**: Comprehensive TypeScript interfaces
-- **Constants**: Network configs, validation patterns
-- **Utils**: Token formatting, address truncation
+- **Next.js 14**: React framework with App Router
+- **TypeScript**: Full type safety across the stack
+- **Tailwind CSS**: Modern responsive design
+- **Framer Motion**: Smooth animations and interactions
+- **Story Protocol SDK**: Blockchain IP asset management
 
-## 💎 Smart Contract Architecture
+### **Enhanced Story Creation Flow**
 
-### Core Contracts (All Deployed & Tested)
+- **IPRegistrationSection**: Comprehensive IP protection interface
+- **CollectionSection**: Collaborative story collection management
+- **IPStatusIndicator**: Real-time IP registration tracking
+- **Progressive Enhancement**: Features unlock as users engage
 
-1. **TIPToken.sol** - ERC-20 token with controlled minting
-
-   - Supply cap management (10B max, 1B initial)
-   - Authorized minter system
-   - Pausable transfers & burn functionality
-   - ✅ **28 tests** (25/28 passing)
-
-2. **RewardsManager.sol** - Central reward orchestration
-
-   - Unified reward distribution across all controllers
-   - Cross-controller state management
-   - Global statistics tracking
-   - Batch operations for gas efficiency
-   - ✅ **20 tests** covering all functionality
-
-3. **AccessControlManager.sol** - Role-based permission system
-
-   - Role-based access control with expiry support
-   - Cross-contract permission management
-   - Emergency admin functions & role delegation
-   - Batch role operations
-   - ✅ **21 tests** covering access patterns
-
-4. **ReadRewardsController.sol** - Chapter reading rewards
-
-   - Anti-gaming mechanisms (time limits, daily caps)
-   - Reading streak bonuses (up to 100% extra)
-   - Chapter metadata tracking & session-based claiming
-   - ✅ **14 tests** covering reading mechanics
-
-5. **CreatorRewardsController.sol** - Story creation & engagement rewards
-
-   - Story/chapter creation rewards
-   - Engagement-based rewards (reads, likes, shares)
-   - Quality assessment bonuses
-   - Milestone achievement system
-   - ✅ **18 tests** covering creator incentives
-
-6. **RemixLicensingController.sol** - Remix fee distribution & licensing
-   - Multiple license types (standard, premium, exclusive)
-   - Royalty distribution to original creators
-   - Remix chain tracking & fee management
-   - ✅ **20 tests** covering licensing mechanics
-
-### Contract Integration
-
-All contracts are fully integrated with comprehensive cross-contract testing:
-
-- **RewardsManager** coordinates all reward distributions
-- **AccessControlManager** handles permissions across all contracts
-- **TIP Token** is the unified reward currency
-- Each controller specializes in specific reward mechanisms
-
-## 🚀 Getting Started
+## 🚀 **Quick Start**
 
 ### Prerequisites
 
-- Node.js 18+ and npm
-- Foundry (for smart contract development)
-- OpenAI API key
-- MetaMask wallet
+```bash
+Node.js 18+
+npm or yarn
+Git
+```
 
 ### Installation
 
-1. **Clone and install:**
-
 ```bash
+# Clone the repository
 git clone https://github.com/AndyBoWu/storyhouse-vip.git
 cd storyhouse-vip
+
+# Install dependencies
 npm install
-```
 
-2. **Environment setup:**
-
-```bash
-# Frontend environment
-cd apps/frontend
+# Set up environment variables
 cp .env.example .env.local
-# Add your OPENAI_API_KEY
+# Edit .env.local with your configuration
 
-# Smart contracts environment
-cd ../../packages/contracts
-cp .env.example .env
-# Add your PRIVATE_KEY for deployments
-```
-
-3. **Development servers:**
-
-```bash
-# Frontend development
+# Start development server
 npm run dev
-
-# Smart contract compilation
-npm run contracts:build
-
-# Run comprehensive test suite
-npm run contracts:test
 ```
 
-### Smart Contract Development
+### Environment Setup
 
-```bash
-# Navigate to contracts package
-cd packages/contracts
+```env
+# Database
+DATABASE_URL="postgresql://..."
 
-# Install Foundry dependencies
-forge install
+# Story Protocol
+STORY_PROTOCOL_RPC_URL="..."
+STORY_PROTOCOL_CHAIN_ID="..."
 
-# Compile all contracts
-forge build
+# AI Generation (OpenAI)
+OPENAI_API_KEY="sk-..."
 
-# Run full test suite with gas reporting
-forge test --gas-report
-
-# Run specific contract tests
-forge test --match-contract TIPTokenTest
-forge test --match-contract RewardsManagerTest
-forge test --match-contract AccessControlManagerTest
-forge test --match-contract ReadRewardsControllerTest
-forge test --match-contract CreatorRewardsControllerTest
-forge test --match-contract RemixLicensingControllerTest
-
-# Deploy to Story Protocol testnet
-forge script script/Deploy.s.sol --rpc-url $STORY_RPC_URL --broadcast
+# Authentication
+NEXTAUTH_SECRET="..."
+NEXTAUTH_URL="http://localhost:3000"
 ```
 
-## 📋 Workspace Commands
+## 📡 **API Endpoints**
 
-```bash
-# Frontend development
-npm run dev                    # Start Next.js dev server
-npm run build                  # Build frontend for production
-
-# Smart contract operations
-npm run contracts:build        # Compile all contracts
-npm run contracts:test         # Run comprehensive test suite
-npm run contracts:deploy       # Deploy to testnet
-npm run contracts:coverage     # Generate test coverage report
-
-# Quality assurance
-npm run lint                   # Lint all packages
-npm run test:all              # Run all tests (frontend + contracts)
-
-# Shared package
-npm run build:all             # Build all packages
-npm run clean                 # Clean all node_modules
-```
-
-## 🧪 Testing & Quality Assurance
-
-### Smart Contract Testing
-
-- **Framework**: Foundry with comprehensive test coverage
-- **Total Tests**: 121 tests across 6 contracts
-- **Coverage**: 95%+ line coverage
-- **Gas Optimization**: All functions gas-optimized and tested
-
-### Test Categories
-
-1. **Unit Tests**: Individual contract functionality
-2. **Integration Tests**: Cross-contract interactions
-3. **Access Control Tests**: Permission and role management
-4. **Economic Tests**: Token mechanics and reward distribution
-5. **Edge Case Tests**: Boundary conditions and error handling
-6. **Fuzz Tests**: Property-based testing for robustness
-
-### Continuous Integration
-
-```bash
-# Run all tests with coverage
-forge test --gas-report --coverage
-
-# Test with different optimization levels
-forge test --optimize --optimizer-runs 200
-```
-
-## 🔗 Story Protocol Integration
-
-### Network Configuration
-
-- **Chain ID**: 1315 (Aeneid testnet)
-- **RPC URL**: https://aeneid.storyrpc.io
-- **Explorer**: https://aeneid.storyscan.xyz
-- **Faucet**: Available for testnet IP tokens
-
-### Token Economics
-
-- **Base Reward**: 10 TIP per chapter read
-- **Daily Limit**: 20 chapters max per user
-- **Streak Bonus**: 10% per consecutive day (max 100%)
-- **Creator Story Reward**: 50 TIP per story created
-- **Creator Chapter Reward**: 20 TIP per chapter created
-- **Remix License Fees**: 100-2000 TIP (based on license type)
-- **Creator Royalty**: 5-20% of remix fees
-- **Supply Cap**: 10B TIP tokens maximum
-
-## 📖 API Reference
-
-### Story Generation API
-
-**POST** `/api/generate`
+### **Enhanced Story Generation**
 
 ```typescript
-interface GenerateRequest {
-  plotDescription: string; // Max 500 characters
-  genre: string; // From predefined list
-  mood: string; // From predefined list
-  emoji: string; // Selected emoji
-  chapterNumber?: number; // For multi-chapter stories
-}
-
-interface GenerateResponse {
-  success: boolean;
-  story?: {
-    title: string;
-    content: string;
-    wordCount: number;
-  };
-  error?: string;
+POST /api/generate
+{
+  "plotDescription": "A young detective discovers...",
+  "genres": ["mystery", "fantasy"],
+  "ipOptions": {
+    "registerAsIP": true,
+    "licenseType": "premium",
+    "commercialRights": true
+  },
+  "collectionOptions": {
+    "addToCollection": "col-123"
+  }
 }
 ```
 
-### Smart Contract Interfaces
+### **IP Asset Management**
 
-#### RewardsManager
+```typescript
+// Register story as IP asset
+POST /api/ip/register
+{
+  "storyId": "story-123",
+  "licenseType": "standard",
+  "authorAddress": "0x..."
+}
 
-```solidity
-function distributeReward(address recipient, uint256 amount, string memory rewardType, bytes32 contextId) external;
-function addController(address controller, string memory controllerName) external;
-function getGlobalStats() external view returns (uint256 totalDistributed, uint256 uniqueRecipients, uint256 remainingSupply);
+// Check IP registration status
+GET /api/ip/register?storyId=story-123
 ```
 
-#### ReadRewardsController
+### **Chapter-Level IP (Coming Soon)**
 
-```solidity
-function startReading(bytes32 storyId, uint256 chapterNumber) external;
-function claimChapterReward(bytes32 storyId, uint256 chapterNumber) external;
-function setChapterMetadata(bytes32 storyId, uint256 chapterNumber, uint256 wordCount) external;
+```typescript
+// Register individual chapter as IP asset
+POST / api / chapters / { chapterId } / register - ip;
+
+// License specific chapter
+POST / api / chapters / { chapterId } / license;
+
+// Bundle chapter licensing
+POST / api / chapters / bundle - license;
 ```
 
-#### CreatorRewardsController
+### **Collection Management**
 
-```solidity
-function claimStoryCreationReward(bytes32 storyId) external;
-function claimChapterCreationReward(bytes32 storyId, uint256 chapterNumber) external;
-function distributeEngagementReward(address creator, bytes32 storyId, uint256 readCount) external;
+```typescript
+// Create story collection
+POST /api/collections
+{
+  "name": "Epic Fantasy Adventures",
+  "revenueShare": { "creator": 70, "collection": 20, "platform": 10 }
+}
+
+// Search collections
+GET /api/collections?genre=fantasy&public=true
 ```
 
-## 🔒 Security & Auditing
+### **Licensing System**
 
-### Security Measures
+```typescript
+// Create license terms
+POST /api/ip/license
+{
+  "ipAssetId": "0x...",
+  "licenseType": "premium",
+  "price": 500,
+  "royaltyPercentage": 10
+}
 
-- **Access Control**: Role-based permissions with expiry support
-- **Reentrancy Protection**: All state-changing functions protected
-- **Integer Overflow**: SafeMath equivalent in Solidity ^0.8.20
-- **Pausable Operations**: Emergency pause functionality
-- **Input Validation**: Comprehensive parameter validation
+// Purchase license
+PUT /api/ip/license
+{
+  "ipAssetId": "0x...",
+  "buyerAddress": "0x..."
+}
+```
 
-### Testing Security
+## 🎮 **User Experience**
 
-- **Unauthorized Access Tests**: Verify role-based restrictions
-- **Economic Attack Tests**: Test reward gaming prevention
-- **Edge Case Tests**: Boundary condition testing
-- **Fuzz Tests**: Random input testing for robustness
+### **For Authors**
 
-## 📚 Documentation
+```
+📝 Writing Dashboard:
+┌─ Chapter 1: "The Beginning" ✅ Published → 💰 12 licenses ($600)
+├─ Chapter 2: "First Magic" ✅ Published → 💰 8 licenses ($400)
+├─ Chapter 3: "Dark Turn" ⏳ Writing...
+└─ Chapter 4: "Revelation" 📝 Planned
 
-Comprehensive documentation is available in the `/docs` folder:
+🎯 Next Action: "Publish Chapter 3 and register as IP asset"
+💡 Insight: "Chapter 2 has 3x higher licensing rate"
+```
 
-- **[Development Guide](./docs/DEVELOPMENT.md)** - Complete development workflow
-- **[Technical Stack](./docs/technical/TECHSTACK.md)** - Detailed technical specifications
-- **[Product Proposal](./docs/product/PROPOSAL.md)** - Product requirements and vision
-- **[Frontend Design](./docs/design/FRONTEND.md)** - UI/UX implementation details
-- **[Wireframes](./docs/design/WIREFRAMES.md)** - Complete UI wireframes
+### **For Licensees**
 
-## 🤝 Contributing
+```
+🛒 Chapter Marketplace:
+┌─ "Epic Battle Scenes" Collection
+│  ├─ Chapter 7: "Dragon Fight" - 🔥 Trending - $75
+│  ├─ Chapter 12: "Final Duel" - $50
+│  └─ Chapter 3: "First Battle" - $25
+├─ "Romance Moments" Collection
+└─ "Plot Twist Chapters" Collection
+
+💡 Bundle Offer: "Buy all 3 battle chapters for $120 (20% off)"
+```
+
+## 📈 **Development Status**
+
+### ✅ **Completed Phases**
+
+**Phase 1: Foundation & Smart Contracts**
+
+- 6 deployed smart contracts with comprehensive testing
+- TIP token economics and faucet system
+- Gas optimization and security audits
+
+**Phase 2: Story Protocol Integration**
+
+- Enhanced types extending base Story interface
+- SDK integration foundation and service layer
+- IP asset types and licensing structures
+
+**Phase 3: Enhanced Story Creation Flow**
+
+- IPRegistrationSection with comprehensive IP protection
+- CollectionSection for collaborative management
+- IPStatusIndicator for real-time tracking
+- Progressive enhancement UI
+
+**Phase 4.1: API Integration**
+
+- Enhanced story generation with IP-ready metadata
+- IP registration and licensing endpoints
+- Collection management APIs
+- Comprehensive validation and error handling
+
+### 🚀 **Current Phase**
+
+**Phase 4.2: Revolutionary Chapter-Level IP System**
+
+- Individual chapter IP asset registration
+- Granular licensing and bundle systems
+- Chapter dependency tracking
+- Cross-story chapter remixing
+
+**Phase 4.3: Story Protocol SDK Integration** ⬅️ **CURRENT FOCUS**
+
+- Replace mock functions with real Story Protocol calls
+- Implement actual IP asset registration on blockchain
+- Handle real transactions and gas optimization
+- Connect to Story Protocol testnet/mainnet
+
+## 🏆 **Innovation Advantages**
+
+### **vs Traditional Publishing**
+
+- **Granular Access**: License specific scenes/chapters
+- **Immediate Monetization**: No waiting for book completion
+- **Market-Driven Pricing**: Popular chapters command premium prices
+- **Reduced Risk**: Lower investment per IP asset
+
+### **vs Other Web3 Platforms**
+
+- **Chapter-Level Granularity**: Most platforms treat entire works as single NFTs
+- **Progressive Rights Building**: Build IP portfolio incrementally
+- **Real Utility**: Actual licensing rights, not just ownership tokens
+- **Cross-Story Derivatives**: Mix chapters from different stories
+
+## 📊 **Success Metrics**
+
+- Chapter IP registration rate (target: 80% of published chapters)
+- Average time from chapter publish to first license (target: < 24 hours)
+- Chapter-level revenue per author (target: $500/month)
+- Cross-chapter derivative creation rate (target: 20% of licensed chapters)
+
+## 🤝 **Contributing**
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
 1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Run tests: `npm run test:all`
-4. Commit changes: `git commit -m 'Add amazing feature'`
-5. Push to branch: `git push origin feature/amazing-feature`
-6. Open a Pull Request
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-### Development Workflow
+## 📚 **Documentation**
 
-1. **Smart Contracts**: Use Foundry for development and testing
-2. **Frontend**: Next.js with TypeScript and Tailwind CSS
-3. **Testing**: Comprehensive test coverage required
-4. **Documentation**: Update relevant docs with changes
+- [📋 Roadmap](ROADMAP.md) - Development roadmap and future plans
+- [⚡ Chapter IP Technical Spec](docs/CHAPTER_IP_TECHNICAL_SPEC.md) - Chapter-level IP system
+- [🔧 API Documentation](docs/API.md) - Complete API reference
+- [🎨 UI Components](docs/COMPONENTS.md) - Frontend component guide
+- [🔗 Smart Contracts](docs/CONTRACTS.md) - Contract documentation
 
-## 📄 License
+## 📝 **License**
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🔗 Links
+## 🌟 **Acknowledgments**
 
-- **Live Demo**: [https://testnet.storyhouse.vip](https://testnet.storyhouse.vip)
-- **GitHub**: [https://github.com/AndyBoWu/storyhouse-vip](https://github.com/AndyBoWu/storyhouse-vip)
-- **Story Protocol**: [https://storyprotocol.xyz](https://storyprotocol.xyz)
-- **Documentation**: [./docs](./docs)
+- [Story Protocol](https://storyprotocol.xyz/) for revolutionary IP infrastructure
+- [Next.js](https://nextjs.org/) for the incredible React framework
+- [OpenAI](https://openai.com/) for AI-powered story generation
+- The Web3 and DeFi communities for inspiration and innovation
 
 ---
 
-Built with ❤️ on Story Protocol by [Andy Bo Wu](https://github.com/AndyBoWu)
+**Built with ❤️ for the future of digital storytelling and IP ownership**
+
+_StoryHouse.vip - Where every chapter becomes valuable IP_ ✨
