@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import IPRegistrationSection from '../../components/creator/IPRegistrationSection'
 import CollectionSection from '../../components/creator/CollectionSection'
 import IPStatusIndicator from '../../components/creator/IPStatusIndicator'
+import StoryContentDisplay from '../../components/ui/StoryContentDisplay'
 import type {
   EnhancedGeneratedStory,
   EnhancedStoryCreationParams
@@ -40,7 +41,7 @@ export default function CreateStoryPage() {
   const [storyTitle, setStoryTitle] = useState('')
   const [selectedStory, setSelectedStory] = useState<ExistingStory | null>(null)
   const [chapterNumber, setChapterNumber] = useState(1)
-  
+
   // Existing state for multimodal inputs
   const [selectedMoods, setSelectedMoods] = useState<string[]>([])
   const [selectedEmojis, setSelectedEmojis] = useState<string[]>([])
@@ -273,7 +274,7 @@ export default function CreateStoryPage() {
       {/* Help Text */}
       <div className="text-center bg-purple-50 rounded-lg p-4">
         <p className="text-purple-800">
-          💡 Don't worry about blockchain stuff yet - just focus on creating great content! 
+          💡 Don't worry about blockchain stuff yet - just focus on creating great content!
           We'll handle IP protection later.
         </p>
       </div>
@@ -300,7 +301,7 @@ export default function CreateStoryPage() {
       {/* Story Selection */}
       <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
         <h3 className="text-lg font-semibold text-gray-800 mb-4">📚 Select story to continue:</h3>
-        
+
         <div className="space-y-3">
           {existingStories.map((story) => (
             <motion.button
@@ -342,7 +343,7 @@ export default function CreateStoryPage() {
           <h3 className="text-lg font-semibold text-gray-800 mb-4">
             ✨ What happens next in "{selectedStory.title}"?
           </h3>
-          
+
           <textarea
             value={plotDescription}
             onChange={(e) => setPlotDescription(e.target.value)}
@@ -350,7 +351,7 @@ export default function CreateStoryPage() {
             className="w-full h-32 p-4 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-purple-500 focus:border-transparent mb-4"
             maxLength={500}
           />
-          
+
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-500">{plotDescription.length}/500 characters</span>
             <button
@@ -544,7 +545,7 @@ export default function CreateStoryPage() {
           <Wand2 className="w-5 h-5" />
           {isGenerating ? 'Generating Chapter 1...' : '✨ Generate Chapter 1 with AI'}
         </motion.button>
-        
+
         {plotDescription.trim() && (
           <p className="text-sm text-gray-500 mt-2">💡 This will be Chapter 1 of your new story</p>
         )}
@@ -618,9 +619,9 @@ export default function CreateStoryPage() {
                 <p className="text-sm text-green-600 font-medium">💰 {story.earnings} $TIP</p>
               </div>
             </div>
-            
+
             <p className="text-sm text-gray-600 italic mb-4">"{story.preview}"</p>
-            
+
             <div className="flex items-center gap-2">
               <button
                 onClick={() => handleSelectStory(story)}
@@ -656,8 +657,9 @@ export default function CreateStoryPage() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="max-w-4xl mx-auto"
+      className="max-w-5xl mx-auto"
     >
+      {/* Header Actions */}
       <div className="flex items-center justify-between mb-6">
         <button
           onClick={handleEdit}
@@ -675,7 +677,7 @@ export default function CreateStoryPage() {
           >
             🔄 Regenerate
           </motion.button>
-          
+
           <motion.button
             onClick={() => {
               // Redirect to publishing flow with deferred IP registration
@@ -691,44 +693,22 @@ export default function CreateStoryPage() {
         </div>
       </div>
 
-      {/* Generated Chapter */}
-      <div className="bg-white rounded-xl shadow-lg p-8">
-        <h1 className="text-2xl font-bold text-center mb-8 text-gray-800">
-          {generatedStory?.title || `Chapter ${chapterNumber}${selectedStory ? `: ${selectedStory.title}` : ''}`}
-        </h1>
+      {/* Enhanced Story Display with Reading Preferences */}
+      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+        <StoryContentDisplay
+          title={generatedStory?.title || `Chapter ${chapterNumber}${selectedStory ? `: ${selectedStory.title}` : ''}`}
+          content={generatedStory?.content || ''}
+          wordCount={generatedStory?.wordCount || 0}
+          readingTime={generatedStory?.readingTime || 0}
+          themes={generatedStory?.themes || []}
+          contentRating="PG-13"
+          showHeader={true}
+          showToolbar={true}
+          className="p-8"
+        />
 
-        <div className="prose prose-lg max-w-none">
-          {generatedStory?.content.split('\n\n').map((paragraph, index) => (
-            <p key={index} className="mb-4 text-gray-700 leading-relaxed">
-              {paragraph}
-            </p>
-          ))}
-        </div>
-
-        {/* Story Metadata */}
-        <div className="mt-8 pt-6 border-t border-gray-200">
-          <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-            <span>Word count: {generatedStory?.wordCount.toLocaleString()}</span>
-            <span>Estimated reading time: {generatedStory?.readingTime} min</span>
-          </div>
-
-          {/* Themes */}
-          {generatedStory?.themes && generatedStory.themes.length > 0 && (
-            <div className="mb-6">
-              <p className="text-sm text-gray-600 mb-2">Story themes:</p>
-              <div className="flex flex-wrap gap-2">
-                {generatedStory.themes.map((theme) => (
-                  <span
-                    key={theme}
-                    className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm capitalize"
-                  >
-                    {theme}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
+        {/* Publishing Actions */}
+        <div className="p-6 bg-gray-50 border-t border-gray-200">
           {/* Publishing Options Preview */}
           <div className="mb-6 p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-green-200">
             <h4 className="font-medium text-green-800 mb-2">🚀 Ready to publish?</h4>
@@ -741,6 +721,7 @@ export default function CreateStoryPage() {
             </div>
           </div>
 
+          {/* Action Buttons */}
           <div className="flex items-center justify-center gap-4">
             <button
               onClick={handleRegenerate}
@@ -749,7 +730,7 @@ export default function CreateStoryPage() {
               🔄 Regenerate
             </button>
             <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
-              ✏️ Edit
+              ✏️ Edit Content
             </button>
             <button
               onClick={() => {

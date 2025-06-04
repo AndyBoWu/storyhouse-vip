@@ -1,6 +1,21 @@
 import type { Metadata, Viewport } from 'next'
+import { Inter, Merriweather } from 'next/font/google'
 import './globals.css'
 import Web3Provider from '@/components/Web3Provider'
+
+// Configure reading-optimized fonts
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+})
+
+const merriweather = Merriweather({
+  subsets: ['latin'],
+  weight: ['300', '400', '700', '900'],
+  display: 'swap',
+  variable: '--font-merriweather',
+})
 
 export const metadata: Metadata = {
   title: 'StoryHouse.vip - Read Stories, Earn Tokens, Create with AI',
@@ -39,7 +54,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang="en" className={`scroll-smooth ${inter.variable} ${merriweather.variable}`}>
       <body className="min-h-screen font-sans antialiased">
         <Web3Provider>
           {children}
