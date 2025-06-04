@@ -1,12 +1,12 @@
 {
-  "buildCommand": "next build",
-  "outputDirectory": ".next",
-  "devCommand": "next dev",
+  "buildCommand": "npm run build --workspace=@storyhouse/frontend",
+  "outputDirectory": "apps/frontend/.next",
+  "devCommand": "npm run dev --workspace=@storyhouse/frontend",
   "installCommand": "npm install",
   "framework": "nextjs",
   "regions": ["iad1"],
   "functions": {
-    "src/app/**/*.{js,ts,jsx,tsx}": {
+    "app/api/**/*.{js,ts}": {
       "maxDuration": 30
     }
   },
