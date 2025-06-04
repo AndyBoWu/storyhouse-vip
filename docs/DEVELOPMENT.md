@@ -12,26 +12,36 @@ StoryHouse.vip is built as a monorepo containing a Next.js frontend and Foundry 
 ```
 storyhouse-vip/
 ├── apps/
-│   └── frontend/              # Next.js web application
-│       ├── src/app/          # Next.js 15 App Router
-│       ├── src/components/   # React components
-│       ├── src/lib/         # Utilities and AI integration
-│       └── public/          # Static assets
+│   └── frontend/              # Next.js 15 + TypeScript frontend
+│       ├── src/
+│       │   ├── components/    # React components
+│       │   ├── pages/         # Next.js pages
+│       │   ├── hooks/         # Custom hooks
+│       │   ├── utils/         # Utility functions
+│       │   └── types/         # TypeScript type definitions
+│       ├── public/            # Static assets
+│       └── styles/            # Global styles
 ├── packages/
-│   ├── contracts/           # Foundry smart contracts
-│   │   ├── src/            # Solidity contracts
-│   │   ├── test/           # Contract tests
-│   │   ├── script/         # Deployment scripts
-│   │   └── foundry.toml    # Foundry configuration
-│   ├── shared/             # Shared types & utilities
-│   │   ├── src/types/      # TypeScript interfaces
-│   │   ├── src/constants/  # Network configs
-│   │   └── src/utils/      # Helper functions
-│   └── sdk/                # Contract interaction SDK (planned)
+│   ├── contracts/            # Smart contracts & tests
+│   │   ├── src/              # Solidity source files
+│   │   ├── test/             # Foundry test suites
+│   │   ├── script/           # Deployment scripts
+│   │   ├── foundry.toml      # Foundry configuration
+│   │   ├── remappings.txt    # Import remappings
+│   │   └── .env.example      # Environment template
+│   ├── shared/              # Shared TypeScript utilities
+│   │   ├── src/
+│   │   │   ├── types/        # Shared type definitions
+│   │   │   ├── constants/    # Shared constants
+│   │   │   └── utils/        # Shared utilities
+│   │   └── package.json
+│   └── sdk/                 # Contract interaction SDK (planned)
 ├── tools/
-│   └── scripts/            # Automation scripts
-├── docs/                   # Documentation
-└── package.json           # Root package.json with workspaces
+│   └── scripts/             # Automation scripts
+└── docs/                    # Documentation
+    ├── technical/           # Technical specifications
+    ├── product/             # Product requirements
+    └── design/              # UI/UX documentation
 ```
 
 ## 🚀 Quick Start
@@ -93,8 +103,8 @@ npm run format
 
 - **Framework**: Next.js 15 with App Router
 - **Styling**: Tailwind CSS with custom design system
-- **Web3**: Direct MetaMask integration (removed wagmi/RainbowKit)
-- **AI**: OpenAI GPT-4o for story generation
+- **Web3**: Wagmi + Viem for blockchain interactions
+- **AI**: OpenAI GPT-4o integration
 - **Animations**: Framer Motion
 
 ### Smart Contract Development
@@ -122,8 +132,11 @@ forge clean
 **Contract Architecture:**
 
 - **TIPToken.sol**: ERC-20 token with controlled minting
-- **RewardsManager.sol**: Central reward distribution hub
-- **ReadRewardsController.sol**: Chapter reading rewards with anti-gaming
+- **AccessControlManager.sol**: Role-based permission system
+- **RewardsManager.sol**: Central reward orchestration
+- **ReadRewardsController.sol**: Reading reward mechanics
+- **CreatorRewardsController.sol**: Creator incentive system
+- **RemixLicensingController.sol**: Remix licensing and royalties
 
 ### Shared Package Development
 
