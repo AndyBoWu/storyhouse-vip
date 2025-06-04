@@ -8,22 +8,22 @@ contract DeployTIPToken is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         address deployer = vm.addr(deployerPrivateKey);
-        
+
         console.log("Deploying TIP Token...");
         console.log("Deployer address:", deployer);
-        
+
         vm.startBroadcast(deployerPrivateKey);
-        
+
         // Deploy TIP Token
         TIPToken tipToken = new TIPToken(deployer);
-        
+
         console.log("TIP Token deployed at:", address(tipToken));
         console.log("Initial supply:", tipToken.balanceOf(deployer));
         console.log("Symbol:", tipToken.symbol());
         console.log("Name:", tipToken.name());
-        
+
         vm.stopBroadcast();
-        
+
         // Print deployment info
         console.log("\n=== Deployment Complete ===");
         console.log("Contract Address:", address(tipToken));
@@ -34,4 +34,4 @@ contract DeployTIPToken is Script {
         console.log("2. Add contract address to TIP_TOKEN_CONFIG");
         console.log("3. Verify contract on explorer if needed");
     }
-} 
+}
