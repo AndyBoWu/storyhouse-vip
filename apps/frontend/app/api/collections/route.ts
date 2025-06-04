@@ -8,6 +8,7 @@ import type {
   StoryCollection,
   EnhancedApiResponse
 } from '@storyhouse/shared'
+import type { Address } from 'viem'
 
 interface CreateCollectionRequest {
   name: string
@@ -70,12 +71,12 @@ export async function POST(request: NextRequest) {
       id: collectionId,
       name: body.name,
       description: body.description,
-      creatorAddress: body.creatorAddress,
+      creatorAddress: body.creatorAddress as Address,
       isPublic: body.isPublic,
       allowContributions: body.allowContributions,
       requireApproval: body.requireApproval,
       revenueShare: body.revenueShare,
-      creators: [body.creatorAddress],
+      creators: [body.creatorAddress as Address],
       stories: [],
       ipAssets: [],
       genre: body.genre,
@@ -179,7 +180,7 @@ export async function PUT(request: NextRequest) {
 
     // Check if user can add to collection
     const canAdd = collection.allowContributions &&
-                  (collection.isPublic || collection.creators.includes(body.authorAddress))
+                  (collection.isPublic || collection.creators.includes(body.authorAddress as Address))
 
     if (!canAdd) {
       return NextResponse.json(
@@ -197,7 +198,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // Add story to collection
-    const updatedCollection = await addStoryToCollection(body.collectionId, body.storyId, body.authorAddress)
+    const updatedCollection = await addStoryToCollection(body.collectionId, body.storyId, body.authorAddress as Address)
 
     const response: EnhancedApiResponse<StoryCollection> = {
       success: true,
@@ -243,12 +244,12 @@ async function getCollections(filters: {
       id: 'col-1',
       name: 'Mystery Chronicles',
       description: 'A collection of thrilling mystery stories',
-      creatorAddress: '0x123...',
+      creatorAddress: '0x123...' as Address,
       isPublic: true,
       allowContributions: true,
       requireApproval: false,
       revenueShare: { creator: 70, collection: 20, platform: 10 },
-      creators: ['0x123...', '0x456...'],
+      creators: ['0x123...' as Address, '0x456...' as Address],
       stories: ['story-1', 'story-2'],
       ipAssets: ['ip-1', 'ip-2'],
       genre: 'Mystery',
@@ -268,33 +269,35 @@ async function getCollection(collectionId: string): Promise<StoryCollection | nu
   // TODO: Implement actual database lookup
   console.log('Fetching collection:', collectionId)
 
-  // Mock collection for demo
+  // Mock data for demo
   return {
     id: collectionId,
-    name: 'Mock Collection',
-    description: 'A mock collection for testing',
-    creatorAddress: '0x123...',
+    name: 'Mystery Chronicles',
+    description: 'A collection of thrilling mystery stories',
+    creatorAddress: '0x123...' as Address,
     isPublic: true,
     allowContributions: true,
     requireApproval: false,
     revenueShare: { creator: 70, collection: 20, platform: 10 },
-    creators: ['0x123...'],
-    stories: [],
-    ipAssets: [],
-    tags: [],
-    totalEarnings: 0,
-    memberCount: 1,
-    storyCount: 0,
-    totalReads: 0,
-    createdAt: new Date(),
-    updatedAt: new Date()
+    creators: ['0x123...' as Address, '0x456...' as Address],
+    stories: ['story-1', 'story-2'],
+    ipAssets: ['ip-1', 'ip-2'],
+    genre: 'Mystery',
+    theme: 'Detective Stories',
+    tags: ['mystery', 'detective', 'thriller'],
+    totalEarnings: 1250,
+    memberCount: 5,
+    storyCount: 12,
+    totalReads: 2340,
+    createdAt: new Date('2024-01-15'),
+    updatedAt: new Date('2024-01-20')
   }
 }
 
 async function addStoryToCollection(
   collectionId: string,
   storyId: string,
-  authorAddress: string
+  authorAddress: Address
 ): Promise<StoryCollection> {
   // TODO: Implement actual database update
   console.log('Adding story to collection:', { collectionId, storyId, authorAddress })
