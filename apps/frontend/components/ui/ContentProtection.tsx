@@ -121,6 +121,9 @@ export default function ContentProtection({ children, className = '' }: ContentP
     const threshold = 160
 
     const detectDevTools = () => {
+      // TEMPORARILY DISABLED FOR DEBUGGING
+      // Uncomment this code when ready to re-enable developer tools protection
+      /*
       if (
         window.outerHeight - window.innerHeight > threshold ||
         window.outerWidth - window.innerWidth > threshold
@@ -133,10 +136,12 @@ export default function ContentProtection({ children, className = '' }: ContentP
       } else {
         devtools.open = false
       }
+      */
     }
 
     // Check for dev tools every 500ms
-    const devToolsInterval = setInterval(detectDevTools, 500)
+    // TEMPORARILY DISABLED FOR DEBUGGING
+    // const devToolsInterval = setInterval(detectDevTools, 500)
 
     // Cleanup function
     return () => {
@@ -146,7 +151,7 @@ export default function ContentProtection({ children, className = '' }: ContentP
       document.removeEventListener('drop', disableDragDrop)
       document.removeEventListener('selectstart', disableSelection)
       document.removeEventListener('copy', clearClipboard)
-      clearInterval(devToolsInterval)
+      // clearInterval(devToolsInterval)
     }
   }, [])
 

@@ -61,7 +61,16 @@ export default function PublishingModal({
       setPublishingOption(null)
       resetPublishing()
     }
-  }, [isOpen, resetPublishing])
+  }, [isOpen])
+
+  // Debug state changes
+  useEffect(() => {
+    console.log('Current step changed to:', currentStep)
+  }, [currentStep])
+
+  useEffect(() => {
+    console.log('Publishing option changed to:', publishingOption)
+  }, [publishingOption])
 
   const handleWalletConnect = async () => {
     try {
@@ -200,8 +209,12 @@ export default function PublishingModal({
                     {/* Simple Publishing */}
                     <motion.button
                       onClick={() => {
+                        console.log('🚀 Simple Publish clicked!')
+                        console.log('📊 Current step before:', currentStep)
+                        console.log('🔧 Publishing option before:', publishingOption)
                         setPublishingOption('simple')
                         setCurrentStep('wallet')
+                        console.log('✅ Should transition to wallet step')
                       }}
                       whileHover={{ scale: 1.02 }}
                       className={`p-6 border-2 rounded-xl text-left transition-all ${
