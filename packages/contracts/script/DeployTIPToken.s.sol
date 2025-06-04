@@ -6,16 +6,26 @@ import "../src/TIPToken.sol";
 
 contract DeployTIPToken is Script {
     function run() external {
-        // Read private key as string and convert to uint256
+        // Read private key as string
         string memory privateKeyStr = vm.envString("PRIVATE_KEY");
 
-        // Add 0x prefix if not present
+        // Convert to uint256 - vm.parseUint will handle both formats
         uint256 deployerPrivateKey;
-        if (bytes(privateKeyStr).length == 64) {
-            // No 0x prefix, add it
-            privateKeyStr = string(abi.encodePacked("0x", privateKeyStr));
+
+        // Try parsing as-is first (in case it has 0x prefix)
+        if (bytes(privateKeyStr).length == 66) {
+            // Likely has 0x prefix
+            deployerPrivateKey = vm.parseUint(privateKeyStr);
+        } else if (bytes(privateKeyStr).length == 64) {
+            // No 0x prefix, add it manually for parseUint
+            deployerPrivateKey = vm.parseUint(
+                string.concat("0x", privateKeyStr)
+            );
+        } else {
+            revert(
+                "Invalid private key length. Expected 64 characters (no 0x) or 66 characters (with 0x)"
+            );
         }
-        deployerPrivateKey = vm.parseUint(privateKeyStr);
 
         address deployer = vm.addr(deployerPrivateKey);
 
