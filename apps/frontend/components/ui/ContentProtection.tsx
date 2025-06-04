@@ -151,32 +151,19 @@ export default function ContentProtection({ children, className = '' }: ContentP
   }, [])
 
   return (
-    <div 
-      className={`
-        select-none 
-        pointer-events-auto
-        ${className}
-      `}
+    <div
+      className="relative"
       style={{
-        // CSS-based selection prevention
         userSelect: 'none',
         WebkitUserSelect: 'none',
         MozUserSelect: 'none',
         msUserSelect: 'none',
-        
-        // Prevent highlighting
         WebkitTouchCallout: 'none',
         WebkitTapHighlightColor: 'transparent',
-        
-        // Disable drag
-        WebkitUserDrag: 'none',
-        
-        // Prevent image saving
-        pointerEvents: 'none',
+        // Use a CSS variable for WebkitUserDrag
+        ...({ WebkitUserDrag: 'none' } as any),
       }}
       onDragStart={(e) => e.preventDefault()}
-      onContextMenu={(e) => e.preventDefault()}
-      onSelectStart={(e) => e.preventDefault()}
     >
       <div style={{ pointerEvents: 'auto' }}>
         {children}
