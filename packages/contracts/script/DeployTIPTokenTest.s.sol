@@ -6,24 +6,34 @@ import "../src/TIPTokenTest.sol";
 
 contract DeployTIPTokenTest is Script {
     function run() external {
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        // Read private key as string and convert to uint256
+        string memory privateKeyStr = vm.envString("PRIVATE_KEY");
+
+        // Add 0x prefix if not present
+        uint256 deployerPrivateKey;
+        if (bytes(privateKeyStr).length == 64) {
+            // No 0x prefix, add it
+            privateKeyStr = string(abi.encodePacked("0x", privateKeyStr));
+        }
+        deployerPrivateKey = vm.parseUint(privateKeyStr);
+
         address deployer = vm.addr(deployerPrivateKey);
-        
+
         console.log("Deploying TIP Token Test...");
         console.log("Deployer address:", deployer);
-        
+
         vm.startBroadcast(deployerPrivateKey);
-        
+
         // Deploy TIP Token Test
         TIPTokenTest tipTokenTest = new TIPTokenTest(deployer);
-        
+
         console.log("TIP Token Test deployed at:", address(tipTokenTest));
         console.log("Initial supply:", tipTokenTest.balanceOf(deployer));
         console.log("Symbol:", tipTokenTest.symbol());
         console.log("Name:", tipTokenTest.name());
-        
+
         vm.stopBroadcast();
-        
+
         // Print deployment info
         console.log("\n=== Test Deployment Complete ===");
         console.log("Contract Address:", address(tipTokenTest));
@@ -34,4 +44,4 @@ contract DeployTIPTokenTest is Script {
         console.log("2. Add contract address to TIP_TOKEN_CONFIG");
         console.log("3. This is a TEST token - use for development only");
     }
-} 
+}

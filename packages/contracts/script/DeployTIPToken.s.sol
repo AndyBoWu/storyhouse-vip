@@ -6,7 +6,17 @@ import "../src/TIPToken.sol";
 
 contract DeployTIPToken is Script {
     function run() external {
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        // Read private key as string and convert to uint256
+        string memory privateKeyStr = vm.envString("PRIVATE_KEY");
+
+        // Add 0x prefix if not present
+        uint256 deployerPrivateKey;
+        if (bytes(privateKeyStr).length == 64) {
+            // No 0x prefix, add it
+            privateKeyStr = string(abi.encodePacked("0x", privateKeyStr));
+        }
+        deployerPrivateKey = vm.parseUint(privateKeyStr);
+
         address deployer = vm.addr(deployerPrivateKey);
 
         console.log("Deploying TIP Token...");
