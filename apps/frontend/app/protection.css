@@ -1,0 +1,115 @@
+/* StoryHouse.vip - Content Protection Styles */
+
+/* Prevent text selection across all browsers */
+.protected-content {
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+  
+  /* Prevent image dragging */
+  -webkit-user-drag: none !important;
+  -khtml-user-drag: none !important;
+  -moz-user-drag: none !important;
+  -o-user-drag: none !important;
+  user-drag: none !important;
+  
+  /* Prevent touch callouts on mobile */
+  -webkit-touch-callout: none !important;
+  -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
+  
+  /* Prevent context menu */
+  pointer-events: auto !important;
+}
+
+/* Disable selection for all text elements */
+.protected-content p,
+.protected-content h1,
+.protected-content h2,
+.protected-content h3,
+.protected-content span,
+.protected-content div {
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+}
+
+/* Prevent highlighting */
+.protected-content::selection {
+  background: transparent !important;
+}
+
+.protected-content::-moz-selection {
+  background: transparent !important;
+}
+
+/* Hide content from print */
+@media print {
+  .protected-content {
+    display: none !important;
+    visibility: hidden !important;
+  }
+  
+  body::after {
+    content: "⚠️ This content is protected and cannot be printed.";
+    font-size: 24px;
+    text-align: center;
+    display: block;
+    margin-top: 50vh;
+  }
+}
+
+/* Disable image context menu and dragging */
+.protected-content img {
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+  -webkit-user-drag: none !important;
+  -moz-user-drag: none !important;
+  user-drag: none !important;
+  pointer-events: none !important;
+}
+
+/* Prevent copy via CSS */
+.no-copy {
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+  
+  /* Additional protection */
+  -webkit-touch-callout: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-user-drag: none !important;
+  -khtml-user-drag: none !important;
+  -moz-user-drag: none !important;
+  -o-user-drag: none !important;
+  user-drag: none !important;
+}
+
+/* Hide content from accessibility tools that might be used for scraping */
+.protected-content {
+  speak: none !important;
+  aria-hidden: true;
+}
+
+/* Disable outline that might help with automated selection */
+.protected-content *:focus {
+  outline: none !important;
+}
+
+/* Make content harder to identify programmatically */
+.protected-content {
+  font-family: inherit;
+  color: inherit;
+  background: inherit;
+}
+
+/* Anti-screenshot protection (limited effectiveness) */
+.protected-content {
+  filter: contrast(1.01);
+  transform: translateZ(0);
+  will-change: transform;
+} 

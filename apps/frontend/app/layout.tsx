@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter, Merriweather } from 'next/font/google'
 import './globals.css'
+import './protection.css'
 import Web3Provider from '@/components/Web3Provider'
+import AntiScrapeHeaders from '@/components/ui/AntiScrapeHeaders'
 
 // Configure reading-optimized fonts
 const inter = Inter({
@@ -55,6 +57,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`scroll-smooth ${inter.variable} ${merriweather.variable}`}>
+      <head>
+        <AntiScrapeHeaders />
+      </head>
       <body className="min-h-screen font-sans antialiased">
         <Web3Provider>
           {children}
