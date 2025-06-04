@@ -3,6 +3,36 @@
  * Exports types, services, and utilities for StoryHouse.vip
  */
 
+import type { StoryAnalytics } from './types/enhanced'
+
+// Export all enhanced types
+export type {
+  EnhancedStory,
+  EnhancedChapter,
+  EnhancedUser,
+  EnhancedRemixLicense,
+  StoryCollection,
+  IPOperationRecord,
+  EnhancedApiResponse,
+  EnhancedStoryCreationParams,
+  EnhancedGeneratedStory,
+  EnhancedReadingSession,
+  StoryAnalytics,
+  StoryWithOptionalIP,
+  ChapterWithOptionalIP,
+  UserWithOptionalIP
+} from './types/enhanced'
+
+// Export enhanced type guards and helpers
+export {
+  isEnhancedStory,
+  isEnhancedChapter,
+  isEnhancedUser,
+  enhanceStory,
+  enhanceChapter,
+  enhanceUser
+} from './types/enhanced'
+
 // Export all IP-related types
 export type {
   IPAsset,
@@ -14,7 +44,6 @@ export type {
   StoryWithIP,
   ChapterWithIP,
   LicenseTier,
-  StoryCollection,
   IPOperation,
   StoryProtocolConfig,
   RegisterIPAssetResponse,
@@ -32,10 +61,16 @@ export {
   defaultStoryProtocolConfig
 } from './services/ipService'
 
+// Export data service
+export {
+  DataService,
+  createDataService
+} from './services/dataService'
+
 // Re-export viem types for convenience
 export type { Address, Hash } from 'viem'
 
-// Export all types
+// Export all original types
 export * from './types';
 
 // Export all constants
@@ -72,4 +107,56 @@ export const isValidEthereumAddress = (address: string): boolean => {
 export const formatTimestamp = (timestamp: Date | string | number): string => {
   const date = new Date(timestamp);
   return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+};
+
+// Story Collection utilities
+export const calculateCollectionRevenue = (
+  totalRevenue: number,
+  revenueShare: { creator: number; collection: number; platform: number }
+): { creatorShare: number; collectionShare: number; platformShare: number } => {
+  return {
+    creatorShare: (totalRevenue * revenueShare.creator) / 100,
+    collectionShare: (totalRevenue * revenueShare.collection) / 100,
+    platformShare: (totalRevenue * revenueShare.platform) / 100
+  };
+};
+
+// IP operation utilities
+export const getOperationDisplayName = (operationType: string): string => {
+  const displayNames: Record<string, string> = {
+    register: 'Register IP Asset',
+    license: 'Create License',
+    derivative: 'Register Derivative',
+    royalty: 'Claim Royalties',
+    collection: 'Join Collection'
+  };
+  return displayNames[operationType] || operationType;
+};
+
+// License tier utilities
+export const getTierByPrice = (price: number): 'standard' | 'premium' | 'exclusive' | 'custom' => {
+  if (price === 100) return 'standard';
+  if (price === 500) return 'premium';
+  if (price === 2000) return 'exclusive';
+  return 'custom';
+};
+
+// Analytics utilities
+export const calculateEngagementScore = (analytics: StoryAnalytics): number => {
+  const readWeight = 0.3;
+  const completionWeight = 0.25;
+  const socialWeight = 0.25;
+  const revenueWeight = 0.2;
+
+  const normalizedReads = Math.min(analytics.totalReads / 1000, 1);
+  const normalizedCompletion = analytics.completionRate / 100;
+  const normalizedSocial = Math.min((analytics.likes + analytics.shares + analytics.comments) / 100, 1);
+  const normalizedRevenue = Math.min(analytics.totalRewards / 10000, 1);
+
+  return Math.round(
+    (normalizedReads * readWeight +
+     normalizedCompletion * completionWeight +
+     normalizedSocial * socialWeight +
+     normalizedRevenue * revenueWeight) * 100
+  );
 };
