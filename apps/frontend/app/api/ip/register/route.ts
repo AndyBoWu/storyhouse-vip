@@ -9,6 +9,7 @@ import type {
   EnhancedApiResponse,
   StoryWithIP
 } from '@storyhouse/shared'
+import { parseBlockchainError } from '@shared/utils/blockchainErrors'
 
 interface IPRegistrationRequest {
   storyId: string
@@ -61,14 +62,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Initialize Story Protocol service
-    const ipService = createIPService(defaultStoryProtocolConfig)
+    const ipService = createIPService()
 
     // Check if service is available
     if (!ipService.isAvailable()) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Story Protocol service not available'
+          error: 'Story Protocol blockchain not available. Please check configuration.'
         },
         { status: 503 }
       )
@@ -92,79 +93,75 @@ export async function POST(request: NextRequest) {
       isDerivative: false
     }
 
-    // Mock NFT contract and token ID for now
-    // In production, this would come from your actual NFT minting process
-    const nftContract = '0x1234567890123456789012345678901234567890' as `0x${string}`
-    const tokenId = `${Date.now()}` // Simple token ID generation
+    // **REAL BLOCKCHAIN INTEGRATION** - Replace mock with actual calls
+    try {
+      // Register the story as an IP Asset on Story Protocol
+      const registrationResult = await ipService.registerStoryAsIPAsset(
+        story,
+        '0xc32A8a0FF3beDDDa58393d022aF433e78739FAbc' as Address, // Public SPG contract
+        '1',
+        body.authorAddress as Address
+      )
 
-    // Register the story as an IP Asset
-    const registrationResult = await ipService.registerStoryAsIPAsset(
-      story,
-      nftContract,
-      tokenId,
-      body.authorAddress as `0x${string}`
-    )
-
-    if (!registrationResult.success) {
-      return NextResponse.json(
-        {
+      if (!registrationResult.success) {
+        return NextResponse.json({
           success: false,
-          error: registrationResult.error || 'IP registration failed'
-        },
-        { status: 500 }
-      )
-    }
-
-    // Create license terms if registration succeeded
-    let licenseTermsResult = null
-    if (registrationResult.success && registrationResult.ipAsset) {
-      const defaultTiers = ipService.getDefaultLicenseTiers()
-      const selectedTier = defaultTiers[body.licenseType] || defaultTiers.standard
-
-      const royaltyPolicyAddress = '0x0000000000000000000000000000000000000000' as `0x${string}` // Mock address
-
-      licenseTermsResult = await ipService.createLicenseTermsForTier(
-        selectedTier,
-        royaltyPolicyAddress,
-        body.authorAddress as `0x${string}`
-      )
-    }
-
-    // Prepare response
-    const response: EnhancedApiResponse<any> = {
-      success: true,
-      data: {
-        ipAssetId: registrationResult.ipAsset?.id,
-        transactionHash: registrationResult.transactionHash,
-        licenseTermsId: licenseTermsResult?.licenseTerms?.id,
-        registrationCost: BigInt('1000000000000000000'), // 1 ETH mock cost
-        estimatedGas: BigInt('250000'),
-        gasUsed: BigInt('200000'),
-        blockNumber: BigInt('12345678'),
-        licenseTier: {
-          name: body.licenseType,
-          displayName: body.licenseType.charAt(0).toUpperCase() + body.licenseType.slice(1) + ' License',
-          price: BigInt('100000000000000000000'), // Mock price
-          royaltyPercentage: body.customLicense?.royaltyPercentage || 5,
-          terms: {
-            commercialUse: body.commercialRights,
-            derivativesAllowed: body.derivativeRights,
-            attribution: true,
-            shareAlike: false,
-            exclusivity: body.licenseType === 'exclusive'
-          }
-        }
-      },
-      message: 'IP asset registration initiated successfully',
-      ipData: {
-        operationId: `reg_${Date.now()}_${body.storyId}`,
-        transactionHash: registrationResult.transactionHash,
-        ipAssetId: registrationResult.ipAsset?.id,
-        gasUsed: BigInt('200000')
+          error: registrationResult.error || 'IP Asset registration failed'
+        }, { status: 400 })
       }
-    }
 
-    return NextResponse.json(response, { status: 200 })
+      // Create license terms for the specified tier
+      const defaultLicenseTiers = ipService.getDefaultLicenseTiers()
+      const selectedTier = defaultLicenseTiers[body.licenseType] || defaultLicenseTiers.standard
+
+      const licenseResult = await ipService.createLicenseTermsForTier(
+        selectedTier,
+        '0xBe54FB168b3c982b7AaE60dB6CF75Bd8447b390E' as Address, // RoyaltyPolicyLAP
+        body.authorAddress as Address
+      )
+
+      if (!licenseResult.success) {
+        console.warn('⚠️ License creation failed, IP registered without license:', licenseResult.error)
+      }
+
+      // Attach license to IP Asset if license creation succeeded
+      let licenseAttachResult = null
+      if (licenseResult.success && licenseResult.licenseTerms) {
+        licenseAttachResult = await ipService.attachLicenseToIPAsset(
+          registrationResult.ipAsset!.id,
+          licenseResult.licenseTerms.id,
+          body.authorAddress as Address
+        )
+      }
+
+      return NextResponse.json({
+        success: true,
+        ipAsset: registrationResult.ipAsset,
+        licenseTerms: licenseResult.licenseTerms,
+        transactionHashes: {
+          ipRegistration: registrationResult.transactionHash,
+          licenseCreation: licenseResult.transactionHash,
+          licenseAttachment: licenseAttachResult?.transactionHash
+        },
+        blockchainStatus: {
+          connected: true,
+          network: ipService.getConfig().network || 'aeneid'
+        }
+      })
+
+    } catch (error: any) {
+      const blockchainError = parseBlockchainError(error)
+      console.error('❌ Blockchain operation failed:', blockchainError)
+
+      return NextResponse.json({
+        success: false,
+        error: blockchainError.userMessage,
+        blockchainStatus: {
+          connected: false,
+          error: blockchainError.type
+        }
+      }, { status: 500 })
+    }
 
   } catch (error: any) {
     console.error('IP registration error:', error)
