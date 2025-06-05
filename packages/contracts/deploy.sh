@@ -23,10 +23,12 @@ export PRIVATE_KEY
 echo ""
 echo "🔧 Deploying TIP Token to Story Protocol Aeneid Testnet..."
 echo "📡 RPC: https://aeneid.storyrpc.io"
+echo "⛽ Gas: 2 Gwei (network shows ~1.5 Gwei, using 2 Gwei for fast confirmation)"
+echo "📦 Using legacy transaction format for compatibility"
 echo ""
 
-# Run the deployment
-forge script script/DeployTIPToken.s.sol --rpc-url story_testnet --broadcast
+# Run the deployment with 2 gwei gas price and legacy transaction format
+forge script script/DeployTIPToken.s.sol --rpc-url story_testnet --broadcast --gas-price 2000000000 --legacy
 
 # Store the exit code
 DEPLOY_EXIT_CODE=$?

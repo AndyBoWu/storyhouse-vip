@@ -33,7 +33,7 @@ export const config = createConfig({
 
 // TIP Token Contract Configuration
 export const TIP_TOKEN_CONFIG = {
-  address: '0x0000000000000000000000000000000000000000' as const, // Placeholder - needs actual contract address when deployed
+  address: '0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E' as const, // Successfully deployed TIP token contract
   abi: [
     // Standard ERC-20 ABI
     {
