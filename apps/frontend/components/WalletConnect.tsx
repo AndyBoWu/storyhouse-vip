@@ -36,9 +36,7 @@ export default function WalletConnect() {
   // Get TIP token balance (when contract is deployed)
   const { data: tipBalance } = useBalance({
     address,
-    token: TIP_TOKEN_CONFIG.address !== '0x0000000000000000000000000000000000000000'
-      ? TIP_TOKEN_CONFIG.address
-      : undefined,
+    token: TIP_TOKEN_CONFIG.address,
     chainId: storyProtocolTestnet.id,
   })
 
