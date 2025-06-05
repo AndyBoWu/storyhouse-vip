@@ -6,15 +6,34 @@
 
 🚀 **Try it now**: [https://testnet.storyhouse.vip/](https://testnet.storyhouse.vip/)
 
-## 🎯 **STATUS: PRODUCTION OPTIMIZED**
+## 🎯 **STATUS: PRODUCTION READY**
 
-✅ **Phase 4.4 COMPLETE** - Real blockchain integration with Story Protocol
-✅ **Monorepo OPTIMIZED** - Clean architecture, 0 vulnerabilities, 99% test coverage
+✅ **Phase 4.5 COMPLETE** - Smart contracts deployed and fully operational
+✅ **Smart Contract Ecosystem** - 6 contracts deployed on Story Protocol Aeneid testnet
+✅ **Monorepo OPTIMIZED** - Clean architecture, comprehensive test coverage
 ✅ **Core Innovation Working** - Chapter-level IP registration ($50-500 vs $1000+ books)
 ✅ **Read-to-Earn System** - Users earn $TIP tokens for reading chapters
 ✅ **AI-Powered Creation** - GPT-4 integration for story generation
 ✅ **Remix Economy** - Licensing and derivative content creation
 ✅ **Live Testnet** - Full user journey with real blockchain transactions
+
+## 🔗 **SMART CONTRACT ADDRESSES**
+
+**Network**: Story Protocol Aeneid Testnet (Chain ID: 1315)
+**Deployment Date**: June 4, 2025
+**Status**: ✅ **FULLY OPERATIONAL**
+
+| Contract                       | Address                                      | Purpose                         |
+| ------------------------------ | -------------------------------------------- | ------------------------------- |
+| **TIP Token**                  | `0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E` | Core utility token for rewards  |
+| **Rewards Manager**            | `0xf5ae031ba92295c2ae86a99e88f09989339707e5` | Central reward distribution hub |
+| **Creator Rewards Controller** | `0x8e2d21d1b9c744f772f15a7007de3d5757eea333` | Creator incentive system        |
+| **Read Rewards Controller**    | `0x04553ba8316d407b1c58b99172956d2d5fe100e5` | Reader engagement rewards       |
+| **Remix Licensing Controller** | `0x16144746a33d9a172039efc64bc2e12445fbbef2` | IP licensing & derivatives      |
+| **Access Control Manager**     | `0x41e2db0d016e83ddc3c464ffd260d22a6c898341` | Role-based permissions          |
+
+**🔗 Explorer**: [Story Protocol Block Explorer](https://aeneid.storyscan.xyz)
+**💰 Total Deployment Cost**: ~0.0144 ETH (~$30-40 USD)
 
 ---
 
@@ -59,7 +78,10 @@ storyhouse-vip/
 │       ├── lib/               # Client utilities
 │       └── public/            # Static assets
 ├── packages/
-│   ├── contracts/              # Hardhat smart contracts (131/132 tests ✅)
+│   ├── contracts/              # Smart contracts (DEPLOYED ✅)
+│   │   ├── deployments.json   # Contract addresses & metadata
+│   │   ├── deployments.txt    # Human-readable deployment summary
+│   │   └── .env.deployed      # Environment variables
 │   └── shared/                 # TypeScript utilities & Story Protocol
 ├── docs/                       # Comprehensive documentation (12 files)
 │   ├── product/               # Product specs & UX wireframes
@@ -90,12 +112,12 @@ storyhouse-vip/
 
 ### **Smart Contracts** (OpenZeppelin 5.3.0)
 
-- ✅ **131/132 Tests Passing** (99.2% success rate)
-- ✅ **Security Audited** - 0 vulnerabilities
-- ✅ **Production Ready** - Comprehensive test coverage
+- ✅ **6 Contracts Deployed** - Full ecosystem operational
+- ✅ **Production Ready** - All relationships configured
 - ✅ **TIP Token System** - Read-to-earn token economics
 - ✅ **Reward Distribution** - Automated reader incentives
 - ✅ **Remix Licensing** - Derivative content management
+- ✅ **Access Control** - Role-based permission management
 
 ### **AI Integration** (OpenAI GPT-4)
 
@@ -126,6 +148,9 @@ npm install
 cp .env.example .env.local
 # Add your Story Protocol testnet keys and OpenAI API key
 
+# Load smart contract addresses
+source packages/contracts/.env.deployed
+
 # Start development
 npm run dev
 ```
@@ -147,7 +172,7 @@ Our documentation has been completely restructured for easy navigation:
 
 - **[Technical Overview](./docs/technical/OVERVIEW.md)** - Architecture and technical stack
 - **[API Documentation](./docs/technical/API.md)** - REST API endpoints and usage
-- **[Smart Contracts](./docs/technical/CONTRACTS.md)** - Contract architecture and testing
+- **[Smart Contracts](./docs/technical/CONTRACTS.md)** - Contract architecture and deployment details
 - **[Story Protocol Integration](./docs/technical/STORY_PROTOCOL.md)** - Blockchain integration details
 
 ### **📋 Project Management**
@@ -193,6 +218,14 @@ Our documentation has been completely restructured for easy navigation:
 - **Writers**: Create content with AI → Register chapter IP → Earn from sales & licensing
 - **Readers**: Browse stories → Read 3 chapters FREE → Connect wallet → Earn while reading
 - **Remixers**: Find content → Pay licensing fee → Create derivatives with AI → Earn revenue
+
+### **Smart Contract Integration**
+
+- **Production Ready**: All 6 smart contracts deployed and operational
+- **Read-to-Earn**: Real $TIP token rewards for chapter completion
+- **Creator Rewards**: Automated payments for content creation milestones
+- **Licensing System**: Automated remix rights and royalty distribution
+- **Access Control**: Role-based permissions for all ecosystem participants
 
 ### **Local Development**
 
