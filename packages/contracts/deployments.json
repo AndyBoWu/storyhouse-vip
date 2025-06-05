@@ -1,0 +1,84 @@
+{
+  "networks": {
+    "story-protocol-aeneid": {
+      "chainId": 1315,
+      "rpcUrl": "https://aeneid.storyrpc.io",
+      "explorer": "https://aeneid.storyscan.xyz",
+      "deployer": "0xD9b6d1bd7D8A90915B905EB801c55bA5De1d4476",
+      "deploymentDate": "2024-06-04",
+      "contracts": {
+        "TIPToken": {
+          "address": "0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E",
+          "deploymentTx": "0x63155f282d0b8b1de4a023a21098ef4aa699971e1a1cafa577f8a003e3eeaa81",
+          "block": 5168411,
+          "gasUsed": 1074706,
+          "status": "deployed",
+          "verified": false
+        },
+        "AccessControlManager": {
+          "address": "0x97460c081884B8D7FD1801962ff2Bf7Ac309FCC2",
+          "deploymentTx": "0x2412285a3043722cb4c8ed75bf841178dc5a3bb89079bd3f8e8478f417b1d616",
+          "block": 5177964,
+          "gasUsed": 1992848,
+          "status": "deployed",
+          "verified": false
+        },
+        "RewardsManager": {
+          "address": "0x0b529Ab76789A15E4e12E8acAa68bf6B45924200",
+          "deploymentTx": "0xd1a6bf4c3422251eb79ab98378b644ba71134cea05238d6638fb31939d18dace",
+          "block": 5177968,
+          "gasUsed": 1305447,
+          "status": "deployed",
+          "verified": false,
+          "dependencies": {
+            "tipToken": "0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E"
+          }
+        },
+        "CreatorRewardsController": {
+          "address": "0x7C94efb0A8a1Bb20b4E3382A9497d46197ED913d",
+          "deploymentTx": "0x9c186b17e8478a0fcb699744bb239db88ff6934b295d4ceccd770b921314cca9",
+          "block": 5177973,
+          "gasUsed": 1820312,
+          "status": "deployed",
+          "verified": false,
+          "needsConfiguration": true,
+          "dependencies": {
+            "rewardsManager": "0x0b529Ab76789A15E4e12E8acAa68bf6B45924200"
+          }
+        },
+        "ReadRewardsController": {
+          "address": "0x309f2Ff91c880bF835afcB49993a2c7c4c7bb41d",
+          "deploymentTx": "0xa4cfb1598d43767637aa3dd4250ce3e27ccba67a0ce9bae404a99eb62aa05ddd",
+          "block": 5177978,
+          "gasUsed": 1316881,
+          "status": "deployed",
+          "verified": false,
+          "needsConfiguration": true,
+          "dependencies": {
+            "rewardsManager": "0x0b529Ab76789A15E4e12E8acAa68bf6B45924200"
+          }
+        },
+        "RemixLicensingController": {
+          "address": "0xc62fd31dD3ba6f52946f631336445EF70A26A252",
+          "deploymentTx": "0xcf4d9e59aac554f7da28063563023de053b4949d87badfa653d4a6ed005caacd",
+          "block": 5177983,
+          "gasUsed": 1848020,
+          "status": "deployed",
+          "verified": false,
+          "needsConfiguration": true,
+          "dependencies": {
+            "rewardsManager": "0x0b529Ab76789A15E4e12E8acAa68bf6B45924200",
+            "tipToken": "0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E"
+          }
+        }
+      },
+      "summary": {
+        "totalContracts": 6,
+        "totalGasUsed": 9357814,
+        "totalCostETH": "0.014039031063",
+        "allDeployed": true,
+        "needsConfiguration": true
+      }
+    }
+  }
+} 
