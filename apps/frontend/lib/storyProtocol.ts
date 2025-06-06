@@ -67,9 +67,15 @@ export class StoryProtocolService {
       console.log('🌐 Content URL:', chapterData.contentUrl)
       console.log('👤 Wallet:', walletClient.account.address)
 
+      // Check if SPG NFT contract is configured
+      const spgNftContract = process.env.STORY_SPG_NFT_CONTRACT
+      if (!spgNftContract || spgNftContract === '0x_your_spg_nft_contract_address_optional') {
+        throw new Error('SPG NFT Contract not configured. Please deploy an SPG NFT contract or use an existing one.')
+      }
+
       // Use mintAndRegisterIp to create both NFT and IP Asset
       const registrationResult = await client.ipAsset.mintAndRegisterIp({
-        spgNftContract: (process.env.STORY_SPG_NFT_CONTRACT || '0x') as Address,
+        spgNftContract: spgNftContract as Address,
         ipMetadata: {
           ipMetadataURI,
           ipMetadataHash,
@@ -138,9 +144,11 @@ export class StoryProtocolService {
    * Check if Story Protocol is properly configured (no longer needs private key)
    */
   static isConfigured(): boolean {
+    const spgContract = process.env.STORY_SPG_NFT_CONTRACT
     return !!(
       process.env.STORY_RPC_URL &&
-      process.env.STORY_SPG_NFT_CONTRACT
+      spgContract &&
+      spgContract !== '0x_your_spg_nft_contract_address_optional'
     )
   }
 
@@ -148,9 +156,11 @@ export class StoryProtocolService {
    * Get configuration status for debugging
    */
   static getConfigStatus(walletAddress?: Address) {
+    const spgContract = process.env.STORY_SPG_NFT_CONTRACT
     return {
       hasRpcUrl: !!process.env.STORY_RPC_URL,
-      hasSpgNftContract: !!process.env.STORY_SPG_NFT_CONTRACT,
+      hasSpgNftContract: !!(spgContract && spgContract !== '0x_your_spg_nft_contract_address_optional'),
+      spgNftContract: spgContract || 'Not configured',
       chainId: 'aeneid',
       rpcUrl: process.env.STORY_RPC_URL || 'https://aeneid.storyrpc.io',
       connectedWallet: walletAddress || 'Not connected'
