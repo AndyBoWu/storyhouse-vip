@@ -12,3 +12,10 @@ alwaysApply: false
 - Always use chain of thought reasoning when tackling complex problems or ambiguous requests, breaking them down into logical steps before implementing (not needed for simple, straightforward commands)
 - Think through edge cases and implications before writing code, documenting your reasoning process
 - Explain your approach in comments or commit messages when the solution isn't immediately obvious
+
+# Development Server Management
+- When starting a development server (especially on port 3000), always kill any existing server on that port first before starting a new one
+- Do not start servers on incremental ports (3001, 3002, etc.) - instead restart on the intended port (typically 3000)
+- Use commands like `lsof -ti:3000 | xargs kill -9` or `pkill -f "port 3000"` to kill existing servers before restarting
+- This ensures consistent port usage and avoids confusion with multiple running servers
+- Particularly important for frontend development servers in monorepo environments
