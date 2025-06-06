@@ -4,6 +4,9 @@ globs:
 alwaysApply: false
 ---
 # Coding pattern preferences
+
+> "Remember, code is written for people to read — it just happens to run on machines."
+
 - Always prefer simple solutions
 - Avoid duplication of code whenever possible, which means checking for other areas of the codebase that might already have similar code and functionality
 - Write code that takes into account the different environments: dev, test, and prod
