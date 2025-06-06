@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { generateStoryChapter, StoryGenerationRequest } from '@/lib/ai/openai'
 import { generateMockStory } from '@/lib/ai/mockStoryGenerator'
+import { R2Service } from '@/lib/r2'
 import type {
   EnhancedStoryCreationParams,
   EnhancedGeneratedStory,
@@ -93,19 +94,71 @@ export async function POST(request: NextRequest) {
       commercialViability: calculateCommercialViability(storyResult, generationRequest)
     }
 
+    // Generate unique story and chapter IDs
+    const storyId = body.storyId || `story-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    const chapterNumber = generationRequest.chapterNumber
+
+    // Save content to R2 storage
+    let contentUrl: string | undefined
+    try {
+      const chapterData = {
+        storyId,
+        chapterNumber,
+        content: enhancedResult.content,
+        title: enhancedResult.title,
+        themes: enhancedResult.themes,
+        wordCount: enhancedResult.wordCount,
+        metadata: {
+          suggestedTags: enhancedResult.suggestedTags,
+          suggestedGenre: enhancedResult.suggestedGenre,
+          contentRating: enhancedResult.contentRating,
+          language: enhancedResult.language,
+          qualityScore: enhancedResult.qualityScore,
+          originalityScore: enhancedResult.originalityScore,
+          commercialViability: enhancedResult.commercialViability,
+          generatedAt: new Date().toISOString(),
+        }
+      }
+
+      contentUrl = await R2Service.uploadContent(
+        R2Service.generateChapterKey(storyId, chapterNumber),
+        JSON.stringify(chapterData),
+        {
+          contentType: 'application/json',
+          metadata: {
+            storyId,
+            chapterNumber: chapterNumber.toString(),
+            contentType: 'chapter',
+            generatedAt: new Date().toISOString(),
+          }
+        }
+      )
+
+      console.log(`📚 Chapter ${chapterNumber} saved to R2:`, contentUrl)
+    } catch (r2Error) {
+      console.error('Failed to save to R2:', r2Error)
+      // Continue without failing the entire request
+    }
+
     // Prepare enhanced API response
     const response: EnhancedApiResponse<EnhancedGeneratedStory> = {
       success: true,
-      data: enhancedResult,
+      data: {
+        ...enhancedResult,
+        storyId,
+        chapterNumber,
+        contentUrl, // Add R2 URL to response
+      },
       message: generationRequest.ipOptions?.registerAsIP
-        ? 'Story generated with IP registration metadata'
-        : 'Story generated successfully'
+        ? 'Story generated with IP registration metadata and saved to storage'
+        : 'Story generated successfully and saved to storage'
     }
 
     // Add IP-specific response data if IP registration is requested
     if (generationRequest.ipOptions?.registerAsIP) {
       response.ipData = {
         operationId: `gen-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        contentUrl, // Include R2 URL for IP registration
         // These would be populated after actual IP registration
         transactionHash: undefined,
         ipAssetId: undefined,
