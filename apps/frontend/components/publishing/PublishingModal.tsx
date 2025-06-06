@@ -7,6 +7,7 @@ import { useAccount, useConnect, useDisconnect } from 'wagmi'
 import { injected } from 'wagmi/connectors'
 import { usePublishStory } from '@/hooks/usePublishStory'
 import { getExplorerUrl, getIPAssetUrl } from '@/lib/contracts/storyProtocol'
+import { addPublishedStory, extractPreview, extractGenre } from '@/lib/storage/publishedStories'
 
 interface GeneratedStory {
   title: string
@@ -146,6 +147,26 @@ export default function PublishingModal({
 
       if (result.success) {
         setCurrentStep('success')
+
+        // Save the published story to localStorage for "My Stories" page
+        try {
+          const savedStory = addPublishedStory({
+            title: storyTitle || story.title,
+            genre: extractGenre(story.themes),
+            chapters: chapterNumber,
+            lastUpdated: 'just now',
+            earnings: 0, // Start with 0, will be updated as earnings come in
+            preview: extractPreview(story.content),
+            contentUrl: story.contentUrl || '',
+            transactionHash: result.data?.transactionHash,
+            ipAssetId: result.data?.ipAssetId,
+            tokenId: result.data?.tokenId?.toString(),
+            chapterNumber
+          })
+          console.log('📖 Story saved to local storage:', savedStory)
+        } catch (error) {
+          console.warn('Failed to save story to local storage:', error)
+        }
       } else {
         console.error('Publishing failed:', result.error)
         // Don't reset to options, let the user see the error and try again
