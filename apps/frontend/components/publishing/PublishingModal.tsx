@@ -14,6 +14,7 @@ interface GeneratedStory {
   wordCount: number
   readingTime: number
   themes: string[]
+  contentUrl?: string // R2 URL from story generation
 }
 
 interface PublishingModalProps {
@@ -96,9 +97,25 @@ export default function PublishingModal({
   }
 
   const handlePublish = async () => {
-    if (!address) {
-      console.error('No wallet connected')
-      return
+    // If wallet is not connected, trigger connection first
+    if (!address || !isConnected) {
+      console.log('Wallet not connected, triggering connection...')
+      try {
+        await connect({ connector: injected() })
+        // Wait a bit for the connection to establish
+        await new Promise(resolve => setTimeout(resolve, 1000))
+
+        // Check if connection was successful
+        if (!address) {
+          console.error('Wallet connection failed')
+          alert('Please connect your wallet to publish')
+          return
+        }
+      } catch (error) {
+        console.error('Wallet connection failed:', error)
+        alert('Failed to connect wallet. Please try again.')
+        return
+      }
     }
 
     setCurrentStep('publishing')
@@ -123,19 +140,20 @@ export default function PublishingModal({
         wordCount: story.wordCount,
         readingTime: story.readingTime,
         themes: story.themes,
-        chapterNumber
+        chapterNumber,
+        contentUrl: story.contentUrl // Pass the R2 URL
       }, options)
 
       if (result.success) {
         setCurrentStep('success')
       } else {
         console.error('Publishing failed:', result.error)
-        // The hook will set its own error state, but we need to reset our step
-        setCurrentStep('options')
+        // Don't reset to options, let the user see the error and try again
+        alert(`Publishing failed: ${result.error}`)
       }
     } catch (error) {
       console.error('Publishing error:', error)
-      setCurrentStep('options')
+      alert(`Publishing error: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
 
@@ -149,8 +167,6 @@ export default function PublishingModal({
 
   const getPublishingStepDisplay = () => {
     switch (publishStep) {
-      case 'uploading-ipfs':
-        return { text: 'Uploading content to IPFS...', icon: <Upload className="w-5 h-5" /> }
       case 'minting-nft':
         return { text: 'Minting NFT...', icon: <Coins className="w-5 h-5" /> }
       case 'registering-ip':
@@ -293,7 +309,7 @@ export default function PublishingModal({
                                 Start earning immediately! Perfect for getting your content live quickly.
                               </p>
                               <div className="space-y-1 text-sm">
-                                <div className="text-green-700">✅ Upload to IPFS (decentralized storage)</div>
+                                <div className="text-green-700">✅ Content stored on R2 (global CDN)</div>
                                 <div className="text-green-700">✅ Register as IP Asset on Story Protocol</div>
                                 <div className="text-green-700">✅ Basic IP protection & ownership proof</div>
                                 <div className="text-gray-500">➡️ Add custom licenses later</div>
@@ -407,7 +423,7 @@ export default function PublishingModal({
                     <div className="p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border border-blue-200">
                       <h4 className="font-medium text-blue-900 mb-2">🔗 Decentralized Publishing</h4>
                       <div className="space-y-2 text-sm text-blue-800">
-                        <div>✅ Upload to IPFS (no servers needed)</div>
+                        <div>✅ Content on R2 (global CDN)</div>
                         <div>✅ Register on Story Protocol (Aeneid testnet)</div>
                         <div>✅ You control your own transactions</div>
                         <div>✅ Fully decentralized ownership</div>
@@ -645,8 +661,8 @@ export default function PublishingModal({
                         <h3 className="text-xl font-semibold text-gray-900 mb-2">🚀 Publishing Your Chapter</h3>
                         <p className="text-gray-600">
                           {publishingOption === 'protected'
-                            ? 'Publishing to IPFS and registering IP Asset with custom license terms...'
-                            : 'Publishing to IPFS and registering as IP Asset on Story Protocol...'
+                            ? 'Using R2 storage and registering IP Asset with custom license terms...'
+                            : 'Using R2 storage and registering as IP Asset on Story Protocol...'
                           }
                         </p>
                       </div>
@@ -712,14 +728,35 @@ export default function PublishingModal({
                         <p className="text-gray-600">
                           Finalizing your publication. This should only take a moment.
                         </p>
+                        <p className="text-sm text-orange-600 mt-2">
+                          Stuck? Check your browser console for errors or wallet for pending transactions.
+                        </p>
+                        <button
+                          onClick={() => {
+                            console.log('🔄 Force resetting publishing state...')
+                            resetPublishing()
+                            setCurrentStep('options')
+                          }}
+                          className="text-sm text-red-600 hover:text-red-800 underline mt-2"
+                        >
+                          Force Reset & Try Again
+                        </button>
                       </div>
 
-                      <button
-                        onClick={onClose}
-                        className="px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                      >
-                        Close
-                      </button>
+                      <div className="flex gap-3">
+                        <button
+                          onClick={onClose}
+                          className="flex-1 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                        >
+                          Close
+                        </button>
+                        <button
+                          onClick={() => setCurrentStep('options')}
+                          className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                          Try Again
+                        </button>
+                      </div>
                     </>
                   )}
                 </motion.div>
@@ -739,7 +776,7 @@ export default function PublishingModal({
                   <div>
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">🎉 Chapter Published Successfully!</h3>
                     <p className="text-gray-600">
-                      Your chapter is now on IPFS and registered as an IP Asset on Story Protocol!
+                      Your chapter is now on R2 storage and registered as an IP Asset on Story Protocol!
                     </p>
                   </div>
 
@@ -754,11 +791,11 @@ export default function PublishingModal({
                           </span>
                         </div>
                       )}
-                      {publishResult.data?.ipfsHash && (
+                      {publishResult.data?.contentUrl && (
                         <div className="flex justify-between">
-                          <span className="text-gray-600">IPFS Hash:</span>
+                          <span className="text-gray-600">Content URL:</span>
                           <span className="font-mono text-purple-600 text-xs">
-                            {publishResult.data.ipfsHash.slice(0, 8)}...{publishResult.data.ipfsHash.slice(-6)}
+                            R2 Storage
                           </span>
                         </div>
                       )}
