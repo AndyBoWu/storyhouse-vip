@@ -2,11 +2,11 @@ import { Address, Hash } from 'viem'
 
 // Story Protocol Contract Addresses on Aeneid Testnet
 export const STORY_PROTOCOL_CONTRACTS = {
-  // These are placeholder addresses - need to be updated with real Aeneid testnet addresses
-  IP_ASSET_REGISTRY: '0x1a3d0D55f1847ab5aF789Ee27b7A2c4a8f5B1D7c' as Address,
-  LICENSE_REGISTRY: '0x2b4e1E66f2948bc6aF890Ff28c7B3c5a9f6C2E8d' as Address,
-  ROYALTY_MODULE: '0x3c5f2F77f3959cd7aF991Fg29d8D4d6b0f7D3F9e' as Address,
-  SPG_NFT: '0x4d6g3G88g4060de8aG002Gh30e9E5e7c1g8E4G0f' as Address,
+  // Real deployed contract addresses on Story Protocol Aeneid testnet
+  IP_ASSET_REGISTRY: '0x77319B4031e6eF1250907aa00018B8B1c67a244b' as Address,
+  LICENSE_REGISTRY: '0xbe39E1C756e921BD25DF86e7AAa31106d1eb0424' as Address, // Using Registration Workflows
+  ROYALTY_MODULE: '0x3456789012345678901234567890123456789012' as Address, // TODO: Find real address
+  SPG_NFT: '0xc32A8a0FF3beDDDa58393d022aF433e78739FAbc' as Address, // Test collection from docs
 } as const
 
 // Story Protocol ABI fragments for the functions we need
@@ -35,9 +35,9 @@ export const LICENSE_REGISTRY_ABI = [
     type: 'function',
     stateMutability: 'nonpayable',
     inputs: [
-      { 
-        name: 'terms', 
-        type: 'tuple', 
+      {
+        name: 'terms',
+        type: 'tuple',
         components: [
           { name: 'transferable', type: 'bool' },
           { name: 'royaltyPolicy', type: 'address' },
@@ -182,4 +182,4 @@ export const GAS_LIMITS = {
   REGISTER_IP_ASSET: BigInt(300000),
   CREATE_LICENSE_TERMS: BigInt(250000),
   ATTACH_LICENSE: BigInt(150000)
-} as const 
+} as const
