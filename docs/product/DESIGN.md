@@ -2321,6 +2321,246 @@ Date: June 1, 2025
 
 Would you like me to dive deeper into any of these wireframes or create additional screens for specific interactions?
 
+---
+
+# **ENHANCED BRANCHING & LICENSING MODEL**
+
+## 🎯 **User Scenario: Multi-Author Story Branching**
+
+**Characters**: Andy (Original), Boris (Sci-Fi Remixer), Cecilia (Romance Remixer), Daisy (Alternative Remixer), Emma (Reader)
+
+### **Story Branching Visualization**
+
+**Git-Style Branching Model:** Similar to software development, stories can branch and merge, creating multiple narrative paths.
+
+```
+🎯 Branch Structure:
+• Main Branch (Gray): Andy's Original "Portal Chronicles"
+• Feature A (Blue): Boris' Sci-Fi Branch "Cyberpunk Edition"
+• Feature A-1 (Green): Cecilia's Romance Branch "Love & Circuits"
+• Feature B (Orange): Daisy's Dark Branch "Dark Path"
+```
+
+**Key Branching Rules:**
+
+- ✅ **Free chapters (1-3)** are inherited by all branches
+- 💰 **Paid chapters (4+)** require licensing fees to remix
+- 🔄 **License fees** paid to immediate parent author
+- 📈 **Royalties** flow from successful derivatives
+
+**Visual Story Map:**
+
+```
+Ch1 FREE → Ch2 FREE → Ch3 FREE
+                        ↓
+         ┌─────────────────────────────────────┐
+         ↓ (Main: Andy Original)                ↓ (Boris Sci-Fi Branch)
+    Ch4 Andy → Ch5 → Ch6 → Ch7 → Ch8 → Ch9 → Ch10
+                                   ↓
+                              Ch9 Daisy Dark
+
+                        Ch4 Boris → Ch5 → Ch6 → Ch7 → Ch8
+                                                      ↓
+                                                Ch9 Cecilia Romance
+```
+
+**Branch Details:**
+
+- **Main (Andy)**: 🔮 Fantasy adventure, chapters 4-10 paid
+- **Boris**: 🚀 Sci-fi transformation, branches from chapter 4
+- **Cecilia**: 🌹 Romance elements, branches from Boris' chapter 8
+- **Daisy**: ⚡ Dark alternative, branches from Andy's chapter 8
+
+### **Chapter Selection Interface Design**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ 📖 Portal Chronicles - Chapter 4 Path Selection                │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│ You've completed Chapter 3! Choose your path to continue:      │
+│                                                                 │
+│ ┌─────────────────────┐ ┌─────────────────────┐                 │
+│ │ 🔮 Original (Andy)  │ │ 🚀 Sci-Fi (Boris)  │                 │
+│ │                     │ │                     │                 │
+│ │ Continue the        │ │ Cyberpunk twist     │                 │
+│ │ fantasy adventure   │ │ with hardcore       │                 │
+│ │                     │ │ sci-fi elements     │                 │
+│ │ 💰 0.5 $TIP        │ │ 💰 0.5 $TIP        │                 │
+│ │ 📊 4.8★ (324 reads) │ │ 📊 4.6★ (198 reads) │                 │
+│ │                     │ │                     │                 │
+│ │ [Continue Original] │ │ [Try Sci-Fi]       │                 │
+│ └─────────────────────┘ └─────────────────────┘                 │
+│                                                                 │
+│ ┌─────────────────────┐ ┌─────────────────────┐                 │
+│ │ 🌹 Romance          │ │ ⚡ Dark Path       │                 │
+│ │ (Available Ch. 9)   │ │ (Available Ch. 9)   │                 │
+│ │                     │ │                     │                 │
+│ │ Cecilia's romantic  │ │ Daisy's darker      │                 │
+│ │ take on the story   │ │ alternative ending  │                 │
+│ │                     │ │                     │                 │
+│ │ 💰 Available later  │ │ 💰 Available later  │                 │
+│ │ 📊 4.9★ (89 reads)  │ │ 📊 4.7★ (156 reads) │                 │
+│ │                     │ │                     │                 │
+│ │ [Preview Romance]   │ │ [Preview Dark]     │                 │
+│ └─────────────────────┘ └─────────────────────┘                 │
+│                                                                 │
+│ 💡 All paths start with the same Chapters 1-3 (FREE)          │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### **Remix Creation Interface**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ 🔄 Create Remix Chapter - License Required                     │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│ 📚 Source Story: "Portal Chronicles" by Andy                   │
+│ 📖 Creating: Chapter 4 remix                                   │
+│                                                                 │
+│ 💰 License Fee Required:                                        │
+│ ┌─────────────────────────────────────────────────────────────┐ │
+│ │ 🎫 Standard Remix License                                   │ │
+│ │                                                             │ │
+│ │ • Remix rights for Chapter 4+                              │ │
+│ │ • Commercial use allowed                                    │ │
+│ │ • 25% ongoing royalties to original author                 │ │
+│ │ • Attribution required                                      │ │
+│ │                                                             │ │
+│ │ 💰 Cost: 2.0 $TIP (one-time)                              │ │
+│ │ 📊 Paid to: Andy (original author)                         │ │
+│ │                                                             │ │
+│ │ [Purchase License & Continue]                               │ │
+│ └─────────────────────────────────────────────────────────────┘ │
+│                                                                 │
+│ ⚠️  License includes:                                          │
+│ • Right to create new Chapter 4 based on Chapters 1-3         │
+│ • Chapters 1-3 will remain FREE in your version               │ │
+│ • Your Chapter 4+ can be priced and licensed to others        │ │
+│                                                                 │
+│ 🔒 Your wallet: 5.2 $TIP available                            │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### **Revenue Dashboard - Multi-Stream Analytics**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ 💰 Andy's Revenue Dashboard                                     │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│ 📊 Total Earnings: 22.7 $TIP                                   │
+│                                                                 │
+│ ┌─────────────────────┐ ┌─────────────────────┐                 │
+│ │ 📚 Direct Revenue   │ │ 🔄 Licensing Revenue │                │
+│ │                     │ │                     │                 │
+│ │ Chapter Unlocks:    │ │ Remix Fees:         │                 │
+│ │ 💰 15.2 $TIP       │ │ 💰 4.0 $TIP        │                 │
+│ │                     │ │                     │                 │
+│ │ • Ch 4-10 sales     │ │ • Boris: 2.0 $TIP   │                 │
+│ │ • 324 total reads   │ │ • Daisy: 2.0 $TIP   │                 │
+│ │                     │ │                     │                 │
+│ └─────────────────────┘ └─────────────────────┘                 │
+│                                                                 │
+│ ┌─────────────────────┐ ┌─────────────────────┐                 │
+│ │ 👑 Ongoing Royalties│ │ 📈 Growth Metrics   │                 │
+│ │                     │ │                     │                 │
+│ │ From Derivatives:   │ │ New Remixers:       │                 │
+│ │ 💰 3.5 $TIP/month  │ │ 📊 2 this month     │                 │
+│ │                     │ │                     │                 │
+│ │ • Boris' branch     │ │ Total Derivatives:  │                 │
+│ │ • Daisy's branch    │ │ 📊 3 active branches│                 │
+│ │                     │ │                     │                 │
+│ └─────────────────────┘ └─────────────────────┘                 │
+│                                                                 │
+│ 🎯 Revenue Sources:                                             │
+│ ████████████████████████████████████████████ 67% Chapter Sales │
+│ ████████████████████ 18% License Fees                          │
+│ ███████████████ 15% Ongoing Royalties                         │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### **Chapter Status & Access Control Logic**
+
+```typescript
+interface ChapterAccessModel {
+  chapterNumber: number;
+  accessType: "FREE" | "PAID" | "INHERITED_FREE" | "INHERITED_PAID";
+  price?: number;
+  remixable: boolean;
+  licenseFee?: number;
+  originalAuthor: string;
+  currentAuthor: string;
+  parentBranch?: string;
+}
+
+// Implementation Examples:
+const andyChapter1: ChapterAccessModel = {
+  chapterNumber: 1,
+  accessType: "FREE",
+  remixable: false,
+  originalAuthor: "Andy",
+  currentAuthor: "Andy",
+};
+
+const borisChapter4: ChapterAccessModel = {
+  chapterNumber: 4,
+  accessType: "PAID",
+  price: 0.5,
+  remixable: true,
+  licenseFee: 2.0,
+  originalAuthor: "Andy", // For licensing fees
+  currentAuthor: "Boris",
+  parentBranch: "Andy's Original",
+};
+
+const ceciliaChapter1: ChapterAccessModel = {
+  chapterNumber: 1,
+  accessType: "INHERITED_FREE", // Free because inherited from Andy
+  remixable: false,
+  originalAuthor: "Andy",
+  currentAuthor: "Cecilia",
+  parentBranch: "Boris' Sci-Fi",
+};
+```
+
+### **Chinese Market Considerations**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ 🇨🇳 StoryHouse.vip - 中文版本考虑因素                              │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│ 📱 支付方式 (Payment Methods):                                   │
+│ • 微信支付 (WeChat Pay) integration                              │
+│ • 支付宝 (Alipay) support                                        │
+│ • MetaMask for crypto users                                     │
+│                                                                 │
+│ 📚 内容分类 (Content Categories):                                 │
+│ • 仙侠 (Xianxia/Immortal Heroes)                                │
+│ • 都市 (Urban/Modern Life)                                       │
+│ • 历史 (Historical Fiction)                                      │
+│ • 科幻 (Science Fiction)                                         │
+│                                                                 │
+│ 🗣️ 社交功能 (Social Features):                                   │
+│ • 章节评论 (Chapter Comments)                                    │
+│ • 群体阅读 (Group Reading)                                        │
+│ • 打赏系统 (Tipping/Reward System)                               │
+│ • 粉丝互动 (Fan Interactions)                                    │
+│                                                                 │
+│ 🎨 本地化设计 (Localization Design):                              │
+│ • 竖版阅读 (Vertical Reading Layout)                             │
+│ • 字体大小调节 (Font Size Controls)                               │
+│ • 夜间模式 (Night Mode)                                          │
+│ • 章节预览 (Chapter Previews)                                    │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
 ## **IMPROVED Writer Journey - Scenario-Based Design**
 
 ### **Enhanced Landing Page - Writer Context Detection**
@@ -2352,135 +2592,16 @@ Would you like me to dive deeper into any of these wireframes or create addition
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### **Scenario 1: New Story Creation Flow**
+### **Key Design Principles for Branching Model**
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│ ← Back                                            [Save Draft]   │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│                    📝 Start Your New Story                      │
-│                                                                 │
-│  📖 Story Title (optional):                                     │
-│  ┌─────────────────────────────────────────────────────────────┐ │
-│  │ The Detective's Portal                                      │ │
-│  └─────────────────────────────────────────────────────────────┘ │
-│                                                                 │
-│  📝 Describe your story plot:                                   │
-│  ┌─────────────────────────────────────────────────────────────┐ │
-│  │ A young detective discovers a hidden portal in their        │ │
-│  │ grandmother's attic that leads to...                        │ │
-│  │                                                             │ │
-│  └─────────────────────────────────────────────────────────────┘ │
-│  0/500 characters                                               │
-│                                                                 │
-│  🎨 Add inspiration (optional):                                 │
-│  [📷 Image] [😀 Emoji] [🎭 Genre] [🎨 Style]                  │
-│                                                                 │
-│               [✨ Generate Chapter 1 with AI]                  │
-│                                                                 │
-│  💡 This will be Chapter 1 of your new story                   │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
+1. **Free Content Inheritance**: Chapters 1-3 remain free across all branches
+2. **Direct Parent Licensing**: Remixers pay the immediate parent author
+3. **Revenue Transparency**: Clear revenue tracking across all streams
+4. **Path Discovery**: Easy comparison between different story branches
+5. **Cultural Adaptation**: Chinese market features for global expansion
 
-### **Scenario 2: Continue Existing Story Flow**
+---
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│ ← Back                                            [Save Draft]   │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│                   ➕ Continue Your Story                        │
-│                                                                 │
-│  📚 Select story to continue:                                   │
-│                                                                 │
-│  🔘 The Detective's Portal                          📊 3 chap   │
-│      Mystery • Last updated 2 days ago             💰 0.3 $TIP  │
-│      "Sarah stepped through the portal..."                     │
-│                                                                 │
-│  ○  Space Pirates Adventure                         📊 7 chap   │
-│      Sci-Fi • Last updated 1 week ago              💰 1.2 $TIP  │
-│      "Captain Nova faced the alien fleet..."                   │
-│                                                                 │
-│  ○  Magic Academy Chronicles                        📊 12 chap  │
-│      Fantasy • Last updated 3 weeks ago            💰 2.8 $TIP  │
-│      "The final exam would determine..."                       │
-│                                                                 │
-│  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│                                                                 │
-│  ✨ What happens next in "The Detective's Portal"?             │
-│  ┌─────────────────────────────────────────────────────────────┐ │
-│  │ Sarah found herself in a world where gravity worked         │ │
-│  │ differently. The sky was purple and...                      │ │
-│  └─────────────────────────────────────────────────────────────┘ │
-│                                                                 │
-│               [✨ Generate Chapter 4 with AI]                  │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-### **Scenario 3: Deferred IP Registration - Final Publishing Step**
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                     🎉 Chapter Complete!                       │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│               "Chapter 4: The Purple Sky"                      │
-│                                                                 │
-│  ✅ Content generated and edited                                │
-│  ✅ Grammar and style checked                                   │
-│  ✅ Word count: 1,247 words                                     │
-│                                                                 │
-│  🚀 Ready to publish? Choose your publishing options:          │
-│                                                                 │
-│  📖 Publishing Type:                                            │
-│  🔘 Simple Publish (Recommended for beginners)                 │
-│      • Immediate publishing                                     │
-│      • Basic copyright protection                               │
-│      • Start earning right away                                │
-│                                                                 │
-│  ○  IP Asset Protection (Advanced)                             │
-│      • Blockchain IP registration                               │
-│      • Enhanced licensing options                               │
-│      • Premium remix control                                    │
-│      • Requires wallet connection                               │
-│                                                                 │
-│                      [Publish Chapter]                         │
-│                                                                 │
-│  💡 You can always upgrade to IP Asset protection later!       │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-### **Simplified Initial Interface (No Premature IP Complexity)**
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│ ← Back to StoryHouse                              [Save Draft]   │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│                    ✨ Create Your Story                         │
-│              Let AI help you bring imagination to life          │
-│                                                                 │
-│  📝 Describe your story plot:                                   │
-│  ┌─────────────────────────────────────────────────────────────┐ │
-│  │ A young detective discovers a hidden portal in their        │ │
-│  │ grandmother's attic that leads to...                        │ │
-│  │                                                             │ │
-│  │                                                             │ │
-│  └─────────────────────────────────────────────────────────────┘ │
-│                                                                 │
-│  💡 Add inspiration (optional):                                 │
-│  [📷 Image] [😀 Emoji] [🎭 Genre] [🎨 Style]                  │
-│                                                                 │
-│                        [Generate Chapter]                      │
-│                                                                 │
-│  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│                                                                 │
-│  🤔 Questions? Advanced Options?                                │
-│  [📚 What are Story Collections?] [🛡️ What is IP Protection?]  │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
+**Design Status**: ✅ Complete branching model with visual diagrams
+**Implementation Priority**: High - Core monetization feature
+**Chinese Version**: Recommended for market expansion
