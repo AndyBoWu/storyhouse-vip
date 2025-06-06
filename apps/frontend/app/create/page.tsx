@@ -11,6 +11,7 @@ import CollectionSection from '../../components/creator/CollectionSection'
 import IPStatusIndicator from '../../components/creator/IPStatusIndicator'
 import StoryContentDisplay from '../../components/ui/StoryContentDisplay'
 import PublishingModal from '../../components/publishing/PublishingModal'
+import { getPublishedStories, type PublishedStory } from '@/lib/storage/publishedStories'
 import type {
   EnhancedGeneratedStory,
   EnhancedStoryCreationParams
@@ -65,10 +66,32 @@ export default function CreateStoryPage() {
   })
   const [collectionOptions, setCollectionOptions] = useState<Partial<EnhancedStoryCreationParams>>({})
 
-  // Real user stories - initially empty until stories are actually published
-  const [existingStories] = useState<ExistingStory[]>([
-    // No mock stories - will show actual user-created stories here in the future
-  ])
+  // Real user stories - loaded from localStorage
+  const [existingStories, setExistingStories] = useState<ExistingStory[]>([])
+
+  // Load published stories from localStorage
+  useEffect(() => {
+    const loadPublishedStories = () => {
+      const publishedStories = getPublishedStories()
+      // Convert PublishedStory format to ExistingStory format
+      const convertedStories: ExistingStory[] = publishedStories.map(story => ({
+        id: story.id,
+        title: story.title,
+        genre: story.genre,
+        chapters: story.chapters,
+        lastUpdated: story.lastUpdated,
+        earnings: story.earnings,
+        preview: story.preview
+      }))
+      setExistingStories(convertedStories)
+    }
+
+    loadPublishedStories()
+
+    // Refresh stories when coming back from publishing
+    const interval = setInterval(loadPublishedStories, 2000)
+    return () => clearInterval(interval)
+  }, [])
 
   const genres = ['Mystery', 'Romance', 'Sci-Fi', 'Fantasy', 'Horror', 'Comedy', 'Adventure', 'Drama']
   const moods = ['Dark & Gritty', 'Light & Whimsical', 'Epic Adventure', 'Romantic', 'Suspenseful', 'Humorous']
