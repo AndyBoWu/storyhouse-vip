@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useWriteContract, useWaitForTransactionReceipt, useAccount } from 'wagmi'
+import { useWriteContract, useWaitForTransactionReceipt, useAccount, useWalletClient } from 'wagmi'
 import { Address, Hash } from 'viem'
 import { uploadStoryToIPFS } from '@/lib/ipfs/web3storage'
 import {
@@ -53,6 +53,7 @@ export function usePublishStory() {
   const [ipAssetId, setIPAssetId] = useState<Address | null>(null)
 
   const { address } = useAccount()
+  const { data: walletClient } = useWalletClient()
   const { writeContract, data: txHash, error: contractError, isPending } = useWriteContract()
   const { isLoading: isTxLoading, isSuccess: isTxSuccess } = useWaitForTransactionReceipt({
     hash: txHash,
@@ -167,44 +168,50 @@ export function usePublishStory() {
 
         const metadataURI = createStoryProtocolURI(ipfsResult.ipfsHash)
 
-        // TODO: This approach needs to be properly implemented
-        // For now, we'll use a simplified approach and register existing NFT as IP
-        // In a real implementation, you would either:
-        // 1. Create an SPG NFT collection first, then use mintAndRegisterIp
-        // 2. Deploy your own ERC721 contract and register it
-
-        throw new Error('Real blockchain operations not yet fully implemented. Please use mock mode for testing.')
-
-        // Wait for NFT mint transaction
-        if (!txHash) {
-          throw new Error('NFT minting transaction failed')
+        // Use Story Protocol to mint NFT and register as IP Asset
+        const chapterIPData = {
+          storyId: `story-${Date.now()}`,
+          chapterNumber: storyData.chapterNumber,
+          title: storyData.title,
+          content: storyData.content,
+          contentUrl: `https://ipfs.io/ipfs/${ipfsResult.ipfsHash}`,
+          metadata: {
+            suggestedTags: storyData.themes,
+            suggestedGenre: 'Mixed',
+            contentRating: 'G',
+            language: 'en',
+            qualityScore: 85,
+            originalityScore: 90,
+            commercialViability: 80
+          }
         }
 
-        const mintedTokenId = BigInt(Date.now())
+                        // Import the Story Protocol service
+        const { StoryProtocolService } = await import('@/lib/storyProtocol')
+
+        if (!walletClient) {
+          throw new Error('Wallet not connected')
+        }
+
+        // Register chapter as IP Asset using connected wallet
+        const ipResult = await StoryProtocolService.registerChapterAsIP(chapterIPData, walletClient)
+
+        if (!ipResult.success) {
+          throw new Error(ipResult.error || 'Story Protocol registration failed')
+        }
+
+        // Extract results from Story Protocol registration
+        const mintedTokenId = ipResult.tokenId ? BigInt(ipResult.tokenId) : BigInt(Date.now())
+        const registeredIPAssetId = ipResult.ipAssetId as Address
+        const transactionHash = ipResult.transactionHash as Hash
+
         setTokenId(mintedTokenId)
-        console.log('✅ NFT minted with token ID:', mintedTokenId.toString())
-
-        // Step 3: Register as IP Asset
-        setCurrentStep('registering-ip')
-        console.log('📝 Registering IP Asset...')
-
-        await writeContract({
-          address: STORY_PROTOCOL_CONTRACTS.IP_ASSET_REGISTRY,
-          abi: IP_ASSET_REGISTRY_ABI,
-          functionName: 'register',
-          args: [
-            BigInt(1315), // Aeneid testnet chain ID
-            STORY_PROTOCOL_CONTRACTS.SPG_NFT,
-            mintedTokenId,
-            storyData.title,
-            metadataURI,
-            address
-          ]
-        })
-
-        const registeredIPAssetId = `0x${Math.random().toString(16).substring(2).padEnd(40, '0').substring(0, 40)}` as Address
         setIPAssetId(registeredIPAssetId)
-        console.log('✅ IP Asset registered:', registeredIPAssetId)
+
+        console.log('✅ Story Protocol registration complete!')
+        console.log('🎫 Token ID:', mintedTokenId.toString())
+        console.log('📝 IP Asset ID:', registeredIPAssetId)
+        console.log('🔗 Transaction:', transactionHash)
 
         // Handle license terms
         let licenseTermsId: bigint | undefined
@@ -248,12 +255,12 @@ export function usePublishStory() {
         const result: PublishResult = {
           success: true,
           data: {
-            transactionHash: txHash!,
+            transactionHash: transactionHash,
             ipAssetId: registeredIPAssetId,
             tokenId: mintedTokenId,
             licenseTermsId,
             ipfsHash: ipfsResult.ipfsHash,
-            explorerUrl: getExplorerUrl(txHash!)
+            explorerUrl: getExplorerUrl(transactionHash)
           }
         }
 
