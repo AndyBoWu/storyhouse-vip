@@ -4,11 +4,12 @@ Welcome to the comprehensive documentation for StoryHouse.vip - the revolutionar
 
 ## 🚀 **Current Status: Production Optimized**
 
+- ✅ **Phase 4.6 Complete** - Cloudflare R2 global CDN integration for optimal read-to-earn performance
 - ✅ **Phase 4.4 Complete** - Real blockchain integration with read-to-earn mechanics
 - ✅ **Monorepo Optimized** - 99.2% test coverage (131/132 tests), 0 vulnerabilities
-- ✅ **AI Integration Complete** - GPT-4 powered story generation and remix creation
+- ✅ **AI Integration Complete** - GPT-4 powered story generation with automatic R2 storage
 - ✅ **UX Design Complete** - 24 comprehensive wireframes covering all user journeys
-- ✅ **Demo Ready** - Full end-to-end read-to-earn and remix functionality
+- ✅ **Demo Ready** - Full end-to-end read-to-earn and remix functionality with global CDN
 
 ---
 
@@ -26,6 +27,7 @@ Welcome to the comprehensive documentation for StoryHouse.vip - the revolutionar
 2. **[API Documentation](./technical/API.md)** - REST API endpoints and usage
 3. **[Smart Contracts](./technical/CONTRACTS.md)** - Contract architecture and testing
 4. **[Story Protocol Integration](./technical/STORY_PROTOCOL.md)** - Blockchain integration details
+5. **[R2 Storage Integration](./technical/R2_STORAGE.md)** - Cloudflare R2 global CDN setup and usage
 
 ### **📋 Project Management**
 
@@ -51,6 +53,7 @@ Welcome to the comprehensive documentation for StoryHouse.vip - the revolutionar
 | **Set up development**          | [Development Setup](./setup/DEVELOPMENT.md)   |
 | **Understand the architecture** | [Technical Overview](./technical/OVERVIEW.md) |
 | **Use the API**                 | [API Documentation](./technical/API.md)       |
+| **Set up R2 storage**           | [R2 Storage Guide](./technical/R2_STORAGE.md) |
 | **Deploy to production**        | [Deployment Guide](./project/DEPLOYMENT.md)   |
 | **See the roadmap**             | [Roadmap](./project/ROADMAP.md)               |
 | **View complete UX design**     | [UX Design](./product/DESIGN.md)              |
@@ -145,6 +148,13 @@ Generate Remix → Publish Derivative → Earn Revenue → Build Series
 - **Vercel AI SDK** - Streaming AI responses for real-time generation
 - **Multi-modal** - Support for text, images, emojis, and style inputs
 - **Content validation** - Automated quality and originality scoring
+
+### **Cloud Storage**
+
+- **Cloudflare R2** - Global CDN with sub-100ms loading for optimal read-to-earn UX
+- **Automatic Storage** - Generated stories instantly saved with structured paths
+- **Story Protocol Ready** - Content URLs formatted for IP registration
+- **Cost Effective** - 90% cheaper than alternatives with zero egress fees
 
 ---
 
