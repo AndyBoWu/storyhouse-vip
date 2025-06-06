@@ -65,35 +65,9 @@ export default function CreateStoryPage() {
   })
   const [collectionOptions, setCollectionOptions] = useState<Partial<EnhancedStoryCreationParams>>({})
 
-  // Mock existing stories for demo
+  // Real user stories - initially empty until stories are actually published
   const [existingStories] = useState<ExistingStory[]>([
-    {
-      id: '1',
-      title: 'The Detective\'s Portal',
-      genre: 'Mystery',
-      chapters: 3,
-      lastUpdated: '2 days ago',
-      earnings: 0.3,
-      preview: 'Sarah stepped through the portal...'
-    },
-    {
-      id: '2',
-      title: 'Space Pirates Adventure',
-      genre: 'Sci-Fi',
-      chapters: 7,
-      lastUpdated: '1 week ago',
-      earnings: 1.2,
-      preview: 'Captain Nova faced the alien fleet...'
-    },
-    {
-      id: '3',
-      title: 'Magic Academy Chronicles',
-      genre: 'Fantasy',
-      chapters: 12,
-      lastUpdated: '3 weeks ago',
-      earnings: 2.8,
-      preview: 'The final exam would determine...'
-    }
+    // No mock stories - will show actual user-created stories here in the future
   ])
 
   const genres = ['Mystery', 'Romance', 'Sci-Fi', 'Fantasy', 'Horror', 'Comedy', 'Adventure', 'Drama']
@@ -609,41 +583,56 @@ export default function CreateStoryPage() {
 
       {/* Stories Grid */}
       <div className="grid md:grid-cols-2 gap-6 mb-6">
-        {existingStories.map((story) => (
-          <motion.div
-            key={story.id}
-            whileHover={{ scale: 1.02 }}
-            className="bg-white rounded-xl shadow-lg p-6 border border-gray-200"
-          >
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-1">{story.title}</h3>
-                <p className="text-sm text-gray-600">{story.genre} • {story.chapters} chapters</p>
-                <p className="text-sm text-gray-500 mt-1">Last updated {story.lastUpdated}</p>
+        {existingStories.length === 0 ? (
+          <div className="col-span-full text-center py-12">
+            <div className="text-6xl mb-4">📚</div>
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">No stories yet!</h3>
+            <p className="text-gray-500 mb-6">Start creating your first story to see it here.</p>
+            <button
+              onClick={() => setCreationMode('new')}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 transition-all"
+            >
+              <Sparkles className="w-5 h-5" />
+              Create Your First Story
+            </button>
+          </div>
+        ) : (
+          existingStories.map((story) => (
+            <motion.div
+              key={story.id}
+              whileHover={{ scale: 1.02 }}
+              className="bg-white rounded-xl shadow-lg p-6 border border-gray-200"
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-1">{story.title}</h3>
+                  <p className="text-sm text-gray-600">{story.genre} • {story.chapters} chapters</p>
+                  <p className="text-sm text-gray-500 mt-1">Last updated {story.lastUpdated}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm text-green-600 font-medium">💰 {story.earnings} $TIP</p>
+                </div>
               </div>
-              <div className="text-right">
-                <p className="text-sm text-green-600 font-medium">💰 {story.earnings} $TIP</p>
+
+              <p className="text-sm text-gray-600 italic mb-4">"{story.preview}"</p>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleSelectStory(story)}
+                  className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+                >
+                  ➕ Continue
+                </button>
+                <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm">
+                  📖 Read
+                </button>
+                <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm">
+                  ⚙️
+                </button>
               </div>
-            </div>
-
-            <p className="text-sm text-gray-600 italic mb-4">"{story.preview}"</p>
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => handleSelectStory(story)}
-                className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
-              >
-                ➕ Continue
-              </button>
-              <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm">
-                📖 Read
-              </button>
-              <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm">
-                ⚙️
-              </button>
-            </div>
-          </motion.div>
-        ))}
+            </motion.div>
+          ))
+        )}
       </div>
 
       {/* Quick Actions */}
