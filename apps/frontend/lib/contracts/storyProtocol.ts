@@ -6,7 +6,7 @@ export const STORY_PROTOCOL_CONTRACTS = {
   IP_ASSET_REGISTRY: '0x77319B4031e6eF1250907aa00018B8B1c67a244b' as Address,
   LICENSE_REGISTRY: '0xbe39E1C756e921BD25DF86e7AAa31106d1eb0424' as Address, // Using Registration Workflows
   ROYALTY_MODULE: '0x3456789012345678901234567890123456789012' as Address, // TODO: Find real address
-  SPG_NFT: '0xc32A8a0FF3beDDDa58393d022aF433e78739FAbc' as Address, // Test collection from docs
+  SPG_NFT: '0xbe39E1C756e921BD25DF86e7AAa31106d1eb0424' as Address, // Registration Workflows contract
 } as const
 
 // Story Protocol ABI fragments for the functions we need

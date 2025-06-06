@@ -37,6 +37,12 @@ export default function PublishingModal({
   const [publishingOption, setPublishingOption] = useState<'simple' | 'protected' | null>(null)
   const [chapterPrice, setChapterPrice] = useState(0.1)
   const [ipRegistration, setIpRegistration] = useState(false)
+  const [isClient, setIsClient] = useState(false)
+
+  // Prevent hydration mismatch by only rendering after client-side hydration
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   // Wagmi hooks for wallet connection
   const { address, isConnected } = useAccount()
@@ -65,14 +71,7 @@ export default function PublishingModal({
     }
   }, [isOpen, chapterNumber])
 
-  // Debug state changes
-  useEffect(() => {
-    console.log('Current step changed to:', currentStep)
-  }, [currentStep])
-
-  useEffect(() => {
-    console.log('Publishing option changed to:', publishingOption)
-  }, [publishingOption])
+  // Debug state changes (removed for cleaner console)
 
   const handleWalletConnect = async () => {
     try {
@@ -163,6 +162,11 @@ export default function PublishingModal({
       default:
         return { text: 'Processing...', icon: <CheckCircle className="w-5 h-5" /> }
     }
+  }
+
+  // Don't render until client-side to prevent hydration mismatch
+  if (!isClient) {
+    return null
   }
 
   return (
@@ -431,14 +435,20 @@ export default function PublishingModal({
                       <button
                         onClick={() => {
                           if (publishingOption === 'simple') {
-                            setCurrentStep('pricing')
+                            // Chapters 1-3 are free, skip pricing step
+                            if (chapterNumber <= 3) {
+                              setChapterPrice(0) // Ensure price is 0 for free chapters
+                              handlePublish() // Go directly to publishing
+                            } else {
+                              setCurrentStep('pricing') // Show pricing for paid chapters
+                            }
                           } else {
                             setCurrentStep('ip-setup')
                           }
                         }}
                         className="flex-1 px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg font-medium hover:from-green-700 hover:to-emerald-700 transition-all"
                       >
-                        Continue →
+                        {chapterNumber <= 3 ? 'Publish' : 'Continue →'}
                       </button>
                     </div>
                   )}
