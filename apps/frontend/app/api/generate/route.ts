@@ -140,29 +140,80 @@ export async function POST(request: NextRequest) {
       // Continue without failing the entire request
     }
 
-    // Prepare enhanced API response
-    const response: EnhancedApiResponse<EnhancedGeneratedStory> = {
-      success: true,
-      data: {
-        ...enhancedResult,
-        storyId,
-        chapterNumber,
-        contentUrl, // Add R2 URL to response
-      },
+            // Prepare enhanced API response
+        const response: EnhancedApiResponse<EnhancedGeneratedStory> = {
+          success: true,
+          data: {
+            ...enhancedResult,
+          },
       message: generationRequest.ipOptions?.registerAsIP
         ? 'Story generated with IP registration metadata and saved to storage'
         : 'Story generated successfully and saved to storage'
     }
 
     // Add IP-specific response data if IP registration is requested
-    if (generationRequest.ipOptions?.registerAsIP) {
-      response.ipData = {
-        operationId: `gen-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        contentUrl, // Include R2 URL for IP registration
-        // These would be populated after actual IP registration
-        transactionHash: undefined,
-        ipAssetId: undefined,
-        gasUsed: undefined
+    if (generationRequest.ipOptions?.registerAsIP && contentUrl) {
+      console.log('🔗 Attempting Story Protocol IP registration...')
+
+      try {
+        // Import Story Protocol service dynamically to avoid build issues
+        const { StoryProtocolService } = await import('@/lib/storyProtocol')
+
+        // Prepare chapter data for IP registration
+        const chapterIPData = {
+          storyId,
+          chapterNumber,
+          title: enhancedResult.title,
+          content: enhancedResult.content,
+          contentUrl,
+          metadata: {
+            suggestedTags: enhancedResult.suggestedTags,
+            suggestedGenre: enhancedResult.suggestedGenre,
+            contentRating: enhancedResult.contentRating,
+            language: enhancedResult.language,
+            qualityScore: enhancedResult.qualityScore,
+            originalityScore: enhancedResult.originalityScore,
+            commercialViability: enhancedResult.commercialViability,
+          }
+        }
+
+        // Check if Story Protocol is configured
+        if (StoryProtocolService.isConfigured()) {
+          const ipResult = await StoryProtocolService.registerChapterAsIP(chapterIPData)
+
+                     response.ipData = {
+             operationId: `gen-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+             transactionHash: ipResult.transactionHash as `0x${string}` | undefined,
+             ipAssetId: ipResult.ipAssetId,
+             gasUsed: undefined, // This would need to be calculated from transaction receipt
+           }
+
+          if (ipResult.success) {
+            console.log('✅ Chapter registered as IP Asset:', ipResult.ipAssetId)
+            response.message = 'Story generated, saved to storage, and registered as IP asset!'
+          } else {
+            console.warn('⚠️ IP registration failed:', ipResult.error)
+            response.message = 'Story generated and saved, but IP registration failed'
+          }
+        } else {
+          console.warn('⚠️ Story Protocol not configured, skipping IP registration')
+                     response.ipData = {
+             operationId: `gen-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+             transactionHash: undefined,
+             ipAssetId: undefined,
+             gasUsed: undefined,
+           }
+          response.message = 'Story generated and saved, but Story Protocol not configured'
+        }
+      } catch (ipError) {
+        console.error('❌ IP registration error:', ipError)
+                 response.ipData = {
+           operationId: `gen-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+           transactionHash: undefined,
+           ipAssetId: undefined,
+           gasUsed: undefined,
+         }
+        response.message = 'Story generated and saved, but IP registration failed'
       }
     }
 
