@@ -59,9 +59,11 @@ export default function PublishingModal({
     if (isOpen) {
       setCurrentStep('options')
       setPublishingOption(null)
+      // Set chapter price to 0 for chapters 1-3, default 0.1 for others
+      setChapterPrice(chapterNumber <= 3 ? 0 : 0.1)
       resetPublishing()
     }
-  }, [isOpen])
+  }, [isOpen, chapterNumber])
 
   // Debug state changes
   useEffect(() => {
@@ -102,32 +104,40 @@ export default function PublishingModal({
 
     setCurrentStep('publishing')
 
-    const options = {
-      publishingOption: publishingOption!,
-      chapterPrice,
-      ...(publishingOption === 'protected' && {
-        ipRegistration,
-        licenseTerms: {
-          commercialUse: true,
-          derivativesAllowed: true,
-          commercialRevShare: 25, // 25% royalty to creator
-        }
-      })
-    }
+    try {
+      const options = {
+        publishingOption: publishingOption!,
+        chapterPrice,
+        ...(publishingOption === 'protected' && {
+          ipRegistration,
+          licenseTerms: {
+            commercialUse: true,
+            derivativesAllowed: true,
+            commercialRevShare: 25, // 25% royalty to creator
+          }
+        })
+      }
 
-    const result = await publishStory({
-      title: story.title,
-      content: story.content,
-      wordCount: story.wordCount,
-      readingTime: story.readingTime,
-      themes: story.themes,
-      chapterNumber
-    }, options)
+      const result = await publishStory({
+        title: story.title,
+        content: story.content,
+        wordCount: story.wordCount,
+        readingTime: story.readingTime,
+        themes: story.themes,
+        chapterNumber
+      }, options)
 
-    if (result.success) {
-      setCurrentStep('success')
+      if (result.success) {
+        setCurrentStep('success')
+      } else {
+        console.error('Publishing failed:', result.error)
+        // The hook will set its own error state, but we need to reset our step
+        setCurrentStep('options')
+      }
+    } catch (error) {
+      console.error('Publishing error:', error)
+      setCurrentStep('options')
     }
-    // Error handling is managed by the hook
   }
 
   const getStepProgress = () => {
@@ -445,7 +455,7 @@ export default function PublishingModal({
               )}
 
               {/* Step 3: Pricing Setup */}
-              {currentStep === 'pricing' && (
+              {currentStep === 'pricing' && chapterNumber > 3 && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -524,7 +534,7 @@ export default function PublishingModal({
                       disabled={!isConnected}
                       className="flex-1 px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg font-medium hover:from-green-700 hover:to-emerald-700 transition-all disabled:opacity-50"
                     >
-                      Publish to IPFS + Story Protocol 🚀
+                                                Publish
                     </button>
                   </div>
                 </motion.div>
@@ -646,42 +656,61 @@ export default function PublishingModal({
                         )}
                       </div>
                     </>
-                  ) : (
+                  ) : publishResult && !publishResult.success ? (
                     // Show error state if publishing failed
-                    publishResult && !publishResult.success && (
-                      <>
-                        <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto">
-                          <AlertCircle className="w-8 h-8 text-red-600" />
-                        </div>
+                    <>
+                      <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto">
+                        <AlertCircle className="w-8 h-8 text-red-600" />
+                      </div>
 
-                        <div>
-                          <h3 className="text-xl font-semibold text-gray-900 mb-2">❌ Publication Failed</h3>
-                          <p className="text-gray-600 mb-4">
-                            {publishResult.error || 'An error occurred during publication'}
-                          </p>
-                          {contractError && (
-                            <div className="text-xs text-red-600 bg-red-50 p-3 rounded-lg">
-                              Contract Error: {contractError.message}
-                            </div>
-                          )}
-                        </div>
+                      <div>
+                        <h3 className="text-xl font-semibold text-gray-900 mb-2">❌ Publication Failed</h3>
+                        <p className="text-gray-600 mb-4">
+                          {publishResult.error || 'An error occurred during publication'}
+                        </p>
+                        {contractError && (
+                          <div className="text-xs text-red-600 bg-red-50 p-3 rounded-lg">
+                            Contract Error: {contractError.message}
+                          </div>
+                        )}
+                      </div>
 
-                        <div className="flex gap-3">
-                          <button
-                            onClick={() => setCurrentStep(publishingOption === 'simple' ? 'pricing' : 'ip-setup')}
-                            className="flex-1 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                          >
-                            ← Try Again
-                          </button>
-                          <button
-                            onClick={onClose}
-                            className="flex-1 px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-                          >
-                            Close
-                          </button>
-                        </div>
-                      </>
-                    )
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => setCurrentStep(chapterNumber <= 3 ? 'wallet' : (publishingOption === 'simple' ? 'pricing' : 'ip-setup'))}
+                          className="flex-1 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                        >
+                          ← Try Again
+                        </button>
+                        <button
+                          onClick={onClose}
+                          className="flex-1 px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                        >
+                          Close
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    // Fallback state - publishing completed but waiting for result
+                    <>
+                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
+                        <div className="w-8 h-8 border-3 border-gray-300 border-t-blue-600 rounded-full animate-spin" />
+                      </div>
+
+                      <div>
+                        <h3 className="text-xl font-semibold text-gray-900 mb-2">⏳ Processing...</h3>
+                        <p className="text-gray-600">
+                          Finalizing your publication. This should only take a moment.
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={onClose}
+                        className="px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                      >
+                        Close
+                      </button>
+                    </>
                   )}
                 </motion.div>
               )}
