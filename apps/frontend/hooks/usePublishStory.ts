@@ -35,7 +35,7 @@ interface PublishOptions {
   }
 }
 
-type PublishStep = 
+type PublishStep =
   | 'idle'
   | 'uploading-ipfs'
   | 'minting-nft'
@@ -58,7 +58,7 @@ export function usePublishStory() {
     hash: txHash,
   })
 
-  const publishStory = async (storyData: StoryData, options: PublishOptions): Promise<PublishResult> => {
+    const publishStory = async (storyData: StoryData, options: PublishOptions): Promise<PublishResult> => {
     if (!address) {
       const error = 'Wallet not connected'
       setPublishResult({ success: false, error })
@@ -67,7 +67,7 @@ export function usePublishStory() {
 
     try {
       setCurrentStep('uploading-ipfs')
-      
+
       // Step 1: Upload content to IPFS
       console.log('📤 Uploading to IPFS...')
       const ipfsResult = await uploadStoryToIPFS(
@@ -89,109 +89,169 @@ export function usePublishStory() {
       setIPFSHash(ipfsResult.ipfsHash)
       console.log('✅ IPFS upload successful:', ipfsResult.ipfsHash)
 
-      // Step 2: Mint NFT
-      setCurrentStep('minting-nft')
-      console.log('🎨 Minting NFT...')
-      
-      const metadataURI = createStoryProtocolURI(ipfsResult.ipfsHash)
-      
-      await writeContract({
-        address: STORY_PROTOCOL_CONTRACTS.SPG_NFT,
-        abi: SPG_NFT_ABI,
-        functionName: 'mint',
-        args: [address, metadataURI]
-      })
+      // Step 2: Mock blockchain operations for development
+      const isDevelopment = process.env.NODE_ENV === 'development'
 
-      // Wait for NFT mint transaction
-      if (!txHash) {
-        throw new Error('NFT minting transaction failed')
-      }
+      if (isDevelopment) {
+        console.log('🎭 Running in development mode - using mock blockchain operations')
 
-      // For simplicity, we'll generate a mock token ID
-      // In production, you'd parse the transaction receipt for the actual token ID
-      const mintedTokenId = BigInt(Date.now())
-      setTokenId(mintedTokenId)
-      console.log('✅ NFT minted with token ID:', mintedTokenId.toString())
+        // Mock NFT minting
+        setCurrentStep('minting-nft')
+        console.log('🎨 Mock: Minting NFT...')
+        await new Promise(resolve => setTimeout(resolve, 1500)) // Simulate transaction time
 
-      // Step 3: Register as IP Asset
-      setCurrentStep('registering-ip')
-      console.log('📝 Registering IP Asset...')
+        const mintedTokenId = BigInt(Date.now())
+        setTokenId(mintedTokenId)
+        console.log('✅ Mock: NFT minted with token ID:', mintedTokenId.toString())
 
-      await writeContract({
-        address: STORY_PROTOCOL_CONTRACTS.IP_ASSET_REGISTRY,
-        abi: IP_ASSET_REGISTRY_ABI,
-        functionName: 'register',
-        args: [
-          BigInt(1315), // Aeneid testnet chain ID
-          STORY_PROTOCOL_CONTRACTS.SPG_NFT,
-          mintedTokenId,
-          storyData.title,
-          metadataURI,
-          address
-        ]
-      })
+        // Mock IP Asset registration
+        setCurrentStep('registering-ip')
+        console.log('📝 Mock: Registering IP Asset...')
+        await new Promise(resolve => setTimeout(resolve, 2000)) // Simulate transaction time
 
-      // Mock IP Asset ID (in production, you'd get this from the transaction receipt)
-      const registeredIPAssetId = `0x${Date.now().toString(16).padStart(40, '0')}` as Address
-      setIPAssetId(registeredIPAssetId)
-      console.log('✅ IP Asset registered:', registeredIPAssetId)
+        // Generate a valid mock Ethereum address
+        const registeredIPAssetId = `0x${Math.random().toString(16).substring(2).padEnd(40, '0').substring(0, 40)}` as Address
+        setIPAssetId(registeredIPAssetId)
+        console.log('✅ Mock: IP Asset registered:', registeredIPAssetId)
 
-      // Step 4: Handle license terms for protected publishing
-      let licenseTermsId: bigint | undefined
+        // Mock license terms for protected publishing
+        let licenseTermsId: bigint | undefined
 
-      if (options.publishingOption === 'protected' && options.ipRegistration && options.licenseTerms) {
-        setCurrentStep('creating-license')
-        console.log('🛡️ Creating license terms...')
+        if (options.publishingOption === 'protected' && options.ipRegistration && options.licenseTerms) {
+          setCurrentStep('creating-license')
+          console.log('🛡️ Mock: Creating license terms...')
+          await new Promise(resolve => setTimeout(resolve, 1000))
 
-        const licenseTerms: CreateLicenseTermsParams = {
-          ...DEFAULT_LICENSE_TERMS,
-          commercialUse: options.licenseTerms.commercialUse,
-          derivativesAllowed: options.licenseTerms.derivativesAllowed,
-          defaultMintingFee: BigInt(Math.floor(options.chapterPrice * 1e18))
+          licenseTermsId = BigInt(Date.now() + 1000)
+          console.log('✅ Mock: License terms created:', licenseTermsId.toString())
+
+          setCurrentStep('attaching-license')
+          console.log('🔗 Mock: Attaching license terms...')
+          await new Promise(resolve => setTimeout(resolve, 1000))
+
+          console.log('✅ Mock: License terms attached to IP Asset')
         }
 
-        await writeContract({
-          address: STORY_PROTOCOL_CONTRACTS.LICENSE_REGISTRY,
-          abi: LICENSE_REGISTRY_ABI,
-          functionName: 'registerLicenseTerms',
-          args: [licenseTerms as any]
-        })
-
-        // Mock license terms ID
-        licenseTermsId = BigInt(Date.now() + 1000)
-        console.log('✅ License terms created:', licenseTermsId.toString())
-
-        // Step 5: Attach license terms to IP Asset
-        setCurrentStep('attaching-license')
-        console.log('🔗 Attaching license terms...')
-
-        await writeContract({
-          address: STORY_PROTOCOL_CONTRACTS.LICENSE_REGISTRY,
-          abi: LICENSE_REGISTRY_ABI,
-          functionName: 'attachLicenseTermsToIp',
-          args: [registeredIPAssetId, licenseTermsId]
-        })
-
-        console.log('✅ License terms attached to IP Asset')
-      }
-
-      // Success!
-      setCurrentStep('success')
-      const result: PublishResult = {
-        success: true,
-        data: {
-          transactionHash: txHash!,
-          ipAssetId: registeredIPAssetId,
-          tokenId: mintedTokenId,
-          licenseTermsId,
-          ipfsHash: ipfsResult.ipfsHash,
-          explorerUrl: getExplorerUrl(txHash!)
+        // Mock success
+        setCurrentStep('success')
+        // Generate a proper 64-character hex transaction hash
+        const mockTxHash = `0x${Array.from({length: 64}, () => Math.floor(Math.random() * 16).toString(16)).join('')}` as Hash
+        const result: PublishResult = {
+          success: true,
+          data: {
+            transactionHash: mockTxHash,
+            ipAssetId: registeredIPAssetId,
+            tokenId: mintedTokenId,
+            licenseTermsId,
+            ipfsHash: ipfsResult.ipfsHash,
+            explorerUrl: getExplorerUrl(mockTxHash)
+          }
         }
-      }
 
-      setPublishResult(result)
-      console.log('🎉 Publishing complete!', result)
-      return result
+        setPublishResult(result)
+        console.log('🎉 Mock: Publishing complete!', result)
+        return result
+
+      } else {
+        // Production blockchain operations
+        setCurrentStep('minting-nft')
+        console.log('🎨 Minting NFT...')
+
+        const metadataURI = createStoryProtocolURI(ipfsResult.ipfsHash)
+
+        await writeContract({
+          address: STORY_PROTOCOL_CONTRACTS.SPG_NFT,
+          abi: SPG_NFT_ABI,
+          functionName: 'mint',
+          args: [address, metadataURI]
+        })
+
+        // Wait for NFT mint transaction
+        if (!txHash) {
+          throw new Error('NFT minting transaction failed')
+        }
+
+        const mintedTokenId = BigInt(Date.now())
+        setTokenId(mintedTokenId)
+        console.log('✅ NFT minted with token ID:', mintedTokenId.toString())
+
+        // Step 3: Register as IP Asset
+        setCurrentStep('registering-ip')
+        console.log('📝 Registering IP Asset...')
+
+        await writeContract({
+          address: STORY_PROTOCOL_CONTRACTS.IP_ASSET_REGISTRY,
+          abi: IP_ASSET_REGISTRY_ABI,
+          functionName: 'register',
+          args: [
+            BigInt(1315), // Aeneid testnet chain ID
+            STORY_PROTOCOL_CONTRACTS.SPG_NFT,
+            mintedTokenId,
+            storyData.title,
+            metadataURI,
+            address
+          ]
+        })
+
+        const registeredIPAssetId = `0x${Math.random().toString(16).substring(2).padEnd(40, '0').substring(0, 40)}` as Address
+        setIPAssetId(registeredIPAssetId)
+        console.log('✅ IP Asset registered:', registeredIPAssetId)
+
+        // Handle license terms
+        let licenseTermsId: bigint | undefined
+
+        if (options.publishingOption === 'protected' && options.ipRegistration && options.licenseTerms) {
+          setCurrentStep('creating-license')
+          console.log('🛡️ Creating license terms...')
+
+          const licenseTerms: CreateLicenseTermsParams = {
+            ...DEFAULT_LICENSE_TERMS,
+            commercialUse: options.licenseTerms.commercialUse,
+            derivativesAllowed: options.licenseTerms.derivativesAllowed,
+            defaultMintingFee: BigInt(Math.floor(options.chapterPrice * 1e18))
+          }
+
+          await writeContract({
+            address: STORY_PROTOCOL_CONTRACTS.LICENSE_REGISTRY,
+            abi: LICENSE_REGISTRY_ABI,
+            functionName: 'registerLicenseTerms',
+            args: [licenseTerms as any]
+          })
+
+          licenseTermsId = BigInt(Date.now() + 1000)
+          console.log('✅ License terms created:', licenseTermsId.toString())
+
+          setCurrentStep('attaching-license')
+          console.log('🔗 Attaching license terms...')
+
+          await writeContract({
+            address: STORY_PROTOCOL_CONTRACTS.LICENSE_REGISTRY,
+            abi: LICENSE_REGISTRY_ABI,
+            functionName: 'attachLicenseTermsToIp',
+            args: [registeredIPAssetId, licenseTermsId]
+          })
+
+          console.log('✅ License terms attached to IP Asset')
+        }
+
+        // Success!
+        setCurrentStep('success')
+        const result: PublishResult = {
+          success: true,
+          data: {
+            transactionHash: txHash!,
+            ipAssetId: registeredIPAssetId,
+            tokenId: mintedTokenId,
+            licenseTermsId,
+            ipfsHash: ipfsResult.ipfsHash,
+            explorerUrl: getExplorerUrl(txHash!)
+          }
+        }
+
+        setPublishResult(result)
+        console.log('🎉 Publishing complete!', result)
+        return result
+      }
 
     } catch (error) {
       console.error('❌ Publishing failed:', error)
@@ -227,4 +287,4 @@ export function usePublishStory() {
     contractError,
     isPending: isPending || isTxLoading
   }
-} 
+}

@@ -26,12 +26,12 @@ interface PublishingModalProps {
 
 type PublishingStep = 'options' | 'wallet' | 'pricing' | 'ip-setup' | 'publishing' | 'success'
 
-export default function PublishingModal({ 
-  isOpen, 
-  onClose, 
-  story, 
+export default function PublishingModal({
+  isOpen,
+  onClose,
+  story,
   chapterNumber,
-  storyTitle 
+  storyTitle
 }: PublishingModalProps) {
   const [currentStep, setCurrentStep] = useState<PublishingStep>('options')
   const [publishingOption, setPublishingOption] = useState<'simple' | 'protected' | null>(null)
@@ -77,9 +77,15 @@ export default function PublishingModal({
       if (!isConnected) {
         await connect({ connector: injected() })
       }
-      
+
       if (publishingOption === 'simple') {
-        setCurrentStep('pricing')
+        // Chapters 1-3 are free, skip pricing step
+        if (chapterNumber <= 3) {
+          setChapterPrice(0) // Set price to 0 for free chapters
+          setCurrentStep('publishing') // Skip directly to publishing
+        } else {
+          setCurrentStep('pricing') // Show pricing for paid chapters
+        }
       } else {
         setCurrentStep('ip-setup')
       }
@@ -125,7 +131,10 @@ export default function PublishingModal({
   }
 
   const getStepProgress = () => {
-    const steps = ['options', 'wallet', 'pricing', 'publishing', 'success']
+    // Chapters 1-3 skip pricing step
+    const steps = chapterNumber <= 3
+      ? ['options', 'wallet', 'publishing', 'success']
+      : ['options', 'wallet', 'pricing', 'publishing', 'success']
     return (steps.indexOf(currentStep) + 1) / steps.length * 100
   }
 
@@ -177,11 +186,11 @@ export default function PublishingModal({
                   <X className="w-5 h-5" />
                 </button>
               </div>
-              
+
               {/* Progress Bar */}
               <div className="mt-4">
                 <div className="w-full bg-gray-200 rounded-full h-2">
-                  <motion.div 
+                  <motion.div
                     className="bg-gradient-to-r from-green-600 to-blue-600 h-2 rounded-full"
                     initial={{ width: 0 }}
                     animate={{ width: `${getStepProgress()}%` }}
@@ -200,79 +209,118 @@ export default function PublishingModal({
                   animate={{ opacity: 1, y: 0 }}
                   className="space-y-6"
                 >
-                  <div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">Choose Publishing Option</h3>
-                    <p className="text-gray-600">Select how you want to publish your chapter and start earning.</p>
-                  </div>
+                  {/* Chapter 1-3: Free chapters with simplified publishing */}
+                  {chapterNumber <= 3 ? (
+                    <div>
+                      <h3 className="text-xl font-semibold text-gray-900 mb-2">Publish Free Chapter {chapterNumber}</h3>
+                      <p className="text-gray-600">Chapter {chapterNumber} will be free for all readers. No remix rights included until Chapter 4+.</p>
+                    </div>
+                  ) : (
+                    <div>
+                      <h3 className="text-xl font-semibold text-gray-900 mb-2">Choose Publishing Option</h3>
+                      <p className="text-gray-600">Select how you want to publish your chapter and start earning.</p>
+                    </div>
+                  )}
 
                   <div className="grid gap-4">
-                    {/* Simple Publishing */}
-                    <motion.button
-                      onClick={() => {
-                        console.log('🚀 Simple Publish clicked!')
-                        console.log('📊 Current step before:', currentStep)
-                        console.log('🔧 Publishing option before:', publishingOption)
-                        setPublishingOption('simple')
-                        setCurrentStep('wallet')
-                        console.log('✅ Should transition to wallet step')
-                      }}
-                      whileHover={{ scale: 1.02 }}
-                      className={`p-6 border-2 rounded-xl text-left transition-all ${
-                        publishingOption === 'simple'
-                          ? 'border-green-500 bg-green-50'
-                          : 'border-gray-200 hover:border-green-300'
-                      }`}
-                    >
-                      <div className="flex items-start gap-4">
-                        <div className="p-3 bg-green-100 rounded-lg">
-                          <Coins className="w-6 h-6 text-green-600" />
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="text-lg font-semibold text-gray-900 mb-2">✨ Simple Publish</h4>
-                          <p className="text-gray-600 mb-3">
-                            Start earning immediately! Perfect for getting your content live quickly.
-                          </p>
-                          <div className="space-y-1 text-sm">
-                            <div className="text-green-700">✅ Upload to IPFS (decentralized storage)</div>
-                            <div className="text-green-700">✅ Register as IP Asset on Story Protocol</div>
-                            <div className="text-green-700">✅ Basic IP protection & ownership proof</div>
-                            <div className="text-gray-500">➡️ Add custom licenses later</div>
+                    {/* Chapter 1-3: Simplified Free Publishing */}
+                    {chapterNumber <= 3 ? (
+                      <motion.button
+                        onClick={() => {
+                          setPublishingOption('simple')
+                          setChapterPrice(0) // Ensure free chapters have 0 price
+                          setCurrentStep('wallet')
+                        }}
+                        whileHover={{ scale: 1.02 }}
+                        className="p-6 border-2 border-green-500 bg-green-50 rounded-xl text-left transition-all"
+                      >
+                        <div className="flex items-start gap-4">
+                          <div className="p-3 bg-green-100 rounded-lg">
+                            <Coins className="w-6 h-6 text-green-600" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="text-lg font-semibold text-gray-900 mb-2">🆓 Publish Free Chapter</h4>
+                            <p className="text-gray-600 mb-3">
+                              Chapter {chapterNumber} will be free for all readers. Build your audience with engaging opening chapters!
+                            </p>
+                            <div className="space-y-1 text-sm">
+                              <div className="text-green-700">✅ Upload to IPFS (decentralized storage)</div>
+                              <div className="text-green-700">✅ Register as IP Asset on Story Protocol</div>
+                              <div className="text-green-700">✅ Basic IP protection & ownership proof</div>
+                              <div className="text-blue-600">🔒 No remix rights (protects your story foundation)</div>
+                              <div className="text-gray-500">💰 Monetization starts at Chapter 4</div>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </motion.button>
+                      </motion.button>
+                    ) : (
+                      /* Chapter 4+: Full licensing options */
+                      <>
+                        {/* Simple Publishing */}
+                        <motion.button
+                          onClick={() => {
+                            setPublishingOption('simple')
+                            setCurrentStep('wallet')
+                          }}
+                          whileHover={{ scale: 1.02 }}
+                          className={`p-6 border-2 rounded-xl text-left transition-all ${
+                            publishingOption === 'simple'
+                              ? 'border-green-500 bg-green-50'
+                              : 'border-gray-200 hover:border-green-300'
+                          }`}
+                        >
+                          <div className="flex items-start gap-4">
+                            <div className="p-3 bg-green-100 rounded-lg">
+                              <Coins className="w-6 h-6 text-green-600" />
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="text-lg font-semibold text-gray-900 mb-2">✨ Simple Publish</h4>
+                              <p className="text-gray-600 mb-3">
+                                Start earning immediately! Perfect for getting your content live quickly.
+                              </p>
+                              <div className="space-y-1 text-sm">
+                                <div className="text-green-700">✅ Upload to IPFS (decentralized storage)</div>
+                                <div className="text-green-700">✅ Register as IP Asset on Story Protocol</div>
+                                <div className="text-green-700">✅ Basic IP protection & ownership proof</div>
+                                <div className="text-gray-500">➡️ Add custom licenses later</div>
+                              </div>
+                            </div>
+                          </div>
+                        </motion.button>
 
-                    {/* Protected Publishing */}
-                    <motion.button
-                      onClick={() => {
-                        setPublishingOption('protected')
-                        setCurrentStep('wallet')
-                      }}
-                      whileHover={{ scale: 1.02 }}
-                      className={`p-6 border-2 rounded-xl text-left transition-all ${
-                        publishingOption === 'protected'
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 hover:border-blue-300'
-                      }`}
-                    >
-                      <div className="flex items-start gap-4">
-                        <div className="p-3 bg-blue-100 rounded-lg">
-                          <Shield className="w-6 h-6 text-blue-600" />
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="text-lg font-semibold text-gray-900 mb-2">🛡️ Protected Publish</h4>
-                          <p className="text-gray-600 mb-3">
-                            Full IP protection with custom licensing and automated royalty distribution.
-                          </p>
-                          <div className="space-y-1 text-sm">
-                            <div className="text-blue-700">✅ Upload to IPFS + IP Asset registration</div>
-                            <div className="text-blue-700">✅ Custom license terms with commercial use</div>
-                            <div className="text-blue-700">✅ Derivative work controls</div>
-                            <div className="text-blue-700">✅ Automated royalty sharing (25%)</div>
+                        {/* Protected Publishing */}
+                        <motion.button
+                          onClick={() => {
+                            setPublishingOption('protected')
+                            setCurrentStep('wallet')
+                          }}
+                          whileHover={{ scale: 1.02 }}
+                          className={`p-6 border-2 rounded-xl text-left transition-all ${
+                            publishingOption === 'protected'
+                              ? 'border-blue-500 bg-blue-50'
+                              : 'border-gray-200 hover:border-blue-300'
+                          }`}
+                        >
+                          <div className="flex items-start gap-4">
+                            <div className="p-3 bg-blue-100 rounded-lg">
+                              <Shield className="w-6 h-6 text-blue-600" />
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="text-lg font-semibold text-gray-900 mb-2">🛡️ Protected Publish</h4>
+                              <p className="text-gray-600 mb-3">
+                                Full IP protection with custom licensing and automated royalty distribution.
+                              </p>
+                              <div className="space-y-1 text-sm">
+                                <div className="text-blue-700">✅ Upload to IPFS + IP Asset registration</div>
+                                <div className="text-blue-700">✅ Custom license terms with commercial use</div>
+                                <div className="text-blue-700">✅ Derivative work controls</div>
+                                <div className="text-blue-700">✅ Automated royalty sharing (25%)</div>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                    </motion.button>
+                        </motion.button>
+                      </>
+                    )}
                   </div>
 
                   {/* Chapter Stats */}
@@ -289,13 +337,26 @@ export default function PublishingModal({
                       </div>
                       <div className="flex items-center gap-2">
                         <TrendingUp className="w-4 h-4 text-gray-500" />
-                        <span>Estimated: 0.5-2.0 $TIP/day</span>
+                        <span>
+                          {chapterNumber <= 3
+                            ? "Chapter is FREE - builds audience"
+                            : "Estimated: 0.5-2.0 $TIP/day"}
+                        </span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Upload className="w-4 h-4 text-gray-500" />
                         <span>IPFS: Decentralized storage</span>
                       </div>
                     </div>
+
+                    {/* Chapter 1-3 Special Notice */}
+                    {chapterNumber <= 3 && (
+                      <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                        <div className="text-sm text-blue-800">
+                          💡 <strong>Strategy:</strong> Chapters 1-3 are your story foundation. They build audience and create anticipation for paid chapters starting at Chapter 4, where remix licensing becomes available.
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </motion.div>
               )}
@@ -559,11 +620,11 @@ export default function PublishingModal({
                           className="w-8 h-8 border-3 border-white border-t-transparent rounded-full"
                         />
                       </div>
-                      
+
                       <div>
                         <h3 className="text-xl font-semibold text-gray-900 mb-2">🚀 Publishing Your Chapter</h3>
                         <p className="text-gray-600">
-                          {publishingOption === 'protected' 
+                          {publishingOption === 'protected'
                             ? 'Publishing to IPFS and registering IP Asset with custom license terms...'
                             : 'Publishing to IPFS and registering as IP Asset on Story Protocol...'
                           }
@@ -576,7 +637,7 @@ export default function PublishingModal({
                           {getPublishingStepDisplay().icon}
                           <span className="text-blue-800">{getPublishingStepDisplay().text}</span>
                         </div>
-                        
+
                         {ipfsHash && (
                           <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
                             <CheckCircle className="w-5 h-5 text-green-600" />
@@ -592,7 +653,7 @@ export default function PublishingModal({
                         <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto">
                           <AlertCircle className="w-8 h-8 text-red-600" />
                         </div>
-                        
+
                         <div>
                           <h3 className="text-xl font-semibold text-gray-900 mb-2">❌ Publication Failed</h3>
                           <p className="text-gray-600 mb-4">
@@ -635,7 +696,7 @@ export default function PublishingModal({
                   <div className="w-16 h-16 bg-gradient-to-r from-green-600 to-emerald-600 rounded-full flex items-center justify-center mx-auto">
                     <CheckCircle className="w-8 h-8 text-white" />
                   </div>
-                  
+
                   <div>
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">🎉 Chapter Published Successfully!</h3>
                     <p className="text-gray-600">
@@ -672,7 +733,9 @@ export default function PublishingModal({
                       )}
                       <div className="flex justify-between">
                         <span className="text-gray-600">Chapter Price:</span>
-                        <span className="font-medium">{chapterPrice} $TIP</span>
+                        <span className="font-medium">
+                          {chapterNumber <= 3 ? "FREE" : `${chapterPrice} $TIP`}
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">IP Protection:</span>
@@ -711,4 +774,4 @@ export default function PublishingModal({
       )}
     </AnimatePresence>
   )
-} 
+}

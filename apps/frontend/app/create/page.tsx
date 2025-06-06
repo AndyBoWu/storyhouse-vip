@@ -38,15 +38,15 @@ type CreationMode = 'select' | 'new' | 'continue' | 'browse'
 
 export default function CreateStoryPage() {
   const [creationMode, setCreationMode] = useState<CreationMode>('select')
-  const [plotDescription, setPlotDescription] = useState('')
-  const [storyTitle, setStoryTitle] = useState('')
+  const [plotDescription, setPlotDescription] = useState('A young detective discovers a hidden portal in their grandmother\'s attic that leads to different time periods. Each time they step through, they must solve a historical mystery to return home, but each journey reveals more about a family secret that spans centuries.')
+  const [storyTitle, setStoryTitle] = useState('The Detective\'s Portal')
   const [selectedStory, setSelectedStory] = useState<ExistingStory | null>(null)
   const [chapterNumber, setChapterNumber] = useState(1)
 
   // Existing state for multimodal inputs
-  const [selectedMoods, setSelectedMoods] = useState<string[]>([])
-  const [selectedEmojis, setSelectedEmojis] = useState<string[]>([])
-  const [selectedGenres, setSelectedGenres] = useState<string[]>([])
+  const [selectedMoods, setSelectedMoods] = useState<string[]>(['Suspenseful'])
+  const [selectedEmojis, setSelectedEmojis] = useState<string[]>(['🔍', '⏰', '🏛️'])
+  const [selectedGenres, setSelectedGenres] = useState<string[]>(['Mystery'])
   const [isGenerating, setIsGenerating] = useState(false)
   const [generatedStory, setGeneratedStory] = useState<GeneratedStory | null>(null)
   const [showMultiModal, setShowMultiModal] = useState(false)
@@ -121,19 +121,21 @@ export default function CreateStoryPage() {
     }
   }, [plotDescription, storyTitle, selectedGenres, selectedMoods, selectedEmojis, creationMode, selectedStory])
 
-  // Load draft on mount
+  // Load draft on mount (only if it's different from our sample data)
   useEffect(() => {
     const saved = localStorage.getItem('storyhouse_draft')
     if (saved) {
       try {
         const draft = JSON.parse(saved)
-        // Only load if less than 24 hours old
-        if (Date.now() - draft.timestamp < 24 * 60 * 60 * 1000) {
-          setPlotDescription(draft.plotDescription || '')
-          setStoryTitle(draft.storyTitle || '')
-          setSelectedGenres(draft.selectedGenres || [])
-          setSelectedMoods(draft.selectedMoods || [])
-          setSelectedEmojis(draft.selectedEmojis || [])
+        // Only load if less than 24 hours old and different from sample data
+        if (Date.now() - draft.timestamp < 24 * 60 * 60 * 1000 &&
+            draft.plotDescription &&
+            draft.plotDescription !== 'A young detective discovers a hidden portal in their grandmother\'s attic that leads to different time periods. Each time they step through, they must solve a historical mystery to return home, but each journey reveals more about a family secret that spans centuries.') {
+          setPlotDescription(draft.plotDescription)
+          setStoryTitle(draft.storyTitle || 'The Detective\'s Portal')
+          setSelectedGenres(draft.selectedGenres || ['Mystery'])
+          setSelectedMoods(draft.selectedMoods || ['Suspenseful'])
+          setSelectedEmojis(draft.selectedEmojis || ['🔍', '⏰', '🏛️'])
           if (draft.creationMode) setCreationMode(draft.creationMode)
           if (draft.selectedStory) setSelectedStory(draft.selectedStory)
         }
