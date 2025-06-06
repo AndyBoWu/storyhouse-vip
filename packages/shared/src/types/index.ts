@@ -99,6 +99,17 @@ export interface ApiResponse<T> {
   message?: string;
 }
 
+// Enhanced API response with IP data
+export interface EnhancedApiResponse<T> extends ApiResponse<T> {
+  ipData?: {
+    operationId?: string;
+    contentUrl?: string;
+    transactionHash?: `0x${string}`;
+    ipAssetId?: string;
+    gasUsed?: bigint;
+  };
+}
+
 export interface PaginatedResponse<T> {
   data: T[];
   total: number;
@@ -116,12 +127,35 @@ export interface StoryCreationParams {
   maxWords?: number;
 }
 
+// Enhanced story creation with IP and collection options
+export interface EnhancedStoryCreationParams extends StoryCreationParams {
+  registerAsIP?: boolean;
+  licenseType?: 'standard' | 'premium' | 'exclusive' | 'custom';
+  royaltyPercentage?: number;
+  isCollaborative?: boolean;
+  collectionId?: string;
+}
+
 export interface GeneratedStory {
   title: string;
   content: string;
   themes: string[];
   wordCount: number;
   readingTime: number;
+}
+
+// Enhanced types for R2 and Story Protocol integration
+export interface EnhancedGeneratedStory extends GeneratedStory {
+  storyId?: string;
+  chapterNumber?: number;
+  contentUrl?: string;
+  suggestedTags: string[];
+  suggestedGenre: string;
+  contentRating: 'G' | 'PG' | 'PG-13' | 'R';
+  language: string;
+  qualityScore: number;
+  originalityScore: number;
+  commercialViability: number;
 }
 
 // Blockchain event types
