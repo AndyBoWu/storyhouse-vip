@@ -11,7 +11,6 @@ import CollectionSection from '../../components/creator/CollectionSection'
 import IPStatusIndicator from '../../components/creator/IPStatusIndicator'
 import StoryContentDisplay from '../../components/ui/StoryContentDisplay'
 import PublishingModal from '../../components/publishing/PublishingModal'
-import { getPublishedStories, type PublishedStory } from '@/lib/storage/publishedStories'
 import type {
   EnhancedGeneratedStory,
   EnhancedStoryCreationParams
@@ -66,30 +65,46 @@ export default function CreateStoryPage() {
   })
   const [collectionOptions, setCollectionOptions] = useState<Partial<EnhancedStoryCreationParams>>({})
 
-  // Real user stories - loaded from localStorage
+    // Real user stories - loaded from R2
   const [existingStories, setExistingStories] = useState<ExistingStory[]>([])
+  const [isLoadingStories, setIsLoadingStories] = useState(false)
 
-  // Load published stories from localStorage
+  // Load published stories from R2
   useEffect(() => {
-    const loadPublishedStories = () => {
-      const publishedStories = getPublishedStories()
-      // Convert PublishedStory format to ExistingStory format
-      const convertedStories: ExistingStory[] = publishedStories.map(story => ({
-        id: story.id,
-        title: story.title,
-        genre: story.genre,
-        chapters: story.chapters,
-        lastUpdated: story.lastUpdated,
-        earnings: story.earnings,
-        preview: story.preview
-      }))
-      setExistingStories(convertedStories)
+    const loadStoriesFromR2 = async () => {
+      setIsLoadingStories(true)
+      try {
+        const response = await fetch('/api/stories')
+        const data = await response.json()
+
+        if (data.success && data.stories) {
+          // Convert R2 story format to ExistingStory format
+          const convertedStories: ExistingStory[] = data.stories.map((story: any) => ({
+            id: story.id,
+            title: story.title,
+            genre: story.genre,
+            chapters: story.chapters,
+            lastUpdated: story.lastUpdated,
+            earnings: story.earnings,
+            preview: story.preview
+          }))
+          setExistingStories(convertedStories)
+        } else {
+          console.warn('Failed to load stories from R2:', data.error)
+          setExistingStories([])
+        }
+      } catch (error) {
+        console.error('Error loading stories from R2:', error)
+        setExistingStories([])
+      } finally {
+        setIsLoadingStories(false)
+      }
     }
 
-    loadPublishedStories()
+    loadStoriesFromR2()
 
-    // Refresh stories when coming back from publishing
-    const interval = setInterval(loadPublishedStories, 2000)
+    // Refresh stories periodically to show newly published content
+    const interval = setInterval(loadStoriesFromR2, 10000) // Every 10 seconds
     return () => clearInterval(interval)
   }, [])
 
@@ -606,7 +621,13 @@ export default function CreateStoryPage() {
 
       {/* Stories Grid */}
       <div className="grid md:grid-cols-2 gap-6 mb-6">
-        {existingStories.length === 0 ? (
+        {isLoadingStories ? (
+          <div className="col-span-full text-center py-12">
+            <div className="w-8 h-8 border-3 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <h3 className="text-lg font-semibold text-gray-700 mb-2">Loading your stories...</h3>
+            <p className="text-gray-500">Fetching published stories from R2 storage</p>
+          </div>
+        ) : existingStories.length === 0 ? (
           <div className="col-span-full text-center py-12">
             <div className="text-6xl mb-4">📚</div>
             <h3 className="text-xl font-semibold text-gray-700 mb-2">No stories yet!</h3>
