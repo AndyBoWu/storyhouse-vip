@@ -2350,18 +2350,44 @@ Would you like me to dive deeper into any of these wireframes or create addition
 
 **Visual Story Map:**
 
-```
-Ch1 FREE → Ch2 FREE → Ch3 FREE
-                        ↓
-         ┌─────────────────────────────────────┐
-         ↓ (Main: Andy Original)                ↓ (Boris Sci-Fi Branch)
-    Ch4 Andy → Ch5 → Ch6 → Ch7 → Ch8 → Ch9 → Ch10
-                                   ↓
-                              Ch9 Daisy Dark
+```mermaid
+flowchart LR
+    A1["Ch1<br/>FREE 🆓"] --> A2["Ch2<br/>FREE 🆓"]
+    A2 --> A3["Ch3<br/>FREE 🆓"]
 
-                        Ch4 Boris → Ch5 → Ch6 → Ch7 → Ch8
-                                                      ↓
-                                                Ch9 Cecilia Romance
+    %% Andy's Main Branch (Gray)
+    A3 --> A4["Ch4<br/>Andy Original 🔮<br/>💰 0.5 TIP"]
+    A4 --> A5["Ch5<br/>Andy<br/>💰 0.5 TIP"]
+    A5 --> A6["Ch6<br/>Andy<br/>💰 0.5 TIP"]
+    A6 --> A7["Ch7<br/>Andy<br/>💰 0.5 TIP"]
+    A7 --> A8["Ch8<br/>Andy<br/>💰 0.5 TIP"]
+    A8 --> A9["Ch9<br/>Andy<br/>💰 0.5 TIP"]
+    A9 --> A10["Ch10<br/>Andy<br/>💰 0.5 TIP"]
+
+    %% Boris Sci-Fi Branch (Blue)
+    A3 --> B4["Ch4<br/>Boris Sci-Fi 🚀<br/>💰 0.5 TIP<br/>📜 2.0 TIP license"]
+    B4 --> B5["Ch5<br/>Boris<br/>💰 0.5 TIP"]
+    B5 --> B6["Ch6<br/>Boris<br/>💰 0.5 TIP"]
+    B6 --> B7["Ch7<br/>Boris<br/>💰 0.5 TIP"]
+    B7 --> B8["Ch8<br/>Boris<br/>💰 0.5 TIP"]
+
+    %% Cecilia Romance Branch (Light Green) - from Boris Ch8
+    B8 --> C9["Ch9<br/>Cecilia Romance 🌹<br/>💰 0.5 TIP<br/>📜 2.0 TIP license"]
+
+    %% Daisy Dark Branch (Orange) - from Andy Ch8
+    A8 --> D9["Ch9<br/>Daisy Dark ⚡<br/>💰 0.5 TIP<br/>📜 2.0 TIP license"]
+
+    classDef freeChapter fill:#90EE90,stroke:#006400,stroke-width:3px
+    classDef andyChapter fill:#D3D3D3,stroke:#696969,stroke-width:2px
+    classDef borisChapter fill:#87CEEB,stroke:#4682B4,stroke-width:2px
+    classDef ceciliaChapter fill:#98FB98,stroke:#228B22,stroke-width:2px
+    classDef daisyChapter fill:#FFA500,stroke:#FF8C00,stroke-width:2px
+
+    class A1,A2,A3 freeChapter
+    class A4,A5,A6,A7,A8,A9,A10 andyChapter
+    class B4,B5,B6,B7,B8 borisChapter
+    class C9 ceciliaChapter
+    class D9 daisyChapter
 ```
 
 **Branch Details:**
