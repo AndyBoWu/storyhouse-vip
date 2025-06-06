@@ -1,1 +1,4 @@
 .vercel
+
+# Temporary environment file (copied from .env.testnet or .env.mainnet)
+.env.local

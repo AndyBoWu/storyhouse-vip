@@ -89,10 +89,15 @@ export function usePublishStory() {
       setIPFSHash(ipfsResult.ipfsHash)
       console.log('✅ IPFS upload successful:', ipfsResult.ipfsHash)
 
-      // Step 2: Mock blockchain operations for development
+      // Step 2: Check if we should use real testnet or mock operations
       const isDevelopment = process.env.NODE_ENV === 'development'
+      const enableTestnet = process.env.NEXT_PUBLIC_ENABLE_TESTNET === 'true'
 
-      if (isDevelopment) {
+      console.log(`🔍 Debug - isDevelopment: ${isDevelopment}, enableTestnet: ${enableTestnet}`)
+      console.log(`🔍 Environment check - NODE_ENV: ${process.env.NODE_ENV}`)
+      console.log(`🔍 Environment check - NEXT_PUBLIC_ENABLE_TESTNET: ${process.env.NEXT_PUBLIC_ENABLE_TESTNET}`)
+
+      if (isDevelopment && !enableTestnet) {
         console.log('🎭 Running in development mode - using mock blockchain operations')
 
         // Mock NFT minting
@@ -153,18 +158,22 @@ export function usePublishStory() {
         return result
 
       } else {
-        // Production blockchain operations
+        // Real blockchain operations (production or testnet)
+        const mode = enableTestnet ? 'testnet' : 'production'
+        console.log(`🔗 Running in ${mode} mode - using real blockchain operations`)
+
         setCurrentStep('minting-nft')
         console.log('🎨 Minting NFT...')
 
         const metadataURI = createStoryProtocolURI(ipfsResult.ipfsHash)
 
-        await writeContract({
-          address: STORY_PROTOCOL_CONTRACTS.SPG_NFT,
-          abi: SPG_NFT_ABI,
-          functionName: 'mint',
-          args: [address, metadataURI]
-        })
+        // TODO: This approach needs to be properly implemented
+        // For now, we'll use a simplified approach and register existing NFT as IP
+        // In a real implementation, you would either:
+        // 1. Create an SPG NFT collection first, then use mintAndRegisterIp
+        // 2. Deploy your own ERC721 contract and register it
+
+        throw new Error('Real blockchain operations not yet fully implemented. Please use mock mode for testing.')
 
         // Wait for NFT mint transaction
         if (!txHash) {
