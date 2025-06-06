@@ -131,6 +131,7 @@ export interface PublishResult {
     tokenId?: bigint
     licenseTermsId?: bigint
     ipfsHash?: string
+    contentUrl?: string
     explorerUrl?: string
   }
   error?: string

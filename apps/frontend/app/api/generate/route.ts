@@ -140,16 +140,20 @@ export async function POST(request: NextRequest) {
       // Continue without failing the entire request
     }
 
-            // Prepare enhanced API response
+                    // Prepare enhanced API response with R2 URL
         const response: EnhancedApiResponse<EnhancedGeneratedStory> = {
           success: true,
           data: {
             ...enhancedResult,
+            // These fields are included in the EnhancedGeneratedStory interface
+            ...(storyId && { storyId }),
+            ...(chapterNumber && { chapterNumber }),
+            ...(contentUrl && { contentUrl })
           },
       message: generationRequest.ipOptions?.registerAsIP
         ? 'Story generated with IP registration metadata and saved to storage'
         : 'Story generated successfully and saved to storage'
-    }
+        }
 
     // Add IP-specific response data if IP registration is requested
     if (generationRequest.ipOptions?.registerAsIP && contentUrl) {
@@ -217,7 +221,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json(response)
+    return NextResponse.json(response, { status: 200 })
 
   } catch (error) {
     console.error('Enhanced story generation API error:', error)

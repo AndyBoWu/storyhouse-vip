@@ -14,6 +14,7 @@ import {
   PublishResult,
   CreateLicenseTermsParams
 } from '@/lib/contracts/storyProtocol'
+import { StoryProtocolService } from '@/lib/storyProtocol'
 
 interface StoryData {
   title: string
@@ -22,6 +23,7 @@ interface StoryData {
   readingTime: number
   themes: string[]
   chapterNumber: number
+  contentUrl?: string // R2 URL from story generation
 }
 
 interface PublishOptions {
@@ -37,7 +39,6 @@ interface PublishOptions {
 
 type PublishStep =
   | 'idle'
-  | 'uploading-ipfs'
   | 'minting-nft'
   | 'registering-ip'
   | 'creating-license'
@@ -59,7 +60,7 @@ export function usePublishStory() {
     hash: txHash,
   })
 
-    const publishStory = async (storyData: StoryData, options: PublishOptions): Promise<PublishResult> => {
+  const publishStory = async (storyData: StoryData, options: PublishOptions): Promise<PublishResult> => {
     if (!address) {
       const error = 'Wallet not connected'
       setPublishResult({ success: false, error })
@@ -67,38 +68,35 @@ export function usePublishStory() {
     }
 
     try {
-      setCurrentStep('uploading-ipfs')
-
-      // Step 1: Upload content to IPFS
-      console.log('📤 Uploading to IPFS...')
-      const ipfsResult = await uploadStoryToIPFS(
-        storyData.title,
-        storyData.content,
-        {
-          wordCount: storyData.wordCount,
-          readingTime: storyData.readingTime,
-          themes: storyData.themes,
-          chapterNumber: storyData.chapterNumber,
-          author: address
-        }
-      )
-
-      if (!ipfsResult.success || !ipfsResult.ipfsHash) {
-        throw new Error(ipfsResult.error || 'IPFS upload failed')
+      // Step 1: Use existing R2 content URL (skip IPFS)
+      if (!storyData.contentUrl) {
+        throw new Error('Content URL not available. Please regenerate the story.')
       }
 
-      setIPFSHash(ipfsResult.ipfsHash)
-      console.log('✅ IPFS upload successful:', ipfsResult.ipfsHash)
+      console.log('📍 Using R2 content URL:', storyData.contentUrl)
+      setCurrentStep('minting-nft') // Skip IPFS step
 
-      // Step 2: Check if we should use real testnet or mock operations
+      // Step 2: Check if we should use real blockchain operations or mock operations
       const isDevelopment = process.env.NODE_ENV === 'development'
       const enableTestnet = process.env.NEXT_PUBLIC_ENABLE_TESTNET === 'true'
+      const forceRealTransactions = process.env.NEXT_PUBLIC_FORCE_REAL_TRANSACTIONS === 'true'
 
       console.log(`🔍 Debug - isDevelopment: ${isDevelopment}, enableTestnet: ${enableTestnet}`)
       console.log(`🔍 Environment check - NODE_ENV: ${process.env.NODE_ENV}`)
       console.log(`🔍 Environment check - NEXT_PUBLIC_ENABLE_TESTNET: ${process.env.NEXT_PUBLIC_ENABLE_TESTNET}`)
+      console.log(`🔍 Environment check - NEXT_PUBLIC_FORCE_REAL_TRANSACTIONS: ${process.env.NEXT_PUBLIC_FORCE_REAL_TRANSACTIONS}`)
 
-      if (isDevelopment && !enableTestnet) {
+            // Use real blockchain operations if:
+      // 1. Not in development, OR
+      // 2. Testnet is explicitly enabled, OR
+      // 3. Real transactions are forced, OR
+      // 4. We have a connected wallet (user expects real transactions)
+      // Default to real transactions when wallet is connected (most expected behavior)
+      const useRealBlockchain = !isDevelopment || enableTestnet || forceRealTransactions || (address && walletClient)
+
+      console.log(`🔍 Decision: useRealBlockchain = ${useRealBlockchain} (wallet connected: ${!!address})`)
+
+      if (!useRealBlockchain) {
         console.log('🎭 Running in development mode - using mock blockchain operations')
 
         // Mock NFT minting
@@ -149,7 +147,7 @@ export function usePublishStory() {
             ipAssetId: registeredIPAssetId,
             tokenId: mintedTokenId,
             licenseTermsId,
-            ipfsHash: ipfsResult.ipfsHash,
+            contentUrl: storyData.contentUrl,
             explorerUrl: getExplorerUrl(mockTxHash)
           }
         }
@@ -159,14 +157,12 @@ export function usePublishStory() {
         return result
 
       } else {
-        // Real blockchain operations (production or testnet)
-        const mode = enableTestnet ? 'testnet' : 'production'
-        console.log(`🔗 Running in ${mode} mode - using real blockchain operations`)
+        // Real blockchain operations
+        const mode = enableTestnet ? 'testnet' : (isDevelopment ? 'development-real' : 'production')
+        console.log(`🔗 Running in ${mode} mode - using real blockchain operations with wallet signatures`)
 
         setCurrentStep('minting-nft')
         console.log('🎨 Minting NFT...')
-
-        const metadataURI = createStoryProtocolURI(ipfsResult.ipfsHash)
 
         // Use Story Protocol to mint NFT and register as IP Asset
         const chapterIPData = {
@@ -174,7 +170,7 @@ export function usePublishStory() {
           chapterNumber: storyData.chapterNumber,
           title: storyData.title,
           content: storyData.content,
-          contentUrl: `https://ipfs.io/ipfs/${ipfsResult.ipfsHash}`,
+          contentUrl: storyData.contentUrl,
           metadata: {
             suggestedTags: storyData.themes,
             suggestedGenre: 'Mixed',
@@ -186,22 +182,37 @@ export function usePublishStory() {
           }
         }
 
-                        // Import the Story Protocol service
-        const { StoryProtocolService } = await import('@/lib/storyProtocol')
-
         if (!walletClient) {
           throw new Error('Wallet not connected')
         }
 
-        // Register chapter as IP Asset using connected wallet
-        const ipResult = await StoryProtocolService.registerChapterAsIP(chapterIPData, walletClient)
+        // Register chapter as IP Asset using connected wallet with timeout
+        console.log('🔗 Starting Story Protocol registration...')
+        const timeoutPromise = new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('Story Protocol call timed out after 30 seconds')), 30000)
+        )
+
+        const ipResult = await Promise.race([
+          StoryProtocolService.registerChapterAsIP(chapterIPData, walletClient),
+          timeoutPromise
+        ])
 
         if (!ipResult.success) {
           throw new Error(ipResult.error || 'Story Protocol registration failed')
         }
 
         // Extract results from Story Protocol registration
-        const mintedTokenId = ipResult.tokenId ? BigInt(ipResult.tokenId) : BigInt(Date.now())
+        // Safe conversion of tokenId to BigInt with fallback
+        let mintedTokenId: bigint
+        try {
+          mintedTokenId = (ipResult.tokenId && ipResult.tokenId !== 'unknown' && !isNaN(Number(ipResult.tokenId)))
+            ? BigInt(ipResult.tokenId)
+            : BigInt(Date.now())
+        } catch (e) {
+          console.warn('⚠️ Could not convert tokenId to BigInt, using timestamp:', ipResult.tokenId)
+          mintedTokenId = BigInt(Date.now())
+        }
+
         const registeredIPAssetId = ipResult.ipAssetId as Address
         const transactionHash = ipResult.transactionHash as Hash
 
@@ -259,7 +270,7 @@ export function usePublishStory() {
             ipAssetId: registeredIPAssetId,
             tokenId: mintedTokenId,
             licenseTermsId,
-            ipfsHash: ipfsResult.ipfsHash,
+            contentUrl: storyData.contentUrl,
             explorerUrl: getExplorerUrl(transactionHash)
           }
         }
@@ -272,9 +283,32 @@ export function usePublishStory() {
     } catch (error) {
       console.error('❌ Publishing failed:', error)
       setCurrentStep('error')
+
+      // More detailed error handling
+      let errorMessage = 'Unknown error occurred'
+      if (error instanceof Error) {
+        errorMessage = error.message
+        console.error('Error details:', {
+          name: error.name,
+          message: error.message,
+          stack: error.stack
+        })
+      }
+
+      // Check for common errors and provide helpful messages
+      if (errorMessage.includes('User rejected')) {
+        errorMessage = 'Transaction was rejected. Please try again.'
+      } else if (errorMessage.includes('timeout')) {
+        errorMessage = 'Operation timed out. Please check your connection and try again.'
+      } else if (errorMessage.includes('Missing or invalid parameters')) {
+        errorMessage = 'Contract parameters invalid. Please check your SPG contract configuration.'
+      } else if (errorMessage.includes('SPG NFT Contract not configured')) {
+        errorMessage = 'SPG contract not found. Please check your environment configuration.'
+      }
+
       const result: PublishResult = {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred'
+        error: errorMessage
       }
       setPublishResult(result)
       return result
