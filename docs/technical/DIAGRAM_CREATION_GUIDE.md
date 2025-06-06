@@ -307,7 +307,7 @@ B4["Ch4<br/>Boris Sci-Fi<br/>💰 0.5 TIP<br/>📜 Standard: 2.0 TIP<br/>👑 Pr
 
 - **Quick Reference**: `docs/reference/DIAGRAM_QUICK_REFERENCE.md`
 - **Main Design Doc**: `docs/product/DESIGN.md`
-- **User Scenarios**: `USER_SCENARIO_BRANCHING_MODEL.md`
+- **User Scenarios**: `docs/product/USER_SCENARIO_BRANCHING_MODEL.md`
 - **Technical Overview**: `docs/technical/OVERVIEW.md`
 - **Mermaid Documentation**: https://mermaid.js.org/
 
