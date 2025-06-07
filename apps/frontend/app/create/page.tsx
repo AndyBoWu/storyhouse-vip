@@ -71,8 +71,10 @@ export default function CreateStoryPage() {
 
   // Load published stories from R2
   useEffect(() => {
-    const loadStoriesFromR2 = async () => {
-      setIsLoadingStories(true)
+    const loadStoriesFromR2 = async (showLoading = true) => {
+      if (showLoading) {
+        setIsLoadingStories(true)
+      }
       try {
         const response = await fetch('/api/stories')
         const data = await response.json()
@@ -91,20 +93,27 @@ export default function CreateStoryPage() {
           setExistingStories(convertedStories)
         } else {
           console.warn('Failed to load stories from R2:', data.error)
-          setExistingStories([])
+          if (showLoading) {
+            setExistingStories([])
+          }
         }
       } catch (error) {
         console.error('Error loading stories from R2:', error)
-        setExistingStories([])
+        if (showLoading) {
+          setExistingStories([])
+        }
       } finally {
-        setIsLoadingStories(false)
+        if (showLoading) {
+          setIsLoadingStories(false)
+        }
       }
     }
 
-    loadStoriesFromR2()
+    // Initial load with loading state
+    loadStoriesFromR2(true)
 
-    // Refresh stories periodically to show newly published content
-    const interval = setInterval(loadStoriesFromR2, 10000) // Every 10 seconds
+    // Background refresh without loading state - less frequent to avoid flickering
+    const interval = setInterval(() => loadStoriesFromR2(false), 30000) // Every 30 seconds
     return () => clearInterval(interval)
   }, [])
 

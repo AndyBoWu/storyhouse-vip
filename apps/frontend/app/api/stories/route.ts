@@ -120,14 +120,17 @@ export async function GET(request: NextRequest) {
     console.log(`📁 Found ${listResponse.CommonPrefixes.length} story directories`)
     const stories: StoryFromR2[] = []
 
-    // Process each story directory
-    for (let index = 0; index < listResponse.CommonPrefixes.length; index++) {
-      const prefix = listResponse.CommonPrefixes[index]
+    // Process each story directory (limit to first 20 for performance)
+    const maxStoriesToProcess = 20
+    const prefixesToProcess = listResponse.CommonPrefixes.slice(0, maxStoriesToProcess)
+    
+    for (let index = 0; index < prefixesToProcess.length; index++) {
+      const prefix = prefixesToProcess[index]
       if (!prefix.Prefix) continue
 
       // Extract story ID from prefix (stories/{storyId}/)
       const storyId = prefix.Prefix.replace('stories/', '').replace('/', '')
-      console.log(`📖 Processing story ${index + 1}/${listResponse.CommonPrefixes.length}: ${storyId}`)
+      console.log(`📖 Processing story ${index + 1}/${prefixesToProcess.length}: ${storyId}`)
 
       try {
         // List chapters for this story
@@ -234,6 +237,7 @@ export async function GET(request: NextRequest) {
       debug: {
         bucket: BUCKET_NAME,
         totalDirectories: listResponse.CommonPrefixes.length,
+        processedDirectories: prefixesToProcess.length,
         processedStories: stories.length
       }
     })
