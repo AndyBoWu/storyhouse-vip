@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { ListObjectsV2Command } from '@aws-sdk/client-s3'
+import { ListObjectsV2Command, GetObjectCommand } from '@aws-sdk/client-s3'
 import { S3Client } from '@aws-sdk/client-s3'
 
 // Initialize R2 client (same as in r2.ts)
@@ -36,6 +36,12 @@ export interface StoryFromR2 {
 export async function GET(request: NextRequest) {
   try {
     console.log('📖 Fetching stories from R2...')
+    console.log('🔧 R2 Configuration:')
+    console.log('   BUCKET_NAME:', BUCKET_NAME)
+    console.log('   PUBLIC_URL:', PUBLIC_URL)
+    console.log('   R2_ENDPOINT:', process.env.R2_ENDPOINT)
+    console.log('   Has R2_ACCESS_KEY_ID:', !!process.env.R2_ACCESS_KEY_ID)
+    console.log('   Has R2_SECRET_ACCESS_KEY:', !!process.env.R2_SECRET_ACCESS_KEY)
 
     // List all objects in the stories/ prefix
     const listCommand = new ListObjectsV2Command({
@@ -44,24 +50,84 @@ export async function GET(request: NextRequest) {
       Delimiter: '/',
     })
 
-    const listResponse = await r2Client.send(listCommand)
+    console.log('🔍 Listing objects with prefix "stories/"...')
 
-    if (!listResponse.CommonPrefixes) {
+    let listResponse
+    try {
+      listResponse = await r2Client.send(listCommand)
+      console.log('✅ R2 connection successful')
+      console.log('📊 Response:', {
+        KeyCount: listResponse.KeyCount,
+        CommonPrefixesCount: listResponse.CommonPrefixes?.length || 0,
+        IsTruncated: listResponse.IsTruncated
+      })
+    } catch (r2Error) {
+      console.error('❌ R2 connection failed:', r2Error)
+      return NextResponse.json({
+        success: false,
+        error: 'Failed to connect to R2 storage',
+        details: r2Error instanceof Error ? r2Error.message : 'Unknown R2 error',
+        stories: []
+      }, { status: 500 })
+    }
+
+    if (!listResponse.CommonPrefixes || listResponse.CommonPrefixes.length === 0) {
+      console.log('📂 No story directories found in R2')
+      console.log('🔍 Let me check for individual files...')
+
+      // Also try listing all objects without delimiter to see what's actually there
+      const allObjectsCommand = new ListObjectsV2Command({
+        Bucket: BUCKET_NAME,
+        Prefix: 'stories/',
+        MaxKeys: 100
+      })
+
+      try {
+        const allObjectsResponse = await r2Client.send(allObjectsCommand)
+        console.log('📋 All objects in stories/ prefix:')
+        allObjectsResponse.Contents?.forEach(obj => {
+          console.log(`   - ${obj.Key} (${obj.Size} bytes, ${obj.LastModified})`)
+        })
+
+        if (!allObjectsResponse.Contents || allObjectsResponse.Contents.length === 0) {
+          return NextResponse.json({
+            success: true,
+            stories: [],
+            message: 'No stories found in R2 storage - the stories/ directory is empty',
+            debug: {
+              bucket: BUCKET_NAME,
+              prefix: 'stories/',
+              objectCount: 0
+            }
+          })
+        }
+      } catch (debugError) {
+        console.warn('Failed to list all objects for debugging:', debugError)
+      }
+
       return NextResponse.json({
         success: true,
         stories: [],
-        message: 'No stories found'
+        message: 'No story directories found in R2',
+        debug: {
+          bucket: BUCKET_NAME,
+          prefix: 'stories/',
+          commonPrefixes: 0
+        }
       })
     }
 
+    console.log(`📁 Found ${listResponse.CommonPrefixes.length} story directories`)
     const stories: StoryFromR2[] = []
 
     // Process each story directory
-    for (const prefix of listResponse.CommonPrefixes) {
+    for (let index = 0; index < listResponse.CommonPrefixes.length; index++) {
+      const prefix = listResponse.CommonPrefixes[index]
       if (!prefix.Prefix) continue
 
       // Extract story ID from prefix (stories/{storyId}/)
       const storyId = prefix.Prefix.replace('stories/', '').replace('/', '')
+      console.log(`📖 Processing story ${index + 1}/${listResponse.CommonPrefixes.length}: ${storyId}`)
 
       try {
         // List chapters for this story
@@ -72,17 +138,41 @@ export async function GET(request: NextRequest) {
 
         const chaptersResponse = await r2Client.send(chaptersCommand)
         const chapterCount = chaptersResponse.KeyCount || 0
+        console.log(`   📚 Found ${chapterCount} chapters`)
 
-        if (chapterCount === 0) continue // Skip stories with no chapters
+        if (chapterCount === 0) {
+          console.log(`   ⚠️ Skipping story ${storyId} - no chapters found`)
+          continue
+        }
 
-        // Fetch the first chapter to get story info
+                // Fetch the first chapter to get story info using S3 SDK
         const firstChapterKey = `stories/${storyId}/chapters/1.json`
 
-        try {
-          const chapterResponse = await fetch(`${PUBLIC_URL}/${firstChapterKey}`)
-          if (!chapterResponse.ok) continue
+        console.log(`   📄 Fetching first chapter: ${firstChapterKey}`)
 
-          const chapterData = await chapterResponse.json()
+        try {
+          const getObjectCommand = new GetObjectCommand({
+            Bucket: BUCKET_NAME,
+            Key: firstChapterKey,
+          })
+
+          const chapterResponse = await r2Client.send(getObjectCommand)
+          console.log(`   📡 Chapter fetch successful from R2`)
+
+          if (!chapterResponse.Body) {
+            console.log(`   ❌ No body in R2 response`)
+            continue
+          }
+
+          // Convert the readable stream to string
+          const chapterText = await chapterResponse.Body.transformToString()
+          const chapterData = JSON.parse(chapterText)
+          console.log(`   ✅ Chapter data loaded:`, {
+            title: chapterData.title,
+            hasContent: !!chapterData.content,
+            themes: chapterData.themes,
+            hasMetadata: !!chapterData.metadata
+          })
 
           // Extract preview from content (first 100 characters)
           const content = chapterData.content || ''
@@ -118,15 +208,16 @@ export async function GET(request: NextRequest) {
             publishedAt: generatedAt || new Date().toISOString()
           }
 
+          console.log(`   ✅ Story processed:`, story.title)
           stories.push(story)
 
         } catch (chapterError) {
-          console.warn(`Failed to fetch chapter data for story ${storyId}:`, chapterError)
+          console.warn(`   ❌ Failed to fetch/parse chapter data for story ${storyId}:`, chapterError)
           continue
         }
 
       } catch (error) {
-        console.warn(`Failed to process story ${storyId}:`, error)
+        console.warn(`❌ Failed to process story ${storyId}:`, error)
         continue
       }
     }
@@ -134,20 +225,26 @@ export async function GET(request: NextRequest) {
     // Sort by most recent first
     stories.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
 
-    console.log(`✅ Found ${stories.length} stories in R2`)
+    console.log(`✅ Successfully processed ${stories.length} stories`)
 
     return NextResponse.json({
       success: true,
       stories,
-      count: stories.length
+      count: stories.length,
+      debug: {
+        bucket: BUCKET_NAME,
+        totalDirectories: listResponse.CommonPrefixes.length,
+        processedStories: stories.length
+      }
     })
 
   } catch (error) {
-    console.error('Error fetching stories from R2:', error)
+    console.error('❌ Error fetching stories from R2:', error)
     return NextResponse.json(
       {
         success: false,
         error: 'Failed to fetch stories from R2',
+        details: error instanceof Error ? error.message : 'Unknown error',
         stories: []
       },
       { status: 500 }
