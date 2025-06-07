@@ -187,7 +187,7 @@ export default function CreateStoryPage() {
           isContinuation: creationMode === 'continue',
           existingStoryId: selectedStory?.id,
           // Include author information
-          authorAddress: userAddress,
+          authorAddress: userAddress?.toLowerCase(),
           authorName: userAddress ? `${userAddress.slice(0, 6)}...${userAddress.slice(-4)}` : undefined
         })
       })

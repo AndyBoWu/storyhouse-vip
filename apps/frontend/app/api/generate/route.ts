@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
           commercialViability: enhancedResult.commercialViability,
           
           // Authorship
-          authorAddress: generationRequest.authorAddress,
+          authorAddress: generationRequest.authorAddress?.toLowerCase(),
           authorName: generationRequest.authorName,
           
           // Remix System
@@ -172,7 +172,7 @@ export async function POST(request: NextRequest) {
             chapterNumber: chapterNumber.toString(),
             contentType: 'chapter',
             generatedAt: new Date().toISOString(),
-            authorAddress: generationRequest.authorAddress || '',
+            authorAddress: generationRequest.authorAddress?.toLowerCase() || '',
             authorName: generationRequest.authorName || '',
             // Business Critical Fields
             contentRating: enhancedResult.contentRating || 'PG',
