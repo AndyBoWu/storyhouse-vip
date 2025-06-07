@@ -3,10 +3,10 @@ import { R2Service } from '@/lib/r2'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { storyId: string; chapterNumber: string } }
+  context: { params: Promise<{ storyId: string; chapterNumber: string }> }
 ) {
   try {
-    const { storyId, chapterNumber } = params
+    const { storyId, chapterNumber } = await context.params
     
     // Generate the R2 key for the chapter
     const chapterKey = R2Service.generateChapterKey(storyId, parseInt(chapterNumber))
