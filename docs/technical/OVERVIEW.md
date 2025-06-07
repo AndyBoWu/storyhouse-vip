@@ -2,13 +2,16 @@
 
 Comprehensive technical documentation for StoryHouse.vip's revolutionary Web3 storytelling platform.
 
-## 🎯 **Current Status: Production Ready**
+## 🎯 **Current Status: Production Ready (Phase 5.0)**
 
 - ✅ **Smart Contracts**: 6 contracts deployed on Story Protocol Aeneid testnet
-- ✅ **Frontend**: Next.js 15.3.3 with full blockchain integration
-- ✅ **AI Integration**: GPT-4 powered story generation and remix creation
-- ✅ **Blockchain**: Production deployment on Story Protocol
-- ✅ **Read-to-Earn**: Live token distribution system
+- ✅ **Frontend**: Next.js 15.3.3 with enhanced metadata system and user attribution
+- ✅ **AI Integration**: GPT-4 powered story generation with comprehensive metadata tracking
+- ✅ **Blockchain**: Production deployment on Story Protocol with full IP management
+- ✅ **Read-to-Earn**: Live token distribution system with economic flow tracking
+- ✅ **Storage System**: Cloudflare R2 with enhanced caching and metadata
+- ✅ **User Attribution**: Complete author tracking and ownership verification
+- ✅ **Remix Economy**: Full licensing pipeline with royalty tracking
 
 ## 🔗 **Smart Contract Ecosystem**
 
@@ -131,6 +134,108 @@ storyhouse-vip/
 │       ├── src/config/       # Configuration
 │       └── src/utils/        # Utilities
 ```
+
+---
+
+## 📊 **Enhanced Metadata System (Phase 5.0)**
+
+### **Comprehensive Chapter Metadata**
+
+Every chapter now includes **25+ metadata fields** supporting all core business functions:
+
+#### **🏛️ Core Business Logic**
+```typescript
+interface ChapterMetadata {
+  // Read-to-Earn Economics
+  unlockPrice: number;          // TIP tokens required (e.g., 0.1)
+  readReward: number;           // TIP tokens earned (e.g., 0.05)
+  totalReads: number;           // Engagement tracking
+  totalEarned: number;          // Total reader earnings
+  totalRevenue: number;         // Creator revenue
+  
+  // IP & Blockchain Integration
+  ipAssetId?: string;           // Story Protocol IP asset ID
+  nftTokenId?: string;          // Associated NFT token ID
+  licenseTermsIds: string[];    // Applied license terms
+  transactionHash?: string;     // Registration transaction
+  
+  // Remix Economy
+  isRemix: boolean;             // Derivative content flag
+  isRemixable: boolean;         // Can be remixed by others
+  licensePrice: number;         // Cost to remix (100-2000 TIP)
+  royaltyPercentage: number;    // Creator's share (5-20%)
+  parentChapterIds?: string[];  // Source chapters for remixes
+  originalAuthor?: string;      // Original creator for remixes
+}
+```
+
+#### **🎨 Content Classification & Discovery**
+```typescript
+interface ContentMetadata {
+  // Classification
+  genre: string[];              // ["fantasy", "mystery"]
+  mood: string;                 // "dark", "light", "mysterious"
+  contentRating: string;        // "G", "PG", "PG-13", "R"
+  tags: string[];               // Discovery tags
+  language: string;             // "en", "zh-CN", "zh-TW"
+  
+  // Quality Assessment
+  qualityScore?: number;        // AI assessment (0-100)
+  originalityScore?: number;    // Uniqueness score (0-100)
+  averageRating: number;        // User ratings (1-5)
+  
+  // Content Metrics
+  wordCount: number;            // Total words
+  readingTime: number;          // Estimated minutes
+  themes: string[];             // Story themes
+}
+```
+
+#### **🤖 AI Generation Tracking**
+```typescript
+interface AIMetadata {
+  generationMethod: "human" | "ai" | "hybrid";
+  aiModel?: string;             // "gpt-4"
+  plotDescription?: string;     // Original prompt
+  styleInputs?: {               // Generation parameters
+    mood: string;
+    genre: string;
+    emoji?: string;
+  };
+}
+```
+
+#### **👤 User Attribution System**
+```typescript
+interface AuthorshipMetadata {
+  authorAddress: string;        // Creator wallet address
+  authorName: string;           // Display name
+  generatedAt: string;          // Creation timestamp
+  publishedAt: string;          // Publication timestamp
+  lastModified: string;         // Last update
+  status: "draft" | "published" | "archived";
+  visibility: "public" | "private" | "premium";
+}
+```
+
+### **Storage Architecture**
+
+#### **Cloudflare R2 Structure**
+```
+stories/
+├── story-{timestamp}-{id}/
+│   ├── chapters/
+│   │   ├── 1.json              # Chapter content + metadata
+│   │   ├── 2.json
+│   │   └── ...
+│   └── metadata.json           # Story-level metadata
+```
+
+#### **Enhanced Caching Strategy**
+- **Normal Requests**: 60-second cache for performance
+- **Manual Refresh**: Cache bypass with `?cache=false`
+- **Background Updates**: Automatic refresh every 10 seconds
+- **User-Triggered**: Manual refresh button in UI
 
 ---
 
