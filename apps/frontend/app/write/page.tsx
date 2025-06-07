@@ -5,6 +5,7 @@ import { ArrowLeft, Save, Sparkles, Image, Smile, Palette, Wand2, AlertCircle, B
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAccount } from 'wagmi'
+import { useSearchParams } from 'next/navigation'
 
 // Import enhanced components (only used in advanced mode)
 import IPRegistrationSection from '../../components/creator/IPRegistrationSection'
@@ -39,11 +40,13 @@ type CreationMode = 'select' | 'new' | 'continue'
 
 export default function CreateStoryPage() {
   const { address: userAddress } = useAccount()
+  const searchParams = useSearchParams()
   const [creationMode, setCreationMode] = useState<CreationMode>('select')
   const [plotDescription, setPlotDescription] = useState('A young detective discovers a hidden portal in their grandmother\'s attic that leads to different time periods. Each time they step through, they must solve a historical mystery to return home, but each journey reveals more about a family secret that spans centuries.')
   const [storyTitle, setStoryTitle] = useState('The Detective\'s Portal')
   const [selectedStory, setSelectedStory] = useState<ExistingStory | null>(null)
   const [chapterNumber, setChapterNumber] = useState(1)
+  const [continueStoryId, setContinueStoryId] = useState<string | null>(null)
 
   // Existing state for multimodal inputs
   const [selectedMoods, setSelectedMoods] = useState<string[]>(['Suspenseful'])
@@ -98,6 +101,31 @@ export default function CreateStoryPage() {
       loadStoriesFromR2()
     }
   }, [creationMode])
+
+  // Handle URL parameters for continuing stories
+  useEffect(() => {
+    const continueStory = searchParams.get('continueStory')
+    const nextChapter = searchParams.get('nextChapter')
+    const title = searchParams.get('title')
+    const genre = searchParams.get('genre')
+
+    if (continueStory && nextChapter && title) {
+      console.log('🔄 Continuing story:', { continueStory, nextChapter, title, genre })
+      
+      // Set up the page for continuing an existing story
+      setCreationMode('new') // Use new mode but with continuation context
+      setContinueStoryId(continueStory)
+      setChapterNumber(parseInt(nextChapter))
+      setStoryTitle(decodeURIComponent(title))
+      
+      if (genre) {
+        setSelectedGenres([decodeURIComponent(genre)])
+      }
+      
+      // Update plot description to indicate this is a continuation
+      setPlotDescription(`Continue the story "${decodeURIComponent(title)}" - Chapter ${nextChapter}. Build upon the previous chapters while maintaining the established tone, characters, and plot threads.`)
+    }
+  }, [searchParams])
 
   const genres = ['Mystery', 'Romance', 'Sci-Fi', 'Fantasy', 'Horror', 'Comedy', 'Adventure', 'Drama']
   const moods = ['Dark & Gritty', 'Light & Whimsical', 'Epic Adventure', 'Romantic', 'Suspenseful', 'Humorous']
@@ -171,6 +199,29 @@ export default function CreateStoryPage() {
     setError(null)
 
     try {
+      // If we're continuing a story, fetch previous chapters for context
+      let previousContent = ''
+      const isContinuation = continueStoryId !== null || (creationMode === 'continue' && selectedStory)
+      const storyIdForContext = continueStoryId || selectedStory?.id
+
+      if (isContinuation && storyIdForContext && chapterNumber > 1) {
+        try {
+          console.log(`🔄 Fetching previous chapters for story ${storyIdForContext}`)
+          const contextResponse = await fetch(`/api/chapters/${storyIdForContext}/${chapterNumber - 1}`)
+          
+          if (contextResponse.ok) {
+            const contextData = await contextResponse.json()
+            if (contextData.success && contextData.chapter) {
+              previousContent = contextData.chapter.content
+              console.log(`✅ Loaded previous chapter context (${previousContent.length} chars)`)
+            }
+          }
+        } catch (contextErr) {
+          console.warn('Failed to fetch previous chapter context:', contextErr)
+          // Continue without context if fetch fails
+        }
+      }
+
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: {
@@ -183,9 +234,11 @@ export default function CreateStoryPage() {
           moods: selectedMoods,
           emojis: selectedEmojis,
           chapterNumber,
-          isNewStory: creationMode === 'new',
-          isContinuation: creationMode === 'continue',
-          existingStoryId: selectedStory?.id,
+          isNewStory: !isContinuation,
+          isContinuation,
+          storyId: storyIdForContext, // Use storyId (not existingStoryId) for continuation
+          existingStoryId: storyIdForContext, // Keep this for backward compatibility
+          previousContent, // Include previous chapter content for better continuity
           // Include author information
           authorAddress: userAddress?.toLowerCase(),
           authorName: userAddress ? `${userAddress.slice(0, 6)}...${userAddress.slice(-4)}` : undefined
@@ -386,7 +439,9 @@ export default function CreateStoryPage() {
           <ArrowLeft className="w-4 h-4" />
           Back
         </button>
-        <h2 className="text-2xl font-bold text-gray-800">📝 Start Your New Story</h2>
+        <h2 className="text-2xl font-bold text-gray-800">
+          {continueStoryId ? `➕ Continue Your Story: ${storyTitle}` : '📝 Start Your New Story'}
+        </h2>
       </div>
 
       {/* Error Display */}
@@ -406,6 +461,33 @@ export default function CreateStoryPage() {
             >
               Dismiss
             </button>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Story Continuation Info */}
+      {continueStoryId && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4"
+        >
+          <div className="flex items-start gap-3">
+            <BookOpen className="w-5 h-5 text-blue-600 mt-0.5" />
+            <div>
+              <h4 className="text-blue-800 font-medium">Continuing Story</h4>
+              <p className="text-blue-700 text-sm mt-1">
+                You're writing Chapter {chapterNumber} of "{storyTitle}". 
+                The AI will use the previous chapter context to maintain story continuity.
+              </p>
+              <div className="flex items-center gap-2 mt-2 text-xs text-blue-600">
+                <span className="px-2 py-1 bg-blue-100 rounded">
+                  {selectedGenres[0] || 'Fiction'}
+                </span>
+                <span>•</span>
+                <span>Chapter {chapterNumber}</span>
+              </div>
+            </div>
           </div>
         </motion.div>
       )}
@@ -543,11 +625,13 @@ export default function CreateStoryPage() {
           }`}
         >
           <Wand2 className="w-5 h-5" />
-          {isGenerating ? 'Generating Chapter 1...' : '✨ Generate Chapter 1 with AI'}
+          {isGenerating ? `Generating Chapter ${chapterNumber}...` : `✨ Generate Chapter ${chapterNumber} with AI`}
         </motion.button>
 
         {plotDescription.trim() && (
-          <p className="text-sm text-gray-500 mt-2">💡 This will be Chapter 1 of your new story</p>
+          <p className="text-sm text-gray-500 mt-2">
+            💡 This will be Chapter {chapterNumber} of your {continueStoryId ? 'continued' : 'new'} story
+          </p>
         )}
       </div>
 
