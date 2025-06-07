@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Sparkles, RefreshCw, Book, X } from 'lucide-react'
+import { ArrowLeft, Sparkles, RefreshCw, Book } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { buildChapterUrl } from '@/lib/utils/slugify'
 
 interface ExistingStory {
   id: string
@@ -34,12 +36,10 @@ interface ExistingStory {
 }
 
 export default function MyStoriesPage() {
+  const router = useRouter()
   const [existingStories, setExistingStories] = useState<ExistingStory[]>([])
   const [isLoadingStories, setIsLoadingStories] = useState(false)
   const [isRefreshing, setIsRefreshing] = useState(false)
-  const [selectedStory, setSelectedStory] = useState<ExistingStory | null>(null)
-  const [chapterContent, setChapterContent] = useState<any>(null)
-  const [isLoadingChapter, setIsLoadingChapter] = useState(false)
 
   // Load published stories from R2
   useEffect(() => {
@@ -150,165 +150,15 @@ export default function MyStoriesPage() {
     }
   }
 
-  const handleReadStory = async (story: ExistingStory) => {
-    setSelectedStory(story)
-    setIsLoadingChapter(true)
-    
-    try {
-      console.log('📚 Fetching chapter via API for story:', story.id)
-      
-      // Use our API route to fetch chapter content (avoids CORS issues)
-      const response = await fetch(`/api/chapters/${story.id}/1`)
-      
-      console.log('📡 API Response status:', response.status)
-      
-      if (!response.ok) {
-        throw new Error(`API Error ${response.status}: ${response.statusText}`)
-      }
-      
-      const result = await response.json()
-      console.log('📚 API Response:', result)
-      
-      if (result.success && result.data) {
-        setChapterContent(result.data)
-      } else {
-        throw new Error(result.error || 'Failed to load chapter from API')
-      }
-    } catch (error) {
-      console.error('❌ Error loading chapter:', error)
-      console.error('📊 Story object:', story)
-      setChapterContent({ error: 'Failed to load chapter content', details: error.message })
-    } finally {
-      setIsLoadingChapter(false)
+  const handleReadStory = (story: ExistingStory) => {
+    // Navigate to the dedicated chapter URL
+    if (!story.authorAddress) {
+      console.error('No author address for story:', story)
+      return
     }
-  }
-
-  const handleCloseReader = () => {
-    setSelectedStory(null)
-    setChapterContent(null)
-  }
-
-  // If a story is selected for reading, show the reader interface
-  if (selectedStory) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-orange-100 via-pink-100 to-blue-200">
-        {/* Reader Header */}
-        <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
-          <div className="container mx-auto px-6 py-4">
-            <div className="flex items-center justify-between">
-              <button 
-                onClick={handleCloseReader}
-                className="flex items-center gap-2 text-gray-600 hover:text-gray-800"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Back to My Stories
-              </button>
-              
-              <div className="flex items-center gap-4">
-                <div className="text-sm text-gray-600">
-                  {selectedStory.genre} • Chapter 1
-                </div>
-                <button 
-                  onClick={handleCloseReader}
-                  className="p-2 hover:bg-gray-100 rounded-lg"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </header>
-
-        {/* Reader Content */}
-        <div className="container mx-auto px-6 py-8 max-w-4xl">
-          {isLoadingChapter ? (
-            <div className="text-center py-12">
-              <div className="w-8 h-8 border-3 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading chapter...</p>
-            </div>
-          ) : chapterContent ? (
-            <motion.article 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-xl shadow-lg p-8"
-            >
-              {/* Chapter Header */}
-              <header className="mb-8 border-b border-gray-200 pb-6">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                  {chapterContent.title || selectedStory.title}
-                </h1>
-                <div className="flex items-center gap-4 text-sm text-gray-600">
-                  <span>by {selectedStory.authorName || 'Anonymous'}</span>
-                  <span>•</span>
-                  <span>{chapterContent.wordCount || 0} words</span>
-                  <span>•</span>
-                  <span>{chapterContent.readingTime || 0} min read</span>
-                </div>
-              </header>
-
-              {/* Chapter Content */}
-              <div className="prose prose-lg max-w-none">
-                <div className="whitespace-pre-wrap text-gray-800 leading-relaxed">
-                  {chapterContent.content}
-                </div>
-              </div>
-
-              {/* Chapter Footer */}
-              <footer className="mt-8 pt-6 border-t border-gray-200">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-gray-500">
-                    Chapter 1 of {selectedStory.chapters}
-                  </div>
-                  <div className="flex gap-3">
-                    <button 
-                      onClick={handleCloseReader}
-                      className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
-                    >
-                      Close
-                    </button>
-                    {selectedStory.chapters > 1 && (
-                      <button className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
-                        Next Chapter
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </footer>
-            </motion.article>
-          ) : chapterContent?.error ? (
-            <div className="text-center py-12 bg-white rounded-xl shadow-lg p-8">
-              <div className="mb-4">
-                <p className="text-red-600 text-lg font-semibold mb-2">Failed to load chapter content</p>
-                <p className="text-gray-600 text-sm mb-4">
-                  {chapterContent.details || 'Unknown error occurred'}
-                </p>
-                <div className="text-left bg-gray-100 p-4 rounded-lg mb-4">
-                  <p className="text-xs text-gray-500 mb-2">Debug Info:</p>
-                  <p className="text-xs text-gray-700 break-all">URL: {selectedStory.contentUrl}</p>
-                  <p className="text-xs text-gray-700">Story ID: {selectedStory.id}</p>
-                </div>
-              </div>
-              <button 
-                onClick={handleCloseReader}
-                className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
-              >
-                Back to Stories
-              </button>
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-red-600">No chapter content available</p>
-              <button 
-                onClick={handleCloseReader}
-                className="mt-4 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
-              >
-                Back to Stories
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-    )
+    
+    const chapterUrl = buildChapterUrl(story.authorAddress, story.title, story.id, 1)
+    router.push(chapterUrl)
   }
 
   return (

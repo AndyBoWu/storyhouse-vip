@@ -1,9 +1,8 @@
 'use client'
 
 import { PenTool } from 'lucide-react'
-import { motion } from 'framer-motion'
 import Link from 'next/link'
-import WalletConnect, { NetworkChecker } from '@/components/WalletConnect'
+import WalletConnect from '@/components/WalletConnect'
 
 export default function HomePage() {
   return (
@@ -15,34 +14,22 @@ export default function HomePage() {
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <Link href="/read">
-                  <motion.button
-                    whileHover={{ scale: 1.05, y: -2 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-gray-800 bg-white/60 backdrop-blur-sm transition-all hover:bg-white/80"
-                  >
+                  <button className="flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-gray-800 bg-white/60 backdrop-blur-sm transition-all hover:bg-white/80">
                     📖 READ
-                  </motion.button>
+                  </button>
                 </Link>
 
                 <Link href="/write">
-                  <motion.button
-                    whileHover={{ scale: 1.05, y: -2 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-gray-800 bg-white/60 backdrop-blur-sm transition-all hover:bg-white/80"
-                  >
+                  <button className="flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-gray-800 bg-white/60 backdrop-blur-sm transition-all hover:bg-white/80">
                     <PenTool className="h-4 w-4" />
                     WRITE
-                  </motion.button>
+                  </button>
                 </Link>
 
                 <Link href="/own">
-                  <motion.button
-                    whileHover={{ scale: 1.05, y: -2 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-gray-800 bg-white/60 backdrop-blur-sm transition-all hover:bg-white/80"
-                  >
+                  <button className="flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-gray-800 bg-white/60 backdrop-blur-sm transition-all hover:bg-white/80">
                     👑 OWN
-                  </motion.button>
+                  </button>
                 </Link>
               </div>
 
@@ -55,16 +42,11 @@ export default function HomePage() {
       {/* Main Content */}
       <main className="relative">
         <div className="container mx-auto px-6 py-8">
-          <NetworkChecker />
+          {/* <NetworkChecker /> */}
 
           <div className="mx-auto max-w-4xl text-center py-12">
             {/* Hero Section */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              className="mb-16"
-            >
+            <div className="mb-16">
               <h1 className="mb-6 text-4xl font-bold text-gray-900 lg:text-6xl">
                 Explore Infinite Worlds,{' '}
                 <span className="text-red-600">
@@ -79,33 +61,20 @@ export default function HomePage() {
               </p>
 
               <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="rounded-full bg-red-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all hover:shadow-xl hover:bg-red-700"
-                >
+                <button className="rounded-full bg-red-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all hover:shadow-xl hover:bg-red-700">
                   Start Reading Free
-                </motion.button>
+                </button>
 
                 <Link href="/write">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="rounded-full border-2 border-gray-800 px-8 py-4 text-lg font-semibold text-gray-800 transition-all hover:bg-gray-800 hover:text-white"
-                  >
+                  <button className="rounded-full border-2 border-gray-800 px-8 py-4 text-lg font-semibold text-gray-800 transition-all hover:bg-gray-800 hover:text-white">
                     Create Your Story
-                  </motion.button>
+                  </button>
                 </Link>
               </div>
-            </motion.div>
+            </div>
 
             {/* Features Grid */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="grid gap-8 md:grid-cols-3"
-            >
+            <div className="grid gap-8 md:grid-cols-3">
               <div className="bg-white/70 backdrop-blur-sm rounded-xl p-6 text-gray-800 border border-white/50">
                 <div className="mb-4 text-4xl">📚</div>
                 <h3 className="mb-2 text-xl font-bold">Immerse & Discover</h3>
@@ -129,20 +98,15 @@ export default function HomePage() {
                   Build upon existing worlds. Create infinite variations that spawn new universes.
                 </p>
               </div>
-            </motion.div>
+            </div>
 
             {/* Story Protocol Badge */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-              className="mt-16"
-            >
+            <div className="mt-16">
               <p className="text-gray-600">Proudly built on and powered by</p>
               <div className="mt-2 text-2xl font-bold text-gray-800">
                 Story Protocol L1 Blockchain
               </div>
-            </motion.div>
+            </div>
           </div>
         </div>
       </main>

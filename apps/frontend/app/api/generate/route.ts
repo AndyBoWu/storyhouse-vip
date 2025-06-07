@@ -234,42 +234,24 @@ export async function POST(request: NextRequest) {
           }
         }
 
-        // Check if Story Protocol is configured
-        if (StoryProtocolService.isConfigured()) {
-          const ipResult = await StoryProtocolService.registerChapterAsIP(chapterIPData)
-
-                     response.ipData = {
-             operationId: `gen-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-             transactionHash: ipResult.transactionHash as `0x${string}` | undefined,
-             ipAssetId: ipResult.ipAssetId,
-             gasUsed: undefined, // This would need to be calculated from transaction receipt
-           }
-
-          if (ipResult.success) {
-            console.log('✅ Chapter registered as IP Asset:', ipResult.ipAssetId)
-            response.message = 'Story generated, saved to storage, and registered as IP asset!'
-          } else {
-            console.warn('⚠️ IP registration failed:', ipResult.error)
-            response.message = 'Story generated and saved, but IP registration failed'
-          }
-        } else {
-          console.warn('⚠️ Story Protocol not configured, skipping IP registration')
-                     response.ipData = {
-             operationId: `gen-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-             transactionHash: undefined,
-             ipAssetId: undefined,
-             gasUsed: undefined,
-           }
-          response.message = 'Story generated and saved, but Story Protocol not configured'
+        // Note: IP registration should be handled client-side with wallet connection
+        // Server-side IP registration is not supported as it requires wallet client
+        response.ipData = {
+          operationId: `gen-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          transactionHash: undefined,
+          ipAssetId: undefined,
+          gasUsed: undefined
         }
+        
+        response.message = 'Story generated and saved successfully'
       } catch (ipError) {
-        console.error('❌ IP registration error:', ipError)
-                 response.ipData = {
-           operationId: `gen-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-           transactionHash: undefined,
-           ipAssetId: undefined,
-           gasUsed: undefined,
-         }
+        console.error('❌ IP data preparation error:', ipError)
+        response.ipData = {
+          operationId: `gen-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          transactionHash: undefined,
+          ipAssetId: undefined,
+          gasUsed: undefined
+        }
         response.message = 'Story generated and saved, but IP registration failed'
       }
     }

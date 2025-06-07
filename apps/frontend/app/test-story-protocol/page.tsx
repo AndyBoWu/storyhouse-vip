@@ -84,10 +84,10 @@ export default function TestStoryProtocolPage() {
               <span>Wallet Connected: {isWalletConnected ? 'Yes' : 'No'}</span>
             </div>
             <div className="flex items-center">
-              <span className={`mr-2 ${configStatus.hasRpcUrl ? 'text-green-500' : 'text-red-500'}`}>
-                {configStatus.hasRpcUrl ? '✅' : '❌'}
+              <span className={`mr-2 ${configStatus.rpcUrl ? 'text-green-500' : 'text-red-500'}`}>
+                {configStatus.rpcUrl ? '✅' : '❌'}
               </span>
-              <span>RPC URL Configured: {configStatus.hasRpcUrl ? 'Yes' : 'No'}</span>
+              <span>RPC URL Configured: {configStatus.rpcUrl ? 'Yes' : 'No'}</span>
             </div>
             <div className="flex items-center">
               <span className={`mr-2 ${configStatus.hasSpgNftContract ? 'text-green-500' : 'text-red-500'}`}>
