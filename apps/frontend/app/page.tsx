@@ -11,13 +11,7 @@ export default function HomePage() {
       {/* Header */}
       <header className="relative z-10">
         <div className="container mx-auto px-6 py-4">
-          <nav className="flex items-center justify-between">
-            <div className="text-gray-900">
-              <h1 className="text-xl font-bold tracking-tight lg:text-2xl">
-                StoryHouse.vip
-              </h1>
-            </div>
-
+          <nav className="flex items-center justify-end">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <Link href="/read">
@@ -26,7 +20,7 @@ export default function HomePage() {
                     whileTap={{ scale: 0.95 }}
                     className="flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-gray-800 bg-white/60 backdrop-blur-sm transition-all hover:bg-white/80"
                   >
-                    📖 Read
+                    📖 READ
                   </motion.button>
                 </Link>
 
@@ -37,7 +31,7 @@ export default function HomePage() {
                     className="flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-gray-800 bg-white/60 backdrop-blur-sm transition-all hover:bg-white/80"
                   >
                     <PenTool className="h-4 w-4" />
-                    Write
+                    WRITE
                   </motion.button>
                 </Link>
 
@@ -47,7 +41,7 @@ export default function HomePage() {
                     whileTap={{ scale: 0.95 }}
                     className="flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-gray-800 bg-white/60 backdrop-blur-sm transition-all hover:bg-white/80"
                   >
-                    👑 Own
+                    👑 OWN
                   </motion.button>
                 </Link>
               </div>
@@ -72,9 +66,9 @@ export default function HomePage() {
               className="mb-16"
             >
               <h1 className="mb-6 text-4xl font-bold text-gray-900 lg:text-6xl">
-                Read Stories, Earn Tokens,{' '}
+                Explore Infinite Worlds,{' '}
                 <span className="text-red-600">
-                  Create with AI
+                  Create Without Limits
                 </span>
               </h1>
 
