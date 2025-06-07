@@ -333,26 +333,19 @@ export default function ChapterPage() {
       <div className="fixed bottom-0 left-0 right-0 z-50">
         <div className="h-1 bg-gray-900/20 backdrop-blur-sm">
           <div 
-            className="h-full bg-gradient-to-r from-green-400 via-green-500 to-green-600 transition-all duration-500 ease-out relative"
+            className="h-full bg-gradient-to-r from-purple-500 via-violet-500 to-blue-500 transition-all duration-500 ease-out relative"
             style={{ 
               width: `${readingProgress}%`,
-              boxShadow: '0 0 8px rgba(34, 197, 94, 0.8), 0 0 16px rgba(34, 197, 94, 0.6), 0 0 24px rgba(34, 197, 94, 0.4), 0 0 32px rgba(34, 197, 94, 0.2)'
+              boxShadow: '0 0 8px rgba(139, 92, 246, 0.8), 0 0 16px rgba(139, 92, 246, 0.6), 0 0 24px rgba(139, 92, 246, 0.4), 0 0 32px rgba(139, 92, 246, 0.2)'
             }}
           >
             {/* Additional neon glow effect */}
             <div 
-              className="absolute inset-0 bg-gradient-to-r from-green-300 via-green-400 to-green-500 opacity-60 blur-[1px]"
+              className="absolute inset-0 bg-gradient-to-r from-purple-400 via-violet-400 to-blue-400 opacity-60 blur-[1px]"
               style={{ width: '100%' }}
             />
           </div>
         </div>
-        
-        {/* Progress percentage indicator (only show when reading) */}
-        {readingProgress > 0 && (
-          <div className="absolute bottom-2 right-4 bg-green-500/90 text-white text-xs px-2 py-1 rounded-full backdrop-blur-sm border border-green-400/30">
-            {Math.round(readingProgress)}% complete
-          </div>
-        )}
       </div>
     </div>
   )

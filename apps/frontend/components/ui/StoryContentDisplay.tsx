@@ -52,7 +52,7 @@ export default function StoryContentDisplay({
   return (
     <>
       {/* Reading Progress Bar */}
-      <ReadingProgressBar color="blue" height={4} animate={true} />
+      <ReadingProgressBar color="purple" height={4} animate={true} />
       
       <ContentProtection className={`max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 ${className}`}>
         <div className="protected-content">
