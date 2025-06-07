@@ -3,7 +3,6 @@
 import { useAccount, useDisconnect, useBalance } from 'wagmi'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { Wallet, LogOut, AlertCircle, CheckCircle, Copy } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
 import { storyProtocolTestnet, TIP_TOKEN_CONFIG } from '@/lib/web3/config'
 
 // Global connection state to prevent duplicate requests across all instances
@@ -163,23 +162,16 @@ export default function WalletConnect() {
   if (isConnected && address) {
     return (
       <div className="relative">
-        <motion.button
+        <button
           onClick={() => setShowDetails(!showDetails)}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
           className="flex items-center gap-2 bg-white/60 backdrop-blur-sm hover:bg-white/80 text-gray-800 px-6 py-3 rounded-full transition-all border border-white/50 text-sm font-semibold"
         >
           💳
           <span>{formatAddress(address)}</span>
-        </motion.button>
+        </button>
 
-        <AnimatePresence>
-          {showDetails && (
-            <motion.div
-              initial={{ opacity: 0, y: 10, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 10, scale: 0.95 }}
-              className="absolute right-0 top-full mt-2 bg-white rounded-xl shadow-lg border border-gray-200 p-4 min-w-80 z-50"
+        {showDetails && (
+          <div className="absolute right-0 top-full mt-2 bg-white rounded-xl shadow-lg border border-gray-200 p-4 min-w-80 z-50"
             >
               <div className="space-y-4">
                 {/* Wallet Address */}
@@ -253,9 +245,8 @@ export default function WalletConnect() {
                   </button>
                 </div>
               </div>
-            </motion.div>
+            </div>
           )}
-        </AnimatePresence>
 
         {/* Click outside to close */}
         {showDetails && (
@@ -271,11 +262,9 @@ export default function WalletConnect() {
   const isCurrentlyConnecting = isConnectingLocal || globalConnectionInProgress
 
   return (
-    <motion.button
+    <button
       onClick={handleConnect}
       disabled={isCurrentlyConnecting}
-      whileHover={!isCurrentlyConnecting ? { scale: 1.05 } : {}}
-      whileTap={!isCurrentlyConnecting ? { scale: 0.95 } : {}}
       className={`flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-sm transition-all ${
         isCurrentlyConnecting
           ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
@@ -293,7 +282,7 @@ export default function WalletConnect() {
           Connect
         </>
       )}
-    </motion.button>
+    </button>
   )
 }
 
@@ -313,11 +302,7 @@ export function NetworkChecker() {
   if (!showError) return null
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4"
-    >
+    <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
       <div className="flex items-center gap-3">
         <AlertCircle className="w-5 h-5 text-red-600" />
         <div>
@@ -327,6 +312,6 @@ export function NetworkChecker() {
           </p>
         </div>
       </div>
-    </motion.div>
+    </div>
   )
 }
