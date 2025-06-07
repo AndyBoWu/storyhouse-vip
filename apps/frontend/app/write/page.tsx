@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { ArrowLeft, Save, Sparkles, Image, Smile, Palette, Wand2, AlertCircle, BookOpen, Plus, List, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useAccount } from 'wagmi'
 
 // Import enhanced components (only used in advanced mode)
 import IPRegistrationSection from '../../components/creator/IPRegistrationSection'
@@ -37,6 +38,7 @@ interface ExistingStory {
 type CreationMode = 'select' | 'new' | 'continue'
 
 export default function CreateStoryPage() {
+  const { address: userAddress } = useAccount()
   const [creationMode, setCreationMode] = useState<CreationMode>('select')
   const [plotDescription, setPlotDescription] = useState('A young detective discovers a hidden portal in their grandmother\'s attic that leads to different time periods. Each time they step through, they must solve a historical mystery to return home, but each journey reveals more about a family secret that spans centuries.')
   const [storyTitle, setStoryTitle] = useState('The Detective\'s Portal')
@@ -183,7 +185,10 @@ export default function CreateStoryPage() {
           chapterNumber,
           isNewStory: creationMode === 'new',
           isContinuation: creationMode === 'continue',
-          existingStoryId: selectedStory?.id
+          existingStoryId: selectedStory?.id,
+          // Include author information
+          authorAddress: userAddress,
+          authorName: userAddress ? `${userAddress.slice(0, 6)}...${userAddress.slice(-4)}` : undefined
         })
       })
 
@@ -216,28 +221,19 @@ export default function CreateStoryPage() {
   }
 
   const renderModeSelector = () => (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="max-w-4xl mx-auto"
-    >
+    <div className="max-w-4xl mx-auto">
       <div className="text-center mb-8">
-        <motion.div
-          initial={{ scale: 0.8 }}
-          animate={{ scale: 1 }}
-          className="inline-flex items-center gap-2 text-3xl font-bold text-gray-800 mb-4"
-        >
+        <div className="inline-flex items-center gap-2 text-3xl font-bold text-gray-800 mb-4">
           <Sparkles className="w-8 h-8 text-purple-600" />
           Create Your Story
-        </motion.div>
+        </div>
         <p className="text-gray-600 text-lg">Let AI help you bring imagination to life</p>
       </div>
 
       {/* Scenario Selection */}
       <div className="grid md:grid-cols-3 gap-6 mb-8">
-        <motion.button
+        <button
           onClick={() => setCreationMode('new')}
-          whileHover={{ scale: 1.02 }}
           className="bg-white rounded-xl shadow-lg p-6 text-left hover:shadow-xl transition-all border-2 border-transparent hover:border-purple-200"
         >
           <div className="text-4xl mb-4">📝</div>
@@ -247,11 +243,10 @@ export default function CreateStoryPage() {
             <span>Start Writing</span>
             <ChevronRight className="w-4 h-4" />
           </div>
-        </motion.button>
+        </button>
 
-        <motion.button
+        <button
           onClick={() => setCreationMode('continue')}
-          whileHover={{ scale: 1.02 }}
           className="bg-white rounded-xl shadow-lg p-6 text-left hover:shadow-xl transition-all border-2 border-transparent hover:border-blue-200"
         >
           <div className="text-4xl mb-4">➕</div>
@@ -261,13 +256,10 @@ export default function CreateStoryPage() {
             <span>Add Chapter</span>
             <ChevronRight className="w-4 h-4" />
           </div>
-        </motion.button>
+        </button>
 
         <Link href="/own">
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            className="w-full bg-white rounded-xl shadow-lg p-6 text-left hover:shadow-xl transition-all border-2 border-transparent hover:border-green-200"
-          >
+          <button className="w-full bg-white rounded-xl shadow-lg p-6 text-left hover:shadow-xl transition-all border-2 border-transparent hover:border-green-200">
             <div className="text-4xl mb-4">📚</div>
             <h3 className="text-xl font-semibold text-gray-800 mb-2">My Stories</h3>
             <p className="text-gray-600 mb-4">View all drafts & published</p>
@@ -275,7 +267,7 @@ export default function CreateStoryPage() {
               <span>Browse All</span>
               <ChevronRight className="w-4 h-4" />
             </div>
-          </motion.button>
+          </button>
         </Link>
       </div>
 
@@ -286,7 +278,7 @@ export default function CreateStoryPage() {
           We'll handle IP protection later.
         </p>
       </div>
-    </motion.div>
+    </div>
   )
 
   const renderContinueStoryMode = () => (
@@ -692,7 +684,7 @@ export default function CreateStoryPage() {
   )
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-b from-orange-100 via-pink-100 to-blue-200">
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4">

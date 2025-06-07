@@ -18,6 +18,8 @@ interface EnhancedStoryGenerationRequest {
   previousContent: string
   ipOptions?: Partial<EnhancedStoryCreationParams>
   collectionOptions?: Partial<EnhancedStoryCreationParams>
+  authorAddress?: string
+  authorName?: string
 }
 
 export async function POST(request: NextRequest) {
@@ -42,7 +44,10 @@ export async function POST(request: NextRequest) {
       previousContent: body.previousContent || '',
       // Enhanced options
       ipOptions: body.ipOptions || undefined,
-      collectionOptions: body.collectionOptions || undefined
+      collectionOptions: body.collectionOptions || undefined,
+      // Author information
+      authorAddress: body.authorAddress,
+      authorName: body.authorName
     }
 
     // Validate plot description length
@@ -108,15 +113,52 @@ export async function POST(request: NextRequest) {
         title: enhancedResult.title,
         themes: enhancedResult.themes,
         wordCount: enhancedResult.wordCount,
+        readingTime: enhancedResult.readingTime,
         metadata: {
+          // Content Classification
           suggestedTags: enhancedResult.suggestedTags,
           suggestedGenre: enhancedResult.suggestedGenre,
           contentRating: enhancedResult.contentRating,
-          language: enhancedResult.language,
+          language: enhancedResult.language || 'en',
+          genre: generationRequest.genres || [],
+          mood: generationRequest.moods?.[0] || 'neutral',
+          
+          // AI Generation Data
+          generationMethod: 'ai' as const,
+          aiModel: 'gpt-4',
+          plotDescription: generationRequest.plotDescription,
           qualityScore: enhancedResult.qualityScore,
           originalityScore: enhancedResult.originalityScore,
           commercialViability: enhancedResult.commercialViability,
+          
+          // Authorship
+          authorAddress: generationRequest.authorAddress,
+          authorName: generationRequest.authorName,
+          
+          // Remix System
+          isRemix: false,
+          isRemixable: true,
+          licensePrice: 100, // Default license price in TIP
+          royaltyPercentage: 5, // Default 5% royalty
+          
+          // Read-to-Earn Economics
+          unlockPrice: 0.1, // TIP tokens to read
+          readReward: 0.05, // TIP tokens earned for reading
+          totalReads: 0,
+          totalEarned: 0,
+          totalRevenue: 0,
+          
+          // Status & Lifecycle
+          status: 'published' as const,
+          visibility: 'public' as const,
           generatedAt: new Date().toISOString(),
+          publishedAt: new Date().toISOString(),
+          lastModified: new Date().toISOString(),
+          
+          // Engagement
+          averageRating: 0,
+          remixCount: 0,
+          streakBonus: 0,
         }
       }
 
@@ -130,6 +172,17 @@ export async function POST(request: NextRequest) {
             chapterNumber: chapterNumber.toString(),
             contentType: 'chapter',
             generatedAt: new Date().toISOString(),
+            authorAddress: generationRequest.authorAddress || '',
+            authorName: generationRequest.authorName || '',
+            // Business Critical Fields
+            contentRating: enhancedResult.contentRating || 'PG',
+            genre: (generationRequest.genres || []).join(','),
+            unlockPrice: '0.1',
+            readReward: '0.05',
+            licensePrice: '100',
+            isRemixable: 'true',
+            status: 'published',
+            visibility: 'public',
           }
         }
       )

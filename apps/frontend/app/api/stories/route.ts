@@ -28,6 +28,24 @@ export interface StoryFromR2 {
   ipAssetId?: string
   tokenId?: string
   publishedAt: string
+  authorAddress?: string
+  authorName?: string
+  // Enhanced metadata
+  contentRating?: string
+  unlockPrice?: number
+  readReward?: number
+  licensePrice?: number
+  isRemixable?: boolean
+  totalReads?: number
+  averageRating?: number
+  wordCount?: number
+  readingTime?: number
+  mood?: string
+  tags?: string[]
+  qualityScore?: number
+  originalityScore?: number
+  isRemix?: boolean
+  generationMethod?: string
 }
 
 /**
@@ -120,9 +138,16 @@ export async function GET(request: NextRequest) {
     console.log(`📁 Found ${listResponse.CommonPrefixes.length} story directories`)
     const stories: StoryFromR2[] = []
 
-    // Process each story directory (limit to first 20 for performance)
-    const maxStoriesToProcess = 20
-    const prefixesToProcess = listResponse.CommonPrefixes.slice(0, maxStoriesToProcess)
+    // Sort story directories by timestamp (newest first) and increase limit
+    const sortedPrefixes = listResponse.CommonPrefixes.sort((a, b) => {
+      const timestampA = a.Prefix?.match(/(\d{13})/)?.[1] || '0'
+      const timestampB = b.Prefix?.match(/(\d{13})/)?.[1] || '0'
+      return parseInt(timestampB) - parseInt(timestampA)
+    })
+
+    // Process each story directory (increased limit for better coverage)
+    const maxStoriesToProcess = 50
+    const prefixesToProcess = sortedPrefixes.slice(0, maxStoriesToProcess)
     
     for (let index = 0; index < prefixesToProcess.length; index++) {
       const prefix = prefixesToProcess[index]
@@ -208,7 +233,25 @@ export async function GET(request: NextRequest) {
             earnings: 0, // TODO: Calculate from blockchain data
             preview,
             contentUrl: `${PUBLIC_URL}/${firstChapterKey}`,
-            publishedAt: generatedAt || new Date().toISOString()
+            publishedAt: generatedAt || new Date().toISOString(),
+            authorAddress: chapterData.metadata?.authorAddress,
+            authorName: chapterData.metadata?.authorName,
+            // Enhanced metadata from chapter data
+            contentRating: chapterData.metadata?.contentRating || 'PG',
+            unlockPrice: chapterData.metadata?.unlockPrice || 0.1,
+            readReward: chapterData.metadata?.readReward || 0.05,
+            licensePrice: chapterData.metadata?.licensePrice || 100,
+            isRemixable: chapterData.metadata?.isRemixable ?? true,
+            totalReads: chapterData.metadata?.totalReads || 0,
+            averageRating: chapterData.metadata?.averageRating || 0,
+            wordCount: chapterData.wordCount || 0,
+            readingTime: chapterData.readingTime || 0,
+            mood: chapterData.metadata?.mood,
+            tags: chapterData.metadata?.suggestedTags || [],
+            qualityScore: chapterData.metadata?.qualityScore,
+            originalityScore: chapterData.metadata?.originalityScore,
+            isRemix: chapterData.metadata?.isRemix || false,
+            generationMethod: chapterData.metadata?.generationMethod || 'unknown'
           }
 
           console.log(`   ✅ Story processed:`, story.title)
@@ -230,7 +273,7 @@ export async function GET(request: NextRequest) {
 
     console.log(`✅ Successfully processed ${stories.length} stories`)
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       stories,
       count: stories.length,
@@ -241,6 +284,16 @@ export async function GET(request: NextRequest) {
         processedStories: stories.length
       }
     })
+
+    // Add cache control headers
+    const cacheDisabled = request.nextUrl.searchParams.get('cache') === 'false'
+    if (cacheDisabled) {
+      response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate')
+    } else {
+      response.headers.set('Cache-Control', 'public, max-age=60, s-maxage=60')
+    }
+
+    return response
 
   } catch (error) {
     console.error('❌ Error fetching stories from R2:', error)

@@ -4,7 +4,7 @@ import { R2Service } from '@/lib/r2'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { content, storyId, chapterNumber, contentType = 'application/json' } = body
+    const { content, storyId, chapterNumber, contentType = 'application/json', authorAddress, authorName } = body
 
     // Validate required fields
     if (!content) {
@@ -26,6 +26,8 @@ export async function POST(request: NextRequest) {
     let metadata: Record<string, string> = {
       storyId,
       uploadedAt: new Date().toISOString(),
+      ...(authorAddress && { authorAddress }),
+      ...(authorName && { authorName }),
     }
 
     if (chapterNumber !== undefined) {
