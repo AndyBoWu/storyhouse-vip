@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
 import { ArrowLeft, Sparkles, RefreshCw, Book } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -184,11 +183,7 @@ export default function MyStoriesPage() {
       </header>
 
       <div className="container mx-auto px-6 py-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="max-w-6xl mx-auto"
-        >
+        <div className="max-w-6xl mx-auto">
           {/* Page Header */}
           <div className="flex items-center gap-4 mb-8">
             <Link href="/write" className="flex items-center gap-2 text-gray-600 hover:text-gray-800">
@@ -214,21 +209,16 @@ export default function MyStoriesPage() {
                 <h3 className="text-2xl font-semibold text-gray-700 mb-4">No stories yet!</h3>
                 <p className="text-gray-500 mb-8 text-lg">Start creating your first story to see it here.</p>
                 <Link href="/write">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 transition-all text-lg"
-                  >
+                  <button className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 transition-all text-lg">
                     <Sparkles className="w-5 h-5" />
                     Create Your First Story
-                  </motion.button>
+                  </button>
                 </Link>
               </div>
             ) : (
               existingStories.map((story) => (
-                <motion.div
+                <div
                   key={story.id}
-                  whileHover={{ scale: 1.02, y: -5 }}
                   className="bg-white rounded-xl shadow-lg p-6 border border-gray-200 hover:shadow-xl transition-all"
                 >
                   <div className="flex items-start justify-between mb-4">
@@ -269,7 +259,7 @@ export default function MyStoriesPage() {
                       Read
                     </button>
                   </div>
-                </motion.div>
+                </div>
               ))
             )}
           </div>
@@ -279,38 +269,31 @@ export default function MyStoriesPage() {
             <h3 className="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h3>
             <div className="grid md:grid-cols-3 gap-4">
               <Link href="/write">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  className="w-full p-4 border-2 border-dashed border-purple-300 rounded-xl text-purple-600 hover:border-purple-400 hover:bg-purple-50 transition-all"
-                >
+                <button className="w-full p-4 border-2 border-dashed border-purple-300 rounded-xl text-purple-600 hover:border-purple-400 hover:bg-purple-50 transition-all">
                   <div className="text-2xl mb-2">✨</div>
                   <div className="font-semibold">New Story</div>
                   <div className="text-sm opacity-75">Start fresh with AI</div>
-                </motion.button>
+                </button>
               </Link>
               
               <Link href="/read">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  className="w-full p-4 border-2 border-dashed border-blue-300 rounded-xl text-blue-600 hover:border-blue-400 hover:bg-blue-50 transition-all"
-                >
+                <button className="w-full p-4 border-2 border-dashed border-blue-300 rounded-xl text-blue-600 hover:border-blue-400 hover:bg-blue-50 transition-all">
                   <div className="text-2xl mb-2">🌟</div>
                   <div className="font-semibold">Browse Stories</div>
                   <div className="text-sm opacity-75">Discover others' work</div>
-                </motion.button>
+                </button>
               </Link>
 
-              <motion.button
-                whileHover={{ scale: 1.02 }}
+              <button
                 className="w-full p-4 border-2 border-dashed border-green-300 rounded-xl text-green-600 hover:border-green-400 hover:bg-green-50 transition-all"
               >
                 <div className="text-2xl mb-2">📊</div>
                 <div className="font-semibold">Analytics</div>
                 <div className="text-sm opacity-75">View earnings & stats</div>
-              </motion.button>
+              </button>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </div>
   )
