@@ -34,7 +34,7 @@ interface ExistingStory {
   preview: string
 }
 
-type CreationMode = 'select' | 'new' | 'continue' | 'browse'
+type CreationMode = 'select' | 'new' | 'continue'
 
 export default function CreateStoryPage() {
   const [creationMode, setCreationMode] = useState<CreationMode>('select')
@@ -65,57 +65,37 @@ export default function CreateStoryPage() {
   })
   const [collectionOptions, setCollectionOptions] = useState<Partial<EnhancedStoryCreationParams>>({})
 
-    // Real user stories - loaded from R2
+    // Load existing stories for continue mode
   const [existingStories, setExistingStories] = useState<ExistingStory[]>([])
-  const [isLoadingStories, setIsLoadingStories] = useState(false)
 
-  // Load published stories from R2
+  // Load stories when continue mode is selected
   useEffect(() => {
-    const loadStoriesFromR2 = async (showLoading = true) => {
-      if (showLoading) {
-        setIsLoadingStories(true)
-      }
-      try {
-        const response = await fetch('/api/stories')
-        const data = await response.json()
+    if (creationMode === 'continue') {
+      const loadStoriesFromR2 = async () => {
+        try {
+          const response = await fetch('/api/stories')
+          const data = await response.json()
 
-        if (data.success && data.stories) {
-          // Convert R2 story format to ExistingStory format
-          const convertedStories: ExistingStory[] = data.stories.map((story: any) => ({
-            id: story.id,
-            title: story.title,
-            genre: story.genre,
-            chapters: story.chapters,
-            lastUpdated: story.lastUpdated,
-            earnings: story.earnings,
-            preview: story.preview
-          }))
-          setExistingStories(convertedStories)
-        } else {
-          console.warn('Failed to load stories from R2:', data.error)
-          if (showLoading) {
-            setExistingStories([])
+          if (data.success && data.stories) {
+            const convertedStories: ExistingStory[] = data.stories.map((story: any) => ({
+              id: story.id,
+              title: story.title,
+              genre: story.genre,
+              chapters: story.chapters,
+              lastUpdated: story.lastUpdated,
+              earnings: story.earnings,
+              preview: story.preview
+            }))
+            setExistingStories(convertedStories)
           }
-        }
-      } catch (error) {
-        console.error('Error loading stories from R2:', error)
-        if (showLoading) {
-          setExistingStories([])
-        }
-      } finally {
-        if (showLoading) {
-          setIsLoadingStories(false)
+        } catch (error) {
+          console.error('Error loading stories:', error)
         }
       }
+
+      loadStoriesFromR2()
     }
-
-    // Initial load with loading state
-    loadStoriesFromR2(true)
-
-    // Background refresh without loading state - less frequent to avoid flickering
-    const interval = setInterval(() => loadStoriesFromR2(false), 30000) // Every 30 seconds
-    return () => clearInterval(interval)
-  }, [])
+  }, [creationMode])
 
   const genres = ['Mystery', 'Romance', 'Sci-Fi', 'Fantasy', 'Horror', 'Comedy', 'Adventure', 'Drama']
   const moods = ['Dark & Gritty', 'Light & Whimsical', 'Epic Adventure', 'Romantic', 'Suspenseful', 'Humorous']
@@ -283,19 +263,20 @@ export default function CreateStoryPage() {
           </div>
         </motion.button>
 
-        <motion.button
-          onClick={() => setCreationMode('browse')}
-          whileHover={{ scale: 1.02 }}
-          className="bg-white rounded-xl shadow-lg p-6 text-left hover:shadow-xl transition-all border-2 border-transparent hover:border-green-200"
-        >
-          <div className="text-4xl mb-4">📚</div>
-          <h3 className="text-xl font-semibold text-gray-800 mb-2">My Stories</h3>
-          <p className="text-gray-600 mb-4">View all drafts & published</p>
-          <div className="inline-flex items-center gap-2 text-green-600 font-medium">
-            <span>Browse All</span>
-            <ChevronRight className="w-4 h-4" />
-          </div>
-        </motion.button>
+        <Link href="/own">
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            className="w-full bg-white rounded-xl shadow-lg p-6 text-left hover:shadow-xl transition-all border-2 border-transparent hover:border-green-200"
+          >
+            <div className="text-4xl mb-4">📚</div>
+            <h3 className="text-xl font-semibold text-gray-800 mb-2">My Stories</h3>
+            <p className="text-gray-600 mb-4">View all drafts & published</p>
+            <div className="inline-flex items-center gap-2 text-green-600 font-medium">
+              <span>Browse All</span>
+              <ChevronRight className="w-4 h-4" />
+            </div>
+          </motion.button>
+        </Link>
       </div>
 
       {/* Help Text */}
@@ -611,95 +592,6 @@ export default function CreateStoryPage() {
     </motion.div>
   )
 
-  const renderBrowseMode = () => (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="max-w-4xl mx-auto"
-    >
-      <div className="flex items-center gap-4 mb-8">
-        <button
-          onClick={() => setCreationMode('select')}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-800"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back
-        </button>
-        <h2 className="text-2xl font-bold text-gray-800">📚 My Stories</h2>
-      </div>
-
-      {/* Stories Grid */}
-      <div className="grid md:grid-cols-2 gap-6 mb-6">
-        {isLoadingStories ? (
-          <div className="col-span-full text-center py-12">
-            <div className="w-8 h-8 border-3 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <h3 className="text-lg font-semibold text-gray-700 mb-2">Loading your stories...</h3>
-            <p className="text-gray-500">Fetching published stories from R2 storage</p>
-          </div>
-        ) : existingStories.length === 0 ? (
-          <div className="col-span-full text-center py-12">
-            <div className="text-6xl mb-4">📚</div>
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">No stories yet!</h3>
-            <p className="text-gray-500 mb-6">Start creating your first story to see it here.</p>
-            <button
-              onClick={() => setCreationMode('new')}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 transition-all"
-            >
-              <Sparkles className="w-5 h-5" />
-              Create Your First Story
-            </button>
-          </div>
-        ) : (
-          existingStories.map((story) => (
-            <motion.div
-              key={story.id}
-              whileHover={{ scale: 1.02 }}
-              className="bg-white rounded-xl shadow-lg p-6 border border-gray-200"
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-1">{story.title}</h3>
-                  <p className="text-sm text-gray-600">{story.genre} • {story.chapters} chapters</p>
-                  <p className="text-sm text-gray-500 mt-1">Last updated {story.lastUpdated}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm text-green-600 font-medium">💰 {story.earnings} $TIP</p>
-                </div>
-              </div>
-
-              <p className="text-sm text-gray-600 italic mb-4">"{story.preview}"</p>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => handleSelectStory(story)}
-                  className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
-                >
-                  ➕ Continue
-                </button>
-                <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm">
-                  📖 Read
-                </button>
-                <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm">
-                  ⚙️
-                </button>
-              </div>
-            </motion.div>
-          ))
-        )}
-      </div>
-
-      {/* Quick Actions */}
-      <div className="text-center">
-        <button
-          onClick={() => setCreationMode('new')}
-          className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 transition-all"
-        >
-          <Sparkles className="w-5 h-5" />
-          Create New Story
-        </button>
-      </div>
-    </motion.div>
-  )
 
   const renderGeneratedContent = () => (
     <motion.div
@@ -824,7 +716,6 @@ export default function CreateStoryPage() {
             {creationMode === 'select' && renderModeSelector()}
             {creationMode === 'continue' && renderContinueStoryMode()}
             {creationMode === 'new' && renderNewStoryMode()}
-            {creationMode === 'browse' && renderBrowseMode()}
           </>
         ) : (
           renderGeneratedContent()
