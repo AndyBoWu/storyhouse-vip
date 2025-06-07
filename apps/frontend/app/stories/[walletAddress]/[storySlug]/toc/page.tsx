@@ -175,56 +175,70 @@ export default function TableOfContentsPage() {
                 <p className="text-gray-600">No chapters published yet.</p>
               </div>
             ) : (
-              chapters.map((chapter) => (
-                <div
-                  key={chapter.chapterNumber}
-                  onClick={() => handleChapterClick(chapter.chapterNumber)}
-                  className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all cursor-pointer border border-gray-200"
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className="text-lg font-bold text-purple-600">
-                          Chapter {chapter.chapterNumber}
-                        </span>
-                        {chapter.isUnlocked ? (
-                          <Unlock className="w-4 h-4 text-green-600" />
-                        ) : (
-                          <Lock className="w-4 h-4 text-gray-400" />
-                        )}
+              chapters.map((chapter) => {
+                const isFreeChapter = chapter.chapterNumber <= 3
+                return (
+                  <div
+                    key={chapter.chapterNumber}
+                    onClick={() => handleChapterClick(chapter.chapterNumber)}
+                    className={`bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all cursor-pointer border ${
+                      isFreeChapter 
+                        ? 'border-green-100' 
+                        : 'border-gray-200'
+                    }`}
+                    style={isFreeChapter ? { backgroundColor: '#fafffe' } : {}}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <span className="text-lg font-bold text-purple-600">
+                            Chapter {chapter.chapterNumber}
+                          </span>
+                          {isFreeChapter ? (
+                            <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                              FREE
+                            </span>
+                          ) : chapter.isUnlocked ? (
+                            <Unlock className="w-4 h-4 text-green-600" />
+                          ) : (
+                            <Lock className="w-4 h-4 text-gray-400" />
+                          )}
+                        </div>
+                        
+                        <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                          {chapter.title}
+                        </h3>
+                        
+                        <p className="text-gray-600 mb-4 line-clamp-2">
+                          {chapter.summary}
+                        </p>
+                        
+                        <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-4 h-4" />
+                            {formatReadingTime(chapter.readingTime)}
+                          </span>
+                          <span>{chapter.wordCount.toLocaleString()} words</span>
+                          <span className="flex items-center gap-1">
+                            <Sparkles className="w-4 h-4" />
+                            {chapter.readReward} $TIP reward
+                          </span>
+                          <span>{chapter.totalReads} reads</span>
+                        </div>
                       </div>
                       
-                      <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                        {chapter.title}
-                      </h3>
-                      
-                      <p className="text-gray-600 mb-4 line-clamp-2">
-                        {chapter.summary}
-                      </p>
-                      
-                      <div className="flex flex-wrap gap-4 text-sm text-gray-500">
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-4 h-4" />
-                          {formatReadingTime(chapter.readingTime)}
-                        </span>
-                        <span>{chapter.wordCount.toLocaleString()} words</span>
-                        <span className="flex items-center gap-1">
-                          <Sparkles className="w-4 h-4" />
-                          {chapter.readReward} $TIP reward
-                        </span>
-                        <span>{chapter.totalReads} reads</span>
-                      </div>
-                    </div>
-                    
-                    <div className="ml-4 text-right">
-                      <div className="text-lg font-semibold text-gray-800 mb-1">
-                        {chapter.unlockPrice} $TIP
-                      </div>
-                      <span className="text-sm text-gray-500">to unlock</span>
+                      {!isFreeChapter && (
+                        <div className="ml-4 text-right">
+                          <div className="text-lg font-semibold text-gray-800 mb-1">
+                            {chapter.unlockPrice} $TIP
+                          </div>
+                          <span className="text-sm text-gray-500">to unlock</span>
+                        </div>
+                      )}
                     </div>
                   </div>
-                </div>
-              ))
+                )
+              })
             )}
           </div>
 
