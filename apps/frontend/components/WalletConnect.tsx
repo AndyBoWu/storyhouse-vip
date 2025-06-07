@@ -124,7 +124,7 @@ export default function WalletConnect() {
 
   const copyAddress = async () => {
     if (address) {
-      await navigator.clipboard.writeText(address)
+      await navigator.clipboard.writeText(address.toLowerCase())
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     }
@@ -167,7 +167,7 @@ export default function WalletConnect() {
           className="flex items-center gap-2 bg-white/60 backdrop-blur-sm hover:bg-white/80 text-gray-800 px-6 py-3 rounded-full transition-all border border-white/50 text-sm font-semibold"
         >
           💳
-          <span>{formatAddress(address)}</span>
+          <span>{formatAddress(address.toLowerCase())}</span>
         </button>
 
         {showDetails && (
@@ -181,7 +181,7 @@ export default function WalletConnect() {
                   </label>
                   <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-lg">
                     <span className="text-sm font-mono text-gray-800 flex-1">
-                      {address}
+                      {address.toLowerCase()}
                     </span>
                     <button
                       onClick={copyAddress}
@@ -229,7 +229,7 @@ export default function WalletConnect() {
                   <button
                     onClick={() => {
                       if (storyProtocolTestnet.blockExplorers?.default?.url) {
-                        window.open(storyProtocolTestnet.blockExplorers.default.url + '/address/' + address, '_blank')
+                        window.open(storyProtocolTestnet.blockExplorers.default.url + '/address/' + address.toLowerCase(), '_blank')
                       }
                     }}
                     className="flex-1 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm transition-colors"
