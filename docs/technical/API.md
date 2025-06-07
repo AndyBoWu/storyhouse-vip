@@ -33,7 +33,202 @@ Currently using session-based authentication. API keys coming in Phase 5.
 
 ---
 
-## 📚 **Story Generation API**
+## 📚 **Stories API**
+
+### **Get All Published Stories**
+
+Fetch all published stories from R2 storage with enhanced metadata.
+
+```http
+GET /api/stories
+```
+
+**Query Parameters:**
+- `cache` (optional): Set to "false" to bypass cache and force refresh
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "stories": [
+    {
+      "id": "story_1703123456",
+      "title": "The Shadowbrook Mysteries",
+      "genre": "Mystery",
+      "chapters": 3,
+      "lastUpdated": "2 hours ago",
+      "earnings": 0,
+      "preview": "Detective Sarah Chen never believed in magic until she encountered the strange case...",
+      "contentUrl": "https://r2.example.com/stories/story_1703123456/chapters/1.json",
+      "publishedAt": "2024-12-21T10:30:00Z",
+      "authorAddress": "0x1234567890123456789012345678901234567890",
+      "authorName": "0x1234...7890",
+      "contentRating": "PG-13",
+      "unlockPrice": 0.1,
+      "readReward": 0.05,
+      "licensePrice": 100,
+      "isRemixable": true,
+      "totalReads": 0,
+      "averageRating": 0,
+      "wordCount": 1987,
+      "readingTime": 8,
+      "mood": "mysterious",
+      "tags": ["mystery", "fantasy", "urban"],
+      "qualityScore": 87,
+      "originalityScore": 94,
+      "isRemix": false,
+      "generationMethod": "ai"
+    }
+  ],
+  "count": 1,
+  "debug": {
+    "bucket": "storyhouse-stories",
+    "totalDirectories": 1,
+    "processedDirectories": 1,
+    "processedStories": 1
+  }
+}
+```
+
+### **Get Story Table of Contents**
+
+Fetch complete story metadata and all chapters for a specific story by wallet and slug.
+
+```http
+GET /api/stories/[walletAddress]/[storySlug]/chapters
+```
+
+**Path Parameters:**
+- `walletAddress`: Author's wallet address (case-insensitive)
+- `storySlug`: Story slug derived from title or story ID
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "story": {
+    "id": "story_1703123456",
+    "title": "The Shadowbrook Mysteries",
+    "authorName": "Detective Writer",
+    "authorAddress": "0x1234567890123456789012345678901234567890",
+    "genre": "Mystery",
+    "totalChapters": 3,
+    "totalWords": 5961,
+    "totalReadingTime": 24,
+    "averageRating": 4.2,
+    "description": "A gripping mystery series following Detective Sarah Chen...",
+    "tags": ["mystery", "detective", "urban"],
+    "createdAt": "2024-12-21T10:30:00Z",
+    "updatedAt": "2024-12-21T14:30:00Z"
+  },
+  "chapters": [
+    {
+      "chapterNumber": 1,
+      "title": "The First Case",
+      "summary": "Detective Sarah Chen receives her first supernatural case...",
+      "wordCount": 1987,
+      "readingTime": 8,
+      "unlockPrice": 0.1,
+      "readReward": 0.05,
+      "totalReads": 45,
+      "isUnlocked": false,
+      "createdAt": "2024-12-21T10:30:00Z",
+      "genre": "Mystery",
+      "mood": "mysterious",
+      "contentRating": "PG-13"
+    },
+    {
+      "chapterNumber": 2,
+      "title": "Strange Evidence",
+      "summary": "The investigation takes an unexpected turn when Chen discovers...",
+      "wordCount": 2100,
+      "readingTime": 8,
+      "unlockPrice": 0.1,
+      "readReward": 0.05,
+      "totalReads": 32,
+      "isUnlocked": false,
+      "createdAt": "2024-12-21T12:15:00Z",
+      "genre": "Mystery",
+      "mood": "suspenseful",
+      "contentRating": "PG-13"
+    }
+  ],
+  "debug": {
+    "storyId": "story_1703123456",
+    "totalChapters": 3,
+    "totalWords": 5961,
+    "totalReadingTime": 24
+  }
+}
+```
+
+### **Get Individual Chapter**
+
+Fetch complete content for a specific chapter.
+
+```http
+GET /api/chapters/[storyId]/[chapterNumber]
+```
+
+**Path Parameters:**
+- `storyId`: Unique story identifier
+- `chapterNumber`: Chapter number (starting from 1)
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "storyId": "story_1703123456",
+    "chapterNumber": 1,
+    "content": "Detective Sarah Chen never believed in magic until...",
+    "title": "The First Case",
+    "themes": ["mystery", "supernatural", "detective"],
+    "wordCount": 1987,
+    "readingTime": 8,
+    "metadata": {
+      "suggestedTags": ["mystery", "detective", "supernatural"],
+      "suggestedGenre": "Mystery",
+      "contentRating": "PG-13",
+      "language": "en",
+      "genre": ["mystery", "fantasy"],
+      "mood": "mysterious",
+      "generationMethod": "ai",
+      "aiModel": "gpt-4",
+      "plotDescription": "A detective discovers supernatural elements in her cases",
+      "qualityScore": 87,
+      "originalityScore": 94,
+      "commercialViability": 89,
+      "authorAddress": "0x1234567890123456789012345678901234567890",
+      "authorName": "Detective Writer",
+      "isRemix": false,
+      "isRemixable": true,
+      "licensePrice": 100,
+      "royaltyPercentage": 5,
+      "unlockPrice": 0.1,
+      "readReward": 0.05,
+      "totalReads": 45,
+      "totalEarned": 2.25,
+      "totalRevenue": 4.5,
+      "status": "published",
+      "visibility": "public",
+      "generatedAt": "2024-12-21T10:30:00Z",
+      "publishedAt": "2024-12-21T10:30:00Z",
+      "lastModified": "2024-12-21T10:30:00Z",
+      "averageRating": 4.2,
+      "remixCount": 0,
+      "streakBonus": 0
+    }
+  }
+}
+```
+
+---
+
+## 📝 **Story Generation API**
 
 ### **Enhanced Story Generation**
 
@@ -45,32 +240,18 @@ POST /api/generate
 
 **Request Body (Enhanced with Phase 5.0 Features):**
 
+**For New Stories:**
 ```json
 {
   "plotDescription": "A young detective discovers ancient magic in modern London",
-  "storyTitle": "The Arcane Detective",
   "genres": ["mystery", "fantasy", "urban"],
   "moods": ["mysterious", "dark"],
   "emojis": ["🔍", "✨", "🌙"],
   "chapterNumber": 1,
-  "isNewStory": true,
   
-  // Enhanced Author Attribution (NEW)
+  // Enhanced Author Attribution
   "authorAddress": "0x1234567890123456789012345678901234567890",
   "authorName": "0x1234...7890",
-  
-  // Read-to-Earn Economics (NEW)
-  "economics": {
-    "unlockPrice": 0.1,
-    "readReward": 0.05,
-    "licensePrice": 100,
-    "royaltyPercentage": 5
-  },
-  
-  // Content Classification (NEW)
-  "contentRating": "PG-13",
-  "language": "en",
-  "isRemixable": true,
   
   // IP Options (Enhanced)
   "ipOptions": {
@@ -89,39 +270,96 @@ POST /api/generate
 }
 ```
 
+**For Story Continuation (Adding Chapters):**
+```json
+{
+  "plotDescription": "The detective delves deeper into the magical underworld of London",
+  "storyId": "story_1703123456",
+  "chapterNumber": 2,
+  "previousContent": "Detective Sarah Chen had just discovered that magic was real...",
+  "genres": ["mystery", "fantasy", "urban"],
+  "moods": ["suspenseful", "mysterious"],
+  "emojis": ["🔍", "✨", "🌙"],
+  
+  // Author Attribution (must match existing story)
+  "authorAddress": "0x1234567890123456789012345678901234567890",
+  "authorName": "0x1234...7890"
+}
+```
+
 **Response:**
 
 ```json
 {
   "success": true,
-  "story": {
-    "id": "story_1703123456",
+  "data": {
+    "storyId": "story_1703123456",
+    "chapterNumber": 1,
     "title": "The Shadowbrook Mysteries",
     "content": "Detective Sarah Chen never believed in magic...",
-    "author": "0x1234567890123456789012345678901234567890",
-    "genre": "mystery",
-    "mood": "mysterious",
-    "emoji": "🔍",
-    "createdAt": "2024-12-21T10:30:00Z",
-    "metadata": {
-      "wordCount": 1987,
-      "readingTime": 8,
-      "contentRating": "PG-13",
-      "qualityScore": 87,
-      "commercialViability": 92,
-      "uniquenessScore": 94
-    },
-    "ipRegistrationStatus": "ready",
-    "licenseStatus": "pending",
-    "availableLicenseTypes": ["standard", "premium", "exclusive"]
+    "themes": ["mystery", "supernatural", "detective"],
+    "wordCount": 1987,
+    "readingTime": 8,
+    "contentUrl": "https://r2.example.com/stories/story_1703123456/chapters/1.json",
+    "suggestedTags": ["mystery", "detective", "supernatural"],
+    "suggestedGenre": "Mystery",
+    "contentRating": "PG-13",
+    "language": "en",
+    "qualityScore": 87,
+    "originalityScore": 94,
+    "commercialViability": 89
   },
-  "ipMetadata": {
-    "readyForRegistration": true,
-    "estimatedRegistrationCost": "0.05 ETH",
-    "suggestedLicensePrice": 250
+  "message": "Story generated successfully and saved to storage",
+  "ipData": {
+    "operationId": "gen-1703123456-abc123",
+    "transactionHash": null,
+    "ipAssetId": null,
+    "gasUsed": null
   }
 }
 ```
+
+### **Story Continuation Workflow**
+
+The platform supports continuing existing stories by adding new chapters. This workflow enables serialized content and multi-chapter narratives.
+
+**1. Generate New Story (Chapter 1):**
+```http
+POST /api/generate
+{
+  "plotDescription": "A young detective discovers ancient magic",
+  "chapterNumber": 1,
+  "authorAddress": "0x1234..."
+}
+```
+
+**2. Continue Story (Chapter 2+):**
+```http
+POST /api/generate
+{
+  "plotDescription": "The detective investigates deeper",
+  "storyId": "story_1703123456",
+  "chapterNumber": 2,
+  "previousContent": "Previous chapter summary or ending...",
+  "authorAddress": "0x1234..."
+}
+```
+
+**3. Get Story Table of Contents:**
+```http
+GET /api/stories/{walletAddress}/{storySlug}/chapters
+```
+
+**4. Read Individual Chapters:**
+```http
+GET /api/chapters/{storyId}/{chapterNumber}
+```
+
+**Key Features:**
+- **Story Continuity**: AI uses `previousContent` to maintain narrative consistency
+- **Author Verification**: `authorAddress` must match the original story creator
+- **Automatic Organization**: Chapters are automatically organized and numbered
+- **Rich Metadata**: Each chapter includes complete metadata for the read-to-earn economy
 
 ---
 
@@ -557,15 +795,19 @@ POST /api/blockchain/estimate-gas
 
 ## 📋 **API Status**
 
-| Feature          | Status  | Blockchain |
-| ---------------- | ------- | ---------- |
-| Story Generation | ✅ Live | N/A        |
-| IP Registration  | ✅ Live | ✅ Real    |
-| License Creation | ✅ Live | ✅ Real    |
-| License Purchase | ✅ Live | ✅ Real    |
-| Collections      | ✅ Live | ✅ Real    |
-| Royalty Claims   | ✅ Live | ✅ Real    |
-| Derivatives      | ✅ Live | ✅ Real    |
+| Feature                    | Status  | Blockchain | Description                           |
+| -------------------------- | ------- | ---------- | ------------------------------------- |
+| Story Generation           | ✅ Live | N/A        | AI-powered story creation             |
+| Story Continuation         | ✅ Live | N/A        | Multi-chapter story support           |
+| Stories Listing            | ✅ Live | N/A        | Get all published stories             |
+| Table of Contents          | ✅ Live | N/A        | Story metadata and chapter listing    |
+| Chapter Reading            | ✅ Live | N/A        | Individual chapter content access     |
+| IP Registration            | ✅ Live | ✅ Real    | Register stories as IP assets         |
+| License Creation           | ✅ Live | ✅ Real    | Create licensing terms                |
+| License Purchase           | ✅ Live | ✅ Real    | Purchase usage rights                 |
+| Collections                | ✅ Live | ✅ Real    | Organize related IP assets            |
+| Royalty Claims             | ✅ Live | ✅ Real    | Claim earnings from licensing         |
+| Derivatives                | ✅ Live | ✅ Real    | Create remixes and derivative works   |
 
 ---
 
