@@ -19,8 +19,6 @@ export default function HomePage() {
             </div>
 
             <div className="flex items-center gap-4">
-              <WalletConnect />
-
               <div className="flex items-center gap-2">
                 <Link href="/read">
                   <motion.button
@@ -53,6 +51,8 @@ export default function HomePage() {
                   </motion.button>
                 </Link>
               </div>
+
+              <WalletConnect />
             </div>
           </nav>
         </div>

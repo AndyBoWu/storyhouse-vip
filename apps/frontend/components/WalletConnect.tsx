@@ -132,7 +132,7 @@ export default function WalletConnect() {
   }
 
   const formatAddress = (addr: string) => {
-    return `${addr.slice(0, 6)}...${addr.slice(-4)}`
+    return `${addr.slice(-4)}`
   }
 
   const formatBalance = (balance: any) => {
@@ -167,15 +167,10 @@ export default function WalletConnect() {
           onClick={() => setShowDetails(!showDetails)}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="flex items-center gap-3 bg-green-100 hover:bg-green-200 text-green-800 px-4 py-2 rounded-lg transition-all border border-green-300"
+          className="flex items-center gap-2 bg-white/60 backdrop-blur-sm hover:bg-white/80 text-gray-800 px-6 py-3 rounded-full transition-all border border-white/50 text-sm font-semibold"
         >
-          <CheckCircle className="w-4 h-4" />
-          <span className="font-medium">{formatAddress(address)}</span>
-          {tipBalance && (
-            <span className="text-sm bg-green-200 px-2 py-1 rounded">
-              {formatBalance(tipBalance)} TIP
-            </span>
-          )}
+          💳
+          <span>{formatAddress(address)}</span>
         </motion.button>
 
         <AnimatePresence>
@@ -281,10 +276,10 @@ export default function WalletConnect() {
       disabled={isCurrentlyConnecting}
       whileHover={!isCurrentlyConnecting ? { scale: 1.05 } : {}}
       whileTap={!isCurrentlyConnecting ? { scale: 0.95 } : {}}
-      className={`flex items-center gap-3 px-6 py-3 rounded-lg font-semibold transition-all ${
+      className={`flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-sm transition-all ${
         isCurrentlyConnecting
-          ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-          : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg'
+          ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+          : 'bg-white/60 backdrop-blur-sm hover:bg-white/80 text-gray-800 border border-white/50'
       }`}
     >
       {isCurrentlyConnecting ? (
@@ -294,8 +289,8 @@ export default function WalletConnect() {
         </>
       ) : (
         <>
-          <Wallet className="w-5 h-5" />
-          Connect Wallet
+          <Wallet className="w-4 h-4" />
+          Connect
         </>
       )}
     </motion.button>
