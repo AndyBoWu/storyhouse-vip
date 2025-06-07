@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { ArrowLeft, Sparkles, RefreshCw, Book } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useAccount } from 'wagmi'
 import { buildChapterUrl } from '@/lib/utils/slugify'
 
 interface ExistingStory {
@@ -36,23 +37,53 @@ interface ExistingStory {
 
 export default function MyStoriesPage() {
   const router = useRouter()
+  const { address: connectedAddress, isConnected } = useAccount()
   const [existingStories, setExistingStories] = useState<ExistingStory[]>([])
   const [isLoadingStories, setIsLoadingStories] = useState(false)
   const [isRefreshing, setIsRefreshing] = useState(false)
 
+  // Debug logging
+  console.log('🔍 MyStoriesPage render:', {
+    connectedAddress,
+    isConnected,
+    existingStoriesCount: existingStories.length,
+    isLoadingStories,
+    isRefreshing,
+    firstStoryTitle: existingStories[0]?.title || 'No stories'
+  })
+
   // Load published stories from R2
   useEffect(() => {
-    const loadStoriesFromR2 = async (showLoading = true) => {
-      if (showLoading) {
-        setIsLoadingStories(true)
-      }
+    const loadStories = async () => {
+      console.log('🔄 Loading stories from API...')
+      setIsLoadingStories(true)
+      
       try {
         const response = await fetch('/api/stories?cache=false&t=' + Date.now())
+        console.log('📡 API Response status:', response.status)
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+        }
+        
         const data = await response.json()
+        console.log('📊 API Response data:', data)
 
-        if (data.success && data.stories) {
+        if (data.success && data.stories && Array.isArray(data.stories)) {
+          console.log('✅ Stories loaded from API:', data.stories.length, 'stories')
+          console.log('📖 Stories:', data.stories.map(s => s.title))
+          
+          // Filter stories by connected wallet address
+          const filteredStories = connectedAddress 
+            ? data.stories.filter((story: any) => 
+                story.authorAddress?.toLowerCase() === connectedAddress.toLowerCase()
+              )
+            : [] // If no wallet connected, show no stories
+          
+          console.log('🔒 Filtered stories for wallet', connectedAddress, ':', filteredStories.length, 'stories')
+          
           // Convert R2 story format to ExistingStory format
-          const convertedStories: ExistingStory[] = data.stories.map((story: any) => ({
+          const convertedStories: ExistingStory[] = filteredStories.map((story: any) => ({
             id: story.id,
             title: story.title,
             genre: story.genre,
@@ -79,41 +110,44 @@ export default function MyStoriesPage() {
             isRemix: story.isRemix,
             generationMethod: story.generationMethod
           }))
+          
+          console.log('🔄 Setting stories state with:', convertedStories.length, 'stories')
           setExistingStories(convertedStories)
         } else {
-          console.warn('Failed to load stories from R2:', data.error)
-          if (showLoading) {
-            setExistingStories([])
-          }
-        }
-      } catch (error) {
-        console.error('Error loading stories from R2:', error)
-        if (showLoading) {
+          console.warn('❌ Invalid API response:', data)
           setExistingStories([])
         }
+      } catch (error) {
+        console.error('❌ Error loading stories:', error)
+        setExistingStories([])
       } finally {
-        if (showLoading) {
-          setIsLoadingStories(false)
-        }
+        setIsLoadingStories(false)
       }
     }
 
-    // Initial load with loading state
-    loadStoriesFromR2(true)
-
-    // Background refresh without loading state - more frequent for new stories
-    const interval = setInterval(() => loadStoriesFromR2(false), 10000) // Every 10 seconds
-    return () => clearInterval(interval)
-  }, [])
+    loadStories()
+  }, [connectedAddress]) // Reload when wallet connection changes
 
   const handleManualRefresh = async () => {
+    console.log('🔄 Manual refresh triggered')
     setIsRefreshing(true)
     try {
       const response = await fetch('/api/stories?cache=false&t=' + Date.now())
       const data = await response.json()
 
-      if (data.success && data.stories) {
-        const convertedStories: ExistingStory[] = data.stories.map((story: any) => ({
+      if (data.success && data.stories && Array.isArray(data.stories)) {
+        console.log('✅ Manual refresh loaded:', data.stories.length, 'stories')
+        
+        // Filter stories by connected wallet address
+        const filteredStories = connectedAddress 
+          ? data.stories.filter((story: any) => 
+              story.authorAddress?.toLowerCase() === connectedAddress.toLowerCase()
+            )
+          : [] // If no wallet connected, show no stories
+        
+        console.log('🔒 Manual refresh filtered stories for wallet', connectedAddress, ':', filteredStories.length, 'stories')
+        
+        const convertedStories: ExistingStory[] = filteredStories.map((story: any) => ({
           id: story.id,
           title: story.title,
           genre: story.genre,
@@ -141,9 +175,11 @@ export default function MyStoriesPage() {
           generationMethod: story.generationMethod
         }))
         setExistingStories(convertedStories)
+      } else {
+        console.warn('❌ Manual refresh failed:', data)
       }
     } catch (error) {
-      console.error('Error refreshing stories:', error)
+      console.error('❌ Error during manual refresh:', error)
     } finally {
       setIsRefreshing(false)
     }
@@ -195,9 +231,25 @@ export default function MyStoriesPage() {
             </h1>
           </div>
 
-          {/* Stories Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-            {isLoadingStories ? (
+          {/* Wallet Connection Check */}
+          {!isConnected ? (
+            <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-200 mb-6">
+              <div className="text-center">
+                <div className="text-6xl mb-4">🔗</div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-2">Connect Your Wallet</h3>
+                <p className="text-gray-600 mb-6">
+                  To view your stories, please connect your wallet using the "Connect" button in the top navigation.
+                </p>
+                <p className="text-sm text-gray-500">
+                  Your stories are linked to your wallet address for ownership verification.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Stories Grid */}
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                {isLoadingStories ? (
               <div className="col-span-full text-center py-12">
                 <div className="w-8 h-8 border-3 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
                 <h3 className="text-lg font-semibold text-gray-700 mb-2">Loading your stories...</h3>
@@ -264,7 +316,10 @@ export default function MyStoriesPage() {
             )}
           </div>
 
-          {/* Quick Actions */}
+              </>
+            )}
+
+          {/* Quick Actions (always show) */}
           <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h3>
             <div className="grid md:grid-cols-3 gap-4">
