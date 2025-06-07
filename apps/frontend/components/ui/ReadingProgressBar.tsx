@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react'
 
 interface ReadingProgressBarProps {
-  /** Optional color theme - blue or green */
-  color?: 'blue' | 'green'
+  /** Optional color theme - blue, green, or purple */
+  color?: 'blue' | 'green' | 'purple'
   /** Height of the progress bar in pixels */
   height?: number
   /** Whether to show pulsing animation */
@@ -59,6 +59,12 @@ export default function ReadingProgressBar({
       progress: 'bg-gradient-to-r from-emerald-400 via-green-500 to-green-600',
       shadow: 'shadow-[0_0_10px_rgba(34,197,94,0.5)]',
       glow: 'shadow-[0_0_20px_rgba(34,197,94,0.8),0_0_40px_rgba(34,197,94,0.4)]'
+    },
+    purple: {
+      bg: 'bg-purple-950/30',
+      progress: 'bg-gradient-to-r from-purple-500 via-violet-500 to-blue-500',
+      shadow: 'shadow-[0_0_10px_rgba(139,92,246,0.5)]',
+      glow: 'shadow-[0_0_20px_rgba(139,92,246,0.8),0_0_40px_rgba(139,92,246,0.4)]'
     }
   }
 
@@ -99,7 +105,7 @@ export default function ReadingProgressBar({
         <div
           className={`
             absolute top-1/2 -translate-y-1/2 w-2 h-2 rounded-full
-            ${color === 'blue' ? 'bg-blue-300' : 'bg-green-300'}
+            ${color === 'blue' ? 'bg-blue-300' : color === 'green' ? 'bg-green-300' : 'bg-purple-300'}
             ${theme.glow}
             ${animate ? 'animate-ping' : ''}
           `}
