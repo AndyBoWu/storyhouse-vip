@@ -186,14 +186,27 @@ export default function MyStoriesPage() {
   }
 
   const handleReadStory = (story: ExistingStory) => {
-    // Navigate to the dedicated chapter URL
+    // Navigate to the table of contents page
     if (!story.authorAddress) {
       console.error('No author address for story:', story)
       return
     }
     
-    const chapterUrl = buildChapterUrl(story.authorAddress, story.title, story.id, 1)
-    router.push(chapterUrl)
+    // Create slug from title
+    const storySlug = story.title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+    
+    const tocUrl = `/stories/${story.authorAddress}/${storySlug}/toc`
+    router.push(tocUrl)
+  }
+
+  const handleContinueStory = (story: ExistingStory) => {
+    // Navigate to write page with story context to continue with next chapter
+    const nextChapter = story.chapters + 1
+    const continueUrl = `/write?continueStory=${encodeURIComponent(story.id)}&nextChapter=${nextChapter}&title=${encodeURIComponent(story.title)}&genre=${encodeURIComponent(story.genre)}`
+    router.push(continueUrl)
   }
 
   return (
@@ -202,10 +215,7 @@ export default function MyStoriesPage() {
       <header className="bg-white shadow-sm border-b">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2 text-gray-600 hover:text-gray-800">
-              <ArrowLeft className="w-4 h-4" />
-              Back to StoryHouse
-            </Link>
+            <div></div>
             <button 
               onClick={handleManualRefresh}
               disabled={isRefreshing}
@@ -221,11 +231,7 @@ export default function MyStoriesPage() {
       <div className="container mx-auto px-6 py-8">
         <div className="max-w-6xl mx-auto">
           {/* Page Header */}
-          <div className="flex items-center gap-4 mb-8">
-            <Link href="/write" className="flex items-center gap-2 text-gray-600 hover:text-gray-800">
-              <ArrowLeft className="w-4 h-4" />
-              Back
-            </Link>
+          <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
               👑 My Stories
             </h1>
@@ -300,7 +306,10 @@ export default function MyStoriesPage() {
                   </div>
 
                   <div className="flex gap-2">
-                    <button className="flex-1 px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition-all flex items-center justify-center gap-2">
+                    <button 
+                      onClick={() => handleContinueStory(story)}
+                      className="flex-1 px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition-all flex items-center justify-center gap-2"
+                    >
                       ✨ Continue
                     </button>
                     <button 
