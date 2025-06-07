@@ -73,9 +73,9 @@ export default function HomePage() {
               </h1>
 
               <p className="mb-8 text-xl text-gray-700 lg:text-2xl">
-                First 3 chapters FREE. Earn $TIP tokens while reading.
+                Discover stories that transport you to new dimensions.
                 <br />
-                Remix content and earn from your creativity.
+                Build worlds that live forever on the Internet.
               </p>
 
               <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
@@ -108,25 +108,25 @@ export default function HomePage() {
             >
               <div className="bg-white/70 backdrop-blur-sm rounded-xl p-6 text-gray-800 border border-white/50">
                 <div className="mb-4 text-4xl">📚</div>
-                <h3 className="mb-2 text-xl font-bold">Read & Earn</h3>
+                <h3 className="mb-2 text-xl font-bold">Immerse & Discover</h3>
                 <p className="text-gray-600">
-                  Earn $TIP tokens for every chapter you read. Your reading pays for itself!
+                  Dive deep into captivating narratives. Every chapter opens new dimensions of possibility.
                 </p>
               </div>
 
               <div className="bg-white/70 backdrop-blur-sm rounded-xl p-6 text-gray-800 border border-white/50">
                 <div className="mb-4 text-4xl">🤖</div>
-                <h3 className="mb-2 text-xl font-bold">AI-Powered Writing</h3>
+                <h3 className="mb-2 text-xl font-bold">Dream & Create</h3>
                 <p className="text-gray-600">
-                  Create stories with AI assistance. Multi-modal inputs bring your ideas to life.
+                  Transform imagination into reality with AI. Your wildest ideas become living stories.
                 </p>
               </div>
 
               <div className="bg-white/70 backdrop-blur-sm rounded-xl p-6 text-gray-800 border border-white/50">
                 <div className="mb-4 text-4xl">🔄</div>
-                <h3 className="mb-2 text-xl font-bold">Remix & Earn</h3>
+                <h3 className="mb-2 text-xl font-bold">Expand & Evolve</h3>
                 <p className="text-gray-600">
-                  Remix existing stories and earn licensing fees. Recursive creativity economy.
+                  Build upon existing worlds. Create infinite variations that spawn new universes.
                 </p>
               </div>
             </motion.div>
@@ -138,9 +138,9 @@ export default function HomePage() {
               transition={{ duration: 0.8, delay: 0.4 }}
               className="mt-16"
             >
-              <p className="text-gray-600">Built on</p>
+              <p className="text-gray-600">Proudly built on and powered by</p>
               <div className="mt-2 text-2xl font-bold text-gray-800">
-                Story Protocol Layer 1
+                Story Protocol L1 Blockchain
               </div>
             </motion.div>
           </div>
