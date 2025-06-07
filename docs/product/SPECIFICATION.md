@@ -152,7 +152,78 @@ StoryHouse.vip revolutionizes Web3 publishing by combining **chapter-level IP as
 - **Bundle Options**: License multiple chapters at discounted rates
 - **Preview System**: Sample content before purchasing license
 
-### **6. Comprehensive Revenue Dashboard**
+### **6. Table of Contents & Chapter Navigation**
+
+**Feature**: Dynamic table of contents with enhanced chapter navigation
+**Innovation**: Complete story overview with chapter-level metadata and unlock status
+**User Benefit**: Easy story navigation and chapter discovery
+
+**Table of Contents Features**:
+
+- **Story Metadata Display**: Title, author, genre, total chapters, reading time
+- **Chapter Listings**: Individual chapter cards with titles, summaries, and metadata
+- **Unlock Status**: Visual indicators for locked/unlocked chapters
+- **Economic Preview**: Chapter unlock prices and reading rewards
+- **Reading Statistics**: Word count, reading time, and read counts per chapter
+- **Smart Navigation**: Direct chapter access with URL-based routing
+
+**Enhanced Chapter Navigation**:
+
+- **Previous/Next Buttons**: Seamless chapter-to-chapter navigation
+- **Reading Progress Bar**: Visual indicator of reading completion
+- **Breadcrumb Navigation**: Clear path showing story > chapter hierarchy
+- **Chapter Pills**: Quick navigation between adjacent chapters
+- **Back to TOC**: Easy return to story overview
+
+### **7. Story Continuation Workflow**
+
+**Feature**: Intelligent story continuation with AI-assisted chapter creation
+**Innovation**: Context-aware chapter generation that maintains story continuity
+**User Benefit**: Effortless multi-chapter story development
+
+**Continuation Features**:
+
+- **Continue Button**: One-click continuation from My Stories page
+- **Context Preservation**: Previous chapter content fed to AI for continuity
+- **Chapter Numbering**: Automatic sequential chapter management
+- **Story Metadata**: Title, genre, and style consistency across chapters
+- **URL Parameters**: Deep linking to continuation workflow
+- **Draft Management**: Auto-save and recovery of continuation drafts
+
+**User Flow**:
+
+1. Creator views existing stories in My Stories dashboard
+2. Clicks "Continue" button on any published story
+3. Automatically navigated to write page with pre-filled context
+4. AI generates next chapter using previous content for continuity
+5. Creator can edit, regenerate, or publish the new chapter
+6. Chapter is automatically linked to existing story with proper numbering
+
+### **8. Multi-Chapter Story Management**
+
+**Feature**: Comprehensive story organization and management system
+**Innovation**: Wallet-based story ownership with enhanced metadata tracking
+**User Benefit**: Professional story management and discovery tools
+
+**Story Management Features**:
+
+- **Wallet-Based Filtering**: Stories automatically filtered by connected wallet
+- **Story Cards**: Rich preview cards with metadata and earnings
+- **Chapter Counting**: Real-time chapter count and story progression
+- **Earnings Tracking**: Per-story revenue and performance metrics
+- **Story Status**: Last updated dates and activity tracking
+- **Quick Actions**: Read, Continue, and Analytics buttons
+
+**Enhanced Story Organization**:
+
+- **Genre Classification**: Visual genre tags and filtering
+- **Reading Metrics**: Word counts, reading times, and completion rates
+- **Quality Indicators**: AI-generated quality and originality scores
+- **Remix Status**: Clear indicators for remix-enabled content
+- **Author Attribution**: Complete authorship tracking with wallet verification
+- **Content Ratings**: Age-appropriate content classification
+
+### **9. Comprehensive Revenue Dashboard**
 
 **Feature**: Real-time earnings tracking across all revenue streams
 **Data Sources**: Story Protocol royalty contracts + TIP token rewards
@@ -201,8 +272,9 @@ StoryHouse.vip revolutionizes Web3 publishing by combining **chapter-level IP as
 **Reader Journey (Read-to-Earn)**:
 
 ```
-Story Discovery → Free Reading (Chapters 1-3) → Engagement Hook →
-Wallet Connection → Paid Reading + Earning → Streak Building →
+Story Discovery → Table of Contents Review → Free Reading (Chapters 1-3) → 
+Engagement Hook → Wallet Connection → Chapter Navigation → 
+Paid Reading + Earning → Progress Tracking → Streak Building →
 Community Participation → Remix Discovery
 ```
 
@@ -210,8 +282,9 @@ Community Participation → Remix Discovery
 
 ```
 Plot Concept → AI Generation → Content Review/Edit →
-IP Registration → Licensing Setup → Revenue Tracking →
-Community Building → Series Development
+Chapter Publishing → Story Management → Continue Story →
+Multi-Chapter Development → IP Registration → Licensing Setup → 
+Revenue Tracking → Community Building → Series Development
 ```
 
 **Remixer Journey (Derivative Creation)**:
@@ -229,6 +302,9 @@ Revenue Sharing → Series Building
 | **Homepage**         | "Start Reading"    | "Create Story", Browse trending      |
 | **Reader Dashboard** | Continue reading   | View earnings, Track streaks         |
 | **Creator Studio**   | Generate with AI   | Write manually, Manage chapters      |
+| **My Stories**       | Continue story     | Read chapters, View analytics        |
+| **Table of Contents**| Read chapter       | Navigate chapters, View metadata     |
+| **Chapter Reader**   | Complete chapter   | Navigate prev/next, Track progress   |
 | **Remix Workshop**   | Find content       | Evaluate licenses, Transform with AI |
 | **Marketplace**      | Browse chapters    | Purchase licenses, Preview content   |
 | **Earnings Hub**     | View total rewards | Convert tokens, Withdraw earnings    |
@@ -252,16 +328,26 @@ src/
 ├── app/                    # App router pages
 │   ├── (dashboard)/       # Protected dashboard routes
 │   ├── read/             # Reading interface with earnings
-│   ├── create/           # AI-powered story creation
+│   ├── write/            # AI-powered story creation with continuation
+│   ├── own/              # My Stories dashboard with management
+│   ├── stories/          # Story reading with chapter navigation
+│   │   └── [wallet]/[story]/[chapter]/  # Dynamic chapter routes
+│   │   └── [wallet]/[story]/toc/        # Table of contents
 │   ├── remix/            # Remix discovery and creation
 │   └── earn/             # Read-to-earn tracking
 ├── components/
 │   ├── ui/              # Design system components
+│   │   ├── StoryContentDisplay.tsx    # Enhanced reading interface
+│   │   ├── ReadingProgressBar.tsx     # Chapter progress tracking
+│   │   └── ContentProtection.tsx      # Anti-scraping measures
 │   ├── web3/            # Wallet and blockchain components
 │   ├── ai/              # AI generation and transformation
 │   ├── reading/         # Reading interface and rewards
-│   └── creator/         # Creation and IP management
+│   ├── creator/         # Creation and IP management
+│   └── publishing/      # Story publication workflow
 └── lib/                 # Enhanced utilities and configurations
+    └── utils/
+        └── slugify.ts   # URL generation for stories and chapters
 ```
 
 ### **Backend Requirements**
@@ -273,7 +359,10 @@ src/
 
 **Enhanced API Endpoints**:
 
-- `POST /api/generate` - AI story generation with streaming
+- `POST /api/generate` - AI story generation with streaming and continuation
+- `GET /api/stories` - Fetch all published stories with filtering
+- `GET /api/chapters/[storyId]/[chapterNumber]` - Fetch specific chapter content
+- `GET /api/stories/[wallet]/[slug]/chapters` - Table of contents data
 - `POST /api/rewards/claim` - Claim reading rewards
 - `POST /api/remix/license` - Purchase remix rights
 - `POST /api/remix/generate` - AI content transformation
@@ -378,22 +467,28 @@ src/
 
 ## 🚀 **Implementation Phases**
 
-### **Phase 4.4: Current (Production Ready)**
+### **Phase 5.0: Current (Production Ready)**
 
 - ✅ Read-to-earn mechanics with progressive onboarding
 - ✅ AI-powered content generation with GPT-4
 - ✅ Remix economy with automated licensing
 - ✅ Chapter-level IP registration on Story Protocol
-- ✅ Comprehensive UX with 24 wireframes
+- ✅ Table of Contents functionality with chapter navigation
+- ✅ Story continuation workflow with "Continue" button
+- ✅ Multi-chapter story management with wallet filtering
+- ✅ Enhanced story organization and navigation
+- ✅ Reading progress tracking and chapter-to-chapter navigation
+- ✅ Wallet-based story ownership and management
+- ✅ Comprehensive UX with enhanced metadata system
 
-### **Phase 5: Production Foundation**
+### **Phase 6: Production Foundation**
 
 - [ ] Database implementation (PostgreSQL + Prisma)
 - [ ] Enhanced mobile experience and PWA features
 - [ ] Advanced analytics dashboard
 - [ ] Social features and community building
 
-### **Phase 6: Ecosystem Expansion**
+### **Phase 7: Ecosystem Expansion**
 
 - [ ] Multi-chain support (Polygon, Ethereum mainnet)
 - [ ] Creator marketplace and advanced tools
