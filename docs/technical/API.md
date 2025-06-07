@@ -2,13 +2,13 @@
 
 ## 🌟 **Overview**
 
-StoryHouse.vip provides a comprehensive RESTful API for creating, managing, and licensing intellectual property assets on the blockchain. With **Phase 4.4 complete**, all endpoints now feature **real Story Protocol blockchain integration**.
+StoryHouse.vip provides a comprehensive RESTful API for creating, managing, and licensing intellectual property assets on the blockchain. With **Phase 5.0 complete**, all endpoints now feature **enhanced metadata system**, **user attribution**, and **real Story Protocol blockchain integration**.
 
 ### **Base URL**
 
 ```
 Production: https://storyhouse.vip/api
-Development: http://localhost:3000/api
+Development: http://localhost:3001/api
 ```
 
 ### **Authentication**
@@ -19,14 +19,17 @@ Currently using session-based authentication. API keys coming in Phase 5.
 
 ## 🔗 **Real Blockchain Integration Status**
 
-**✅ Phase 4.4 COMPLETE**: All API endpoints now use **real Story Protocol SDK calls**:
+**✅ Phase 5.0 COMPLETE**: All API endpoints now feature comprehensive enhancements:
 
+- ✅ **Enhanced Metadata System** with 25+ tracked fields per chapter
+- ✅ **User Attribution** with complete author tracking and wallet integration
+- ✅ **Read-to-Earn Economics** with full token flow tracking
+- ✅ **Remix Economy** with IP licensing metadata and royalty tracking
 - ✅ **Real IP Asset Registration** via `mintAndRegisterIp()`
 - ✅ **Smart Contract Licensing** via `registerPILTerms()`
 - ✅ **Blockchain Transaction Processing** with gas optimization
-- ✅ **Error Handling & Retry Logic** for network failures
-- ✅ **Multi-Tier Licensing** (Standard, Premium, Exclusive)
-- ✅ **Automatic Royalty Distribution** via smart contracts
+- ✅ **Enhanced Storage** with Cloudflare R2 caching and metadata
+- ✅ **AI Generation Tracking** with complete provenance and quality scores
 
 ---
 
@@ -40,17 +43,36 @@ Generate AI-powered stories with built-in IP asset metadata and blockchain regis
 POST /api/generate
 ```
 
-**Request Body:**
+**Request Body (Enhanced with Phase 5.0 Features):**
 
 ```json
 {
   "plotDescription": "A young detective discovers ancient magic in modern London",
+  "storyTitle": "The Arcane Detective",
   "genres": ["mystery", "fantasy", "urban"],
-  "mood": "mysterious",
-  "authorSettings": {
-    "name": "Author Name",
-    "walletAddress": "0x1234567890123456789012345678901234567890"
+  "moods": ["mysterious", "dark"],
+  "emojis": ["🔍", "✨", "🌙"],
+  "chapterNumber": 1,
+  "isNewStory": true,
+  
+  // Enhanced Author Attribution (NEW)
+  "authorAddress": "0x1234567890123456789012345678901234567890",
+  "authorName": "0x1234...7890",
+  
+  // Read-to-Earn Economics (NEW)
+  "economics": {
+    "unlockPrice": 0.1,
+    "readReward": 0.05,
+    "licensePrice": 100,
+    "royaltyPercentage": 5
   },
+  
+  // Content Classification (NEW)
+  "contentRating": "PG-13",
+  "language": "en",
+  "isRemixable": true,
+  
+  // IP Options (Enhanced)
   "ipOptions": {
     "registerAsIP": true,
     "licenseType": "premium",
@@ -58,15 +80,11 @@ POST /api/generate
     "derivativeRights": true,
     "autoRegister": false
   },
+  
+  // Collection Options
   "collectionOptions": {
     "addToCollection": "col-fantasy-mysteries",
     "createNewCollection": false
-  },
-  "enhancedMetadata": {
-    "targetWordCount": 2000,
-    "contentRating": "PG-13",
-    "language": "en",
-    "serializable": true
   }
 }
 ```

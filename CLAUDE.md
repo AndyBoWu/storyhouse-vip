@@ -9,16 +9,21 @@ StoryHouse.vip is a revolutionary Web3 storytelling platform built on Story Prot
 - Read-to-earn mechanics where readers earn $TIP tokens while reading
 - AI-powered story generation and remix creation
 - Automated licensing and royalty distribution
+- **Enhanced metadata system** with 25+ tracked fields per chapter
+- **Complete user attribution** with wallet integration
+- **Advanced caching** and performance optimization
 
 Tech Stack: Next.js 15.3.3, TypeScript, Story Protocol SDK, OpenAI GPT-4, Cloudflare R2, Smart Contracts (Solidity)
+
+**Current Status: Phase 5.0 Complete** - Enhanced metadata system and user attribution fully implemented
 
 ## Common Development Commands
 
 ```bash
 # Development
-npm run dev                      # Start frontend dev server (uses .env.testnet)
-npm run dev:testnet             # Explicitly use testnet config
-npm run dev:mainnet             # Use mainnet config
+npm run dev                      # Start frontend dev server on port 3001 (uses .env.testnet)
+npm run dev:testnet             # Explicitly use testnet config on port 3001
+npm run dev:mainnet             # Use mainnet config on port 3001
 
 # Build & Test
 npm run build                   # Build all packages in order
@@ -96,11 +101,25 @@ Key environment variables:
 5. Prefer simple solutions over complex patterns
 6. Consider dev/test/prod environments when coding
 
-## Current Development Status
+## Current Development Status (Phase 5.0 Complete)
 
 - Live testnet deployment: https://testnet.storyhouse.vip/
 - All smart contracts deployed and operational
-- R2 integration complete for story storage
-- AI story generation working with GPT-4
-- Read-to-earn mechanics implemented
-- Chapter-level IP registration functional
+- **Enhanced metadata system** with comprehensive chapter tracking
+- **User attribution system** with complete author tracking
+- **Advanced R2 caching** with manual refresh capabilities
+- R2 integration complete for story storage with rich metadata
+- AI story generation working with GPT-4 and full provenance tracking
+- Read-to-earn mechanics implemented with economic flow tracking
+- Chapter-level IP registration functional with licensing metadata
+- **Port standardization** - development server runs on port 3001
+
+## Enhanced Metadata System
+
+Every chapter now includes 25+ metadata fields:
+- **Read-to-Earn Economics**: unlock price, read reward, total reads, revenue
+- **IP & Licensing**: license price, royalty percentage, remix status
+- **Content Classification**: genre, mood, content rating, tags
+- **AI Generation**: quality scores, originality scores, provenance
+- **User Attribution**: author address, author name, timestamps
+- **Engagement**: ratings, word count, reading time, remix count
