@@ -52,10 +52,10 @@ interface StoryMetadata {
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { walletAddress: string; storySlug: string } }
+  { params }: { params: Promise<{ walletAddress: string; storySlug: string }> }
 ) {
   try {
-    const { walletAddress, storySlug } = params
+    const { walletAddress, storySlug } = await params
     
     console.log(`📖 Fetching chapters for story: ${storySlug} by ${walletAddress}`)
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { ArrowLeft, Save, Sparkles, Image, Smile, Palette, Wand2, AlertCircle, BookOpen, Plus, List, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -38,7 +38,7 @@ interface ExistingStory {
 
 type CreationMode = 'select' | 'new' | 'continue'
 
-export default function CreateStoryPage() {
+function CreateStoryPageContent() {
   const { address: userAddress } = useAccount()
   const searchParams = useSearchParams()
   const [creationMode, setCreationMode] = useState<CreationMode>('select')
@@ -809,5 +809,18 @@ export default function CreateStoryPage() {
         />
       )}
     </div>
+  )
+}
+
+export default function CreateStoryPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gradient-to-b from-orange-100 via-pink-100 to-blue-200 flex items-center justify-center">
+      <div className="text-center">
+        <div className="w-8 h-8 border-3 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <p className="text-gray-700">Loading...</p>
+      </div>
+    </div>}>
+      <CreateStoryPageContent />
+    </Suspense>
   )
 }

@@ -71,7 +71,7 @@ export default function MyStoriesPage() {
 
         if (data.success && data.stories && Array.isArray(data.stories)) {
           console.log('✅ Stories loaded from API:', data.stories.length, 'stories')
-          console.log('📖 Stories:', data.stories.map(s => s.title))
+          console.log('📖 Stories:', data.stories.map((s: any) => s.title))
           
           // Filter stories by connected wallet address
           const filteredStories = connectedAddress 
