@@ -265,7 +265,10 @@ export default function MyStoriesPage() {
       <header className="bg-white shadow-sm border-b">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <div></div>
+            <Link href="/" className="flex items-center gap-2 text-gray-600 hover:text-gray-800">
+              <ArrowLeft className="w-4 h-4" />
+              Back to StoryHouse
+            </Link>
             <WalletConnect />
           </div>
         </div>
