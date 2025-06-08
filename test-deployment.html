@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StoryHouse - Hybrid Deployment Test</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+        .status { padding: 1rem; margin: 1rem 0; border-radius: 8px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .loading { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        button { 
+            background: #007bff; 
+            color: white; 
+            border: none; 
+            padding: 0.5rem 1rem; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            margin: 0.5rem;
+        }
+        button:hover { background: #0056b3; }
+        pre { background: #f8f9fa; padding: 1rem; border-radius: 4px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🚀 StoryHouse Hybrid Deployment Test</h1>
+    
+    <div class="status loading">
+        <strong>Testing Cloudflare + Vercel Hybrid Architecture</strong><br>
+        Frontend: Cloudflare Pages CDN<br>
+        Backend: Vercel API (proxied)
+    </div>
+
+    <h2>API Proxy Tests</h2>
+    
+    <button onclick="testSecurityAPI()">Test Security API</button>
+    <button onclick="testStoriesAPI()">Test Stories API</button>
+    <button onclick="testCollectionsAPI()">Test Collections API</button>
+    <button onclick="testGenerateAPI()">Test Generate API</button>
+    
+    <div id="results"></div>
+
+    <h2>Environment Check</h2>
+    <pre id="env-info"></pre>
+
+    <script>
+        // Display environment info
+        document.getElementById('env-info').textContent = `
+Deployment URL: ${window.location.origin}
+User Agent: ${navigator.userAgent}
+Current Time: ${new Date().toISOString()}
+        `;
+
+        function showResult(test, status, data) {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `status ${status}`;
+            div.innerHTML = `
+                <strong>${test}</strong><br>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+            `;
+            results.appendChild(div);
+        }
+
+        async function testAPI(endpoint, testName) {
+            try {
+                showResult(testName, 'loading', 'Testing...');
+                
+                const response = await fetch(`/api/${endpoint}`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult(testName, 'success', {
+                        status: response.status,
+                        headers: Object.fromEntries(response.headers.entries()),
+                        data: data
+                    });
+                } else {
+                    showResult(testName, 'error', {
+                        status: response.status,
+                        error: data
+                    });
+                }
+            } catch (error) {
+                showResult(testName, 'error', {
+                    error: error.message,
+                    stack: error.stack
+                });
+            }
+        }
+
+        function testSecurityAPI() {
+            testAPI('security', 'Security API Test');
+        }
+
+        function testStoriesAPI() {
+            testAPI('stories', 'Stories API Test');
+        }
+
+        function testCollectionsAPI() {
+            testAPI('collections', 'Collections API Test');
+        }
+
+        function testGenerateAPI() {
+            // Test with minimal payload
+            fetch('/api/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    prompt: 'Test prompt',
+                    genre: 'test'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                showResult('Generate API Test', response.ok ? 'success' : 'error', data);
+            })
+            .catch(error => {
+                showResult('Generate API Test', 'error', { error: error.message });
+            });
+        }
+
+        // Auto-test security API on load
+        window.addEventListener('load', () => {
+            setTimeout(() => testSecurityAPI(), 1000);
+        });
+    </script>
+</body>
+</html>
