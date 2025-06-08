@@ -1,11 +1,18 @@
 'use client'
 
 import { useState, useEffect, Suspense } from 'react'
-import { ArrowLeft, Save, Sparkles, Image, Smile, Palette, Wand2, AlertCircle, BookOpen, Plus, List, ChevronRight } from 'lucide-react'
+import { ArrowLeft, Sparkles, Image, Smile, Palette, Wand2, AlertCircle, BookOpen, Plus, List, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAccount } from 'wagmi'
 import { useSearchParams } from 'next/navigation'
+import dynamic from 'next/dynamic'
+
+// Dynamically import WalletConnect to avoid hydration issues
+const WalletConnect = dynamic(() => import('@/components/WalletConnect'), {
+  ssr: false,
+  loading: () => <div className="w-24 h-10 bg-gray-200 rounded-full animate-pulse"></div>
+})
 
 // Import enhanced components (only used in advanced mode)
 import IPRegistrationSection from '../../components/creator/IPRegistrationSection'
@@ -131,50 +138,6 @@ function CreateStoryPageContent() {
   const moods = ['Dark & Gritty', 'Light & Whimsical', 'Epic Adventure', 'Romantic', 'Suspenseful', 'Humorous']
   const emojiOptions = ['😊', '😢', '😱', '😍', '🔥', '⚡', '🌟', '💀', '🦸', '👑', '🎭', '🎪', '🌙', '⭐', '💎', '🚀']
 
-  // Auto-save functionality
-  useEffect(() => {
-    if (plotDescription.trim() || storyTitle.trim()) {
-      const saveTimer = setTimeout(() => {
-        // Auto-save to localStorage
-        localStorage.setItem('storyhouse_draft', JSON.stringify({
-          plotDescription,
-          storyTitle,
-          selectedGenres,
-          selectedMoods,
-          selectedEmojis,
-          creationMode,
-          selectedStory,
-          timestamp: Date.now()
-        }))
-      }, 2000)
-
-      return () => clearTimeout(saveTimer)
-    }
-  }, [plotDescription, storyTitle, selectedGenres, selectedMoods, selectedEmojis, creationMode, selectedStory])
-
-  // Load draft on mount (only if it's different from our sample data)
-  useEffect(() => {
-    const saved = localStorage.getItem('storyhouse_draft')
-    if (saved) {
-      try {
-        const draft = JSON.parse(saved)
-        // Only load if less than 24 hours old and different from sample data
-        if (Date.now() - draft.timestamp < 24 * 60 * 60 * 1000 &&
-            draft.plotDescription &&
-            draft.plotDescription !== 'A young detective discovers a hidden portal in their grandmother\'s attic that leads to different time periods. Each time they step through, they must solve a historical mystery to return home, but each journey reveals more about a family secret that spans centuries.') {
-          setPlotDescription(draft.plotDescription)
-          setStoryTitle(draft.storyTitle || 'The Detective\'s Portal')
-          setSelectedGenres(draft.selectedGenres || ['Mystery'])
-          setSelectedMoods(draft.selectedMoods || ['Suspenseful'])
-          setSelectedEmojis(draft.selectedEmojis || ['🔍', '⏰', '🏛️'])
-          if (draft.creationMode) setCreationMode(draft.creationMode)
-          if (draft.selectedStory) setSelectedStory(draft.selectedStory)
-        }
-      } catch (e) {
-        console.log('Could not load draft:', e)
-      }
-    }
-  }, [])
 
   const toggleSelection = (item: string, currentSelection: string[], setSelection: (items: string[]) => void) => {
     if (currentSelection.includes(item)) {
@@ -778,10 +741,7 @@ function CreateStoryPageContent() {
               <span>Back to StoryHouse</span>
             </Link>
 
-            <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
-              <Save className="w-4 h-4" />
-              Save Draft
-            </button>
+            <WalletConnect />
           </div>
         </div>
       </header>

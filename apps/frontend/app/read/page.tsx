@@ -4,6 +4,13 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowLeft, Search, Filter, TrendingUp, Clock, Star } from 'lucide-react'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
+
+// Dynamically import WalletConnect to avoid hydration issues
+const WalletConnect = dynamic(() => import('@/components/WalletConnect'), {
+  ssr: false,
+  loading: () => <div className="w-24 h-10 bg-gray-200 rounded-full animate-pulse"></div>
+})
 
 interface PublicStory {
   id: string
@@ -94,8 +101,11 @@ export default function ReadPage() {
               <ArrowLeft className="w-4 h-4" />
               Back to StoryHouse
             </Link>
-            <div className="text-sm text-gray-500">
-              Discover amazing stories from creators worldwide
+            <div className="flex items-center gap-4">
+              <div className="text-sm text-gray-500">
+                Discover amazing stories from creators worldwide
+              </div>
+              <WalletConnect />
             </div>
           </div>
         </div>

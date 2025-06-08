@@ -386,6 +386,9 @@ For detailed deployment instructions, see:
 - ✅ **Content Classification**: Genre, mood, rating, and tag system for discovery
 - ✅ **Performance Optimization**: Enhanced R2 caching with manual refresh capabilities
 - ✅ **Storage Architecture**: Structured R2 paths with rich metadata
+- ✅ **SPA Routing System**: Hash-based routing for story navigation in static export
+- ✅ **User Interface Polish**: Streamlined wallet address display (last 4 characters only)
+- ✅ **Story Navigation**: Complete table of contents with chapter unlock system
 
 ---
 
