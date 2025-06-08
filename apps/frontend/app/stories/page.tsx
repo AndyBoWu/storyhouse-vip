@@ -1,11 +1,37 @@
 'use client'
 
 import { useEffect, useState, Suspense } from 'react'
+import Link from 'next/link'
+import { ArrowLeft, Book, FileText } from 'lucide-react'
+import { apiClient } from '@/lib/api-client'
+
+interface StoryChapter {
+  number: number
+  title: string
+  wordCount: number
+  readingTime: number
+  isUnlocked: boolean
+  unlockPrice?: number
+}
+
+interface StoryDetails {
+  id: string
+  title: string
+  authorAddress: string
+  authorName: string
+  genre: string
+  description: string
+  chapters: StoryChapter[]
+  totalChapters: number
+}
 
 function StoriesContent() {
   const [walletAddress, setWalletAddress] = useState<string>('')
   const [storySlug, setStorySlug] = useState<string>('')
-  const [chapterNumber, setChapterNumber] = useState<string>('')
+  const [pageType, setPageType] = useState<string>('') // 'toc', chapter number, etc.
+  const [storyDetails, setStoryDetails] = useState<StoryDetails | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string>('')
 
   useEffect(() => {
     // Extract route parameters from URL hash for client-side routing
@@ -15,75 +41,291 @@ function StoriesContent() {
     if (pathParts.length >= 3) {
       setWalletAddress(pathParts[0])
       setStorySlug(pathParts[1])
-      setChapterNumber(pathParts[2])
+      setPageType(pathParts[2]) // 'toc' or chapter number
+      
+      // Load story details when we have valid parameters
+      loadStoryDetails(pathParts[0], pathParts[1])
     }
   }, [])
 
-  const getApiBaseUrl = () => {
-    return process.env.NEXT_PUBLIC_API_BASE_URL || 'https://testnet.storyhouse.vip'
+  const loadStoryDetails = async (address: string, slug: string) => {
+    setIsLoading(true)
+    setError('')
+    
+    try {
+      // For now, we'll create mock data since we don't have a specific story details endpoint
+      // In a real implementation, you'd call: apiClient.getStoryDetails(address, slug)
+      
+      // Mock story details based on the slug
+      const mockStory: StoryDetails = {
+        id: `story-${address}-${slug}`,
+        title: slug.split('-').map(word => 
+          word.charAt(0).toUpperCase() + word.slice(1)
+        ).join(' '),
+        authorAddress: address,
+        authorName: `${address.slice(0, 6)}...${address.slice(-4)}`,
+        genre: 'Mystery',
+        description: 'A thrilling tale that will keep you on the edge of your seat.',
+        totalChapters: 4,
+        chapters: [
+          { number: 1, title: 'The Discovery', wordCount: 2500, readingTime: 10, isUnlocked: true },
+          { number: 2, title: 'The Investigation', wordCount: 2800, readingTime: 11, isUnlocked: true },
+          { number: 3, title: 'The Revelation', wordCount: 3200, readingTime: 13, isUnlocked: false, unlockPrice: 0.1 },
+          { number: 4, title: 'The Resolution', wordCount: 2900, readingTime: 12, isUnlocked: false, unlockPrice: 0.1 }
+        ]
+      }
+      
+      setStoryDetails(mockStory)
+    } catch (err) {
+      setError('Failed to load story details')
+      console.error('Error loading story:', err)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
+  const getApiBaseUrl = () => {
+    return process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api-testnet.storyhouse.vip'
+  }
+
+  // Render Table of Contents
+  const renderTableOfContents = () => {
+    if (!storyDetails) return null
+
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-orange-100 via-pink-100 to-blue-200">
+        <div className="container mx-auto px-6 py-8">
+          <div className="max-w-4xl mx-auto">
+            {/* Header */}
+            <div className="flex items-center gap-4 mb-8">
+              <Link href="/own" className="p-2 hover:bg-white/20 rounded-lg transition-colors">
+                <ArrowLeft className="w-6 h-6" />
+              </Link>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-800">{storyDetails.title}</h1>
+                <p className="text-gray-600">by {storyDetails.authorName}</p>
+              </div>
+            </div>
+
+            {/* Story Info */}
+            <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Story Details</h3>
+                  <div className="space-y-2 text-sm text-gray-600">
+                    <p><span className="font-medium">Genre:</span> {storyDetails.genre}</p>
+                    <p><span className="font-medium">Chapters:</span> {storyDetails.totalChapters}</p>
+                    <p><span className="font-medium">Author:</span> {storyDetails.authorName}</p>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Description</h3>
+                  <p className="text-gray-600 text-sm">{storyDetails.description}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Chapters List */}
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h3 className="text-xl font-semibold mb-6 flex items-center gap-2">
+                <Book className="w-5 h-5" />
+                Table of Contents
+              </h3>
+              
+              <div className="space-y-3">
+                {storyDetails.chapters.map((chapter) => (
+                  <div
+                    key={chapter.number}
+                    className={`p-4 rounded-lg border transition-all ${
+                      chapter.isUnlocked
+                        ? 'border-green-200 bg-green-50 hover:bg-green-100 cursor-pointer'
+                        : 'border-gray-200 bg-gray-50'
+                    }`}
+                    onClick={() => {
+                      if (chapter.isUnlocked) {
+                        const chapterUrl = `/stories#${walletAddress}/${storySlug}/${chapter.number}`
+                        window.location.href = chapterUrl
+                      }
+                    }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
+                          chapter.isUnlocked ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'
+                        }`}>
+                          {chapter.number}
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-gray-800">{chapter.title}</h4>
+                          <p className="text-xs text-gray-500">
+                            {chapter.wordCount} words • {chapter.readingTime} min read
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        {chapter.isUnlocked ? (
+                          <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                            Free
+                          </span>
+                        ) : (
+                          <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
+                            {chapter.unlockPrice} $TIP
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading story...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl mb-4">❌</div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">Error Loading Story</h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <Link href="/own" className="text-blue-600 hover:text-blue-800">
+            ← Back to My Stories
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
+  // Show table of contents for 'toc' route
+  if (pageType === 'toc' && storyDetails) {
+    return renderTableOfContents()
+  }
+
+  // Show chapter content for numeric chapter routes
+  if (pageType && !isNaN(Number(pageType)) && storyDetails) {
+    const chapterNumber = Number(pageType)
+    const chapter = storyDetails.chapters.find(c => c.number === chapterNumber)
+    
+    if (!chapter) {
+      return (
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="text-6xl mb-4">📖</div>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">Chapter Not Found</h2>
+            <p className="text-gray-600 mb-4">Chapter {chapterNumber} doesn't exist for this story.</p>
+            <Link href={`/stories#${walletAddress}/${storySlug}/toc`} className="text-blue-600 hover:text-blue-800">
+              ← Back to Table of Contents
+            </Link>
+          </div>
+        </div>
+      )
+    }
+
+    // Chapter reading view
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-orange-100 via-pink-100 to-blue-200">
+        <div className="container mx-auto px-6 py-8">
+          <div className="max-w-4xl mx-auto">
+            {/* Header */}
+            <div className="flex items-center gap-4 mb-8">
+              <Link href={`/stories#${walletAddress}/${storySlug}/toc`} 
+                    className="p-2 hover:bg-white/20 rounded-lg transition-colors">
+                <ArrowLeft className="w-6 h-6" />
+              </Link>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-800">{chapter.title}</h1>
+                <p className="text-gray-600">
+                  {storyDetails.title} • Chapter {chapter.number} of {storyDetails.totalChapters}
+                </p>
+              </div>
+            </div>
+
+            {/* Chapter Content */}
+            <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
+              {chapter.isUnlocked ? (
+                <div className="prose prose-lg max-w-none">
+                  <p className="text-gray-700 leading-relaxed">
+                    This is a placeholder for chapter content. In a real implementation, 
+                    this would load the actual chapter content from the backend API using 
+                    the chapter endpoint.
+                  </p>
+                  <p className="text-gray-700 leading-relaxed mt-4">
+                    The content would be fetched from: 
+                    <code className="bg-gray-100 px-2 py-1 rounded text-sm">
+                      {getApiBaseUrl()}/api/chapters/{storyDetails.id}/{chapter.number}
+                    </code>
+                  </p>
+                </div>
+              ) : (
+                <div className="text-center py-16">
+                  <div className="text-6xl mb-4">🔒</div>
+                  <h3 className="text-xl font-semibold text-gray-800 mb-2">Chapter Locked</h3>
+                  <p className="text-gray-600 mb-6">
+                    Unlock this chapter for {chapter.unlockPrice} $TIP tokens
+                  </p>
+                  <button className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors">
+                    Unlock Chapter
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Navigation */}
+            <div className="flex justify-between">
+              <div>
+                {chapterNumber > 1 && (
+                  <Link href={`/stories#${walletAddress}/${storySlug}/${chapterNumber - 1}`}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow hover:bg-gray-50 transition-colors">
+                    <ArrowLeft className="w-4 h-4" />
+                    Previous Chapter
+                  </Link>
+                )}
+              </div>
+              <div>
+                {chapterNumber < storyDetails.totalChapters && (
+                  <Link href={`/stories#${walletAddress}/${storySlug}/${chapterNumber + 1}`}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow hover:bg-gray-50 transition-colors">
+                    Next Chapter
+                    <ArrowLeft className="w-4 h-4 rotate-180" />
+                  </Link>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Default view when no valid route is detected
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
-          Story Viewer (SPA Mode)
-        </h1>
-        
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-4">Current Story</h2>
-          <div className="space-y-2">
-            <p><strong>Wallet Address:</strong> {walletAddress || 'Not specified'}</p>
-            <p><strong>Story Slug:</strong> {storySlug || 'Not specified'}</p>
-            <p><strong>Chapter Number:</strong> {chapterNumber || 'Not specified'}</p>
-            <p><strong>API Base URL:</strong> {getApiBaseUrl()}</p>
-          </div>
-        </div>
-
-        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-3">
-            ✅ SPA Mode Active
-          </h3>
-          <p className="text-blue-800 dark:text-blue-200 mb-4">
-            This is running in Single Page Application mode on Cloudflare Pages. 
-            To view a specific story, use the URL format:
-          </p>
-          <code className="bg-blue-100 dark:bg-blue-800 px-3 py-1 rounded text-sm">
-            /stories#[walletAddress]/[storySlug]/[chapterNumber]
-          </code>
-          
-          <div className="mt-4">
-            <p className="text-sm text-blue-700 dark:text-blue-300">
-              Example: <code>/stories#0x123.../my-story/1</code>
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-green-900 dark:text-green-100 mb-3">
-              ✅ What's Working
-            </h3>
-            <ul className="text-green-800 dark:text-green-200 space-y-1 text-sm">
-              <li>• Static content delivery via Cloudflare CDN</li>
-              <li>• Client-side routing and navigation</li>
-              <li>• API calls to Vercel backend</li>
-              <li>• 70% cost savings vs full Vercel hosting</li>
-            </ul>
-          </div>
-          
-          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-yellow-900 dark:text-yellow-100 mb-3">
-              ⚠️ Current Limitations
-            </h3>
-            <ul className="text-yellow-800 dark:text-yellow-200 space-y-1 text-sm">
-              <li>• Server-side rendering disabled</li>
-              <li>• Hash-based routing for dynamic content</li>
-              <li>• Backend still needs to be accessible</li>
-              <li>• Some SEO benefits lost</li>
-            </ul>
-          </div>
-        </div>
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="text-center">
+        <div className="text-6xl mb-4">📚</div>
+        <h2 className="text-2xl font-bold text-gray-800 mb-2">Story Viewer</h2>
+        <p className="text-gray-600 mb-6">
+          Use the URL format: <code>/stories#[wallet]/[story-slug]/toc</code>
+        </p>
+        <Link href="/own" className="text-blue-600 hover:text-blue-800">
+          ← Back to My Stories
+        </Link>
       </div>
     </div>
   )

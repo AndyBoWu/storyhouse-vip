@@ -235,7 +235,7 @@ export default function MyStoriesPage() {
   }
 
   const handleReadStory = (story: ExistingStory) => {
-    // Navigate to the table of contents page
+    // Navigate to the table of contents page using hash-based routing for SPA
     if (!story.authorAddress) {
       console.error('No author address for story:', story)
       return
@@ -247,7 +247,8 @@ export default function MyStoriesPage() {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '')
     
-    const tocUrl = `/stories/${story.authorAddress}/${storySlug}/toc`
+    // Use hash-based routing for static export compatibility
+    const tocUrl = `/stories#${story.authorAddress}/${storySlug}/toc`
     router.push(tocUrl)
   }
 
