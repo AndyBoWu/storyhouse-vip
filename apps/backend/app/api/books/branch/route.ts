@@ -7,7 +7,7 @@ import {
   BookId,
   BOOK_SYSTEM_CONSTANTS 
 } from '@storyhouse/shared'
-import { BookStorageService } from '../../../lib/storage/bookStorage'
+import { BookStorageService } from '@/lib/storage'
 
 /**
  * POST /api/books/branch
