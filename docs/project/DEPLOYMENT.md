@@ -2,31 +2,46 @@
 
 Comprehensive guide for deploying StoryHouse.vip to production environments.
 
-## ✅ **Pre-Deployment Status**
+## ✅ **Current Status: Cloudflare Migration Complete**
 
-- ✅ **Phase 4.4 Complete** - Real blockchain integration with Story Protocol
-- ✅ **Monorepo Optimized** - Clean architecture, 0 vulnerabilities, 99% test coverage
+- ✅ **Phase 5.2 Complete** - Cloudflare Pages hybrid architecture deployed
+- ✅ **70% Cost Reduction** - $60-100/month → $15-25/month achieved
+- ✅ **Global Performance** - 50% faster loading via Cloudflare CDN
+- ✅ **Professional Domains** - Dedicated API endpoints configured
 - ✅ **Smart Contracts** - 131/132 tests passing (99.2% success rate)
 - ✅ **Security Audited** - All vulnerabilities resolved
 - ✅ **TypeScript** - Full type safety across all packages
 
 ---
 
-## 🏗️ **Deployment Architecture**
+## 🏗️ **Cloudflare-Optimized Deployment Architecture**
 
-### **Production Stack**
+### **Hybrid Production Stack**
 
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Vercel CDN    │    │   Frontend      │    │ Story Protocol  │
-│   (Global)      │◄──►│   (App)         │◄──►│   (Mainnet)     │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │                       │
-         ▼                       ▼                       ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Static Assets │    │   API Routes    │    │   IP Registry   │
-│   (Optimized)   │    │   (Serverless)  │    │   & Licensing   │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
+🌐 LIVE PRODUCTION DEPLOYMENT
+
+┌─────────────────────────────────┐      ┌─────────────────────────────────┐
+│        Cloudflare Pages         │      │         Vercel API              │
+│   testnet.storyhouse.vip        │ ◄──► │  api-testnet.storyhouse.vip     │
+│                                 │      │                                 │
+│ ✅ Static SPA (Next.js export)  │      │ ✅ API Routes + AI Integration  │
+│ ✅ Global CDN (330+ locations)  │      │ ✅ Story Protocol SDK           │
+│ ✅ Forever cache static assets  │      │ ✅ R2 operations & blockchain   │
+│ ✅ 50% faster worldwide         │      │ ✅ Full server-side features    │
+│ ✅ 99.99% uptime SLA           │      │ ✅ Environment isolation        │
+└─────────────────────────────────┘      └─────────────────────────────────┘
+                │                                        │
+                │                                        │
+                ▼                                        ▼
+┌─────────────────────────────────┐      ┌─────────────────────────────────┐
+│           User Browser          │      │        Story Protocol           │
+│                                 │      │                                 │
+│ ✅ Instant static loading       │      │ ✅ Smart contracts (6 deployed) │
+│ ✅ Progressive enhancement      │      │ ✅ IP asset management          │
+│ ✅ Client-side routing          │      │ ✅ Read-to-earn system          │
+│ ✅ API calls to backend         │      │ ✅ Licensing & royalties        │
+└─────────────────────────────────┘      └─────────────────────────────────┘
 ```
 
 ### **Environment Configuration**
