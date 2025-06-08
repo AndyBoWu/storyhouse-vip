@@ -1,0 +1,501 @@
+'use client'
+
+import { useState, useEffect, Suspense } from 'react'
+import { ArrowLeft, BookOpen, Users, GitBranch, Upload, AlertCircle, Sparkles } from 'lucide-react'
+import Link from 'next/link'
+import { motion } from 'framer-motion'
+import { useAccount } from 'wagmi'
+import { useRouter } from 'next/navigation'
+import dynamic from 'next/dynamic'
+import { apiClient } from '@/lib/api-client'
+
+// Dynamically import WalletConnect to avoid hydration issues
+const WalletConnect = dynamic(() => import('@/components/WalletConnect'), {
+  ssr: false,
+  loading: () => <div className="w-24 h-10 bg-gray-200 rounded-full animate-pulse"></div>
+})
+
+interface Story {
+  id: string
+  title: string
+  genre: string
+  chapters: number
+  lastUpdated: string
+  preview: string
+  authorAddress: string
+  authorName: string
+  isRemixable: boolean
+  totalReads?: number
+  averageRating?: number
+  contentRating?: string
+  tags?: string[]
+}
+
+interface BranchingInfo {
+  parentBook: {
+    bookId: string
+    title: string
+    authorName: string
+    totalChapters: number
+    isRemixable: boolean
+    genres: string[]
+    contentRating: string
+  }
+  availableBranchPoints: Array<{
+    chapterKey: string
+    chapterNumber: number
+    chapterPath: string
+  }>
+  existingDerivatives: number
+  derivativeBooks: string[]
+}
+
+function BranchStoryPageContent() {
+  const { address: connectedAddress, isConnected } = useAccount()
+  const router = useRouter()
+  const [allStories, setAllStories] = useState<Story[]>([])
+  const [isLoadingStories, setIsLoadingStories] = useState(false)
+  const [selectedStory, setSelectedStory] = useState<Story | null>(null)
+  const [branchingInfo, setBranchingInfo] = useState<BranchingInfo | null>(null)
+  const [selectedChapter, setSelectedChapter] = useState<number | null>(null)
+  const [newTitle, setNewTitle] = useState('')
+  const [newDescription, setNewDescription] = useState('')
+  const [selectedGenres, setSelectedGenres] = useState<string[]>([])
+  const [contentRating, setContentRating] = useState<'G' | 'PG' | 'PG-13' | 'R'>('PG')
+  const [coverFile, setCoverFile] = useState<File | null>(null)
+  const [isCreatingBranch, setIsCreatingBranch] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
+
+  const availableGenres = ['Fantasy', 'Romance', 'Mystery', 'Sci-Fi', 'Horror', 'Comedy', 'Drama', 'Adventure']
+
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Load all published stories that allow remixing
+  useEffect(() => {
+    if (mounted) {
+      const loadStories = async () => {
+        setIsLoadingStories(true)
+        
+        try {
+          const data = await apiClient.getStories()
+
+          if (data.success && data.stories && Array.isArray(data.stories)) {
+            // Filter to only remixable stories from other authors
+            const remixableStories: Story[] = data.stories
+              .filter((story: any) => 
+                story.isRemixable && 
+                story.authorAddress?.toLowerCase() !== connectedAddress?.toLowerCase()
+              )
+              .map((story: any) => ({
+                id: story.id,
+                title: story.title,
+                genre: story.genre,
+                chapters: story.chapters,
+                lastUpdated: story.lastUpdated,
+                preview: story.preview,
+                authorAddress: story.authorAddress,
+                authorName: story.authorName,
+                isRemixable: story.isRemixable,
+                totalReads: story.totalReads,
+                averageRating: story.averageRating,
+                contentRating: story.contentRating,
+                tags: story.tags
+              }))
+            
+            setAllStories(remixableStories)
+          } else {
+            setAllStories([])
+          }
+        } catch (error) {
+          console.error('Error loading stories:', error)
+          setAllStories([])
+        } finally {
+          setIsLoadingStories(false)
+        }
+      }
+
+      loadStories()
+    }
+  }, [mounted, connectedAddress])
+
+  const handleSelectStory = async (story: Story) => {
+    setSelectedStory(story)
+    setSelectedChapter(null)
+    setBranchingInfo(null)
+    setNewTitle(`${story.title} - Remix`)
+    setNewDescription(`A new take on ${story.title}`)
+    setSelectedGenres(story.genre ? [story.genre] : [])
+    
+    // Load branching information
+    try {
+      const data = await apiClient.getBranchingInfo(story.id)
+      
+      if (data.success) {
+        setBranchingInfo(data)
+      }
+    } catch (error) {
+      console.error('Error loading branching info:', error)
+    }
+  }
+
+  const handleGenreToggle = (genre: string) => {
+    setSelectedGenres(prev => 
+      prev.includes(genre) 
+        ? prev.filter(g => g !== genre)
+        : [...prev, genre]
+    )
+  }
+
+  const handleCoverUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setCoverFile(file)
+    }
+  }
+
+  const handleCreateBranch = async () => {
+    if (!selectedStory || !selectedChapter || !connectedAddress || !newTitle.trim()) return
+
+    setIsCreatingBranch(true)
+    setError(null)
+
+    try {
+      const formData = new FormData()
+      formData.append('parentBookId', selectedStory.id)
+      formData.append('branchPoint', `ch${selectedChapter}`)
+      formData.append('newTitle', newTitle)
+      formData.append('newDescription', newDescription)
+      formData.append('authorAddress', connectedAddress)
+      formData.append('authorName', connectedAddress.slice(-4))
+      formData.append('genres', JSON.stringify(selectedGenres))
+      formData.append('contentRating', contentRating)
+      
+      if (coverFile) {
+        formData.append('newCover', coverFile)
+      }
+
+      const result = await apiClient.branchBook(formData)
+
+      if (result.success) {
+        // Redirect to new story
+        router.push(`/stories?bookId=${result.book.bookId}`)
+      } else {
+        setError(result.error || 'Failed to create branch')
+      }
+    } catch (error) {
+      console.error('Error creating branch:', error)
+      setError('Failed to create branch')
+    } finally {
+      setIsCreatingBranch(false)
+    }
+  }
+
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-orange-100 via-pink-100 to-blue-200 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-3 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-700">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-orange-100 via-pink-100 to-blue-200">
+      {/* Header */}
+      <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <Link href="/write" className="flex items-center gap-3 text-gray-700 hover:text-gray-900 transition-colors">
+              <ArrowLeft className="w-5 h-5" />
+              <span>Back to Write Options</span>
+            </Link>
+
+            <WalletConnect />
+          </div>
+        </div>
+      </header>
+
+      <div className="container mx-auto px-6 py-8">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
+          >
+            <div className="flex items-center gap-4 mb-8">
+              <h2 className="text-2xl font-bold text-gray-800">🌿 Branch & Remix Stories</h2>
+            </div>
+
+            {/* Info Box */}
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+              <div className="flex items-start gap-3">
+                <GitBranch className="w-5 h-5 text-green-600 mt-0.5" />
+                <div>
+                  <h4 className="text-green-800 font-medium">How Branching Works</h4>
+                  <p className="text-green-700 text-sm mt-1">
+                    Pick any story and any chapter to continue from that point with your own twist. 
+                    Revenue is shared between you and the original author(s) based on contribution.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Wallet Connection Check */}
+            {!isConnected ? (
+              <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-200 mb-6">
+                <div className="text-center">
+                  <div className="text-6xl mb-4">🔗</div>
+                  <h3 className="text-xl font-semibold text-gray-800 mb-2">Connect Your Wallet</h3>
+                  <p className="text-gray-600 mb-6">
+                    To create branched stories, please connect your wallet for ownership verification.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <>
+                {/* Error Display */}
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3"
+                  >
+                    <AlertCircle className="w-5 h-5 text-red-500 mt-0.5" />
+                    <div>
+                      <h4 className="text-red-800 font-medium">Branching Failed</h4>
+                      <p className="text-red-700 text-sm mt-1">{error}</p>
+                      <button
+                        onClick={() => setError(null)}
+                        className="text-red-600 text-sm underline mt-2 hover:text-red-800"
+                      >
+                        Dismiss
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Story Selection */}
+                <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">📚 Select a story to branch:</h3>
+
+                  {isLoadingStories ? (
+                    <div className="text-center py-12">
+                      <div className="w-8 h-8 border-3 border-green-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                      <h3 className="text-lg font-semibold text-gray-700 mb-2">Loading remixable stories...</h3>
+                    </div>
+                  ) : allStories.length === 0 ? (
+                    <div className="text-center py-16">
+                      <div className="text-8xl mb-6">🌿</div>
+                      <h3 className="text-2xl font-semibold text-gray-700 mb-4">No stories available for branching</h3>
+                      <p className="text-gray-500 mb-8 text-lg">Stories must be marked as remixable by their authors.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {allStories.map((story) => (
+                        <motion.button
+                          key={story.id}
+                          onClick={() => handleSelectStory(story)}
+                          whileHover={{ scale: 1.01 }}
+                          className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
+                            selectedStory?.id === story.id
+                              ? 'border-green-400 bg-green-50'
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-2">
+                                <div className={`w-3 h-3 rounded-full ${
+                                  selectedStory?.id === story.id ? 'bg-green-600' : 'bg-gray-300'
+                                }`} />
+                                <h4 className="font-semibold text-gray-800">{story.title}</h4>
+                                <span className="text-sm text-gray-500">📊 {story.chapters} chap</span>
+                                <span className="text-sm text-blue-600">👤 {story.authorName}</span>
+                              </div>
+                              <p className="text-sm text-gray-500 mb-1">{story.genre} • {story.totalReads || 0} reads</p>
+                              <p className="text-sm text-gray-500 italic">"{story.preview}"</p>
+                            </div>
+                          </div>
+                        </motion.button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Chapter Selection */}
+                {selectedStory && branchingInfo && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    className="bg-white rounded-xl shadow-lg p-6 mb-6"
+                  >
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                      📍 Choose your branching point:
+                    </h3>
+                    
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                      {branchingInfo.availableBranchPoints.map((point) => (
+                        <button
+                          key={point.chapterKey}
+                          onClick={() => setSelectedChapter(point.chapterNumber)}
+                          className={`p-3 text-center rounded-lg border-2 transition-all ${
+                            selectedChapter === point.chapterNumber
+                              ? 'border-green-400 bg-green-50 text-green-800'
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          <div className="font-medium">Chapter {point.chapterNumber}</div>
+                        </button>
+                      ))}
+                    </div>
+
+                    <p className="text-sm text-gray-600">
+                      💡 You'll inherit chapters 1-{selectedChapter || '?'} and continue from there with your own story.
+                    </p>
+                  </motion.div>
+                )}
+
+                {/* Branch Details */}
+                {selectedStory && selectedChapter && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    className="bg-white rounded-xl shadow-lg p-6"
+                  >
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                      ✨ Create your branched story:
+                    </h3>
+
+                    <div className="space-y-4">
+                      {/* Title */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">New Title</label>
+                        <input
+                          type="text"
+                          value={newTitle}
+                          onChange={(e) => setNewTitle(e.target.value)}
+                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                          placeholder="Your story's new title..."
+                        />
+                      </div>
+
+                      {/* Description */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                        <textarea
+                          value={newDescription}
+                          onChange={(e) => setNewDescription(e.target.value)}
+                          className="w-full h-24 p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                          placeholder="Describe your unique take on this story..."
+                        />
+                      </div>
+
+                      {/* Genres */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Genres</label>
+                        <div className="flex flex-wrap gap-2">
+                          {availableGenres.map((genre) => (
+                            <button
+                              key={genre}
+                              onClick={() => handleGenreToggle(genre)}
+                              className={`px-3 py-1 rounded-full border transition-all ${
+                                selectedGenres.includes(genre)
+                                  ? 'bg-green-100 border-green-400 text-green-800'
+                                  : 'bg-gray-100 border-gray-300 text-gray-700 hover:border-gray-400'
+                              }`}
+                            >
+                              {genre}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Content Rating */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Content Rating</label>
+                        <div className="flex gap-2">
+                          {(['G', 'PG', 'PG-13', 'R'] as const).map((rating) => (
+                            <button
+                              key={rating}
+                              onClick={() => setContentRating(rating)}
+                              className={`px-4 py-2 rounded-lg border transition-all ${
+                                contentRating === rating
+                                  ? 'bg-green-100 border-green-400 text-green-800'
+                                  : 'bg-gray-100 border-gray-300 text-gray-700 hover:border-gray-400'
+                              }`}
+                            >
+                              {rating}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Cover Upload */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">New Cover (Optional)</label>
+                        <div className="flex items-center gap-4">
+                          <input
+                            type="file"
+                            onChange={handleCoverUpload}
+                            accept="image/*"
+                            className="hidden"
+                            id="cover-upload"
+                          />
+                          <label
+                            htmlFor="cover-upload"
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-200 transition-all"
+                          >
+                            <Upload className="w-4 h-4" />
+                            {coverFile ? coverFile.name : 'Choose Image'}
+                          </label>
+                        </div>
+                      </div>
+
+                      {/* Submit */}
+                      <div className="flex items-center justify-between pt-4">
+                        <div className="text-sm text-gray-500">
+                          Revenue will be shared with original author(s)
+                        </div>
+                        <button
+                          onClick={handleCreateBranch}
+                          disabled={!newTitle.trim() || isCreatingBranch}
+                          className={`inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
+                            newTitle.trim() && !isCreatingBranch
+                              ? 'bg-green-600 text-white hover:bg-green-700'
+                              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                          }`}
+                        >
+                          <Sparkles className="w-4 h-4" />
+                          {isCreatingBranch ? 'Creating Branch...' : 'Create Branched Story'}
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </>
+            )}
+          </motion.div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default function BranchStoryPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gradient-to-b from-orange-100 via-pink-100 to-blue-200 flex items-center justify-center">
+      <div className="text-center">
+        <div className="w-8 h-8 border-3 border-green-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <p className="text-gray-700">Loading...</p>
+      </div>
+    </div>}>
+      <BranchStoryPageContent />
+    </Suspense>
+  )
+}

@@ -23,7 +23,7 @@ function WritePageContent() {
       </div>
 
       {/* Scenario Selection */}
-      <div className="grid md:grid-cols-2 gap-6 mb-8 max-w-4xl mx-auto">
+      <div className="grid md:grid-cols-3 gap-6 mb-8 max-w-6xl mx-auto">
         <Link href="/write/new">
           <button className="w-full bg-white rounded-xl shadow-lg p-6 text-left hover:shadow-xl transition-all border-2 border-transparent hover:border-purple-200">
             <div className="text-4xl mb-4">📝</div>
@@ -43,6 +43,18 @@ function WritePageContent() {
             <p className="text-gray-600 mb-4">Add next chapter</p>
             <div className="inline-flex items-center gap-2 text-blue-600 font-medium">
               <span>Add Chapter</span>
+              <ChevronRight className="w-4 h-4" />
+            </div>
+          </button>
+        </Link>
+
+        <Link href="/write/branch">
+          <button className="w-full bg-white rounded-xl shadow-lg p-6 text-left hover:shadow-xl transition-all border-2 border-transparent hover:border-green-200">
+            <div className="text-4xl mb-4">🌿</div>
+            <h3 className="text-xl font-semibold text-gray-800 mb-2">Branch & Remix</h3>
+            <p className="text-gray-600 mb-4">Continue any story from any chapter</p>
+            <div className="inline-flex items-center gap-2 text-green-600 font-medium">
+              <span>Browse Stories</span>
               <ChevronRight className="w-4 h-4" />
             </div>
           </button>
