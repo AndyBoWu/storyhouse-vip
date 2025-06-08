@@ -49,11 +49,12 @@ Create production environment variables:
 # Story Protocol Configuration (Production)
 STORY_PROTOCOL_RPC_URL=https://rpc.story.foundation
 STORY_PROTOCOL_CHAIN_ID=1
-STORY_PROTOCOL_PRIVATE_KEY=your_production_private_key
 
 # Alternative for Testnet Deployment
 # STORY_PROTOCOL_RPC_URL=https://testnet.storyrpc.io
-# STORY_PROTOCOL_CHAIN_ID=1513
+# STORY_PROTOCOL_CHAIN_ID=1315
+
+# Note: WalletConnect not used - app uses direct MetaMask integration
 
 # OpenAI API (Production)
 OPENAI_API_KEY=your_production_openai_key
@@ -147,7 +148,7 @@ Set in Vercel Dashboard → Project → Settings → Environment Variables:
 ```bash
 STORY_PROTOCOL_RPC_URL=https://rpc.story.foundation
 STORY_PROTOCOL_CHAIN_ID=1
-STORY_PROTOCOL_PRIVATE_KEY=[encrypted]
+# WalletConnect not used - app uses direct MetaMask integration
 OPENAI_API_KEY=[encrypted]
 NEXT_PUBLIC_APP_ENV=production
 ```

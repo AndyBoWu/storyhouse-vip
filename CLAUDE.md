@@ -92,6 +92,8 @@ Key environment variables:
 - `OPENAI_API_KEY` - For AI features
 - `NEXT_PUBLIC_ENABLE_TESTNET` - Enable blockchain transactions
 
+Note: Private keys and WalletConnect are no longer needed. All blockchain operations use direct MetaMask integration.
+
 ## Important Notes from Cursor Rules
 
 1. Avoid code duplication - check existing implementations first

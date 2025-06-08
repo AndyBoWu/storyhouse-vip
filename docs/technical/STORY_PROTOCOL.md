@@ -554,8 +554,8 @@ function getStoryProtocolConfig(): StoryProtocolConfig {
     rpcUrl: isProduction
       ? "https://rpc.story.foundation"
       : "https://testnet.storyrpc.io",
-    chainId: isProduction ? 1 : 1513,
-    privateKey: process.env.STORY_PROTOCOL_PRIVATE_KEY!,
+    chainId: isProduction ? 1 : 1315,
+    // Note: Private keys are no longer used - operations happen client-side
     contractAddresses: {
       ipAssetRegistry: "0x..." as Address,
       licensingModule: "0x..." as Address,
@@ -585,9 +585,7 @@ function validateStoryProtocolConfig(): {
     errors.push("STORY_PROTOCOL_RPC_URL is required");
   }
 
-  if (!process.env.STORY_PROTOCOL_PRIVATE_KEY) {
-    errors.push("STORY_PROTOCOL_PRIVATE_KEY is required");
-  }
+  // Note: Private keys are no longer required - using client-side wallet connections
 
   if (!process.env.STORY_PROTOCOL_CHAIN_ID) {
     errors.push("STORY_PROTOCOL_CHAIN_ID is required");

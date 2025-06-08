@@ -1,31 +1,6 @@
 name = "storyhouse-vip"
 compatibility_date = "2024-06-07"
-pages_build_output_dir = "apps/frontend/.next"
-
-# Environment configurations
-[env.production]
-vars = { NODE_ENV = "production" }
-
-[env.staging]
-vars = { NODE_ENV = "staging" }
-
-[env.development]
-vars = { NODE_ENV = "development" }
-
-# Build configuration
-[build]
-command = "npm run build"
-cwd = "."
-
-# Cloudflare Pages specific settings
-[pages]
-# Enable compatibility with Next.js App Router
-compatibility_flags = ["nodejs_compat"]
-
-# Function configuration for API routes
-[functions]
-# Increase timeout for AI generation endpoints
-max_duration = 30000  # 30 seconds (Cloudflare Pages limit)
+pages_build_output_dir = "apps/frontend/out"
 
 # Environment variable bindings will be configured in Cloudflare dashboard
 # Including:

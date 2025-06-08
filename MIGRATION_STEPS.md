@@ -67,9 +67,9 @@ R2_ENDPOINT=your-r2-endpoint.r2.cloudflarestorage.com
 R2_PUBLIC_URL=https://your-r2-endpoint.r2.cloudflarestorage.com/storyhouse-content
 
 # Story Protocol Configuration
-STORY_PROTOCOL_PRIVATE_KEY=your-testnet-private-key
-NEXT_PUBLIC_SEPOLIA_RPC_URL=https://sepolia.infura.io/v3/your-key
-NEXT_PUBLIC_STORY_PROTOCOL_CHAIN_ID=1513
+STORY_PROTOCOL_RPC_URL=https://testnet.storyrpc.io
+STORY_PROTOCOL_CHAIN_ID=1315
+# Note: WalletConnect not used - app uses direct MetaMask integration
 
 # App Configuration
 NEXT_PUBLIC_ENABLE_TESTNET=true

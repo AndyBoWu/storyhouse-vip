@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { generateStoryChapter, StoryGenerationRequest } from '@/lib/ai/openai'
+
 import { generateMockStory } from '@/lib/ai/mockStoryGenerator'
 import { R2Service } from '@/lib/r2'
 import type {
