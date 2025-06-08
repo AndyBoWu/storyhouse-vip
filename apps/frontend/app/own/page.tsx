@@ -1,12 +1,19 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ArrowLeft, Sparkles, RefreshCw, Book } from 'lucide-react'
+import { ArrowLeft, Sparkles, Book } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAccount } from 'wagmi'
 import { buildChapterUrl } from '@/lib/utils/slugify'
 import { apiClient } from '@/lib/api-client'
+import dynamic from 'next/dynamic'
+
+// Dynamically import WalletConnect to avoid hydration issues
+const WalletConnect = dynamic(() => import('@/components/WalletConnect'), {
+  ssr: false,
+  loading: () => <div className="w-24 h-10 bg-gray-200 rounded-full animate-pulse"></div>
+})
 
 interface ExistingStory {
   id: string
@@ -42,6 +49,12 @@ export default function MyStoriesPage() {
   const [existingStories, setExistingStories] = useState<ExistingStory[]>([])
   const [isLoadingStories, setIsLoadingStories] = useState(false)
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  // Prevent hydration mismatch by only rendering wallet-dependent content after mount
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // Debug logging
   console.log('🔍 MyStoriesPage render:', {
@@ -55,12 +68,15 @@ export default function MyStoriesPage() {
 
   // Load published stories from R2
   useEffect(() => {
+    console.log('🚀 useEffect triggered - about to load stories')
     const loadStories = async () => {
       console.log('🔄 Loading stories from API...')
+      console.log('🔗 Wallet connected:', isConnected, 'Address:', connectedAddress)
       setIsLoadingStories(true)
       
       try {
         // Use API client instead of direct fetch for proper routing
+        console.log('📡 Calling apiClient.getStories()...')
         const data = await apiClient.getStories()
         console.log('📊 API Response data:', data)
 
@@ -110,126 +126,46 @@ export default function MyStoriesPage() {
           setExistingStories(convertedStories)
         } else {
           console.warn('❌ Invalid API response:', data)
-          // Fallback to mock data if API fails
-          if (connectedAddress) {
-            const mockStories: ExistingStory[] = [
-              {
-                id: 'the-quantum-heist',
-                title: 'The Quantum Heist',
-                genre: 'Science Fiction',
-                chapters: 5,
-                lastUpdated: '2025-06-07',
-                earnings: 127.50,
-                preview: 'In a world where quantum computing has unlocked the secrets of parallel universes, master thief Maya Chen plans the ultimate heist across multiple realities.',
-                authorAddress: connectedAddress,
-                authorName: 'You',
-                contentRating: 'PG-13',
-                unlockPrice: 10,
-                readReward: 2,
-                licensePrice: 50,
-                isRemixable: true,
-                totalReads: 234,
-                averageRating: 4.7,
-                wordCount: 12500,
-                readingTime: 45,
-                mood: 'thrilling',
-                tags: ['heist', 'quantum', 'sci-fi', 'multiverse'],
-                qualityScore: 8.9,
-                originalityScore: 9.2,
-                isRemix: false,
-                generationMethod: 'AI-assisted'
-              },
-              {
-                id: 'dragons-of-the-digital-realm',
-                title: 'Dragons of the Digital Realm',
-                genre: 'Fantasy',
-                chapters: 8,
-                lastUpdated: '2025-06-05',
-                earnings: 89.25,
-                preview: 'When ancient dragons awaken in a virtual reality MMORPG, player Sarah must bridge the gap between digital magic and real-world consequences.',
-                authorAddress: connectedAddress,
-                authorName: 'You',
-                contentRating: 'Teen',
-                unlockPrice: 8,
-                readReward: 1.5,
-                licensePrice: 75,
-                isRemixable: true,
-                totalReads: 156,
-                averageRating: 4.5,
-                wordCount: 18600,
-                readingTime: 62,
-                mood: 'adventurous',
-                tags: ['dragons', 'VR', 'fantasy', 'gaming'],
-                qualityScore: 8.4,
-                originalityScore: 8.8,
-                isRemix: false,
-                generationMethod: 'AI-assisted'
-              }
-            ]
-            setExistingStories(mockStories)
-          } else {
-            setExistingStories([])
-          }
+          setExistingStories([])
         }
       } catch (error) {
         console.error('❌ Error loading stories:', error)
-        // Fallback to mock data if API fails
+        console.error('❌ Error details:', {
+          message: error instanceof Error ? error.message : 'Unknown error',
+          name: error instanceof Error ? error.name : 'Unknown',
+          stack: error instanceof Error ? error.stack : 'No stack trace'
+        })
+        
+        // For testing: Show a demo story when API fails and wallet is connected
         if (connectedAddress) {
-          const mockStories: ExistingStory[] = [
-            {
-              id: 'the-quantum-heist',
-              title: 'The Quantum Heist',
-              genre: 'Science Fiction',
-              chapters: 5,
-              lastUpdated: '2025-06-07',
-              earnings: 127.50,
-              preview: 'In a world where quantum computing has unlocked the secrets of parallel universes, master thief Maya Chen plans the ultimate heist across multiple realities.',
-              authorAddress: connectedAddress,
-              authorName: 'You',
-              contentRating: 'PG-13',
-              unlockPrice: 10,
-              readReward: 2,
-              licensePrice: 50,
-              isRemixable: true,
-              totalReads: 234,
-              averageRating: 4.7,
-              wordCount: 12500,
-              readingTime: 45,
-              mood: 'thrilling',
-              tags: ['heist', 'quantum', 'sci-fi', 'multiverse'],
-              qualityScore: 8.9,
-              originalityScore: 9.2,
-              isRemix: false,
-              generationMethod: 'AI-assisted'
-            },
-            {
-              id: 'dragons-of-the-digital-realm',
-              title: 'Dragons of the Digital Realm',
-              genre: 'Fantasy',
-              chapters: 8,
-              lastUpdated: '2025-06-05',
-              earnings: 89.25,
-              preview: 'When ancient dragons awaken in a virtual reality MMORPG, player Sarah must bridge the gap between digital magic and real-world consequences.',
-              authorAddress: connectedAddress,
-              authorName: 'You',
-              contentRating: 'Teen',
-              unlockPrice: 8,
-              readReward: 1.5,
-              licensePrice: 75,
-              isRemixable: true,
-              totalReads: 156,
-              averageRating: 4.5,
-              wordCount: 18600,
-              readingTime: 62,
-              mood: 'adventurous',
-              tags: ['dragons', 'VR', 'fantasy', 'gaming'],
-              qualityScore: 8.4,
-              originalityScore: 8.8,
-              isRemix: false,
-              generationMethod: 'AI-assisted'
-            }
-          ]
-          setExistingStories(mockStories)
+          console.log('🔧 API failed - showing demo story for connected wallet')
+          const demoStory: ExistingStory = {
+            id: 'demo-story-test',
+            title: 'The Portal\'s Secret (Demo)',
+            genre: 'Mystery',
+            chapters: 4,
+            lastUpdated: '2025-06-07',
+            earnings: 0,
+            preview: 'A mysterious portal appears in the old library, leading to worlds unknown. [This is a demo story shown when the backend API is unavailable]',
+            authorAddress: connectedAddress,
+            authorName: 'You',
+            contentRating: 'PG',
+            unlockPrice: 0.1,
+            readReward: 0.05,
+            licensePrice: 100,
+            isRemixable: true,
+            totalReads: 0,
+            averageRating: 0,
+            wordCount: 2500,
+            readingTime: 10,
+            mood: 'mysterious',
+            tags: ['portal', 'mystery', 'demo'],
+            qualityScore: 100,
+            originalityScore: 80,
+            isRemix: false,
+            generationMethod: 'Demo'
+          }
+          setExistingStories([demoStory])
         } else {
           setExistingStories([])
         }
@@ -329,14 +265,7 @@ export default function MyStoriesPage() {
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div></div>
-            <button 
-              onClick={handleManualRefresh}
-              disabled={isRefreshing}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50"
-            >
-              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-              {isRefreshing ? 'Refreshing...' : 'Refresh Stories'}
-            </button>
+            <WalletConnect />
           </div>
         </div>
       </header>
@@ -350,8 +279,18 @@ export default function MyStoriesPage() {
             </h1>
           </div>
 
-          {/* Wallet Connection Check */}
-          {!isConnected ? (
+          {/* Wallet Connection Check - only render after mount to prevent hydration mismatch */}
+          {!mounted ? (
+            <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-200 mb-6">
+              <div className="text-center">
+                <div className="text-6xl mb-4">⏳</div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-2">Loading...</h3>
+                <p className="text-gray-600 mb-6">
+                  Initializing wallet connection
+                </p>
+              </div>
+            </div>
+          ) : !isConnected ? (
             <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-200 mb-6">
               <div className="text-center">
                 <div className="text-6xl mb-4">🔗</div>
