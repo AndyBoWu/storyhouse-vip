@@ -21,6 +21,7 @@ interface EnhancedStoryGenerationRequest {
   collectionOptions?: Partial<EnhancedStoryCreationParams>
   authorAddress?: string
   authorName?: string
+  bookCoverUrl?: string
 }
 
 export async function POST(request: NextRequest) {
@@ -48,7 +49,9 @@ export async function POST(request: NextRequest) {
       collectionOptions: body.collectionOptions || undefined,
       // Author information
       authorAddress: body.authorAddress,
-      authorName: body.authorName
+      authorName: body.authorName,
+      // Book cover
+      bookCoverUrl: body.bookCoverUrl
     }
 
     // Validate plot description length
