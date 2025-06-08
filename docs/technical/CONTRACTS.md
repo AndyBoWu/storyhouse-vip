@@ -23,6 +23,7 @@ StoryHouse.vip utilizes a comprehensive smart contract system built on OpenZeppe
 | **Creator Rewards Controller** | `0x8e2d21d1b9c744f772f15a7007de3d5757eea333` | Creator incentive system       |
 | **Read Rewards Controller**    | `0x04553ba8316d407b1c58b99172956d2d5fe100e5` | Reader engagement rewards      |
 | **Remix Licensing Controller** | `0x16144746a33d9a172039efc64bc2e12445fbbef2` | IP licensing & derivatives     |
+| **🆕 Hybrid Revenue Controller** | `Ready for Deployment`                     | **Phase 3**: Multi-author revenue sharing |
 
 **🔗 Verification**: All contracts deployed and fully configured with proper relationships
 **🛡️ Security**: All permissions granted, relationships established, ready for production use
@@ -584,4 +585,86 @@ npm run deploy:mainnet
 
 ---
 
-**StoryHouse.vip Smart Contracts** - Powering the future of chapter-level IP monetization! 🚀
+## 🆕 **Phase 3: Advanced Features Contract**
+
+### **7. Hybrid Revenue Controller** - `Ready for Deployment`
+
+**Purpose**: Multi-author revenue sharing for collaborative storytelling  
+**Status**: ✅ Development Complete (13/13 tests passing)
+
+```solidity
+contract HybridRevenueController is Ownable, Pausable, ReentrancyGuard {
+    // Default revenue splits
+    uint256 public defaultAuthorShare = 70;    // 70% to chapter author
+    uint256 public defaultCuratorShare = 20;   // 20% to book curator  
+    uint256 public defaultPlatformShare = 10;  // 10% to platform
+
+    struct BookMetadata {
+        address curator;
+        bool isDerivative;
+        bytes32 parentBookId;
+        uint256 totalChapters;
+        bool isActive;
+        string ipfsMetadataHash;
+    }
+
+    struct ChapterAttribution {
+        address originalAuthor;
+        bytes32 sourceBookId;
+        uint256 unlockPrice;
+        bool isOriginalContent;
+    }
+
+    function unlockChapter(bytes32 bookId, uint256 chapterNumber) 
+        external whenNotPaused nonReentrant {
+        // Unlock chapter and distribute revenue automatically
+        _distributeRevenue(bookId, chapterNumber, unlockPrice, attribution);
+    }
+}
+```
+
+**Revolutionary Features**:
+
+- ✅ **Multi-Author Revenue Splits**: Automatic distribution based on chapter authorship
+- ✅ **Transparent Attribution**: Readers see exactly how payments are distributed  
+- ✅ **Book Curation Rewards**: Curators earn 20% for assembling derivative books
+- ✅ **Platform Sustainability**: 10% platform share for ecosystem maintenance
+- ✅ **Batch Operations**: Gas-efficient multi-chapter unlocking
+- ✅ **Emergency Controls**: Pause/unpause and book deactivation capabilities
+
+**Revenue Distribution Flow**:
+
+```
+Reader pays 1 TIP to unlock chapter
+    ↓
+70% (0.7 TIP) → Chapter Author
+20% (0.2 TIP) → Book Curator  
+10% (0.1 TIP) → Platform
+```
+
+**Test Coverage**:
+- ✅ Book registration (original & derivative)
+- ✅ Chapter attribution configuration
+- ✅ Single chapter unlock with revenue distribution
+- ✅ Batch chapter unlock operations
+- ✅ Revenue sharing percentage updates
+- ✅ Platform earnings withdrawal
+- ✅ Access control and authorization
+- ✅ Error handling and edge cases
+- ✅ Hybrid derivative book revenue flows
+
+**Integration Status**:
+- ✅ **RewardsManager Compatible**: Ready for authorization
+- ✅ **TIPToken Integration**: Direct token transfers
+- ✅ **Book System Integration**: Works with book metadata
+- ✅ **Frontend Integration**: API endpoints ready
+
+**Deployment Requirements**:
+1. Deploy HybridRevenueController with existing RewardsManager and TIPToken addresses
+2. Grant authorization to HybridRevenueController in RewardsManager  
+3. Update frontend to use hybrid revenue endpoints
+4. Configure book metadata with revenue attribution
+
+---
+
+**StoryHouse.vip Smart Contracts** - Powering the future of collaborative storytelling with transparent revenue sharing! 🚀
