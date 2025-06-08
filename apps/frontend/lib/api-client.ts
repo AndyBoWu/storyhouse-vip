@@ -103,6 +103,27 @@ export const apiClient = {
     })
   },
   
+  // Book operations
+  async registerBook(data: FormData) {
+    return apiRequest('/api/books/register', {
+      method: 'POST',
+      body: data,
+      headers: {}, // Let fetch set Content-Type for FormData
+    })
+  },
+  
+  async branchBook(data: FormData) {
+    return apiRequest('/api/books/branch', {
+      method: 'POST',
+      body: data,
+      headers: {}, // Let fetch set Content-Type for FormData
+    })
+  },
+  
+  async getBranchingInfo(parentBookId: string) {
+    return apiRequest(`/api/books/branch?parentBookId=${parentBookId}`)
+  },
+  
   // Collections
   async getCollections() {
     return apiRequest('/api/collections')
