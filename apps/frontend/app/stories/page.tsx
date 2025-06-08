@@ -63,7 +63,7 @@ function StoriesContent() {
           word.charAt(0).toUpperCase() + word.slice(1)
         ).join(' '),
         authorAddress: address,
-        authorName: `${address.slice(0, 6)}...${address.slice(-4)}`,
+        authorName: address.slice(-4),
         genre: 'Mystery',
         description: 'A thrilling tale that will keep you on the edge of your seat.',
         totalChapters: 4,

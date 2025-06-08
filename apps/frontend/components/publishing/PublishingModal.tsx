@@ -419,7 +419,7 @@ export default function PublishingModal({
                         <CheckCircle className="w-5 h-5 text-green-600" />
                         <div>
                           <div className="font-medium text-green-800">Wallet Connected!</div>
-                          <div className="text-sm text-green-600 font-mono">{address.slice(0, 6)}...{address.slice(-4)}</div>
+                          <div className="text-sm text-green-600 font-mono">{address.slice(-4)}</div>
                         </div>
                       </div>
                     </div>
