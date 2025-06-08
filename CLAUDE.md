@@ -109,6 +109,30 @@ Key environment variables:
 
 Note: Private keys and WalletConnect are no longer needed. All blockchain operations use direct MetaMask integration.
 
+## Claude Code Permissions
+
+Claude has comprehensive permissions to work effectively on this project:
+
+### ✅ Allowed Operations
+- **Full file operations**: Read, write, create, delete (except protected files)
+- **All development commands**: npm, yarn, git, build, deploy, test
+- **Smart contract operations**: Deploy, test, interact with contracts
+- **AI integrations**: OpenAI API calls, story generation
+- **Blockchain operations**: Story Protocol SDK, Web3 interactions
+- **Cloudflare operations**: R2 storage, Pages deployment
+
+### 🔒 Protected Files
+- Environment files (`.env*`) - read-only
+- Private keys and certificates
+- `package-lock.json` - warns before changes
+- `.gitignore` - read-only
+
+### ⚠️ Safety Rules
+- Always check git status before major changes
+- Require tests to pass before contract deployment
+- Confirm destructive operations
+- Warn before mainnet operations
+
 ## Important Notes from Cursor Rules
 
 1. Avoid code duplication - check existing implementations first
