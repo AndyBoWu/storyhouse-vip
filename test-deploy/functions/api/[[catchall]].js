@@ -7,27 +7,29 @@
  * - API requests are forwarded to Vercel
  */
 
-interface Env {
-  VERCEL_API_URL?: string;
-}
-
-export async function onRequest(context: {
-  request: Request;
-  env: Env;
-  params: { path: string[] };
-}): Promise<Response> {
+export async function onRequest(context) {
   const { request, env, params } = context;
+  
+  // Debug logging
+  console.log('API Proxy Debug:', {
+    url: request.url,
+    method: request.method,
+    params: params,
+    envVarSet: !!env.VERCEL_API_URL
+  });
   
   // Default to current Vercel deployment
   const vercelApiUrl = env.VERCEL_API_URL || 'https://testnet.storyhouse.vip';
   
   // Construct the API path
-  const apiPath = params.path?.join('/') || '';
+  const apiPath = params.catchall?.join('/') || '';
   const targetUrl = `${vercelApiUrl}/api/${apiPath}`;
   
   // Get the request URL to preserve query parameters
   const url = new URL(request.url);
   const targetUrlWithQuery = `${targetUrl}${url.search}`;
+  
+  console.log('Proxying to:', targetUrlWithQuery);
   
   try {
     // Forward the request to Vercel
@@ -74,7 +76,7 @@ export async function onRequest(context: {
 }
 
 // Handle preflight OPTIONS requests
-export async function onRequestOptions(): Promise<Response> {
+export async function onRequestOptions() {
   return new Response(null, {
     status: 200,
     headers: {

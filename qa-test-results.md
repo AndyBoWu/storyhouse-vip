@@ -29,9 +29,13 @@
 ## 🔄 In Progress Tests
 
 ### 4. API Proxy Functionality
-- **Status**: Testing API forwarding to Vercel backend
-- **Test URL**: https://ff70921c.storyhouse-vip.pages.dev/api/security
-- **Expected**: Successful proxy to https://testnet.storyhouse.vip/api/security
+- **Status**: ⚠️ Cloudflare Functions not triggering on existing project
+- **Issue**: Functions return static HTML instead of executing
+- **Test URLs**: 
+  - Original: https://1ca95837.storyhouse-vip.pages.dev/api/security
+  - New project: https://5ebd6f56.storyhouse-test.pages.dev/api/security
+- **Function Structure**: ✅ Correct (`functions/api/[[catchall]].js`)
+- **Next Steps**: Debug Functions configuration or use alternative approach
 
 ### 5. Complete Next.js Application Deployment
 - **Challenge**: Dynamic routes require `generateStaticParams()` for static export
@@ -83,15 +87,23 @@
 
 ### Working Components
 - ✅ Cloudflare Pages hosting
-- ✅ Cloudflare Functions for API proxy
-- ✅ Environment variable management
-- ✅ CORS configuration
-- ✅ TypeScript compilation
+- ✅ Static HTML/CSS/JS deployment
+- ✅ Environment variable management  
+- ✅ TypeScript compilation (updated to es2022)
+- ✅ Function code structure and syntax
 
 ### Remaining Challenges
+- ❌ Cloudflare Functions execution (returns static content instead)
 - ❌ Next.js dynamic route static export
 - ❌ Complex SDK compatibility with Edge Runtime
-- ⚠️ Full application deployment strategy
+- ⚠️ Functions configuration/enablement issue
+
+### Investigation Findings
+- ✅ Correct function file naming: `[[catchall]].js`
+- ✅ Proper ES6 module exports
+- ✅ CORS headers configuration
+- ❌ Functions not executing on any route (`/hello`, `/api/*`)
+- ⚠️ Possible project configuration or deployment timing issue
 
 ## 🔍 Test URLs for Manual Verification
 
