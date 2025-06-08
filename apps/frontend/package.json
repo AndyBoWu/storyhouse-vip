@@ -4,7 +4,7 @@
   "description": "StoryHouse.vip frontend application",
   "private": true,
   "scripts": {
-    "dev": "cp .env.testnet .env.local && PORT=3001 next dev",
+    "dev": "cp .env.testnet .env.local && PORT=3000 next dev",
     "dev:mainnet": "cp .env.mainnet .env.local && PORT=3001 next dev",
     "dev:testnet": "cp .env.testnet .env.local && PORT=3001 next dev",
     "deploy:spg": "tsx scripts/deploy-spg-contract.ts",
