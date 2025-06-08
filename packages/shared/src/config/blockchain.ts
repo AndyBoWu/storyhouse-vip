@@ -44,19 +44,10 @@ export interface BlockchainConfig {
 export function getBlockchainConfig(): BlockchainConfig {
   const isDevelopment = process.env.NODE_ENV === 'development'
 
-  // Get private key from environment
-  const privateKey = process.env.STORY_PROTOCOL_PRIVATE_KEY || process.env.WALLET_PRIVATE_KEY
-  let account = undefined
-
-  if (privateKey) {
-    try {
-      // Ensure private key has 0x prefix
-      const formattedKey = privateKey.startsWith('0x') ? privateKey : `0x${privateKey}`
-      account = privateKeyToAccount(formattedKey as `0x${string}`)
-    } catch (error) {
-      console.warn('⚠️ Invalid private key format:', error)
-    }
-  }
+  // Note: Private keys are no longer used - all blockchain operations happen client-side
+  // Users connect their wallets and sign transactions directly
+  const privateKey = undefined
+  const account = undefined
 
   return {
     // Network Configuration
@@ -126,10 +117,7 @@ export function validateBlockchainConfig(): { isValid: boolean; errors: string[]
     errors.push('STORY_PROTOCOL_CHAIN_ID must be a positive number')
   }
 
-  // Check private key for blockchain operations
-  if (!config.privateKey) {
-    errors.push('STORY_PROTOCOL_PRIVATE_KEY or WALLET_PRIVATE_KEY is required for blockchain operations')
-  }
+  // Note: Private keys are no longer required - blockchain operations happen client-side via wallet connections
 
   // Check gas configuration
   if (config.maxGasPrice <= 0) {

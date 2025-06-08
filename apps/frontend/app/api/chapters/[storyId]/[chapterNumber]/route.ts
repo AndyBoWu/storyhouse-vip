@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { R2Service } from '@/lib/r2'
 
+
 export async function GET(
   request: NextRequest,
   context: { params: Promise<{ storyId: string; chapterNumber: string }> }

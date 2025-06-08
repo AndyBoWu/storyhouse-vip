@@ -12,8 +12,7 @@ OPENAI_API_KEY=your_openai_api_key_here
 
 # Story Protocol Configuration
 STORY_PROTOCOL_RPC_URL=https://testnet.storyrpc.io
-STORY_PROTOCOL_CHAIN_ID=1513
-STORY_PROTOCOL_PRIVATE_KEY=your_private_key_here
+STORY_PROTOCOL_CHAIN_ID=1315
 
 # Alternative Story Protocol endpoints
 # STORY_PROTOCOL_RPC_URL=https://rpc.odyssey.storyrpc.io  # Odyssey testnet
@@ -23,8 +22,7 @@ STORY_PROTOCOL_PRIVATE_KEY=your_private_key_here
 # STORY_PROTOCOL_RPC_URL=https://rpc.story.foundation
 # STORY_PROTOCOL_CHAIN_ID=1
 
-# Wallet Configuration
-WALLET_PRIVATE_KEY=your_wallet_private_key_here
+# Note: WalletConnect not used - app uses direct MetaMask integration
 
 # Database (for storing IP operation tracking)
 DATABASE_URL=postgresql://username:password@localhost:5432/storyhouse_vip

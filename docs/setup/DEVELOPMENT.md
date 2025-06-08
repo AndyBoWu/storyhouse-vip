@@ -55,15 +55,13 @@ OPENAI_API_KEY=your_openai_api_key_here
 
 # Story Protocol Configuration
 STORY_PROTOCOL_RPC_URL=https://testnet.storyrpc.io
-STORY_PROTOCOL_CHAIN_ID=1513
-STORY_PROTOCOL_PRIVATE_KEY=your_private_key_here
+STORY_PROTOCOL_CHAIN_ID=1315
 
 # Alternative Networks
 # STORY_PROTOCOL_RPC_URL=https://rpc.odyssey.storyrpc.io  # Odyssey testnet
 # STORY_PROTOCOL_CHAIN_ID=1516
 
-# Wallet Configuration
-WALLET_PRIVATE_KEY=your_private_key_for_transactions
+# Note: WalletConnect not used - app uses direct MetaMask integration
 
 # Gas Configuration (optional)
 MAX_GAS_PRICE=20000000000  # 20 gwei
@@ -183,8 +181,8 @@ Create a new wallet for development:
 
 ```bash
 # Using MetaMask or other wallet
-# Export private key (keep secure!)
-# Add to .env.local as STORY_PROTOCOL_PRIVATE_KEY
+# Users will connect their wallets directly
+# No need to export private keys
 ```
 
 ### **2. Get Testnet Tokens**

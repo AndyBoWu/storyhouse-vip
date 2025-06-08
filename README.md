@@ -395,9 +395,9 @@ For detailed deployment instructions, see:
 
 ```bash
 # Required for Demo
-STORY_PROTOCOL_PRIVATE_KEY=your_testnet_key
-NEXT_PUBLIC_SEPOLIA_RPC_URL=https://sepolia.infura.io/...
-NEXT_PUBLIC_STORY_PROTOCOL_CHAIN_ID=1513
+NEXT_PUBLIC_STORY_PROTOCOL_RPC_URL=https://testnet.storyrpc.io
+NEXT_PUBLIC_STORY_PROTOCOL_CHAIN_ID=1315
+NEXT_PUBLIC_ENABLE_TESTNET=true
 
 # Required for AI Features
 OPENAI_API_KEY=sk-your-openai-key

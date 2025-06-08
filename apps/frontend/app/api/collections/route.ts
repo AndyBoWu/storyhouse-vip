@@ -4,6 +4,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+
+export const runtime = 'edge';
 import type {
   StoryCollection,
   EnhancedApiResponse

@@ -4,6 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+
 import { createIPService, defaultStoryProtocolConfig, type StoryWithIP } from '@storyhouse/shared'
 import { parseBlockchainError } from '@shared/utils/blockchainErrors'
 import { ipService } from '@/lib/ipServiceConfig'
