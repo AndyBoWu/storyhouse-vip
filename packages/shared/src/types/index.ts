@@ -186,3 +186,6 @@ export interface RemixFeeEvent {
   transactionHash: string;
   timestamp: Date;
 }
+
+// Export all book system types
+export * from './book';
