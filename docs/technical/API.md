@@ -1161,8 +1161,221 @@ POST /api/blockchain/estimate-gas
 
 ---
 
-**API Version**: 4.4 - Real Blockchain Integration ✅
+---
 
-**Last Updated**: December 2024
+## 🆕 **Phase 3: Advanced Features APIs**
 
-**Next Update**: Phase 5 - Production Optimization 🚀
+### **Book Discovery & Cross-Discovery**
+
+Advanced discovery endpoints for exploring the collaborative storytelling ecosystem.
+
+#### **Get Discovery Results**
+
+```http
+GET /api/discovery
+```
+
+**Query Parameters:**
+- `type` (required): Discovery type - "family-tree", "derivatives", "author-network", "similar", "recommendations"
+- `bookId` (optional): Book ID for relationship-based discovery
+- `authorAddress` (optional): Author address for network discovery
+- `genre` (optional): Genre filter for recommendations
+- `limit` (optional): Results limit (default: 20)
+- `includeRevenue` (optional): Include revenue attribution data
+- `includeMetrics` (optional): Include engagement metrics
+
+**Discovery Types:**
+
+**1. Family Tree Discovery**
+```http
+GET /api/discovery?type=family-tree&bookId=0x1234-detective&includeMetrics=true
+```
+
+Returns complete book derivation tree with analytics.
+
+**2. Derivatives Discovery**
+```http
+GET /api/discovery?type=derivatives&bookId=0x1234-detective&limit=10
+```
+
+Returns all direct derivatives of a book.
+
+**3. Author Network Discovery**
+```http
+GET /api/discovery?type=author-network&authorAddress=0x1234&limit=20
+```
+
+Returns books connected through author collaboration.
+
+**4. Similar Books Discovery**
+```http
+GET /api/discovery?type=similar&bookId=0x1234-detective&limit=10
+```
+
+Returns books similar by genre, content, and authorship patterns.
+
+**5. Recommendations Discovery**
+```http
+GET /api/discovery?type=recommendations&genre=Fantasy&limit=20
+```
+
+Returns curated recommendations based on engagement and quality.
+
+**Response Example:**
+```json
+{
+  "success": true,
+  "books": [
+    {
+      "bookId": "0x1234-detective",
+      "title": "The Detective's Portal",
+      "authorName": "Alice",
+      "authorAddress": "0x1234...",
+      "totalChapters": 5,
+      "genres": ["Mystery", "Sci-Fi"],
+      "averageRating": 4.2,
+      "totalReads": 1250,
+      "derivativeBooks": ["0x5678-detective-remix"],
+      "isRemixable": true,
+      "createdAt": "2025-06-01T00:00:00Z"
+    }
+  ],
+  "pagination": {
+    "total": 15,
+    "limit": 20,
+    "offset": 0,
+    "hasMore": false
+  }
+}
+```
+
+### **Book Branching System**
+
+#### **Get Branching Information**
+
+```http
+GET /api/books/branch?parentBookId=0x1234-detective
+```
+
+Returns available branching points and metadata for a book.
+
+**Response:**
+```json
+{
+  "success": true,
+  "parentBook": {
+    "bookId": "0x1234-detective",
+    "title": "The Detective's Portal",
+    "authorName": "Alice",
+    "totalChapters": 5,
+    "isRemixable": true
+  },
+  "availableBranchPoints": [
+    {
+      "chapterKey": "ch1",
+      "chapterNumber": 1,
+      "chapterPath": "0x1234-detective/chapters/ch1"
+    },
+    {
+      "chapterKey": "ch2", 
+      "chapterNumber": 2,
+      "chapterPath": "0x1234-detective/chapters/ch2"
+    }
+  ],
+  "existingDerivatives": 3,
+  "derivativeBooks": ["0x5678-detective-remix", "0x9abc-detective-horror"]
+}
+```
+
+#### **Create Book Branch**
+
+```http
+POST /api/books/branch
+```
+
+Create a derivative book that branches from an existing book.
+
+**Request (Multipart Form):**
+```
+parentBookId: "0x1234-detective"
+branchPoint: "ch3"
+newTitle: "The Detective's Portal: Sci-Fi Adventure"
+newDescription: "A sci-fi take on the detective story"
+authorAddress: "0x5678..."
+authorName: "Bob"
+genres: ["Mystery", "Sci-Fi"]
+contentRating: "PG-13"
+newCover: [file]
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "book": {
+    "bookId": "0x5678-detective-sf",
+    "parentBookId": "0x1234-detective",
+    "branchPoint": "ch3",
+    "coverUrl": "https://r2.../cover.jpg",
+    "chapterMap": {
+      "ch1": "0x1234-detective/chapters/ch1",
+      "ch2": "0x1234-detective/chapters/ch2", 
+      "ch3": "0x1234-detective/chapters/ch3"
+    },
+    "originalAuthors": {
+      "0x1234...": {
+        "chapters": ["ch1", "ch2", "ch3"],
+        "revenueShare": 50
+      },
+      "0x5678...": {
+        "chapters": [],
+        "revenueShare": 50
+      }
+    }
+  }
+}
+```
+
+### **Hybrid Revenue System**
+
+Phase 3 introduces transparent revenue sharing for collaborative storytelling.
+
+**Revenue Attribution:**
+- **70%** → Chapter Author
+- **20%** → Book Curator  
+- **10%** → Platform
+
+**Integration Status:**
+- ✅ Smart contract ready for deployment
+- ✅ 13 comprehensive tests passing
+- ✅ API endpoints implemented
+- ✅ Frontend components available
+
+---
+
+## 📊 **API Feature Status**
+
+| Feature                    | Status  | Blockchain | Description                           |
+| -------------------------- | ------- | ---------- | ------------------------------------- |
+| Story Generation           | ✅ Live | N/A        | AI-powered story creation             |
+| Story Continuation         | ✅ Live | N/A        | Multi-chapter story support           |
+| Stories Listing            | ✅ Live | N/A        | Get all published stories             |
+| Table of Contents          | ✅ Live | N/A        | Story metadata and chapter listing    |
+| Chapter Reading            | ✅ Live | N/A        | Individual chapter content access     |
+| IP Registration            | ✅ Live | ✅ Real    | Register stories as IP assets         |
+| License Creation           | ✅ Live | ✅ Real    | Create licensing terms                |
+| License Purchase           | ✅ Live | ✅ Real    | Purchase usage rights                 |
+| Collections                | ✅ Live | ✅ Real    | Organize related IP assets            |
+| Royalty Claims             | ✅ Live | ✅ Real    | Claim earnings from licensing         |
+| Derivatives                | ✅ Live | ✅ Real    | Create remixes and derivative works   |
+| **🆕 Book Branching**      | ✅ Live | ⏳ Ready  | Collaborative book creation           |
+| **🆕 Cross-Discovery**     | ✅ Live | N/A        | Family trees & author networks        |
+| **🆕 Revenue Sharing**     | ✅ Live | ⏳ Ready  | Multi-author payment distribution     |
+
+---
+
+**API Version**: 5.0 - Phase 3 Advanced Features ✅
+
+**Last Updated**: June 2025
+
+**Next Update**: Phase 4 - Production Foundation 🚀
