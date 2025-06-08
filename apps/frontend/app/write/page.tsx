@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, Suspense } from 'react'
-import { ArrowLeft, Sparkles, Image, Smile, Palette, Wand2, AlertCircle, BookOpen, Plus, List, ChevronRight } from 'lucide-react'
+import { ArrowLeft, Sparkles, Image, Smile, Palette, Wand2, AlertCircle, BookOpen, Plus, List, ChevronRight, Upload, X } from 'lucide-react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAccount } from 'wagmi'
@@ -63,6 +63,11 @@ function CreateStoryPageContent() {
   const [generatedStory, setGeneratedStory] = useState<GeneratedStory | null>(null)
   const [showMultiModal, setShowMultiModal] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Book cover state
+  const [bookCover, setBookCover] = useState<File | null>(null)
+  const [bookCoverPreview, setBookCoverPreview] = useState<string | null>(null)
+  const [isUploadingCover, setIsUploadingCover] = useState(false)
 
   // Publishing modal state
   const [isPublishingModalOpen, setIsPublishingModalOpen] = useState(false)
@@ -147,6 +152,62 @@ function CreateStoryPageContent() {
     }
   }
 
+  // Book cover upload functions
+  const handleCoverUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setError('Please select an image file (JPG, PNG, WebP)')
+        return
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('Image must be less than 5MB')
+        return
+      }
+
+      setBookCover(file)
+      
+      // Create preview
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setBookCoverPreview(e.target?.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleCoverRemove = () => {
+    setBookCover(null)
+    setBookCoverPreview(null)
+  }
+
+  const handleCoverDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    const file = event.dataTransfer.files[0]
+    if (file && file.type.startsWith('image/')) {
+      // Create a proper FileList-like object
+      const fileList = {
+        0: file,
+        length: 1,
+        item: (index: number) => index === 0 ? file : null,
+        [Symbol.iterator]: function* () { yield file }
+      } as FileList
+      
+      const fakeEvent = {
+        target: { files: fileList }
+      } as React.ChangeEvent<HTMLInputElement>
+      
+      handleCoverUpload(fakeEvent)
+    }
+  }
+
+  const handleCoverDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault()
+  }
+
   const handleSelectStory = (story: ExistingStory) => {
     setSelectedStory(story)
     setChapterNumber(story.chapters + 1)
@@ -162,6 +223,38 @@ function CreateStoryPageContent() {
     setError(null)
 
     try {
+      // Upload book cover to R2 if provided
+      let bookCoverUrl: string | undefined
+      if (bookCover && chapterNumber === 1) { // Only upload cover for new stories (chapter 1)
+        try {
+          setIsUploadingCover(true)
+          const formData = new FormData()
+          formData.append('file', bookCover)
+          formData.append('type', 'cover')
+          formData.append('storyTitle', storyTitle.trim() || 'Untitled Story')
+          
+          const uploadResponse = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData
+          })
+          
+          if (uploadResponse.ok) {
+            const uploadData = await uploadResponse.json()
+            if (uploadData.success && uploadData.url) {
+              bookCoverUrl = uploadData.url
+              console.log('📚 Book cover uploaded:', bookCoverUrl)
+            }
+          } else {
+            console.warn('Cover upload failed, continuing without cover')
+          }
+        } catch (coverError) {
+          console.warn('Cover upload error:', coverError)
+          // Continue without cover if upload fails
+        } finally {
+          setIsUploadingCover(false)
+        }
+      }
+
       // If we're continuing a story, fetch previous chapters for context
       let previousContent = ''
       const isContinuation = continueStoryId !== null || (creationMode === 'continue' && selectedStory)
@@ -204,7 +297,9 @@ function CreateStoryPageContent() {
           previousContent, // Include previous chapter content for better continuity
           // Include author information
           authorAddress: userAddress?.toLowerCase(),
-          authorName: userAddress ? userAddress.slice(-4) : undefined
+          authorName: userAddress ? userAddress.slice(-4) : undefined,
+          // Include book cover URL if uploaded
+          bookCoverUrl: bookCoverUrl
         })
       })
 
@@ -470,6 +565,90 @@ function CreateStoryPageContent() {
         />
       </div>
 
+      {/* Book Cover Upload */}
+      <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+        <label className="block text-lg font-semibold text-gray-800 mb-4">
+          🎨 Book Cover (optional):
+        </label>
+        
+        {bookCoverPreview ? (
+          // Cover Preview
+          <div className="relative">
+            <div className="flex items-start gap-4">
+              <div className="relative group">
+                <img
+                  src={bookCoverPreview}
+                  alt="Book cover preview"
+                  className="w-32 h-48 object-cover rounded-lg shadow-md border border-gray-200"
+                />
+                <button
+                  onClick={handleCoverRemove}
+                  className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+              <div className="flex-1">
+                <p className="text-sm text-gray-600 mb-2">
+                  <strong>Cover uploaded!</strong> This will represent your book across the platform.
+                </p>
+                <div className="text-xs text-gray-500 space-y-1">
+                  <p>File: {bookCover?.name}</p>
+                  <p>Size: {bookCover ? (bookCover.size / 1024 / 1024).toFixed(2) : 0}MB</p>
+                </div>
+                <button
+                  onClick={handleCoverRemove}
+                  className="mt-3 text-sm text-red-600 hover:text-red-800 underline"
+                >
+                  Remove cover
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          // Upload Area
+          <div
+            onDrop={handleCoverDrop}
+            onDragOver={handleCoverDragOver}
+            className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-purple-400 transition-colors cursor-pointer"
+          >
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleCoverUpload}
+              className="hidden"
+              id="cover-upload"
+            />
+            <label htmlFor="cover-upload" className="cursor-pointer">
+              <div className="space-y-4">
+                <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                  <Image className="w-8 h-8 text-gray-400" />
+                </div>
+                <div>
+                  <p className="text-lg font-medium text-gray-700 mb-2">
+                    Drop your book cover here or click to browse
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    Supports JPG, PNG, WebP up to 5MB
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors"
+                >
+                  <Upload className="w-4 h-4" />
+                  Choose Image
+                </button>
+              </div>
+            </label>
+          </div>
+        )}
+        
+        <div className="mt-3 text-xs text-gray-500">
+          💡 A good cover helps readers discover your story. You can always add or change it later.
+        </div>
+      </div>
+
       {/* Plot Description */}
       <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
         <label className="block text-lg font-semibold text-gray-800 mb-4">
@@ -578,22 +757,22 @@ function CreateStoryPageContent() {
       <div className="text-center mb-6">
         <motion.button
           onClick={handleGenerate}
-          disabled={!plotDescription.trim() || isGenerating}
-          whileHover={plotDescription.trim() && !isGenerating ? { scale: 1.05 } : {}}
-          whileTap={plotDescription.trim() && !isGenerating ? { scale: 0.95 } : {}}
+          disabled={!plotDescription.trim() || isGenerating || isUploadingCover}
+          whileHover={plotDescription.trim() && !isGenerating && !isUploadingCover ? { scale: 1.05 } : {}}
+          whileTap={plotDescription.trim() && !isGenerating && !isUploadingCover ? { scale: 0.95 } : {}}
           className={`inline-flex items-center gap-3 px-8 py-4 rounded-xl text-lg font-semibold transition-all ${
-            plotDescription.trim() && !isGenerating
+            plotDescription.trim() && !isGenerating && !isUploadingCover
               ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700 shadow-lg'
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'
           }`}
         >
           <Wand2 className="w-5 h-5" />
-          {isGenerating ? `Generating Chapter ${chapterNumber}...` : `✨ Generate Chapter ${chapterNumber} with AI`}
+{isUploadingCover ? `Uploading cover...` : isGenerating ? `Registering book...` : `📚 Register My Book`}
         </motion.button>
 
-        {plotDescription.trim() && (
+{plotDescription.trim() && (
           <p className="text-sm text-gray-500 mt-2">
-            💡 This will be Chapter {chapterNumber} of your {continueStoryId ? 'continued' : 'new'} story
+            💡 This will register your book and take you to your library where you can start writing
           </p>
         )}
       </div>
