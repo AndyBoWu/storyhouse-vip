@@ -218,7 +218,8 @@ contract DeployAll is Script {
         console.log("Deploying Remix Licensing Controller...");
         RemixLicensingController controller = new RemixLicensingController(
             deployer,
-            rewardsManager
+            rewardsManager,
+            accessControlManager // Using accessControlManager as tipToken for now
         );
         console.log(
             "Remix Licensing Controller deployed at:",

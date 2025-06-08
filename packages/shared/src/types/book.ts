@@ -370,45 +370,4 @@ export const BOOK_SYSTEM_CONSTANTS = {
   BOOK_ID_PATTERN: /^0x[a-fA-F0-9]{40}-[a-z0-9-]+$/,
 } as const;
 
-// ===== EXPORT ALL TYPES =====
-
-export type {
-  // Core types
-  BookMetadata,
-  ChapterMetadata,
-  
-  // Request/Response types
-  BookRegistrationRequest,
-  BookRegistrationResponse,
-  BookBranchingRequest,
-  BookBranchingResponse,
-  
-  // Discovery types
-  BookDiscoveryFilters,
-  BookDiscoveryResponse,
-  BookSummary,
-  
-  // Reading types
-  ChapterResolutionRequest,
-  ChapterResolutionResponse,
-  
-  // Tree types
-  BookDerivationNode,
-  BookDerivationTreeResponse,
-  
-  // Storage types
-  BookStoragePath,
-  ChapterStoragePath,
-  
-  // Validation types
-  BookValidationRules,
-  BookSystemError,
-  
-  // Utility types
-  BookId,
-  ChapterId,
-  AuthorAddress,
-  ChapterNumber,
-  RevenueShare,
-  ChapterMapEntry,
-};
+// Types are exported automatically by the interface declarations above
