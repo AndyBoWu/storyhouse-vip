@@ -124,6 +124,41 @@ export const apiClient = {
     return apiRequest(`/api/books/branch?parentBookId=${parentBookId}`)
   },
   
+  // Discovery operations
+  async getDiscovery(params: {
+    type?: string
+    bookId?: string
+    authorAddress?: string
+    genre?: string
+    limit?: number
+    includeRevenue?: boolean
+    includeMetrics?: boolean
+  }) {
+    const queryParams = new URLSearchParams()
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined) {
+        queryParams.append(key, value.toString())
+      }
+    })
+    return apiRequest(`/api/discovery?${queryParams}`)
+  },
+  
+  async getFamilyTree(bookId: string, includeRevenue = false, includeMetrics = true) {
+    return apiRequest(`/api/discovery?type=family-tree&bookId=${bookId}&includeRevenue=${includeRevenue}&includeMetrics=${includeMetrics}`)
+  },
+  
+  async getDerivatives(bookId: string, limit = 20) {
+    return apiRequest(`/api/discovery?type=derivatives&bookId=${bookId}&limit=${limit}`)
+  },
+  
+  async getAuthorNetwork(authorAddress: string, limit = 20) {
+    return apiRequest(`/api/discovery?type=author-network&authorAddress=${authorAddress}&limit=${limit}`)
+  },
+  
+  async getSimilarBooks(bookId: string, limit = 10) {
+    return apiRequest(`/api/discovery?type=similar&bookId=${bookId}&limit=${limit}`)
+  },
+  
   // Collections
   async getCollections() {
     return apiRequest('/api/collections')
