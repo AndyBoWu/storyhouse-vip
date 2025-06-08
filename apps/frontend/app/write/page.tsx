@@ -39,7 +39,7 @@ function WritePageContent() {
         <Link href="/write/continue">
           <button className="w-full bg-white rounded-xl shadow-lg p-6 text-left hover:shadow-xl transition-all border-2 border-transparent hover:border-blue-200">
             <div className="text-4xl mb-4">➕</div>
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">Continue Existing Story</h3>
+            <h3 className="text-xl font-semibold text-gray-800 mb-2">Ongoing Story</h3>
             <p className="text-gray-600 mb-4">Add next chapter</p>
             <div className="inline-flex items-center gap-2 text-blue-600 font-medium">
               <span>Add Chapter</span>
