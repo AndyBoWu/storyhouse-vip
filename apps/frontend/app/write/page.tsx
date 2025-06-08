@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useAccount } from 'wagmi'
 import { useSearchParams } from 'next/navigation'
 import dynamic from 'next/dynamic'
+import { apiClient } from '@/lib/api-client'
 
 // Dynamically import WalletConnect to avoid hydration issues
 const WalletConnect = dynamic(() => import('@/components/WalletConnect'), {
@@ -90,8 +91,7 @@ function CreateStoryPageContent() {
     if (creationMode === 'continue') {
       const loadStoriesFromR2 = async () => {
         try {
-          const response = await fetch('/api/stories')
-          const data = await response.json()
+          const data = await apiClient.getStories()
 
           if (data.success && data.stories) {
             const convertedStories: ExistingStory[] = data.stories.map((story: any) => ({
@@ -233,17 +233,11 @@ function CreateStoryPageContent() {
           formData.append('type', 'cover')
           formData.append('storyTitle', storyTitle.trim() || 'Untitled Story')
           
-          const uploadResponse = await fetch('/api/upload', {
-            method: 'POST',
-            body: formData
-          })
+          const uploadData = await apiClient.uploadContent(formData)
           
-          if (uploadResponse.ok) {
-            const uploadData = await uploadResponse.json()
-            if (uploadData.success && uploadData.url) {
-              bookCoverUrl = uploadData.url
-              console.log('📚 Book cover uploaded:', bookCoverUrl)
-            }
+          if (uploadData.success && uploadData.url) {
+            bookCoverUrl = uploadData.url
+            console.log('📚 Book cover uploaded:', bookCoverUrl)
           } else {
             console.warn('Cover upload failed, continuing without cover')
           }
@@ -263,14 +257,11 @@ function CreateStoryPageContent() {
       if (isContinuation && storyIdForContext && chapterNumber > 1) {
         try {
           console.log(`🔄 Fetching previous chapters for story ${storyIdForContext}`)
-          const contextResponse = await fetch(`/api/chapters/${storyIdForContext}/${chapterNumber - 1}`)
+          const contextData = await apiClient.getChapter(storyIdForContext, chapterNumber - 1)
           
-          if (contextResponse.ok) {
-            const contextData = await contextResponse.json()
-            if (contextData.success && contextData.chapter) {
-              previousContent = contextData.chapter.content
-              console.log(`✅ Loaded previous chapter context (${previousContent.length} chars)`)
-            }
+          if (contextData.success && contextData.chapter) {
+            previousContent = contextData.chapter.content
+            console.log(`✅ Loaded previous chapter context (${previousContent.length} chars)`)
           }
         } catch (contextErr) {
           console.warn('Failed to fetch previous chapter context:', contextErr)
@@ -278,41 +269,29 @@ function CreateStoryPageContent() {
         }
       }
 
-      const response = await fetch('/api/generate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          plotDescription: plotDescription.trim(),
-          storyTitle: storyTitle.trim(),
-          genres: selectedGenres,
-          moods: selectedMoods,
-          emojis: selectedEmojis,
-          chapterNumber,
-          isNewStory: !isContinuation,
-          isContinuation,
-          storyId: storyIdForContext, // Use storyId (not existingStoryId) for continuation
-          existingStoryId: storyIdForContext, // Keep this for backward compatibility
-          previousContent, // Include previous chapter content for better continuity
-          // Include author information
-          authorAddress: userAddress?.toLowerCase(),
-          authorName: userAddress ? userAddress.slice(-4) : undefined,
-          // Include book cover URL if uploaded
-          bookCoverUrl: bookCoverUrl
-        })
+      const result = await apiClient.generateStory({
+        plotDescription: plotDescription.trim(),
+        storyTitle: storyTitle.trim(),
+        genres: selectedGenres,
+        moods: selectedMoods,
+        emojis: selectedEmojis,
+        chapterNumber,
+        isNewStory: !isContinuation,
+        isContinuation,
+        storyId: storyIdForContext, // Use storyId (not existingStoryId) for continuation
+        existingStoryId: storyIdForContext, // Keep this for backward compatibility
+        previousContent, // Include previous chapter content for better continuity
+        // Include author information
+        authorAddress: userAddress?.toLowerCase(),
+        authorName: userAddress ? userAddress.slice(-4) : undefined,
+        // Include book cover URL if uploaded
+        bookCoverUrl: bookCoverUrl
       })
-
-      const result = await response.json()
-
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to generate story')
-      }
 
       if (result.success && result.data) {
         setGeneratedStory(result.data)
       } else {
-        throw new Error('Invalid response from AI service')
+        throw new Error(result.error || 'Invalid response from AI service')
       }
     } catch (err) {
       console.error('Generation error:', err)
