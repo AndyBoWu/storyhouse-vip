@@ -15,9 +15,19 @@
 
 ---
 
-## 🌟 **The Revolutionary Triple Concept**
+## 🌟 **The Revolutionary Quadruple Concept**
 
-**StoryHouse.vip** is the world's first platform combining **chapter-level intellectual property licensing**, **read-to-earn economics**, and **AI-powered content creation** - a complete paradigm shift in digital publishing.
+**StoryHouse.vip** is the world's first platform combining **book-level IP registration with collaborative branching**, **chapter-level intellectual property licensing**, **read-to-earn economics**, and **AI-powered content creation** - a complete paradigm shift in digital publishing.
+
+### **🔥 NEW FEATURE: Book Registration & Branching System**
+
+**Revolutionary Innovation**: **Collaborative Book Ecosystem**
+- Authors register books as parent IP assets on Story Protocol
+- Any author can branch from any chapter to create derivative books
+- Original chapters are reused via metadata references (no duplication)
+- Remix authors get their own book identity with custom covers and titles
+- Revenue is automatically shared between original and remix authors
+- Readers experience seamless hybrid content from multiple authors
 
 ### **🔥 The Problems We Solve**
 
@@ -32,12 +42,103 @@
 
 **Our Revolutionary Solution:**
 
-- **Immediate monetization** from Chapter 1
-- **Chapter-level IP assets** ($50-500)
-- **Readers earn $TIP tokens** while reading
-- **AI-assisted content creation** and remixing
-- **Automated licensing** with smart contracts
+- **Book & chapter hierarchy** - Books as parent IP, chapters as derivatives
+- **Collaborative branching** - Any author can continue any story
+- **Immediate monetization** from Chapter 1 with cross-author revenue sharing
+- **Chapter-level IP assets** ($50-500) nested under book IP
+- **Readers earn $TIP tokens** while reading hybrid multi-author content
+- **AI-assisted content creation** and remixing with narrative consistency
+- **Automated licensing** with smart contracts for both books and chapters
 - **Progressive onboarding** - no wallet required to start
+
+---
+
+## 📚 **Book Registration & Branching Architecture**
+
+### **Collaborative Book Ecosystem**
+
+```
+🏗️ BOOK-CHAPTER HIERARCHY
+
+Book Registration:
+┌─────────────────────────────────┐
+│  Book IP Asset (Parent)         │
+│  ├── metadata.json              │
+│  ├── cover.jpg                  │
+│  ├── licensing terms            │
+│  └── derivative permissions     │
+└─────────────────────────────────┘
+            │
+            ▼
+┌─────────────────────────────────┐
+│  Chapter IP Assets (Children)   │
+│  ├── ch1.json (derivative of book)│
+│  ├── ch2.json (derivative of book)│
+│  └── ch3.json (derivative of book)│
+└─────────────────────────────────┘
+
+Book Branching:
+┌─────────────────────────────────┐
+│  Original Book (Andy)           │
+│  /books/0x1234-detective/       │
+│  ├── metadata.json              │
+│  ├── cover.jpg                  │
+│  └── /chapters/                 │
+│      ├── ch1/ (Andy)            │
+│      ├── ch2/ (Andy)            │◄──┐
+│      └── ch3/ (Andy)            │   │
+└─────────────────────────────────┘   │
+                                      │
+┌─────────────────────────────────┐   │
+│  Derivative Book (Boris)        │   │
+│  /books/0x5678-detective-sf/    │   │
+│  ├── metadata.json (references)─────┘
+│  ├── cover.jpg (Boris's)        │
+│  └── /chapters/                 │
+│      ├── ch4/ (Boris)           │
+│      ├── ch5/ (Boris)           │
+│      └── ch6/ (Boris)           │
+└─────────────────────────────────┘
+
+Hybrid Reading Experience:
+Reader of Boris's book accesses:
+Ch1-3: Andy's folder → Ch4-6: Boris's folder
+```
+
+### **Storage Structure**
+
+```typescript
+// Book Metadata Structure
+interface BookMetadata {
+  bookId: string              // "0x5678-detective-sf"
+  title: string               // "The Detective's Portal: Sci-Fi"
+  authorAddress: string       // "0x5678..."
+  authorName: string          // "Boris"
+  slug: string               // "detective-sf"
+  
+  // IP Registration
+  ipAssetId: string          // Story Protocol IP asset ID
+  parentBook?: string        // "0x1234-detective" (for remixes)
+  branchPoint?: string       // "ch3" (where branching occurred)
+  
+  // Chapter Resolution Map
+  chapterMap: {
+    "ch1": "0x1234-detective/chapters/ch1",
+    "ch2": "0x1234-detective/chapters/ch2", 
+    "ch3": "0x1234-detective/chapters/ch3",
+    "ch4": "0x5678-detective-sf/chapters/ch4",
+    "ch5": "0x5678-detective-sf/chapters/ch5",
+    "ch6": "0x5678-detective-sf/chapters/ch6"
+  },
+  
+  // Discovery & Attribution
+  derivativeBooks: string[]   // Child books that branch from this
+  originalAuthors: {         // Revenue sharing attribution
+    "0x1234": { chapters: ["ch1", "ch2", "ch3"], percentage: 50 },
+    "0x5678": { chapters: ["ch4", "ch5", "ch6"], percentage: 50 }
+  }
+}
+```
 
 ---
 
@@ -126,6 +227,17 @@
 ---
 
 ## 🚀 **Core Features (Production Ready)**
+
+### **0. Book Registration & Branching System** ✨ NEW!
+
+- ✅ **Book IP Registration** - Books as parent IP assets on Story Protocol
+- ✅ **Custom Book Covers** - Upload and manage unique book artwork
+- ✅ **Collaborative Branching** - Create derivative books from any chapter
+- ✅ **Hybrid Reading Logic** - Seamless chapter resolution across multiple authors
+- ✅ **Revenue Sharing** - Automatic split between original and remix authors
+- ✅ **Efficient Storage** - No duplication via metadata references
+- ✅ **Individual Book Discovery** - Each remix gets its own identity and pages
+- ✅ **Cross-Attribution** - Clear linking between original and derivative works
 
 ### **1. Read-to-Earn System**
 

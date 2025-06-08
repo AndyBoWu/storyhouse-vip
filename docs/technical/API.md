@@ -228,6 +228,356 @@ GET /api/chapters/[storyId]/[chapterNumber]
 
 ---
 
+## 📚 **Book Registration & Branching API** ✨ NEW!
+
+### **Register New Book**
+
+Register a book as a parent IP asset with custom cover and metadata.
+
+```http
+POST /api/books/register
+```
+
+**Request Body:**
+
+```json
+{
+  "title": "The Detective's Portal",
+  "description": "A time-traveling detective discovers ancient mysteries across different eras",
+  "authorAddress": "0x1234567890123456789012345678901234567890",
+  "authorName": "Detective Writer",
+  "coverFile": "File object",
+  "genres": ["mystery", "fantasy", "time-travel"],
+  "contentRating": "PG-13",
+  "licenseTerms": {
+    "commercialUse": true,
+    "derivativesAllowed": true,
+    "commercialRevShare": 2500,
+    "mintingFee": "100000000000000000000"
+  }
+}
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "book": {
+    "bookId": "0x1234-detective-portal",
+    "ipAssetId": "0xa1b2c3d4e5f6789012345678901234567890abcd",
+    "slug": "detective-portal",
+    "coverUrl": "https://r2.example.com/books/0x1234-detective-portal/cover.jpg",
+    "licenseTermsId": "0xdef456789012345678901234567890123456789abc"
+  },
+  "transactionHash": "0x1a2b3c4d5e6f789012345678901234567890abcdef123456789",
+  "blockchainStatus": {
+    "connected": true,
+    "network": "odyssey",
+    "gasUsed": "245821"
+  }
+}
+```
+
+### **Create Derivative Book**
+
+Branch from an existing book to create a new derivative book.
+
+```http
+POST /api/books/branch
+```
+
+**Request Body:**
+
+```json
+{
+  "parentBookId": "0x1234-detective-portal",
+  "branchPoint": "ch3",
+  "newTitle": "The Detective's Portal: Sci-Fi Adventure",
+  "newDescription": "The detective's journey takes a futuristic turn",
+  "newCover": "File object",
+  "authorAddress": "0x5678901234567890123456789012345678901234",
+  "authorName": "Sci-Fi Writer",
+  "genres": ["sci-fi", "mystery", "space"],
+  "contentRating": "PG-13"
+}
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "book": {
+    "bookId": "0x5678-detective-portal-sf",
+    "parentBookId": "0x1234-detective-portal",
+    "ipAssetId": "0xb2c3d4e5f6789012345678901234567890abcdef",
+    "branchPoint": "ch3",
+    "coverUrl": "https://r2.example.com/books/0x5678-detective-portal-sf/cover.jpg",
+    "chapterMap": {
+      "ch1": "0x1234-detective-portal/chapters/ch1",
+      "ch2": "0x1234-detective-portal/chapters/ch2", 
+      "ch3": "0x1234-detective-portal/chapters/ch3"
+    },
+    "originalAuthors": {
+      "0x1234567890123456789012345678901234567890": {
+        "chapters": ["ch1", "ch2", "ch3"],
+        "revenueShare": 50
+      },
+      "0x5678901234567890123456789012345678901234": {
+        "chapters": [],
+        "revenueShare": 50
+      }
+    }
+  },
+  "transactionHash": "0x2b3c4d5e6f789012345678901234567890abcdef1234567890"
+}
+```
+
+### **Get Book Metadata**
+
+Retrieve complete book information including chapter mapping.
+
+```http
+GET /api/books/[bookId]
+```
+
+**Path Parameters:**
+- `bookId`: Book identifier in format `{authorAddress}-{slug}`
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "book": {
+    "bookId": "0x5678-detective-portal-sf",
+    "title": "The Detective's Portal: Sci-Fi Adventure",
+    "description": "The detective's journey takes a futuristic turn",
+    "authorAddress": "0x5678901234567890123456789012345678901234",
+    "authorName": "Sci-Fi Writer",
+    "slug": "detective-portal-sf",
+    "coverUrl": "https://r2.example.com/books/0x5678-detective-portal-sf/cover.jpg",
+    "ipAssetId": "0xb2c3d4e5f6789012345678901234567890abcdef",
+    "parentBook": "0x1234-detective-portal",
+    "branchPoint": "ch3",
+    "totalChapters": 6,
+    "chapterMap": {
+      "ch1": "0x1234-detective-portal/chapters/ch1",
+      "ch2": "0x1234-detective-portal/chapters/ch2",
+      "ch3": "0x1234-detective-portal/chapters/ch3",
+      "ch4": "0x5678-detective-portal-sf/chapters/ch4",
+      "ch5": "0x5678-detective-portal-sf/chapters/ch5",
+      "ch6": "0x5678-detective-portal-sf/chapters/ch6"
+    },
+    "originalAuthors": {
+      "0x1234567890123456789012345678901234567890": {
+        "chapters": ["ch1", "ch2", "ch3"],
+        "revenueShare": 50
+      },
+      "0x5678901234567890123456789012345678901234": {
+        "chapters": ["ch4", "ch5", "ch6"],
+        "revenueShare": 50
+      }
+    },
+    "derivativeBooks": [],
+    "genres": ["sci-fi", "mystery", "space"],
+    "contentRating": "PG-13",
+    "isRemixable": true,
+    "totalReads": 0,
+    "averageRating": 0,
+    "totalRevenue": 0,
+    "createdAt": "2024-12-21T10:30:00Z",
+    "updatedAt": "2024-12-21T10:30:00Z"
+  }
+}
+```
+
+### **Get All Books**
+
+Browse all registered books with filtering options.
+
+```http
+GET /api/books
+```
+
+**Query Parameters:**
+- `author`: Filter by author address
+- `genre`: Filter by genre
+- `remixable`: Filter by remixable status (true/false)
+- `parentBook`: Filter derivative books by parent
+- `limit`: Number of results (default: 50)
+- `offset`: Pagination offset (default: 0)
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "books": [
+    {
+      "bookId": "0x1234-detective-portal",
+      "title": "The Detective's Portal",
+      "authorName": "Detective Writer",
+      "authorAddress": "0x1234567890123456789012345678901234567890",
+      "coverUrl": "https://r2.example.com/books/0x1234-detective-portal/cover.jpg",
+      "totalChapters": 3,
+      "genres": ["mystery", "fantasy", "time-travel"],
+      "averageRating": 4.5,
+      "totalReads": 150,
+      "derivativeBooks": ["0x5678-detective-portal-sf", "0x9abc-detective-portal-dark"],
+      "isRemixable": true,
+      "createdAt": "2024-12-20T08:00:00Z"
+    },
+    {
+      "bookId": "0x5678-detective-portal-sf",
+      "title": "The Detective's Portal: Sci-Fi Adventure",
+      "authorName": "Sci-Fi Writer",
+      "authorAddress": "0x5678901234567890123456789012345678901234",
+      "coverUrl": "https://r2.example.com/books/0x5678-detective-portal-sf/cover.jpg",
+      "totalChapters": 6,
+      "parentBook": "0x1234-detective-portal",
+      "branchPoint": "ch3",
+      "genres": ["sci-fi", "mystery", "space"],
+      "averageRating": 4.2,
+      "totalReads": 89,
+      "derivativeBooks": [],
+      "isRemixable": true,
+      "createdAt": "2024-12-21T10:30:00Z"
+    }
+  ],
+  "pagination": {
+    "total": 2,
+    "limit": 50,
+    "offset": 0,
+    "hasMore": false
+  }
+}
+```
+
+### **Hybrid Chapter Resolution**
+
+Get chapter content with automatic source resolution for branched books.
+
+```http
+GET /api/books/[bookId]/chapters/[chapterNumber]
+```
+
+**Path Parameters:**
+- `bookId`: Book identifier
+- `chapterNumber`: Chapter number (1-indexed)
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "chapter": {
+    "chapterNumber": 2,
+    "title": "Strange Evidence",
+    "content": "Detective Sarah Chen examined the peculiar artifacts...",
+    "summary": "The investigation takes an unexpected turn when Chen discovers...",
+    "wordCount": 2100,
+    "readingTime": 8,
+    "unlockPrice": 0.1,
+    "readReward": 0.05,
+    "source": {
+      "bookId": "0x1234-detective-portal",
+      "authorAddress": "0x1234567890123456789012345678901234567890",
+      "authorName": "Detective Writer",
+      "isOriginalContent": true
+    },
+    "revenueAttribution": {
+      "chapterAuthor": "0x1234567890123456789012345678901234567890",
+      "bookCurator": "0x5678901234567890123456789012345678901234",
+      "revenueShare": {
+        "chapterAuthor": 80,
+        "bookCurator": 10,
+        "platform": 10
+      }
+    },
+    "metadata": {
+      "genre": "mystery",
+      "mood": "suspenseful",
+      "contentRating": "PG-13",
+      "qualityScore": 89,
+      "originalityScore": 92,
+      "generationMethod": "ai",
+      "createdAt": "2024-12-20T12:15:00Z"
+    }
+  }
+}
+```
+
+### **Get Book Derivation Tree**
+
+Get the complete branching tree for a book and its derivatives.
+
+```http
+GET /api/books/[bookId]/derivatives
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "tree": {
+    "root": {
+      "bookId": "0x1234-detective-portal",
+      "title": "The Detective's Portal",
+      "authorName": "Detective Writer",
+      "totalChapters": 3,
+      "totalReads": 150,
+      "createdAt": "2024-12-20T08:00:00Z"
+    },
+    "derivatives": [
+      {
+        "bookId": "0x5678-detective-portal-sf",
+        "title": "The Detective's Portal: Sci-Fi Adventure",
+        "authorName": "Sci-Fi Writer",
+        "branchPoint": "ch3",
+        "totalChapters": 6,
+        "totalReads": 89,
+        "createdAt": "2024-12-21T10:30:00Z",
+        "derivatives": []
+      },
+      {
+        "bookId": "0x9abc-detective-portal-dark",
+        "title": "The Detective's Portal: Dark Chronicles",
+        "authorName": "Dark Writer",
+        "branchPoint": "ch2",
+        "totalChapters": 8,
+        "totalReads": 67,
+        "createdAt": "2024-12-21T14:00:00Z",
+        "derivatives": [
+          {
+            "bookId": "0xdef0-detective-portal-horror",
+            "title": "The Detective's Portal: Horror Edition",
+            "authorName": "Horror Writer",
+            "branchPoint": "ch5",
+            "totalChapters": 4,
+            "totalReads": 23,
+            "createdAt": "2024-12-22T09:00:00Z",
+            "derivatives": []
+          }
+        ]
+      }
+    ]
+  },
+  "analytics": {
+    "totalDerivatives": 3,
+    "totalAuthors": 4,
+    "totalChapters": 21,
+    "totalReads": 329,
+    "averageRating": 4.3,
+    "totalRevenue": 45.67
+  }
+}
+```
+
+---
+
 ## 📝 **Story Generation API**
 
 ### **Enhanced Story Generation**
