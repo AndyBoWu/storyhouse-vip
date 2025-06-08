@@ -241,7 +241,7 @@ function CreateStoryPageContent() {
           previousContent, // Include previous chapter content for better continuity
           // Include author information
           authorAddress: userAddress?.toLowerCase(),
-          authorName: userAddress ? `${userAddress.slice(0, 6)}...${userAddress.slice(-4)}` : undefined
+          authorName: userAddress ? userAddress.slice(-4) : undefined
         })
       })
 

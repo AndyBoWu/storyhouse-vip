@@ -131,8 +131,8 @@ export default function WalletConnect() {
   }
 
   const formatAddress = (addr: string) => {
-    // Standard wallet address formatting: 0x1234...abcd
-    return `${addr.slice(0, 6)}...${addr.slice(-4)}`
+    // Show only last 4 characters: abcd
+    return addr.slice(-4)
   }
 
   const formatBalance = (balance: any) => {
