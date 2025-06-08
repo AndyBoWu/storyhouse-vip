@@ -255,4 +255,21 @@ export class BookStorageService {
       totalRevenue: 0
     }
   }
+  
+  /**
+   * Get all book metadata for discovery purposes
+   * Note: This is a simplified implementation that would benefit from indexing in production
+   */
+  static async getAllBooksMetadata(): Promise<BookMetadata[]> {
+    try {
+      // In production, this would use an index or database
+      // For now, we'll return empty array as this is mainly for discovery
+      // The actual implementation would require R2 listing capabilities
+      console.warn('getAllBooksMetadata: Not implemented - requires R2 bucket listing')
+      return []
+    } catch (error) {
+      console.error('Error retrieving all books metadata:', error)
+      return []
+    }
+  }
 }
