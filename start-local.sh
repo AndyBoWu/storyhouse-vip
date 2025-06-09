@@ -22,6 +22,12 @@ cleanup() {
 # Set trap to cleanup on Ctrl+C
 trap cleanup INT
 
+# Kill any existing Next.js processes on our ports
+echo -e "${YELLOW}Cleaning up existing processes...${NC}"
+pkill -f "next dev -p 3001" 2>/dev/null || true
+pkill -f "next dev -p 3002" 2>/dev/null || true
+sleep 2
+
 # Check if node_modules exist
 if [ ! -d "apps/frontend/node_modules" ]; then
     echo -e "${YELLOW}Installing frontend dependencies...${NC}"
