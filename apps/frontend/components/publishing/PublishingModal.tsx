@@ -454,28 +454,24 @@ function PublishingModal({
                   ) : (
                     <div className="flex gap-3">
                       <button
-                        onClick={() => setCurrentStep('options')}
+                        onClick={onClose}
                         className="flex-1 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                       >
-                        ← Back
+                        Cancel
                       </button>
                       <button
                         onClick={() => {
-                          if (publishingOption === 'simple') {
-                            // Chapters 1-3 are free, skip pricing step
-                            if (chapterNumber <= 3) {
-                              setChapterPrice(0) // Ensure price is 0 for free chapters
-                              handlePublish() // Go directly to publishing
-                            } else {
-                              setCurrentStep('pricing') // Show pricing for paid chapters
-                            }
+                          // Always use simple publishing with Story Protocol
+                          if (chapterNumber <= 3) {
+                            setChapterPrice(0) // Ensure price is 0 for free chapters
+                            handlePublish() // Go directly to publishing
                           } else {
-                            setCurrentStep('ip-setup')
+                            setCurrentStep('pricing') // Show pricing for paid chapters
                           }
                         }}
                         className="flex-1 px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg font-medium hover:from-green-700 hover:to-emerald-700 transition-all"
                       >
-                        {chapterNumber <= 3 ? 'Publish' : 'Continue →'}
+                        {chapterNumber <= 3 ? 'Publish with Story Protocol' : 'Continue →'}
                       </button>
                     </div>
                   )}
