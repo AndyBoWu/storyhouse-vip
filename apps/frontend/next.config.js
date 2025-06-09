@@ -1,19 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Configure for static export to Cloudflare Pages (SPA approach)
-  output: 'export',
-  trailingSlash: true,
-  distDir: 'out',
+  // Standard Next.js configuration for Vercel deployment
   
   images: {
-    unoptimized: true, // Required for static export
     domains: ['images.unsplash.com', 'via.placeholder.com'],
     formats: ['image/avif', 'image/webp'],
   },
   
-  // API base URL for SPA deployment
+  // API routes will be served from same domain in Vercel
   env: {
-    NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api-testnet.storyhouse.vip',
+    NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL || '',
   },
 }
 

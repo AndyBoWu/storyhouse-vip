@@ -1,30 +1,26 @@
 /**
- * API Client for Hybrid Cloudflare + Vercel Architecture
+ * API Client for Unified Vercel Architecture
  * 
- * Routes API calls to:
- * - Local API routes in development
- * - Vercel API endpoints in production (Cloudflare Pages deployment)
+ * Routes API calls to same-domain API routes in Vercel deployment
  */
 
 const getApiBaseUrl = (): string => {
-  // Always use Vercel API base URL for hybrid architecture
-  // Frontend is static export on Cloudflare, backend is on Vercel
-  const vercelApiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api-testnet.storyhouse.vip'
-  
-  return vercelApiUrl
+  // API routes are now served from the same domain
+  // No need for cross-domain requests
+  return ''
 }
 
 /**
- * Enhanced fetch wrapper for hybrid API routing
+ * Enhanced fetch wrapper for same-domain API routing
  */
 export async function apiRequest<T = any>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const baseUrl = getApiBaseUrl()
+  // Use relative paths since API routes are in same deployment
   const url = endpoint.startsWith('/api') 
-    ? `${baseUrl}${endpoint}` 
-    : `${baseUrl}/api${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`
+    ? endpoint 
+    : `/api${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`
   
   const defaultOptions: RequestInit = {
     headers: {
@@ -103,78 +99,6 @@ export const apiClient = {
     })
   },
   
-  // Book operations
-  async registerBook(data: FormData) {
-    return apiRequest('/api/books/register', {
-      method: 'POST',
-      body: data,
-      headers: {}, // Let fetch set Content-Type for FormData
-    })
-  },
-  
-  async branchBook(data: FormData) {
-    return apiRequest('/api/books/branch', {
-      method: 'POST',
-      body: data,
-      headers: {}, // Let fetch set Content-Type for FormData
-    })
-  },
-  
-  async getBranchingInfo(parentBookId: string) {
-    return apiRequest(`/api/books/branch?parentBookId=${parentBookId}`)
-  },
-
-  async getBooks(authorAddress?: string) {
-    const params = authorAddress ? `?author=${authorAddress}` : ''
-    console.log('🔗 API Client: Getting books with params:', params)
-    console.log('🔗 API Base URL:', getApiBaseUrl())
-    const result = await apiRequest(`/api/books${params}`)
-    console.log('📋 API Client: Books response:', result)
-    return result
-  },
-
-  async getBookChapters(bookId: string) {
-    console.log('📚 API Client: Getting chapters for book:', bookId)
-    const result = await apiRequest(`/api/books/${bookId}/chapters`)
-    console.log('📄 API Client: Chapters response:', result)
-    return result
-  },
-  
-  // Discovery operations
-  async getDiscovery(params: {
-    type?: string
-    bookId?: string
-    authorAddress?: string
-    genre?: string
-    limit?: number
-    includeRevenue?: boolean
-    includeMetrics?: boolean
-  }) {
-    const queryParams = new URLSearchParams()
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined) {
-        queryParams.append(key, value.toString())
-      }
-    })
-    return apiRequest(`/api/discovery?${queryParams}`)
-  },
-  
-  async getFamilyTree(bookId: string, includeRevenue = false, includeMetrics = true) {
-    return apiRequest(`/api/discovery?type=family-tree&bookId=${bookId}&includeRevenue=${includeRevenue}&includeMetrics=${includeMetrics}`)
-  },
-  
-  async getDerivatives(bookId: string, limit = 20) {
-    return apiRequest(`/api/discovery?type=derivatives&bookId=${bookId}&limit=${limit}`)
-  },
-  
-  async getAuthorNetwork(authorAddress: string, limit = 20) {
-    return apiRequest(`/api/discovery?type=author-network&authorAddress=${authorAddress}&limit=${limit}`)
-  },
-  
-  async getSimilarBooks(bookId: string, limit = 10) {
-    return apiRequest(`/api/discovery?type=similar&bookId=${bookId}&limit=${limit}`)
-  },
-  
   // Collections
   async getCollections() {
     return apiRequest('/api/collections')
@@ -190,6 +114,61 @@ export const apiClient = {
   // Security
   async checkSecurity() {
     return apiRequest('/api/security')
+  },
+
+  // Books operations (for new book landing pages)
+  async getBooks(authorAddress?: string) {
+    const endpoint = authorAddress ? `/api/books?author=${authorAddress}` : '/api/books'
+    return apiRequest(endpoint)
+  },
+
+  async getBookById(bookId: string) {
+    return apiRequest(`/api/books/${bookId}`)
+  },
+
+  async getBookChapters(bookId: string) {
+    return apiRequest(`/api/books/${bookId}/chapters`)
+  },
+
+  // Generic GET method for flexibility
+  async get(endpoint: string) {
+    return apiRequest(endpoint)
+  },
+
+  // Generic POST method for flexibility
+  async post(endpoint: string, data: any) {
+    return apiRequest(endpoint, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  },
+
+  // Branching operations
+  async getBranchingInfo(storyId: string) {
+    return apiRequest(`/api/stories/${storyId}/branching`)
+  },
+
+  async branchBook(formData: FormData) {
+    return apiRequest('/api/books/branch', {
+      method: 'POST',
+      body: formData,
+      headers: {}, // Let fetch set Content-Type for FormData
+    })
+  },
+
+  async registerBook(formData: FormData) {
+    return apiRequest('/api/books/register', {
+      method: 'POST',
+      body: formData,
+      headers: {}, // Let fetch set Content-Type for FormData
+    })
+  },
+
+  async saveBookChapter(bookId: string, chapterData: any) {
+    return apiRequest(`/api/books/${bookId}/chapters/save`, {
+      method: 'POST',
+      body: JSON.stringify(chapterData),
+    })
   },
 }
 
