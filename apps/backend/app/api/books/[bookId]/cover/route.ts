@@ -43,10 +43,10 @@ const BUCKET_NAME = (process.env.R2_BUCKET_NAME || '').trim().replace(/[\r\n]/g,
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { bookId: string } }
+  { params }: { params: Promise<{ bookId: string }> }
 ) {
   try {
-    const { bookId } = params
+    const { bookId } = await params
     
     // Parse bookId to get author address and slug
     const parts = bookId.split('-')
