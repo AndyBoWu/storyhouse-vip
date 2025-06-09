@@ -4,7 +4,15 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import { ArrowLeft } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import apiClient from '@/lib/api-client';
+
+// Dynamically import WalletConnect to avoid hydration issues
+const WalletConnect = dynamic(() => import('@/components/WalletConnect'), {
+  ssr: false,
+  loading: () => <div className="w-24 h-10 bg-gray-200 rounded-full animate-pulse"></div>
+});
 
 
 interface BookDetails {
@@ -137,7 +145,26 @@ export default function BookPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gray-50">
+      {/* Navigation Header */}
+      <header className="bg-white shadow-sm border-b">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <Link
+              href="/own"
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors"
+            >
+              <ArrowLeft className="h-5 w-5" />
+              <span className="font-medium">Back to Library</span>
+            </Link>
+            
+            <WalletConnect />
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-8">
       {/* Book Details Section */}
       <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -290,6 +317,7 @@ export default function BookPage() {
             ))}
           </div>
         )}
+      </div>
       </div>
     </div>
   );
