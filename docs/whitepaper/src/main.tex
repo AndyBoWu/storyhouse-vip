@@ -1,0 +1,216 @@
+\documentclass[12pt,a4paper]{article}
+
+% Import packages and styling
+\input{style/packages}
+
+% Document metadata
+\title{StoryHouse.vip: Democratizing Intellectual Property for the Digital Age}
+\author{Andy Bo Wu \\ DevOps Engineer \\ \texttt{andy@piplabs.xyz}}
+\date{December 2024}
+
+% Custom styling
+\usepackage[margin=1.2in]{geometry}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{caption}
+\usepackage{subcaption}
+
+% Define StoryHouse brand colors
+\definecolor{storyblue}{HTML}{2563eb}
+\definecolor{storygreen}{HTML}{10b981}
+\definecolor{storygray}{HTML}{6b7280}
+
+% Configure hyperlinks
+\hypersetup{
+    colorlinks=true,
+    linkcolor=storyblue,
+    urlcolor=storyblue,
+    citecolor=storyblue,
+    pdftitle={StoryHouse.vip Whitepaper},
+    pdfauthor={StoryHouse.vip Team},
+    pdfsubject={Web3 Publishing Platform Whitepaper},
+    pdfkeywords={blockchain, IP, publishing, read-to-earn, AI}
+}
+
+% Configure page headers and footers
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\textcolor{storygray}{\small StoryHouse.vip Whitepaper}}
+\fancyhead[R]{\textcolor{storygray}{\small December 2024}}
+\fancyfoot[C]{\textcolor{storygray}{\thepage}}
+\renewcommand{\headrulewidth}{0.5pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% Configure table of contents
+\usepackage{tocloft}
+\renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
+
+\begin{document}
+
+% Title page
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+    
+    % Logo placeholder (add actual logo when available)
+    \textcolor{storyblue}{\Huge \textbf{StoryHouse.vip}}
+    
+    \vspace{1cm}
+    \textcolor{storygray}{\Large Revolutionary Web3 Storytelling Platform}
+    
+    \vspace{2cm}
+    {\huge \textbf{Project Whitepaper}}
+    
+    \vspace{0.5cm}
+    {\Large \textcolor{storygray}{Democratizing Intellectual Property for the Digital Age}}
+    
+    \vspace{2cm}
+    
+    % Key innovations box
+    \begin{center}
+    \fcolorbox{storyblue}{white}{
+        \begin{minipage}{0.8\textwidth}
+            \centering
+            \textcolor{storyblue}{\textbf{Revolutionary Innovations}}
+            \vspace{0.3cm}
+            
+            \textcolor{storygray}{
+            \textbf{Chapter-Level IP Assets} • \textbf{Read-to-Earn Economics} \\
+            \textbf{AI-Powered Creation} • \textbf{Collaborative Branching}
+            }
+        \end{minipage}
+    }
+    \end{center}
+    
+    \vspace{2cm}
+    
+    % Live deployment info
+    \begin{center}
+    \textcolor{storygreen}{\textbf{🌐 LIVE TESTNET DEPLOYMENT}}\\
+    \textcolor{storygray}{\url{https://testnet.storyhouse.vip}}
+    \end{center}
+    
+    \vfill
+    
+    % Document info
+    \begin{center}
+    \textcolor{storygray}{
+        \textbf{Version 1.0} • December 2024 \\
+        Andy Bo Wu, DevOps Engineer \\
+        \texttt{andy@piplabs.xyz}
+    }
+    \end{center}
+    
+    \vspace{1cm}
+\end{titlepage}
+
+% Table of contents
+\tableofcontents
+\newpage
+
+% Executive summary
+\input{sections/01-executive-summary}
+\newpage
+
+% Problem statement
+\input{sections/02-problem-statement}
+\newpage
+
+% Solution architecture
+\input{sections/03-solution-architecture}
+\newpage
+
+% Product features
+\input{sections/04-product-features}
+\newpage
+
+% Blockchain integration
+\input{sections/05-blockchain-integration}
+\newpage
+
+% Tokenomics overview
+\input{sections/06-tokenomics-overview}
+\newpage
+
+% Development roadmap
+\input{sections/07-roadmap}
+\newpage
+
+% Team and advisors
+\input{sections/08-team-advisors}
+\newpage
+
+% Competitive analysis
+\input{sections/09-competitive-analysis}
+\newpage
+
+% Financial projections
+\input{sections/10-financial-projections}
+\newpage
+
+% Risk analysis
+\input{sections/11-risk-analysis}
+\newpage
+
+% Conclusion
+\input{sections/12-conclusion}
+\newpage
+
+% Bibliography (if using citations)
+% \bibliographystyle{plain}
+% \bibliography{bibliography/references}
+
+% Appendices
+\appendix
+
+\section{Technical Specifications}
+\label{appendix:technical}
+
+For detailed technical specifications, smart contract documentation, and API references, please refer to:
+
+\begin{itemize}
+    \item \textbf{Technical Overview}: \url{https://docs.storyhouse.vip/technical/overview}
+    \item \textbf{Smart Contracts}: \url{https://docs.storyhouse.vip/technical/contracts}
+    \item \textbf{API Documentation}: \url{https://docs.storyhouse.vip/technical/api}
+\end{itemize}
+
+\section{Legal Documentation}
+\label{appendix:legal}
+
+Legal framework documentation includes:
+
+\begin{itemize}
+    \item Token classification analysis
+    \item Terms of service and privacy policy
+    \item IP licensing framework
+    \item Regulatory compliance strategy
+\end{itemize}
+
+\section{Financial Modeling}
+\label{appendix:financial}
+
+Detailed financial models and assumptions available in supplementary materials:
+
+\begin{itemize}
+    \item Revenue projection models
+    \item Token economics sensitivity analysis
+    \item Market sizing methodology
+    \item Risk assessment matrices
+\end{itemize}
+
+% Footer information
+\vfill
+\begin{center}
+\textcolor{storygray}{\small
+\textbf{Disclaimer}: This whitepaper contains forward-looking statements and projections. \\
+Actual results may vary significantly. This is not investment advice. \\
+Please conduct your own research before making any financial decisions.
+}
+\end{center}
+
+\end{document}
