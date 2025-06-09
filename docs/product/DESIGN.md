@@ -23,8 +23,8 @@ Date: June 1, 2025
 **For Readers:**
 
 - "Read first 3 chapters FREE - no signup required"
-- "Earn $TIP tokens for every chapter you complete"
-- "Your reading rewards can exceed chapter unlock costs"
+- "Earn $TIP tokens for reading first 3 chapters only (discovery rewards)"
+- "Chapters 4+ require payment to unlock (no read rewards)"
 - "Remix stories and earn from your creativity"
 
 **For Writers:**
@@ -1691,13 +1691,13 @@ Date: June 1, 2025
 │                                                                 │
 │  🔓 Unlock Chapter 4 to continue the adventure!                │
 │                                                                 │
-│  💰 Cost: 0.1 $TIP tokens                                      │
-│  🎁 Earn: 0.1 $TIP tokens (for reading)                        │
+│  💰 Cost: 0.5 $TIP tokens                                      │
+│  ❌ No read rewards for paid chapters                          │
 │                                                                 │
 │              [🦊 Connect Wallet & Continue]                    │
 │                                                                 │
-│  💡 With read-to-earn, your reading pays for itself!          │
-│     You'll earn back what you spend, plus extra!               │
+│  💡 Discovery rewards only for chapters 1-3!                  │
+│     Premium chapters are pay-to-read only.                     │
 │                                                                 │
 │                    [← Browse Other Stories]                    │
 │                                                                 │
@@ -1758,17 +1758,17 @@ Date: June 1, 2025
 │  📖 Chapter 4: "Through the Portal"                            │
 │  ⏱️ Estimated reading time: 6 minutes                          │
 │                                                                 │
-│  💰 Cost to unlock: 0.1 $TIP                                   │
-│  🎁 Earn for reading: 0.1 $TIP                                 │
-│  📈 Net effect: Break even (plus enjoy the story!)             │
+│  💰 Cost to unlock: 0.5 $TIP                                   │
+│  ❌ No read rewards for paid chapters                          │
+│  📈 Net effect: -0.5 $TIP (pay to read premium content)        │
 │                                                                 │
 │  ┌─────────────────────────────────────────────────────────────┐ │
-│  │                [🔓 Unlock Chapter - 0.1 $TIP]               │ │
+│  │                [🔓 Unlock Chapter - 0.5 $TIP]               │ │
 │  └─────────────────────────────────────────────────────────────┘ │
 │                                                                 │
 │  💡 Your current balance: 2.5 $TIP                             │
-│  💡 Balance after unlock: 2.4 $TIP                             │
-│  💡 Balance after reading: 2.5 $TIP                            │
+│  💡 Balance after unlock: 2.0 $TIP                             │
+│  💡 Balance after reading: 2.0 $TIP (no read rewards)          │
 │                                                                 │
 │  🔄 Need more $TIP? [Buy $TIP] [Convert $IP to $TIP]          │
 │                                                                 │
@@ -1795,7 +1795,7 @@ Date: June 1, 2025
 │                                                                 │
 │                   Chapter 4: Through the Portal                │
 │                                                                 │
-│  🔓 UNLOCKED • 📖 6 min read • 🎯 Earning 0.1 $TIP             │
+│  🔓 UNLOCKED • 📖 6 min read • 💰 Paid Content                │
 │                                                                 │
 │ ┌─────────────────────────────────────────────────────────────┐ │
 │ │                                                             │ │
@@ -1813,11 +1813,10 @@ Date: June 1, 2025
 │ └─────────────────────────────────────────────────────────────┘ │
 │                                                                 │
 │  📊 Reading Progress: ████████████████░░░░ 85%                 │
-│  🎁 Earning Progress: ████████████████░░░░ 85%                 │
 │                                                                 │
 │                 [← Previous] [Continue Reading →]              │
 │                                                                 │
-│  💡 Keep reading to earn your 0.1 $TIP reward!                 │
+│  💡 Premium content - no read rewards earned.                  │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -1838,9 +1837,9 @@ Date: June 1, 2025
 │                  🎉 Chapter 4 Complete!                        │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
-│            ✨ You've earned 0.1 $TIP tokens! ✨                │
+│            📖 Chapter 4 Complete! 📖                          │
 │                                                                 │
-│  💰 Updated balance: 2.5 $TIP (back to where you started!)     │
+│  💰 Updated balance: 2.0 $TIP (no read rewards for paid chapters) │
 │                                                                 │
 │  The chapter ended with Sarah discovering an ancient library   │
 │  filled with books that wrote themselves. But as she reached   │
@@ -1849,10 +1848,10 @@ Date: June 1, 2025
 │                                                                 │
 │  ┌─────────────────────────────────────────────────────────────┐ │
 │  │                  [🔓 Unlock Chapter 5]                     │ │
-│  │                     0.1 $TIP                               │ │
+│  │                     0.5 $TIP                               │ │
 │  └─────────────────────────────────────────────────────────────┘ │
 │                                                                 │
-│  🔥 Reading streak: 4 chapters • Bonus: +0.01 $TIP            │
+│  🔥 Reading streak: 4 chapters • Discovery rewards: 3 chapters │
 │                                                                 │
 │  ⚡ Quick actions:                                              │
 │  [❤️ Tip Author] [🔄 Remix This Chapter] [📱 Share Story]     │
@@ -1888,7 +1887,7 @@ Date: June 1, 2025
 │  🎯 Currently Reading                                           │
 │                                                                 │
 │  📖 The Detective's Portal (Chapter 4/12)                      │
-│  Next chapter: 0.1 $TIP • Earn: 0.1 $TIP                      │
+│  Next chapter: 0.5 $TIP • No read rewards                     │
 │  [Continue Reading →]                                           │
 │                                                                 │
 │  📖 Space Pirates Adventure (Chapter 2/8)                      │
