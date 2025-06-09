@@ -81,7 +81,7 @@
 ### 3. **Read-to-Earn Economics**
 
 **Traditional Reading**: Readers pay to consume content
-**StoryHouse.vip**: Readers earn $TIP tokens while reading (can exceed chapter costs)
+**StoryHouse.vip**: Readers earn $TIP tokens for reading first 3 chapters only (discovery rewards)
 
 ### 4. **AI-Powered Remix Economy**
 
@@ -101,7 +101,8 @@
 ### ⚡ **Immediate Impact**
 
 - **Monetize from Chapter 1** instead of waiting for complete book
-- **Readers earn while reading** - economic incentive for engagement
+- **Discovery rewards for readers** - earn tokens for reading first 3 chapters
+- **Premium content model** - chapters 4+ require payment to unlock
 - **Lower barrier to entry** for new authors
 - **Granular IP management** at both book and chapter levels
 - **Collaborative storytelling** - multiple authors can contribute to same universe
@@ -310,7 +311,8 @@ Our documentation has been completely restructured for easy navigation:
 
 ### **Features Available on Testnet**
 
-- ✅ **Read & Earn**: Earn $TIP tokens for every chapter you read
+- ✅ **Discovery Rewards**: Earn $TIP tokens for reading first 3 chapters
+- ✅ **Premium Content**: Pay-to-unlock model for chapters 4+
 - ✅ **AI-Powered Writing**: Create stories with GPT-4 assistance
 - ✅ **Remix & Earn**: Remix existing stories and earn licensing fees
 - ✅ **Wallet Integration**: Connect MetaMask for blockchain transactions
@@ -321,7 +323,7 @@ Our documentation has been completely restructured for easy navigation:
 ### **User Experience Highlights**
 
 - **Writers**: Create content with AI → Register chapter IP → Earn from sales & licensing
-- **Readers**: Browse stories → Read 3 chapters FREE → Connect wallet → Earn while reading
+- **Readers**: Browse stories → Read 3 chapters FREE → Connect wallet → Pay to unlock premium chapters
 - **Remixers**: Find content → Pay licensing fee → Create derivatives with AI → Earn revenue
 
 ### **Smart Contract Integration**
@@ -410,14 +412,14 @@ For detailed deployment instructions, see:
    - Clear value proposition for wallet connection
    - Transparent cost/benefit display
 
-3. **Connect Wallet & Earn** from chapter 4+
+3. **Connect Wallet & Pay** for chapter 4+
 
    - MetaMask integration
-   - Earn $TIP tokens while reading
-   - Reading rewards often exceed chapter costs
+   - Pay $TIP tokens to unlock premium chapters
+   - No read rewards for paid content
 
-4. **Track Progress & Earnings**
-   - Reading streak bonuses
+4. **Track Progress & Discovery Rewards**
+   - Discovery rewards from first 3 chapters
    - Token balance management
    - Social sharing features
 
@@ -644,9 +646,9 @@ Ready to see **chapter-level IP monetization** and **read-to-earn economics** in
 
 **"Democratizing intellectual property for the digital age"**
 
-Every chapter tells a story. Every story deserves to be monetized from day one. Every reader should be rewarded for their time and attention.
+Every chapter tells a story. Every story deserves to be monetized from day one. Discovery should be rewarded, premium content should be valued.
 
-**StoryHouse.vip** - Where chapters become assets, stories become sustainable income, and reading becomes profitable.
+**StoryHouse.vip** - Where chapters become assets, stories become sustainable income, and discovery becomes profitable.
 
 ---
 
