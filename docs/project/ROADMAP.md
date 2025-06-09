@@ -126,23 +126,148 @@ Build the world's first Web3 storytelling platform with **chapter-level IP asset
 
 ## 🚀 **UPCOMING PHASES**
 
-### Phase 6.0: Database Integration & User Management
+### Phase 6.0: Global Multi-Language IP Protection System 🌍
+
+**🎯 Vision:** Revolutionary global IP protection where one book registration grants copyright protection across ALL languages, maximizing author benefits and creating the world's first comprehensive multi-language IP ecosystem.
+
+#### Core Innovation: Universal Language Rights
+
+```
+Traditional Model:                StoryHouse.vip Model:
+📚 English book only             🌍 Global language protection
+🔒 Manual translation rights     ⚡ Automatic worldwide coverage  
+💸 Separate licensing per lang   💰 Unified revenue from all languages
+📝 No AI translation protection  🛡️ AI-proof IP monitoring
+🌐 Platform-by-platform rights   🚀 Universal cross-platform protection
+```
+
+#### Technical Implementation:
+
+**6.0.1: Enhanced IP Metadata System**
+- [ ] Multi-language rights declaration in book registration
+- [ ] Original language + protected languages tracking
+- [ ] Translation policy configuration (author-only, licensed, open)
+- [ ] Language-specific royalty rate settings
+- [ ] Master IP asset with derivative language assets
+
+**6.0.2: Smart Contract Architecture**
+```typescript
+interface MultiLanguageBookMetadata {
+  languageRights: {
+    originalLanguage: string        // "en", "zh", "ko", "ja", "es"
+    protectedLanguages: string[]    // ["all"] or specific ["zh", "ko"]
+    translationPolicy: "author-only" | "licensed" | "open"
+    royaltyRates: {
+      [language: string]: number   // Different rates per market
+    }
+    autoProtection: boolean         // AI monitoring enabled
+  }
+  ipAssets: {
+    master: string                  // Original language IP asset ID
+    derivatives: {
+      [language: string]: string   // Translation IP asset IDs
+    }
+  }
+}
+```
+
+**6.0.3: Translation Rights Marketplace**
+- [ ] Translation licensing dashboard for authors
+- [ ] Translator verification and rating system
+- [ ] Automated bidding system for translation projects
+- [ ] Quality assurance and review workflows
+- [ ] Revenue sharing automation between authors/translators
+
+**6.0.4: AI-Powered IP Protection**
+- [ ] Cross-platform monitoring for unauthorized translations
+- [ ] Automated detection of derivative works in multiple languages
+- [ ] Blockchain-based proof of original publication
+- [ ] DMCA/takedown automation for IP violations
+- [ ] Legal integration for enforcement actions
+
+#### Revolutionary Use Cases:
+
+**For Authors:**
+- 🌍 **Global Protection**: One registration = worldwide language rights
+- 💰 **Maximum Revenue**: Control all translation licensing
+- 🛡️ **AI-Proof Rights**: Protection against unauthorized AI translations
+- 📈 **Market Expansion**: Easy entry into international markets
+- ⚡ **Future-Ready**: Protection for languages not yet translated
+
+**For Translators:**
+- 🎯 **Clear Licensing**: Transparent rights and revenue sharing
+- 🏆 **Quality Verification**: Blockchain-based translator reputation
+- 💸 **Automated Revenue**: Smart contract payment distribution
+- 🌟 **Professional Recognition**: Verified translator credentials
+- 🔄 **Ongoing Royalties**: Percentage of translation revenues
+
+**For Readers:**
+- 🌐 **Native Language Access**: Stories available in their language
+- ✅ **Quality Assurance**: Verified, high-quality translations
+- 💰 **Read-to-Earn**: Earn tokens reading in any language
+- 🔍 **Cross-Language Discovery**: Find stories across language barriers
+
+#### Business Model Expansion:
+
+**Revenue Streams:**
+- Platform fees on translation licensing deals (5-10%)
+- Premium IP monitoring and protection services
+- Legal services for IP violation assistance
+- Official translation certification and verification
+- Cross-language recommendation engine licensing
+
+**Market Positioning:**
+- **"Global IP Protection for Digital Authors"**
+- **"One Registration, Worldwide Rights"** 
+- **"AI-Proof Your Creative Works"**
+- **"The First Truly Global Publishing Platform"**
+
+#### Implementation Phases:
+
+**6.0.5: Foundation (Q2 2025)**
+- [ ] Multi-language metadata schema implementation
+- [ ] Basic language rights declaration in book registration
+- [ ] Story Protocol multi-derivative IP registration
+- [ ] Language rights dashboard UI
+
+**6.0.6: Marketplace (Q3 2025)**
+- [ ] Translation rights licensing system
+- [ ] Translator verification and rating platform
+- [ ] Automated revenue distribution smart contracts
+- [ ] Quality assurance workflows
+
+**6.0.7: Protection & Monitoring (Q4 2025)**
+- [ ] AI-powered translation monitoring system
+- [ ] Cross-platform IP violation detection
+- [ ] Legal integration for enforcement
+- [ ] Automated takedown request generation
+
+#### Success Metrics:
+- **Global Coverage**: Books registered with multi-language protection (target: 95%)
+- **Translation Activity**: Licensed translation projects per month (target: 500+)
+- **Revenue Growth**: Multi-language revenue increase (target: 300% boost)
+- **Market Expansion**: Active languages on platform (target: 15+ languages)
+- **IP Protection**: Successful violation detections and takedowns (target: 99% success rate)
+
+### Phase 7.0: Database Integration & User Management
 
 **🎯 Vision:** Transition from R2-only to comprehensive data layer with advanced user management
 
 #### Planned Implementation:
 
-**6.0.1: Database Layer**
+**7.0.1: Database Layer**
 - [ ] PostgreSQL with Prisma ORM integration
 - [ ] User authentication and session management
 - [ ] Story and chapter data persistence
 - [ ] Blockchain transaction logging
+- [ ] Multi-language content management
 
-**6.0.2: Advanced User Features**
+**7.0.2: Advanced User Features**
 - [ ] User profiles and reputation systems
 - [ ] Social features and community engagement
 - [ ] Advanced analytics and dashboard
 - [ ] Multi-wallet support and account linking
+- [ ] Cross-language user preferences
 
 ### Phase 4.4: Revolutionary Chapter-Level IP System with Read-to-Earn ✅
 
@@ -261,7 +386,7 @@ interface ChapterIP {
 
 ## 🔮 **UPCOMING PHASES**
 
-### Phase 5: Production Foundation
+### Phase 8: Production Foundation
 
 **Database & Infrastructure:**
 
@@ -278,7 +403,7 @@ interface ChapterIP {
 - [ ] Creator analytics dashboard
 - [ ] Reader achievement system
 
-### Phase 6: Scale & Optimize
+### Phase 9: Scale & Optimize
 
 **Multi-Chain Support:**
 
@@ -294,7 +419,7 @@ interface ChapterIP {
 - [ ] Personalized reading suggestions
 - [ ] AI-powered content moderation
 
-### Phase 7: Ecosystem Expansion
+### Phase 10: Ecosystem Expansion
 
 **Creator Economy:**
 
@@ -305,12 +430,12 @@ interface ChapterIP {
 
 **Global Reach:**
 
-- [ ] Multi-language support and localization
 - [ ] Region-specific content and compliance
 - [ ] Mobile applications (iOS/Android)
 - [ ] Community governance features
+- [ ] Integration with global publishing networks
 
-### Phase 8: Advanced Monetization
+### Phase 11: Advanced Monetization
 
 **Sophisticated Financial Tools:**
 
