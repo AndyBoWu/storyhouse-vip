@@ -81,8 +81,14 @@ export class R2Service {
     content: string | Buffer,
     options: UploadOptions = {}
   ): Promise<string> {
+    console.log('🚀 R2Service.uploadContent called with key:', key)
+    console.log('📊 Content type:', options.contentType || 'text/plain')
+    console.log('📏 Content size:', typeof content === 'string' ? content.length : content.length, 'bytes')
+    
     try {
       const client = getR2Client()
+      console.log('✅ R2 client obtained successfully')
+      
       const command = new PutObjectCommand({
         Bucket: BUCKET_NAME,
         Key: key,
@@ -92,13 +98,26 @@ export class R2Service {
         // R2 doesn't support ACLs - objects are public via bucket settings
       })
 
+      console.log('📤 Sending PutObjectCommand to R2...')
+      console.log('🏷️ Bucket:', BUCKET_NAME)
+      console.log('🔑 Key:', key)
+      
       await client.send(command)
+      console.log('✅ R2 upload completed successfully')
 
       // Return public URL
-      return `${PUBLIC_URL}/${key}`
+      const publicUrl = `${PUBLIC_URL}/${key}`
+      console.log('🌐 Generated public URL:', publicUrl)
+      return publicUrl
     } catch (error) {
-      console.error('Error uploading to R2:', error)
-      throw new Error('Failed to upload content')
+      console.error('❌ Error uploading to R2:', error)
+      console.error('❌ Error details:', {
+        name: error instanceof Error ? error.name : 'Unknown',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        code: (error as any)?.code || 'N/A',
+        statusCode: (error as any)?.$metadata?.httpStatusCode || 'N/A'
+      })
+      throw new Error(`Failed to upload content to R2: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
 

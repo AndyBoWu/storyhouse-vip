@@ -27,7 +27,8 @@ export class BookStorageService {
    */
   static generateBookPaths(authorAddress: AuthorAddress, slug: string): BookStoragePath {
     const bookId = `${authorAddress.toLowerCase()}-${slug}`
-    const bookFolder = `${BOOK_SYSTEM_CONSTANTS.BOOKS_ROOT_PATH}/${bookId}`
+    // Store with structure: books/{authorAddress}/{slug}/ (remove leading slash)
+    const bookFolder = `${BOOK_SYSTEM_CONSTANTS.BOOKS_ROOT_PATH.replace(/^\//, '')}/${authorAddress.toLowerCase()}/${slug}`
     
     return {
       bookFolder,
@@ -81,6 +82,9 @@ export class BookStorageService {
     try {
       const metadataJson = JSON.stringify(metadata, null, 2)
       
+      console.log('📂 Uploading to path:', paths.metadataPath)
+      console.log('📝 Metadata size:', metadataJson.length, 'characters')
+      
       const url = await R2Service.uploadContent(
         paths.metadataPath,
         metadataJson,
@@ -98,9 +102,10 @@ export class BookStorageService {
         }
       )
       
+      console.log('✅ Successfully uploaded book metadata to:', url)
       return url
     } catch (error) {
-      console.error('Error storing book metadata:', error)
+      console.error('❌ Error storing book metadata:', error)
       throw new Error(`Failed to store book metadata for ${metadata.bookId}`)
     }
   }

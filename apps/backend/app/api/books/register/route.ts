@@ -6,7 +6,7 @@ import {
   AuthorAddress,
   BOOK_SYSTEM_CONSTANTS 
 } from '@storyhouse/shared'
-import { BookStorageService } from '../../../lib/storage/bookStorage'
+import { BookStorageService } from '../../../../lib/storage/bookStorage'
 
 /**
  * POST /api/books/register
@@ -188,6 +188,7 @@ export async function POST(request: NextRequest) {
     
     try {
       console.log('💾 Creating book metadata...')
+      console.log('📝 Book details:', { authorAddress, slug, title, description, genres, contentRating })
       
       const bookMetadata = BookStorageService.createInitialBookMetadata(
         authorAddress,
@@ -200,6 +201,13 @@ export async function POST(request: NextRequest) {
         undefined, // parentBook - this is an original book
         undefined  // branchPoint - this is an original book
       )
+      
+      console.log('📋 Generated book metadata:', {
+        bookId: bookMetadata.bookId,
+        title: bookMetadata.title,
+        authorAddress: bookMetadata.authorAddress,
+        slug: bookMetadata.slug
+      })
 
       // Add cover URL if uploaded
       if (coverUrl) {
@@ -212,13 +220,14 @@ export async function POST(request: NextRequest) {
       }
 
       // Store book metadata
-      await BookStorageService.storeBookMetadata(
+      console.log('🔄 Storing book metadata to R2...')
+      const metadataUrl = await BookStorageService.storeBookMetadata(
         authorAddress,
         slug,
         bookMetadata
       )
       
-      console.log('✅ Book metadata stored successfully')
+      console.log('✅ Book metadata stored successfully at:', metadataUrl)
 
       // ===== SUCCESS RESPONSE =====
       
