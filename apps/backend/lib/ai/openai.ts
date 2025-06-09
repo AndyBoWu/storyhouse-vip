@@ -18,6 +18,8 @@ export interface StoryGenerationRequest {
   emojis?: string[]
   chapterNumber?: number
   previousContent?: string
+  storyId?: string
+  bookId?: string
 }
 
 export interface StoryGenerationResponse {
@@ -26,6 +28,9 @@ export interface StoryGenerationResponse {
   wordCount: number
   readingTime: number
   themes: string[]
+  storyId?: string
+  bookId?: string
+  chapterNumber: number
 }
 
 export async function generateStoryChapter(request: StoryGenerationRequest): Promise<StoryGenerationResponse> {
@@ -35,7 +40,9 @@ export async function generateStoryChapter(request: StoryGenerationRequest): Pro
     moods = [],
     emojis = [],
     chapterNumber = 1,
-    previousContent = ''
+    previousContent = '',
+    storyId,
+    bookId
   } = request
 
   // Build context from selections
@@ -118,7 +125,10 @@ Build on the established story while advancing the plot and deepening character 
       content: actualContent,
       wordCount,
       readingTime,
-      themes
+      themes,
+      storyId,
+      bookId,
+      chapterNumber
     }
   } catch (error) {
     console.error('OpenAI API error:', error)

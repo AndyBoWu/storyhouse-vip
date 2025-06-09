@@ -17,6 +17,8 @@ interface EnhancedStoryGenerationRequest {
   emojis: string[]
   chapterNumber: number
   previousContent: string
+  storyId?: string
+  bookId?: string
   ipOptions?: Partial<EnhancedStoryCreationParams>
   collectionOptions?: Partial<EnhancedStoryCreationParams>
   authorAddress?: string
@@ -44,6 +46,8 @@ export async function POST(request: NextRequest) {
       emojis: Array.isArray(body.emojis) ? body.emojis : [],
       chapterNumber: body.chapterNumber || 1,
       previousContent: body.previousContent || '',
+      storyId: body.storyId,
+      bookId: body.bookId,
       // Enhanced options
       ipOptions: body.ipOptions || undefined,
       collectionOptions: body.collectionOptions || undefined,

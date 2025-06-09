@@ -132,6 +132,13 @@ export const apiClient = {
     console.log('📋 API Client: Books response:', result)
     return result
   },
+
+  async getBookChapters(bookId: string) {
+    console.log('📚 API Client: Getting chapters for book:', bookId)
+    const result = await apiRequest(`/api/books/${bookId}/chapters`)
+    console.log('📄 API Client: Chapters response:', result)
+    return result
+  },
   
   // Discovery operations
   async getDiscovery(params: {
