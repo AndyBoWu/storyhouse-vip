@@ -214,12 +214,6 @@ export default function MyStoriesPage() {
       <div className="container mx-auto px-6 py-8">
         <div className="max-w-6xl mx-auto">
           {/* Page Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
-              👑 My Library
-            </h1>
-            <p className="text-gray-600 mt-2">Your registered books</p>
-          </div>
 
           {/* Wallet Connection Check - only render after mount to prevent hydration mismatch */}
           {!mounted ? (
