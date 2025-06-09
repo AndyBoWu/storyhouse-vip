@@ -569,10 +569,14 @@ function ChapterWritingPageContent() {
                 <div className="space-y-3 mb-6">
                   <button
                     onClick={() => setIsPreviewMode(!isPreviewMode)}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-700"
+                    className={`w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${
+                      isPreviewMode 
+                        ? 'border border-gray-300 hover:bg-gray-50 text-gray-700'
+                        : 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white'
+                    }`}
                   >
                     <Eye className="w-4 h-4" />
-                    {isPreviewMode ? 'Edit' : 'Preview'}
+                    {isPreviewMode ? 'Edit' : 'Publish'}
                   </button>
                   
                   <button
