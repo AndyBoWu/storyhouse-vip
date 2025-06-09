@@ -8,6 +8,7 @@ import { useAccount } from 'wagmi'
 import { buildChapterUrl } from '@/lib/utils/slugify'
 import { apiClient } from '@/lib/api-client'
 import dynamic from 'next/dynamic'
+import QuickNavigation from '@/components/ui/QuickNavigation'
 
 // Dynamically import WalletConnect to avoid hydration issues
 const WalletConnect = dynamic(() => import('@/components/WalletConnect'), {
@@ -185,7 +186,10 @@ export default function MyStoriesPage() {
               <ArrowLeft className="w-4 h-4" />
               Back to StoryHouse
             </Link>
-            <WalletConnect />
+            <div className="flex items-center gap-4">
+              <QuickNavigation currentPage="own" />
+              <WalletConnect />
+            </div>
           </div>
         </div>
       </header>

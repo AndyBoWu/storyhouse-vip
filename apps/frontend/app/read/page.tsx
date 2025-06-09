@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { ArrowLeft, Search, Filter, TrendingUp, Clock, Star } from 'lucide-react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
+import QuickNavigation from '@/components/ui/QuickNavigation'
 
 // Dynamically import WalletConnect to avoid hydration issues
 const WalletConnect = dynamic(() => import('@/components/WalletConnect'), {
@@ -105,6 +106,7 @@ export default function ReadPage() {
               <div className="text-sm text-gray-500">
                 Discover amazing stories from creators worldwide
               </div>
+              <QuickNavigation currentPage="read" />
               <WalletConnect />
             </div>
           </div>
