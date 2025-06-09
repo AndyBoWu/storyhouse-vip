@@ -8,6 +8,7 @@ import { useSearchParams } from 'next/navigation'
 import { useAccount } from 'wagmi'
 import { apiClient } from '@/lib/api-client'
 import StoryGenerationInterface from '@/components/writing/StoryGenerationInterface'
+import QuickNavigation from '@/components/ui/QuickNavigation'
 
 // Dynamically import WalletConnect to avoid hydration issues
 const WalletConnect = dynamic(() => import('@/components/WalletConnect'), {
@@ -235,7 +236,10 @@ function WritePageContent() {
               <span>Back to StoryHouse</span>
             </Link>
 
-            <WalletConnect />
+            <div className="flex items-center gap-4">
+              <QuickNavigation currentPage="write" />
+              <WalletConnect />
+            </div>
           </div>
         </div>
       </header>
