@@ -1,54 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { ListObjectsV2Command, GetObjectCommand } from '@aws-sdk/client-s3'
-import { S3Client } from '@aws-sdk/client-s3'
 
-// Import R2Service from our improved lib
+// Import R2Service from our improved lib - this has the proven authentication fix
 import { R2Service } from '../../../lib/r2'
 
-// Initialize R2 client with better error handling  
-let r2Client: S3Client
-
-function initializeR2Client(): S3Client {
-  // Log environment variables for debugging (without revealing sensitive data)
-  console.log('🔧 Initializing R2 client...')
-  console.log('   R2_ENDPOINT exists:', !!process.env.R2_ENDPOINT)
-  console.log('   R2_ACCESS_KEY_ID exists:', !!process.env.R2_ACCESS_KEY_ID)
-  console.log('   R2_SECRET_ACCESS_KEY exists:', !!process.env.R2_SECRET_ACCESS_KEY)
-  console.log('   R2_BUCKET_NAME exists:', !!process.env.R2_BUCKET_NAME)
-  
-  const requiredEnvVars = ['R2_ENDPOINT', 'R2_ACCESS_KEY_ID', 'R2_SECRET_ACCESS_KEY', 'R2_BUCKET_NAME']
-  const missingVars = requiredEnvVars.filter(varName => !process.env[varName])
-  
-  if (missingVars.length > 0) {
-    throw new Error(`Missing required R2 environment variables: ${missingVars.join(', ')}`)
-  }
-
-  const client = new S3Client({
-    region: 'auto',
-    endpoint: `https://${process.env.R2_ENDPOINT || ''}`,
-    credentials: {
-      accessKeyId: process.env.R2_ACCESS_KEY_ID || '',
-      secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
-    },
-    // Add additional options to help with header issues
-    forcePathStyle: false,
-    useAccelerateEndpoint: false,
-    useDualstackEndpoint: false,
-  })
-  
-  console.log('✅ R2 client initialized successfully')
-  return client
-}
-
-// Lazy initialization of R2 client
-function getR2Client(): S3Client {
-  if (!r2Client) {
-    r2Client = initializeR2Client()
-  }
-  return r2Client
-}
-
-const BUCKET_NAME = (process.env.R2_BUCKET_NAME || '').trim().replace(/[\r\n]/g, '')
 const PUBLIC_URL = (process.env.R2_PUBLIC_URL || '').trim().replace(/[\r\n]/g, '')
 
 export interface StoryFromR2 {
@@ -89,29 +43,16 @@ export interface StoryFromR2 {
  */
 export async function GET(request: NextRequest) {
   try {
-    console.log('📖 Fetching stories from R2...')
+    console.log('📖 Fetching stories from R2 using R2Service...')
     console.log('🔧 R2 Configuration:')
-    console.log('   BUCKET_NAME:', BUCKET_NAME)
     console.log('   PUBLIC_URL:', PUBLIC_URL)
-    console.log('   R2_ENDPOINT:', process.env.R2_ENDPOINT)
-    console.log('   Has R2_ACCESS_KEY_ID:', !!process.env.R2_ACCESS_KEY_ID)
-    console.log('   Has R2_SECRET_ACCESS_KEY:', !!process.env.R2_SECRET_ACCESS_KEY)
-
-    // Get R2 client with proper initialization
-    const client = getR2Client()
-
-    // List all objects in the stories/ prefix
-    const listCommand = new ListObjectsV2Command({
-      Bucket: BUCKET_NAME,
-      Prefix: 'stories/',
-      Delimiter: '/',
-    })
 
     console.log('🔍 Listing objects with prefix "stories/"...')
 
     let listResponse
     try {
-      listResponse = await client.send(listCommand)
+      // Use R2Service which has the proven authentication fix
+      listResponse = await R2Service.listObjects('stories/', '/')
       console.log('✅ R2 connection successful')
       console.log('📊 Response:', {
         KeyCount: listResponse.KeyCount,
@@ -133,14 +74,8 @@ export async function GET(request: NextRequest) {
       console.log('🔍 Let me check for individual files...')
 
       // Also try listing all objects without delimiter to see what's actually there
-      const allObjectsCommand = new ListObjectsV2Command({
-        Bucket: BUCKET_NAME,
-        Prefix: 'stories/',
-        MaxKeys: 100
-      })
-
       try {
-        const allObjectsResponse = await client.send(allObjectsCommand)
+        const allObjectsResponse = await R2Service.listObjects('stories/', undefined, 100)
         console.log('📋 All objects in stories/ prefix:')
         allObjectsResponse.Contents?.forEach(obj => {
           console.log(`   - ${obj.Key} (${obj.Size} bytes, ${obj.LastModified})`)
@@ -152,7 +87,6 @@ export async function GET(request: NextRequest) {
             stories: [],
             message: 'No stories found in R2 storage - the stories/ directory is empty',
             debug: {
-              bucket: BUCKET_NAME,
               prefix: 'stories/',
               objectCount: 0
             }
@@ -167,7 +101,6 @@ export async function GET(request: NextRequest) {
         stories: [],
         message: 'No story directories found in R2',
         debug: {
-          bucket: BUCKET_NAME,
           prefix: 'stories/',
           commonPrefixes: 0
         }
@@ -197,13 +130,8 @@ export async function GET(request: NextRequest) {
       console.log(`📖 Processing story ${index + 1}/${prefixesToProcess.length}: ${storyId}`)
 
       try {
-        // List chapters for this story
-        const chaptersCommand = new ListObjectsV2Command({
-          Bucket: BUCKET_NAME,
-          Prefix: `stories/${storyId}/chapters/`,
-        })
-
-        const chaptersResponse = await client.send(chaptersCommand)
+        // List chapters for this story using R2Service
+        const chaptersResponse = await R2Service.listObjects(`stories/${storyId}/chapters/`)
         const chapterCount = chaptersResponse.KeyCount || 0
         console.log(`   📚 Found ${chapterCount} chapters`)
 
@@ -218,22 +146,10 @@ export async function GET(request: NextRequest) {
         console.log(`   📄 Fetching first chapter: ${firstChapterKey}`)
 
         try {
-          const getObjectCommand = new GetObjectCommand({
-            Bucket: BUCKET_NAME,
-            Key: firstChapterKey,
-          })
-
-          const chapterResponse = await client.send(getObjectCommand)
-          console.log(`   📡 Chapter fetch successful from R2`)
-
-          if (!chapterResponse.Body) {
-            console.log(`   ❌ No body in R2 response`)
-            continue
-          }
-
-          // Convert the readable stream to string
-          const chapterText = await chapterResponse.Body.transformToString()
+          // Use R2Service to get chapter content
+          const chapterText = await R2Service.getContent(firstChapterKey)
           const chapterData = JSON.parse(chapterText)
+          console.log(`   📡 Chapter fetch successful from R2`)
           console.log(`   ✅ Chapter data loaded:`, {
             title: chapterData.title,
             hasContent: !!chapterData.content,
@@ -317,7 +233,6 @@ export async function GET(request: NextRequest) {
       stories,
       count: stories.length,
       debug: {
-        bucket: BUCKET_NAME,
         totalDirectories: listResponse.CommonPrefixes.length,
         processedDirectories: prefixesToProcess.length,
         processedStories: stories.length

@@ -58,12 +58,37 @@ export async function GET(
         hasContent: !!chapterData.content
       })
 
-      return NextResponse.json({
-        success: true,
-        data: chapterData,
-        storyId,
-        chapterNumber: chapterNum
-      })
+      // Fetch book metadata to get additional info
+      const bookMetadataKey = `books/${storyId}/metadata.json`;
+      let bookMetadata: any = {};
+      
+      try {
+        const bookMetadataContent = await R2Service.getContent(bookMetadataKey);
+        if (bookMetadataContent) {
+          bookMetadata = JSON.parse(bookMetadataContent);
+        }
+      } catch (err) {
+        console.log('Could not fetch book metadata:', err);
+      }
+
+      // Format response for chapter reading page
+      const formattedResponse = {
+        bookId: storyId,
+        bookTitle: bookMetadata.title || chapterData.bookTitle || 'Unknown Book',
+        chapterNumber: chapterNum,
+        title: chapterData.title,
+        content: chapterData.content,
+        author: chapterData.metadata?.authorName || chapterData.author || 'Anonymous',
+        authorAddress: chapterData.metadata?.authorAddress || chapterData.authorAddress || '',
+        wordCount: chapterData.wordCount || 0,
+        readingTime: chapterData.readingTime || Math.ceil((chapterData.wordCount || 0) / 200),
+        createdAt: chapterData.createdAt || chapterData.metadata?.createdAt || new Date().toISOString(),
+        nextChapter: chapterNum + 1,
+        previousChapter: chapterNum > 1 ? chapterNum - 1 : undefined,
+        totalChapters: bookMetadata.chapters || chapterData.totalChapters || 1
+      };
+
+      return NextResponse.json(formattedResponse)
 
     } catch (r2Error) {
       console.error(`❌ Failed to fetch chapter ${chapterNumber} for story ${storyId}:`, r2Error)

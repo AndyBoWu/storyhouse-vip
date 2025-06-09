@@ -22,6 +22,7 @@ import CollectionSection from '../../../components/creator/CollectionSection'
 import IPStatusIndicator from '../../../components/creator/IPStatusIndicator'
 import StoryContentDisplay from '../../../components/ui/StoryContentDisplay'
 import PublishingModal from '../../../components/publishing/PublishingModal'
+import QuickNavigation from '../../../components/ui/QuickNavigation'
 import type {
   EnhancedGeneratedStory,
   EnhancedStoryCreationParams
@@ -293,7 +294,10 @@ function NewStoryPageContent() {
               <span>Back to Write Options</span>
             </Link>
 
-            <WalletConnect />
+            <div className="flex items-center gap-4">
+              <QuickNavigation currentPage="write" />
+              <WalletConnect />
+            </div>
           </div>
         </div>
       </header>

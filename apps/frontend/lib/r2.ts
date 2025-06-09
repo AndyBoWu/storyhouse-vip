@@ -2,23 +2,70 @@ import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } fro
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
 // Initialize R2 client with proper configuration for Cloudflare R2
-const r2Client = new S3Client({
-  region: 'auto',
-  endpoint: `https://${process.env.R2_ENDPOINT}`,
-  credentials: {
-    accessKeyId: process.env.R2_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
-  },
-  // Disable path-style URLs for R2 compatibility
-  forcePathStyle: false,
-  // Use virtual hosted-style URLs
-  useAccelerateEndpoint: false,
-  // Disable global bucket endpoints
-  useDualstackEndpoint: false,
-})
+let r2Client: S3Client
 
-const BUCKET_NAME = process.env.R2_BUCKET_NAME!
-const PUBLIC_URL = process.env.R2_PUBLIC_URL!
+function initializeR2Client(): S3Client {
+  // Validate environment variables
+  const requiredEnvVars = ['R2_ENDPOINT', 'R2_ACCESS_KEY_ID', 'R2_SECRET_ACCESS_KEY']
+  const missingVars = requiredEnvVars.filter(varName => !process.env[varName])
+  
+  if (missingVars.length > 0) {
+    throw new Error(`Missing required R2 environment variables: ${missingVars.join(', ')}`)
+  }
+
+  // Clean up environment variables to remove any extra quotes, whitespace, and newlines
+  const cleanAccessKeyId = (process.env.R2_ACCESS_KEY_ID || '').trim().replace(/^["']|["']$/g, '').replace(/[\r\n]/g, '')
+  const cleanSecretAccessKey = (process.env.R2_SECRET_ACCESS_KEY || '').trim().replace(/^["']|["']$/g, '').replace(/[\r\n]/g, '')
+  const cleanEndpoint = (process.env.R2_ENDPOINT || '').trim().replace(/^["']|["']$/g, '').replace(/[\r\n]/g, '')
+
+  console.log('🔧 R2 Configuration:')
+  console.log('   Access Key ID length:', cleanAccessKeyId.length)
+  console.log('   Secret Access Key length:', cleanSecretAccessKey.length)
+  console.log('   Endpoint:', cleanEndpoint)
+
+  // Additional validation to ensure credentials are clean
+  if (!cleanAccessKeyId || !cleanSecretAccessKey || !cleanEndpoint) {
+    throw new Error('R2 credentials are empty after cleaning')
+  }
+
+  // Log cleaned values for debugging (without exposing secrets)
+  console.log('🔍 Cleaned R2 values:')
+  console.log('   Access Key ID:', cleanAccessKeyId.substring(0, 8) + '...')
+  console.log('   Has Secret Key:', !!cleanSecretAccessKey)
+  console.log('   Endpoint:', cleanEndpoint)
+
+  return new S3Client({
+    region: 'auto',
+    endpoint: `https://${cleanEndpoint}`,
+    credentials: {
+      accessKeyId: cleanAccessKeyId,
+      secretAccessKey: cleanSecretAccessKey,
+    },
+    // R2-specific configuration
+    forcePathStyle: false,
+    // Disable AWS-specific features
+    useAccelerateEndpoint: false,
+    useDualstackEndpoint: false,
+    // Add custom headers to ensure proper encoding
+    requestHandler: {
+      metadata: {
+        handlerProtocol: 'https',
+      }
+    }
+  })
+}
+
+// Lazy initialization of R2 client
+function getR2Client(): S3Client {
+  if (!r2Client) {
+    r2Client = initializeR2Client()
+  }
+  return r2Client
+}
+
+// Clean environment variables for bucket configuration
+const BUCKET_NAME = (process.env.R2_BUCKET_NAME || '').trim().replace(/^["']|["']$/g, '').replace(/[\r\n]/g, '')
+const PUBLIC_URL = (process.env.R2_PUBLIC_URL || '').trim().replace(/^["']|["']$/g, '').replace(/[\r\n]/g, '')
 
 export interface UploadOptions {
   contentType?: string
@@ -34,7 +81,14 @@ export class R2Service {
     content: string | Buffer,
     options: UploadOptions = {}
   ): Promise<string> {
+    console.log('🚀 R2Service.uploadContent called with key:', key)
+    console.log('📊 Content type:', options.contentType || 'text/plain')
+    console.log('📏 Content size:', typeof content === 'string' ? content.length : content.length, 'bytes')
+    
     try {
+      const client = getR2Client()
+      console.log('✅ R2 client obtained successfully')
+      
       const command = new PutObjectCommand({
         Bucket: BUCKET_NAME,
         Key: key,
@@ -44,13 +98,26 @@ export class R2Service {
         // R2 doesn't support ACLs - objects are public via bucket settings
       })
 
-      await r2Client.send(command)
+      console.log('📤 Sending PutObjectCommand to R2...')
+      console.log('🏷️ Bucket:', BUCKET_NAME)
+      console.log('🔑 Key:', key)
+      
+      await client.send(command)
+      console.log('✅ R2 upload completed successfully')
 
       // Return public URL
-      return `${PUBLIC_URL}/${key}`
+      const publicUrl = `${PUBLIC_URL}/${key}`
+      console.log('🌐 Generated public URL:', publicUrl)
+      return publicUrl
     } catch (error) {
-      console.error('Error uploading to R2:', error)
-      throw new Error('Failed to upload content')
+      console.error('❌ Error uploading to R2:', error)
+      console.error('❌ Error details:', {
+        name: error instanceof Error ? error.name : 'Unknown',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        code: (error as any)?.code || 'N/A',
+        statusCode: (error as any)?.$metadata?.httpStatusCode || 'N/A'
+      })
+      throw new Error(`Failed to upload content to R2: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
 
@@ -59,12 +126,13 @@ export class R2Service {
    */
   static async getContent(key: string): Promise<string> {
     try {
+      const client = getR2Client()
       const command = new GetObjectCommand({
         Bucket: BUCKET_NAME,
         Key: key,
       })
 
-      const response = await r2Client.send(command)
+      const response = await client.send(command)
       const content = await response.Body?.transformToString()
 
       if (!content) {
@@ -83,12 +151,13 @@ export class R2Service {
    */
   static async deleteContent(key: string): Promise<void> {
     try {
+      const client = getR2Client()
       const command = new DeleteObjectCommand({
         Bucket: BUCKET_NAME,
         Key: key,
       })
 
-      await r2Client.send(command)
+      await client.send(command)
     } catch (error) {
       console.error('Error deleting from R2:', error)
       throw new Error('Failed to delete content')
@@ -100,12 +169,13 @@ export class R2Service {
    */
   static async getSignedUrl(key: string, expiresIn: number = 3600): Promise<string> {
     try {
+      const client = getR2Client()
       const command = new GetObjectCommand({
         Bucket: BUCKET_NAME,
         Key: key,
       })
 
-      return await getSignedUrl(r2Client, command, { expiresIn })
+      return await getSignedUrl(client, command, { expiresIn })
     } catch (error) {
       console.error('Error generating signed URL:', error)
       throw new Error('Failed to generate signed URL')

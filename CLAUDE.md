@@ -133,6 +133,12 @@ Claude has comprehensive permissions to work effectively on this project:
 - Confirm destructive operations
 - Warn before mainnet operations
 
+### 📝 Git Commit Rules
+- **NEVER include Co-Authored-By lines** - The repository owner is the sole author
+- **NEVER add Claude attribution** in commit messages
+- Use standard commit message format without AI attribution
+- Keep commit messages professional and technical only
+
 ## Important Notes from Cursor Rules
 
 1. Avoid code duplication - check existing implementations first
