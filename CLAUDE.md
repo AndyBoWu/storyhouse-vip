@@ -4,6 +4,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
+**⚠️ MONOREPO STRUCTURE ⚠️**
+This is a monorepo containing three main components:
+- `apps/frontend/` - Next.js frontend application (port 3001)
+- `apps/backend/` - Next.js API backend (port 3002)  
+- `packages/contracts/` - Solidity smart contracts
+- `packages/shared/` - Shared TypeScript utilities
+
+**Always be aware of the current working directory and use correct paths when navigating between apps/packages.**
+
 StoryHouse.vip is a revolutionary Web3 storytelling platform built on Story Protocol that enables:
 - Chapter-level IP asset management ($50-500 vs $1000+ for full books)
 - Read-to-earn mechanics where readers earn $TIP tokens while reading
