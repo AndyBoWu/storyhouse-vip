@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3'
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, ListObjectsV2Command } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
 // Initialize R2 client with proper configuration for Cloudflare R2
@@ -194,5 +194,25 @@ export class R2Service {
    */
   static generateStoryKey(storyId: string): string {
     return `stories/${storyId}/metadata.json`
+  }
+
+  /**
+   * List objects in R2 with prefix
+   */
+  static async listObjects(prefix: string, delimiter?: string, maxKeys?: number) {
+    try {
+      const client = getR2Client()
+      const command = new ListObjectsV2Command({
+        Bucket: BUCKET_NAME,
+        Prefix: prefix,
+        Delimiter: delimiter,
+        MaxKeys: maxKeys,
+      })
+
+      return await client.send(command)
+    } catch (error) {
+      console.error('Error listing objects from R2:', error)
+      throw new Error(`Failed to list objects: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
   }
 }
