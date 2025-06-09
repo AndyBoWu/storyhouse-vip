@@ -15,33 +15,6 @@ const WalletConnect = dynamic(() => import('@/components/WalletConnect'), {
   loading: () => <div className="w-24 h-10 bg-gray-200 rounded-full animate-pulse"></div>
 })
 
-interface ExistingStory {
-  id: string
-  title: string
-  genre: string
-  chapters: number
-  lastUpdated: string
-  earnings: number
-  preview: string
-  authorAddress?: string
-  authorName?: string
-  // Enhanced metadata
-  contentRating?: string
-  unlockPrice?: number
-  readReward?: number
-  licensePrice?: number
-  isRemixable?: boolean
-  totalReads?: number
-  averageRating?: number
-  wordCount?: number
-  readingTime?: number
-  mood?: string
-  tags?: string[]
-  qualityScore?: number
-  originalityScore?: number
-  isRemix?: boolean
-  generationMethod?: string
-}
 
 interface RegisteredBook {
   id: string
@@ -65,9 +38,7 @@ interface RegisteredBook {
 export default function MyStoriesPage() {
   const router = useRouter()
   const { address: connectedAddress, isConnected } = useAccount()
-  const [existingStories, setExistingStories] = useState<ExistingStory[]>([])
   const [registeredBooks, setRegisteredBooks] = useState<RegisteredBook[]>([])
-  const [isLoadingStories, setIsLoadingStories] = useState(false)
   const [isLoadingBooks, setIsLoadingBooks] = useState(false)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [mounted, setMounted] = useState(false)
@@ -81,124 +52,16 @@ export default function MyStoriesPage() {
   console.log('🔍 MyStoriesPage render:', {
     connectedAddress,
     isConnected,
-    existingStoriesCount: existingStories.length,
     registeredBooksCount: registeredBooks.length,
-    isLoadingStories,
     isLoadingBooks,
     isRefreshing,
-    firstStoryTitle: existingStories[0]?.title || 'No stories',
     firstBookTitle: registeredBooks[0]?.title || 'No books'
   })
 
-  // Load published stories and registered books from R2
+  // Load registered books from R2
   useEffect(() => {
-    console.log('🚀 useEffect triggered - about to load stories and books')
+    console.log('🚀 useEffect triggered - about to load books')
     
-    const loadStories = async () => {
-      console.log('🔄 Loading stories from API...')
-      console.log('🔗 Wallet connected:', isConnected, 'Address:', connectedAddress)
-      setIsLoadingStories(true)
-      
-      try {
-        // Use API client instead of direct fetch for proper routing
-        console.log('📡 Calling apiClient.getStories()...')
-        const data = await apiClient.getStories()
-        console.log('📊 API Response data:', data)
-
-        if (data.success && data.stories && Array.isArray(data.stories)) {
-          console.log('✅ Stories loaded from API:', data.stories.length, 'stories')
-          console.log('📖 Stories:', data.stories.map((s: any) => s.title))
-          
-          // Filter stories by connected wallet address
-          const filteredStories = connectedAddress 
-            ? data.stories.filter((story: any) => 
-                story.authorAddress?.toLowerCase() === connectedAddress.toLowerCase()
-              )
-            : [] // If no wallet connected, show no stories
-          
-          console.log('🔒 Filtered stories for wallet', connectedAddress, ':', filteredStories.length, 'stories')
-          
-          // Convert R2 story format to ExistingStory format
-          const convertedStories: ExistingStory[] = filteredStories.map((story: any) => ({
-            id: story.id,
-            title: story.title,
-            genre: story.genre,
-            chapters: story.chapters,
-            lastUpdated: story.lastUpdated,
-            earnings: story.earnings,
-            preview: story.preview,
-            authorAddress: story.authorAddress,
-            authorName: story.authorName,
-            // Enhanced metadata
-            contentRating: story.contentRating,
-            unlockPrice: story.unlockPrice,
-            readReward: story.readReward,
-            licensePrice: story.licensePrice,
-            isRemixable: story.isRemixable,
-            totalReads: story.totalReads,
-            averageRating: story.averageRating,
-            wordCount: story.wordCount,
-            readingTime: story.readingTime,
-            mood: story.mood,
-            tags: story.tags,
-            qualityScore: story.qualityScore,
-            originalityScore: story.originalityScore,
-            isRemix: story.isRemix,
-            generationMethod: story.generationMethod
-          }))
-          
-          console.log('🔄 Setting stories state with:', convertedStories.length, 'stories')
-          setExistingStories(convertedStories)
-        } else {
-          console.warn('❌ Invalid API response:', data)
-          setExistingStories([])
-        }
-      } catch (error) {
-        console.error('❌ Error loading stories:', error)
-        console.error('❌ Error details:', {
-          message: error instanceof Error ? error.message : 'Unknown error',
-          name: error instanceof Error ? error.name : 'Unknown',
-          stack: error instanceof Error ? error.stack : 'No stack trace'
-        })
-        
-        // For testing: Show a demo story when API fails and wallet is connected
-        if (connectedAddress) {
-          console.log('🔧 API failed - showing demo story for connected wallet')
-          const demoStory: ExistingStory = {
-            id: 'demo-story-test',
-            title: 'The Portal\'s Secret (Demo)',
-            genre: 'Mystery',
-            chapters: 4,
-            lastUpdated: '2025-06-07',
-            earnings: 0,
-            preview: 'A mysterious portal appears in the old library, leading to worlds unknown. [This is a demo story shown when the backend API is unavailable]',
-            authorAddress: connectedAddress,
-            authorName: 'You',
-            contentRating: 'PG',
-            unlockPrice: 0.1,
-            readReward: 0.05,
-            licensePrice: 100,
-            isRemixable: true,
-            totalReads: 0,
-            averageRating: 0,
-            wordCount: 2500,
-            readingTime: 10,
-            mood: 'mysterious',
-            tags: ['portal', 'mystery', 'demo'],
-            qualityScore: 100,
-            originalityScore: 80,
-            isRemix: false,
-            generationMethod: 'Demo'
-          }
-          setExistingStories([demoStory])
-        } else {
-          setExistingStories([])
-        }
-      } finally {
-        setIsLoadingStories(false)
-      }
-    }
-
     const loadBooks = async () => {
       console.log('📚 Loading registered books from API...')
       console.log('🔗 Connected address:', connectedAddress)
@@ -253,7 +116,6 @@ export default function MyStoriesPage() {
       }
     }
 
-    loadStories()
     loadBooks()
   }, [connectedAddress]) // Reload when wallet connection changes
 
@@ -261,50 +123,8 @@ export default function MyStoriesPage() {
     console.log('🔄 Manual refresh triggered')
     setIsRefreshing(true)
     try {
-      // Refresh both stories and books
-      const [storiesData, booksData] = await Promise.all([
-        apiClient.getStories(),
-        apiClient.getBooks(connectedAddress || undefined)
-      ])
-
-      // Handle stories
-      if (storiesData.success && storiesData.stories && Array.isArray(storiesData.stories)) {
-        console.log('✅ Manual refresh loaded:', storiesData.stories.length, 'stories')
-        
-        const filteredStories = connectedAddress 
-          ? storiesData.stories.filter((story: any) => 
-              story.authorAddress?.toLowerCase() === connectedAddress.toLowerCase()
-            )
-          : []
-        
-        const convertedStories: ExistingStory[] = filteredStories.map((story: any) => ({
-          id: story.id,
-          title: story.title,
-          genre: story.genre,
-          chapters: story.chapters,
-          lastUpdated: story.lastUpdated,
-          earnings: story.earnings,
-          preview: story.preview,
-          authorAddress: story.authorAddress,
-          authorName: story.authorName,
-          contentRating: story.contentRating,
-          unlockPrice: story.unlockPrice,
-          readReward: story.readReward,
-          licensePrice: story.licensePrice,
-          isRemixable: story.isRemixable,
-          totalReads: story.totalReads,
-          averageRating: story.averageRating,
-          wordCount: story.wordCount,
-          readingTime: story.readingTime,
-          mood: story.mood,
-          tags: story.tags,
-          qualityScore: story.qualityScore,
-          originalityScore: story.originalityScore,
-          isRemix: story.isRemix,
-          generationMethod: story.generationMethod
-        }))
-        setExistingStories(convertedStories)
-      }
+      // Refresh books
+      const booksData = await apiClient.getBooks(connectedAddress || undefined)
 
       // Handle books
       if (booksData.success && booksData.books && Array.isArray(booksData.books)) {
@@ -337,30 +157,6 @@ export default function MyStoriesPage() {
     }
   }
 
-  const handleReadStory = (story: ExistingStory) => {
-    // Navigate to the table of contents page using hash-based routing for SPA
-    if (!story.authorAddress) {
-      console.error('No author address for story:', story)
-      return
-    }
-    
-    // Create slug from title
-    const storySlug = story.title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '')
-    
-    // Use hash-based routing for static export compatibility
-    const tocUrl = `/stories#${story.authorAddress}/${storySlug}/toc`
-    router.push(tocUrl)
-  }
-
-  const handleContinueStory = (story: ExistingStory) => {
-    // Navigate to write page with story context to continue with next chapter
-    const nextChapter = story.chapters + 1
-    const continueUrl = `/write?continueStory=${encodeURIComponent(story.id)}&nextChapter=${nextChapter}&title=${encodeURIComponent(story.title)}&genre=${encodeURIComponent(story.genre)}`
-    router.push(continueUrl)
-  }
 
   const handleStartWriting = (book: RegisteredBook) => {
     // Navigate to write page to start writing the first chapter of this book
@@ -401,7 +197,7 @@ export default function MyStoriesPage() {
             <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
               👑 My Library
             </h1>
-            <p className="text-gray-600 mt-2">Your registered books and published stories</p>
+            <p className="text-gray-600 mt-2">Your registered books</p>
           </div>
 
           {/* Wallet Connection Check - only render after mount to prevent hydration mismatch */}
@@ -421,21 +217,21 @@ export default function MyStoriesPage() {
                 <div className="text-6xl mb-4">🔗</div>
                 <h3 className="text-xl font-semibold text-gray-800 mb-2">Connect Your Wallet</h3>
                 <p className="text-gray-600 mb-6">
-                  To view your stories, please connect your wallet using the "Connect" button in the top navigation.
+                  To view your books, please connect your wallet using the "Connect" button in the top navigation.
                 </p>
                 <p className="text-sm text-gray-500">
-                  Your stories are linked to your wallet address for ownership verification.
+                  Your books are linked to your wallet address for ownership verification.
                 </p>
               </div>
             </div>
           ) : (
             <>
               {/* Loading State */}
-              {(isLoadingStories || isLoadingBooks) && (
+              {isLoadingBooks && (
                 <div className="text-center py-12 mb-6">
                   <div className="w-8 h-8 border-3 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
                   <h3 className="text-lg font-semibold text-gray-700 mb-2">Loading your library...</h3>
-                  <p className="text-gray-500">Fetching books and stories from R2 storage</p>
+                  <p className="text-gray-500">Fetching books from R2 storage</p>
                 </div>
               )}
 
@@ -536,82 +332,6 @@ export default function MyStoriesPage() {
                 </div>
               )}
 
-              {/* Published Stories Section */}
-              {!isLoadingStories && (
-                <div className="mb-8">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-bold text-gray-800">📝 Published Stories</h2>
-                    {existingStories.length > 0 && (
-                      <button
-                        onClick={handleManualRefresh}
-                        disabled={isRefreshing}
-                        className="px-3 py-1 text-sm text-purple-600 hover:text-purple-800 border border-purple-300 rounded-lg hover:bg-purple-50 transition-all"
-                      >
-                        {isRefreshing ? 'Refreshing...' : 'Refresh'}
-                      </button>
-                    )}
-                  </div>
-                  
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {existingStories.length === 0 ? (
-                      <div className="col-span-full text-center py-8">
-                        <div className="text-4xl mb-4">📄</div>
-                        <h3 className="text-lg font-semibold text-gray-700 mb-2">No published stories yet</h3>
-                        <p className="text-gray-500">Stories you publish will appear here</p>
-                      </div>
-                    ) : (
-                      existingStories.map((story) => (
-                        <div
-                          key={story.id}
-                          className="bg-white rounded-xl shadow-lg p-6 border border-gray-200 hover:shadow-xl transition-all"
-                        >
-                          <div className="flex items-start justify-between mb-4">
-                            <div className="flex-1">
-                              <h3 className="text-lg font-semibold text-gray-800 mb-2 line-clamp-2">{story.title}</h3>
-                              {story.authorName && (
-                                <p className="text-sm text-gray-500 mb-3">by {story.authorName}</p>
-                              )}
-                              <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
-                                <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
-                                  {story.genre}
-                                </span>
-                                <span>•</span>
-                                <span>{story.chapters} chapters</span>
-                              </div>
-                              <p className="text-sm text-gray-500">Last updated {story.lastUpdated}</p>
-                            </div>
-                            <div className="text-right">
-                              <div className="text-lg font-bold text-green-600 flex items-center gap-1">
-                                💰 {story.earnings} $TIP
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="mb-4">
-                            <p className="text-sm text-gray-600 italic line-clamp-3">"{story.preview}"</p>
-                          </div>
-
-                          <div className="flex gap-2">
-                            <button 
-                              onClick={() => handleContinueStory(story)}
-                              className="flex-1 px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition-all flex items-center justify-center gap-2"
-                            >
-                              ✨ Continue
-                            </button>
-                            <button 
-                              onClick={() => handleReadStory(story)}
-                              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all flex items-center gap-2"
-                            >
-                              <Book className="w-4 h-4" />
-                              Read
-                            </button>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              )}
 
               </>
             )}
