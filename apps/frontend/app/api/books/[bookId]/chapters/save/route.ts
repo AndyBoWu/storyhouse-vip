@@ -78,6 +78,11 @@ export async function POST(
       }, { status: 403 })
     }
 
+    // Dynamic pricing: first 3 chapters are free
+    const isFreeChapter = body.chapterNumber <= 3
+    const defaultUnlockPrice = isFreeChapter ? 0 : 0.5
+    const defaultReadReward = isFreeChapter ? 0.05 : 0.1
+
     // Create chapter metadata
     const chapterData: ChapterMetadata = {
       chapterId: `${bookId}-ch${body.chapterNumber}`,
@@ -93,9 +98,9 @@ export async function POST(
       ipAssetId: body.ipAssetId,
       parentIpAssetId: undefined, // TODO: Get from book metadata
 
-      // Economics
-      unlockPrice: body.unlockPrice || 0.1,
-      readReward: body.readReward || 0.05,
+      // Economics with dynamic pricing
+      unlockPrice: body.unlockPrice !== undefined ? body.unlockPrice : defaultUnlockPrice,
+      readReward: body.readReward !== undefined ? body.readReward : defaultReadReward,
       licensePrice: body.licensePrice || 100,
 
       // Content Metrics

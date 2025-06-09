@@ -524,6 +524,40 @@ function ChapterWritingPageContent() {
                   </div>
                 </div>
 
+                {/* Chapter Pricing Information */}
+                <div className="mb-6 p-4 rounded-lg border-2 border-dashed border-gray-200">
+                  <h4 className="font-medium text-gray-800 mb-2">💰 Chapter Pricing</h4>
+                  {chapterNumber <= 3 ? (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">🎉</span>
+                        <span className="font-semibold text-green-600">FREE Chapter</span>
+                      </div>
+                      <p className="text-sm text-green-700">
+                        Chapters 1-3 are free for all readers to help them discover your story.
+                      </p>
+                      <div className="text-xs text-gray-500 space-y-1">
+                        <div>• Unlock price: Free</div>
+                        <div>• Read reward: 0.05 TIP</div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">💎</span>
+                        <span className="font-semibold text-blue-600">Premium Chapter</span>
+                      </div>
+                      <p className="text-sm text-blue-700">
+                        This chapter requires TIP tokens to unlock and offers higher reading rewards.
+                      </p>
+                      <div className="text-xs text-gray-500 space-y-1">
+                        <div>• Unlock price: 0.5 TIP</div>
+                        <div>• Read reward: 0.1 TIP</div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 <div className="space-y-3 mb-6">
                   <button
                     onClick={() => setIsPreviewMode(!isPreviewMode)}
