@@ -40,6 +40,40 @@ function getR2Client(): S3Client {
 
 const BUCKET_NAME = (process.env.R2_BUCKET_NAME || '').trim().replace(/[\r\n]/g, '')
 
+// Helper function to get actual chapter count for a book
+async function getChapterCount(client: S3Client, authorAddress: string, slug: string): Promise<number> {
+  try {
+    const chaptersPrefix = `books/${authorAddress}/${slug}/chapters/`
+    
+    const listCommand = new ListObjectsV2Command({
+      Bucket: BUCKET_NAME,
+      Prefix: chaptersPrefix,
+      Delimiter: '/'
+    })
+
+    const listResponse = await client.send(listCommand)
+    
+    // Count chapter directories (ch1/, ch2/, etc.)
+    const chapters: number[] = []
+    if (listResponse.CommonPrefixes) {
+      for (const prefix of listResponse.CommonPrefixes) {
+        if (prefix.Prefix) {
+          const chapterMatch = prefix.Prefix.match(/\/ch(\d+)\/$/)
+          if (chapterMatch) {
+            const chapterNumber = parseInt(chapterMatch[1], 10)
+            chapters.push(chapterNumber)
+          }
+        }
+      }
+    }
+
+    return chapters.length
+  } catch (error) {
+    console.warn(`⚠️ Failed to get chapter count for ${authorAddress}/${slug}:`, error)
+    return 0
+  }
+}
+
 export interface RegisteredBook {
   id: string
   title: string
@@ -204,6 +238,11 @@ export async function GET(request: NextRequest) {
               hasBlockchain: !!bookData.ipAssetId
             })
 
+            // Get actual chapter count
+            console.log(`      🔢 Getting chapter count for ${bookSlug}...`)
+            const chapterCount = await getChapterCount(client, authorFromPrefix, bookSlug)
+            console.log(`      📊 Chapter count: ${chapterCount}`)
+
             const book: RegisteredBook = {
               id: `${authorFromPrefix}-${bookSlug}`,
               title: bookData.title || 'Untitled Book',
@@ -219,7 +258,7 @@ export async function GET(request: NextRequest) {
               ipAssetId: bookData.ipAssetId,
               tokenId: bookData.tokenId,
               transactionHash: bookData.transactionHash,
-              chapters: 0, // Books start with 0 chapters
+              chapters: chapterCount, // Real chapter count from R2
               slug: bookSlug
             }
 

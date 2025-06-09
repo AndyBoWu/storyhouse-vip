@@ -4,8 +4,7 @@
 
 ## 🌐 **LIVE TESTNET DEPLOYMENT**
 
-🚀 **Frontend**: [https://testnet.storyhouse.vip/](https://testnet.storyhouse.vip/) (Cloudflare Pages)  
-🔗 **Backend**: [https://api-testnet.storyhouse.vip/](https://api-testnet.storyhouse.vip/) (Vercel API)
+🚀 **Application**: [https://storyhouse-bgk8qwlrc-andy-wus-projects.vercel.app/](https://storyhouse-bgk8qwlrc-andy-wus-projects.vercel.app/) (Vercel)
 
 ## 🎯 **STATUS: PHASE 5.4 COMPLETE - ADVANCED CHAPTER WRITING SYSTEM LIVE**
 
@@ -25,9 +24,9 @@
 - ✅ **Revenue Attribution** - Transparent 70% author / 20% curator / 10% platform splits
 - ✅ **Interactive Discovery** - BookFamilyTree and DiscoveryDashboard components
 - ✅ **Smart Contract Ecosystem** - 7 contracts with 144+ passing tests
-- ✅ **Hybrid Architecture** - Cloudflare Pages frontend + Vercel API backend (70% cost reduction)
-- ✅ **Global CDN Performance** - 50% faster loading worldwide via Cloudflare edge
-- ✅ **Professional Domain Structure** - Dedicated API endpoints and clean separation
+- ✅ **Unified Vercel Architecture** - Single deployment with dynamic routing enabled
+- ✅ **Server-Side Rendering** - SEO-optimized book and chapter pages
+- ✅ **Simplified Infrastructure** - All API routes and pages in one deployment
 - ✅ **Multi-Chapter Navigation** - Dynamic TOC with chapter summaries and progress tracking
 - ✅ **Story Continuation System** - Seamless chapter-to-chapter creation with AI context
 - ✅ **Enhanced Metadata System** - Full chapter-level tracking for read-to-earn and IP management
@@ -116,36 +115,39 @@
 
 ---
 
-## 🏗️ **Cloudflare-Optimized Architecture**
+## 🏗️ **Vercel-Unified Architecture**
 
-### **Hybrid Deployment Structure** (✅ 70% Cost Reduction)
+### **Single Deployment Structure** (✅ Simplified & Optimized)
 
 ```
 🌐 PRODUCTION ARCHITECTURE
-┌─────────────────────────────────┐    ┌─────────────────────────────────┐
-│        Cloudflare Pages         │    │         Vercel API              │
-│    testnet.storyhouse.vip       │◄──►│   api-testnet.storyhouse.vip    │
-│                                 │    │                                 │
-│  ✅ Static SPA (Next.js export) │    │  ✅ API Routes + AI Integration │
-│  ✅ Global CDN (330+ locations) │    │  ✅ Story Protocol SDK          │
-│  ✅ 50% faster loading         │    │  ✅ Database & R2 operations    │
-│  ✅ Forever cache static assets │    │  ✅ Blockchain transactions     │
-└─────────────────────────────────┘    └─────────────────────────────────┘
+┌─────────────────────────────────────────────────────────┐
+│                    Vercel Deployment                     │
+│       storyhouse-bgk8qwlrc-andy-wus-projects            │
+│                                                         │
+│  ✅ Dynamic Routing (/book/[bookId])                    │
+│  ✅ Server-Side Rendering (SEO optimized)               │
+│  ✅ API Routes (/api/*) + AI Integration                │
+│  ✅ Story Protocol SDK + Blockchain transactions        │
+│  ✅ Cloudflare R2 Storage integration                   │
+│  ✅ No CORS issues (same domain)                        │
+└─────────────────────────────────────────────────────────┘
 
 📁 MONOREPO STRUCTURE
 storyhouse-vip/
 ├── apps/
-│   └── frontend/                # Next.js 15.3.3 SPA
-│       ├── app/                # Static-exported pages
+│   └── frontend/                # Next.js 15.3.3 Unified App
+│       ├── app/
+│       │   ├── api/            # API routes (merged from backend)
+│       │   ├── book/           # Dynamic book pages [bookId]
+│       │   └── ...             # All pages and routes
 │       ├── components/         # React components
-│       ├── lib/               # API client + utilities
-│       ├── out/               # Static build output → Cloudflare
-│       └── public/            # Static assets
+│       ├── lib/               # Utilities + API client
+│       └── vercel.json        # Deployment configuration
 ├── packages/
 │   ├── contracts/              # Smart contracts (DEPLOYED ✅)
-│   └── shared/                 # TypeScript utilities & Story Protocol
-├── docs/                       # Updated documentation
-└── CLOUDFLARE_MIGRATION_COMPLETE.md  # Migration details
+│   └── shared/                 # TypeScript utilities
+└── docs/                       # Updated documentation
 ```
 
 ### **Book Registration & Branching System** (NEW!)
@@ -297,15 +299,14 @@ Our documentation has been completely restructured for easy navigation:
 
 ### **Live Testnet Deployment**
 
-🌐 **Current Status**: **LIVE and FUNCTIONAL - CLOUDFLARE OPTIMIZED**
-🔗 **Frontend**: [https://testnet.storyhouse.vip/](https://testnet.storyhouse.vip/) (Cloudflare Pages)
-🔗 **Backend**: [https://api-testnet.storyhouse.vip/](https://api-testnet.storyhouse.vip/) (Vercel API)
+🌐 **Current Status**: **LIVE and FUNCTIONAL - VERCEL UNIFIED**
+🔗 **Application**: [https://storyhouse-bgk8qwlrc-andy-wus-projects.vercel.app/](https://storyhouse-bgk8qwlrc-andy-wus-projects.vercel.app/)
 
-### **Performance Improvements**
-- ✅ **70% Cost Reduction**: $60-100/month → $15-25/month
-- ✅ **50% Faster Loading**: Global edge delivery via Cloudflare CDN  
-- ✅ **99.99% Uptime**: Cloudflare's enterprise-grade reliability
-- ✅ **Global Reach**: 330+ edge locations worldwide
+### **Architecture Improvements**
+- ✅ **Simplified Infrastructure**: Single deployment instead of hybrid setup
+- ✅ **Dynamic Routing Enabled**: Book and chapter pages with SSR support
+- ✅ **No CORS Issues**: All API calls on same domain
+- ✅ **Better SEO**: Server-side rendering for search engines
 
 ### **Features Available on Testnet**
 
@@ -632,7 +633,7 @@ git push origin feature/enhancement
 
 Ready to see **chapter-level IP monetization** and **read-to-earn economics** in action?
 
-- **🌐 Live Testnet**: [https://testnet.storyhouse.vip/](https://testnet.storyhouse.vip/)
+- **🌐 Live Testnet**: [https://storyhouse-bgk8qwlrc-andy-wus-projects.vercel.app/](https://storyhouse-bgk8qwlrc-andy-wus-projects.vercel.app/)
 - **📖 Documentation**: [./docs/README.md](./docs/README.md)
 - **🎨 Complete UX Design**: [./docs/product/DESIGN.md](./docs/product/DESIGN.md)
 - **🚀 Quick Start**: [./docs/setup/DEVELOPMENT.md](./docs/setup/DEVELOPMENT.md)
@@ -653,4 +654,4 @@ Every chapter tells a story. Every story deserves to be monetized from day one. 
 **🎯 Target**: 50M+ writers worldwide seeking better monetization + 2B+ readers globally
 **💡 Innovation**: First platform enabling chapter-level IP management with read-to-earn economics
 
-**Ready to revolutionize publishing? Start with Chapter 1 at [https://testnet.storyhouse.vip/](https://testnet.storyhouse.vip/)**
+**Ready to revolutionize publishing? Start with Chapter 1 at [https://storyhouse-bgk8qwlrc-andy-wus-projects.vercel.app/](https://storyhouse-bgk8qwlrc-andy-wus-projects.vercel.app/)**

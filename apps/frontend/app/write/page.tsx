@@ -21,7 +21,7 @@ function WritePageContent() {
   const { address: connectedAddress, isConnected } = useAccount()
   const [generatedStory, setGeneratedStory] = useState(null)
   const [isGenerating, setIsGenerating] = useState(false)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<string | null>(null)
   const [drafts, setDrafts] = useState([])
   
   // Check if we have URL parameters for story generation
@@ -65,7 +65,7 @@ function WritePageContent() {
     }
   }, [continueStory, nextChapter, plotDescription, chapterNumber, bookId, storyTitle])
   
-  const handleGenerateStory = async (params) => {
+  const handleGenerateStory = async (params: any) => {
     if (!isConnected || !connectedAddress) {
       setError('Please connect your wallet first')
       return
@@ -103,17 +103,14 @@ function WritePageContent() {
     }
   }
   
-  const handlePublishSuccess = async (publishData) => {
+  const handlePublishSuccess = async (publishData: any) => {
     try {
       // Save the story to R2 after successful blockchain registration
-      await apiClient.apiRequest('/api/stories/save', {
-        method: 'POST',
-        body: JSON.stringify({
-          ...generatedStory,
-          ipAssetId: publishData.ipAssetId,
-          transactionHash: publishData.transactionHash,
-          walletAddress: connectedAddress
-        })
+      await apiClient.post('/stories/save', {
+        ...(generatedStory || {}),
+        ipAssetId: publishData.ipAssetId,
+        transactionHash: publishData.transactionHash,
+        walletAddress: connectedAddress
       })
       
       // Redirect to success page or stories list
@@ -124,7 +121,7 @@ function WritePageContent() {
     }
   }
   
-  const handleSaveDraft = (storyData) => {
+  const handleSaveDraft = (storyData: any) => {
     // Save to localStorage as draft
     const existingDrafts = JSON.parse(localStorage.getItem('storyDrafts') || '[]')
     const newDraft = {
