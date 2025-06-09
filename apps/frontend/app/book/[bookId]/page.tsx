@@ -60,6 +60,7 @@ export default function BookPage() {
       ]);
 
       if (bookResponse) {
+        console.log('📚 Book response:', bookResponse);
         setBook(bookResponse);
       }
       
@@ -125,6 +126,8 @@ export default function BookPage() {
                 width={300}
                 height={400}
                 className="w-full rounded-lg shadow-md hover:shadow-xl transition-shadow"
+                unoptimized={true}
+                onError={() => console.log('Image failed to load:', book.coverUrl)}
               />
             ) : (
               <div className="w-full aspect-[3/4] bg-gradient-to-b from-purple-600 to-blue-600 rounded-lg shadow-md flex items-center justify-center">
