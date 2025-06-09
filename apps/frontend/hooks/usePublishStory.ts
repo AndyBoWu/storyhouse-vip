@@ -234,8 +234,8 @@ export function usePublishStory() {
         setCurrentStep('saving-to-storage' as any)
         console.log('💾 Saving chapter content to R2 storage...')
         
-        // Use provided bookId or generate one as fallback
-        const finalBookId = bookId || `${address.toLowerCase()}-${storyData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${storyData.chapterNumber}`
+        // Use provided bookId or generate one as fallback (without chapter number)
+        const finalBookId = bookId || `${address.toLowerCase()}-${storyData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
         
         const chapterSaveResponse = await fetch(`/api/books/${encodeURIComponent(finalBookId)}/chapters/save`, {
           method: 'POST',
@@ -257,7 +257,9 @@ export function usePublishStory() {
         })
 
         if (!chapterSaveResponse.ok) {
-          console.warn('⚠️ Failed to save chapter content to R2, but blockchain registration succeeded')
+          const errorText = await chapterSaveResponse.text()
+          console.error('❌ Failed to save chapter content to R2:', errorText)
+          throw new Error(`Failed to save chapter content to R2: ${chapterSaveResponse.status} ${errorText}`)
         } else {
           const saveResult = await chapterSaveResponse.json()
           console.log('✅ Chapter content saved to R2:', saveResult.data?.contentUrl)
