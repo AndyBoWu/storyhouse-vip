@@ -1,0 +1,139 @@
+% packages-cn.tex - LaTeX package imports for Chinese version of StoryHouse.vip whitepaper
+
+% Core document packages
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+% Chinese language support
+\usepackage[UTF8, scheme=plain]{ctex}
+\usepackage{xeCJK}
+
+% Set Chinese fonts
+\setCJKmainfont{SimSun}
+\setCJKsansfont{SimHei}
+\setCJKmonofont{FangSong}
+
+% Page layout and geometry
+\usepackage[margin=1.2in]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+
+% Typography and fonts - Chinese optimized
+\usepackage{microtype}
+\usepackage{libertinus}  % Libertinus family (includes Biolinum)
+\usepackage[libertinus]{newtxmath}  % Matching math font
+\renewcommand{\familydefault}{\sfdefault}  % Use Biolinum (sans-serif) as default
+
+% Colors and graphics
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+
+% Tables and lists
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{enumitem}
+
+% Math and equations
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+
+% References and links
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{cleveref}
+
+% Figures and captions
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{float}
+
+% Headers and footers
+\usepackage{fancyhdr}
+
+% Bibliography
+\usepackage[backend=biber,style=alphabetic]{biblatex}
+\addbibresource{bibliography/references.bib}
+
+% Code listings (for technical sections)
+\usepackage{listings}
+\usepackage{minted}
+
+% Boxes and frames
+\usepackage{tcolorbox}
+\usepackage{framed}
+
+% Multi-column layouts
+\usepackage{multicol}
+
+% Custom commands for StoryHouse branding
+\newcommand{\storyhouse}{\textcolor{storyblue}{\textbf{StoryHouse.vip}}}
+\newcommand{\tip}{\textcolor{storygreen}{\textbf{\$TIP}}}
+
+% Custom environments for key sections
+\newenvironment{keypoint}
+{
+    \begin{tcolorbox}[
+        colback=storyblue!5,
+        colframe=storyblue,
+        boxrule=1pt,
+        left=6pt,
+        right=6pt,
+        top=6pt,
+        bottom=6pt
+    ]
+    \textbf{关键要点：}
+}
+{
+    \end{tcolorbox}
+}
+
+\newenvironment{innovation}
+{
+    \begin{tcolorbox}[
+        colback=storygreen!5,
+        colframe=storygreen,
+        boxrule=1pt,
+        left=6pt,
+        right=6pt,
+        top=6pt,
+        bottom=6pt
+    ]
+    \textbf{创新特性：}
+}
+{
+    \end{tcolorbox}
+}
+
+% Table styling
+\renewcommand{\arraystretch}{1.2}
+
+% Configure listings for code
+\lstset{
+    basicstyle=\footnotesize\ttfamily,
+    breaklines=true,
+    captionpos=b,
+    commentstyle=\color{storygray},
+    keywordstyle=\color{storyblue},
+    stringstyle=\color{storygreen},
+    numbers=left,
+    numberstyle=\tiny\color{storygray},
+    frame=single,
+    frameround=tttt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2
+}
+
+% Configure minted for syntax highlighting
+\setminted{
+    fontsize=\footnotesize,
+    linenos=true,
+    frame=lines,
+    framesep=2mm
+}

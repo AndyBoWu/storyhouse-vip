@@ -1,0 +1,184 @@
+\documentclass[12pt,a4paper]{article}
+
+% Import packages and styling
+\input{style/packages-cn}
+
+% Document metadata
+\title{StoryHouse.vip: 为数字时代民主化知识产权}
+\author{吴波 (Wu Bo) \\ DevOps 工程师 \\ \texttt{andy@piplabs.xyz}}
+\date{2024年12月}
+
+% Define StoryHouse brand colors
+\definecolor{storyblue}{HTML}{2563eb}
+\definecolor{storygreen}{HTML}{10b981}
+\definecolor{storygray}{HTML}{6b7280}
+
+% Configure hyperlinks
+\hypersetup{
+    colorlinks=true,
+    linkcolor=storyblue,
+    urlcolor=storyblue,
+    citecolor=storyblue,
+    pdftitle={StoryHouse.vip 白皮书},
+    pdfauthor={吴博 (Andy Bo Wu)},
+    pdfsubject={Web3 出版平台白皮书},
+    pdfkeywords={区块链, 知识产权, 出版, 阅读赚钱, 人工智能}
+}
+
+% Configure page headers and footers
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\textcolor{storygray}{\small StoryHouse.vip 白皮书}}
+\fancyhead[R]{\textcolor{storygray}{\small 2024年12月}}
+\fancyfoot[C]{\textcolor{storygray}{\thepage}}
+\renewcommand{\headrulewidth}{0.5pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\begin{document}
+
+% Title page
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+    
+    % Logo placeholder (add actual logo when available)
+    \textcolor{storyblue}{\Huge \textbf{StoryHouse.vip}}
+    
+    \vspace{1cm}
+    \textcolor{storygray}{\Large 革命性 Web3 故事平台}
+    
+    \vspace{2cm}
+    {\huge \textbf{项目白皮书}}
+    
+    \vspace{0.5cm}
+    {\Large \textcolor{storygray}{为数字时代民主化知识产权}}
+    
+    \vspace{2cm}
+    
+    % Key innovations box
+    \begin{center}
+    \fcolorbox{storyblue}{white}{
+        \begin{minipage}{0.8\textwidth}
+            \centering
+            \textcolor{storyblue}{\textbf{革命性创新}}
+            \vspace{0.3cm}
+            
+            \textcolor{storygray}{
+            \textbf{章节级知识产权资产} • \textbf{阅读赚钱经济学} \\
+            \textbf{AI 驱动创作} • \textbf{协作分支创作}
+            }
+        \end{minipage}
+    }
+    \end{center}
+    
+    \vspace{2cm}
+    
+    % Live deployment info
+    \begin{center}
+    \textcolor{storygreen}{\textbf{🌐 实时测试网部署}}\\
+    \textcolor{storygray}{\url{https://testnet.storyhouse.vip}}
+    \end{center}
+    
+    \vfill
+    
+    % Document info
+    \begin{center}
+    \textcolor{storygray}{
+        \textbf{版本 1.0} • 2024年12月 \\
+        吴波 (Wu Bo), DevOps 工程师 \\
+        \texttt{andy@piplabs.xyz}
+    }
+    \end{center}
+    
+    \vspace{1cm}
+\end{titlepage}
+
+% Table of contents
+\tableofcontents
+\newpage
+
+% Executive summary
+\input{sections-cn/01-executive-summary}
+\newpage
+
+% Problem statement
+\input{sections-cn/02-problem-statement}
+\newpage
+
+% Solution architecture
+\input{sections-cn/03-solution-architecture}
+\newpage
+
+% Product features
+\input{sections-cn/04-product-features}
+\newpage
+
+% Blockchain integration
+\input{sections-cn/05-blockchain-integration}
+\newpage
+
+% Tokenomics overview
+\input{sections-cn/06-tokenomics-overview}
+\newpage
+
+% Development roadmap
+\input{sections-cn/07-roadmap}
+\newpage
+
+% Team and advisors
+\input{sections-cn/08-team-advisors}
+\newpage
+
+% Competitive analysis
+\input{sections-cn/09-competitive-analysis}
+\newpage
+
+% Financial projections
+\input{sections-cn/10-financial-projections}
+\newpage
+
+% Risk analysis
+\input{sections-cn/11-risk-analysis}
+\newpage
+
+% Conclusion
+\input{sections-cn/12-conclusion}
+\newpage
+
+% Appendices
+\appendix
+
+\section{技术规格}
+\label{appendix:technical}
+
+详细技术规格、智能合约文档和API参考，请参阅：
+
+\begin{itemize}
+    \item \textbf{技术概览}: \url{https://docs.storyhouse.vip/technical/overview}
+    \item \textbf{智能合约}: \url{https://docs.storyhouse.vip/technical/contracts}
+    \item \textbf{API 文档}: \url{https://docs.storyhouse.vip/technical/api}
+\end{itemize}
+
+\section{法律文档}
+\label{appendix:legal}
+
+法律框架文档包括：
+
+\begin{itemize}
+    \item 代币分类分析
+    \item 服务条款和隐私政策
+    \item 知识产权许可框架
+    \item 监管合规策略
+\end{itemize}
+
+% Footer information
+\vfill
+\begin{center}
+\textcolor{storygray}{\small
+\textbf{免责声明}: 本白皮书包含前瞻性陈述和预测。\\
+实际结果可能会有显著差异。这不是投资建议。\\
+请在做出任何财务决定之前进行自己的研究。
+}
+\end{center}
+
+\end{document}
