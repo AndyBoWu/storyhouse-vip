@@ -40,6 +40,7 @@ export default function BookPage() {
   
   const [book, setBook] = useState<BookDetails | null>(null);
   const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [nextChapterNumber, setNextChapterNumber] = useState<number>(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -78,6 +79,9 @@ export default function BookPage() {
         }));
         
         setChapters(chapterObjects);
+        
+        // Set the next chapter number for writing
+        setNextChapterNumber(chaptersResponse.data.nextChapterNumber || 1);
         
         // Update book's totalChapters from the chapters API response
         if (bookResponse && chaptersResponse.data.totalChapters !== undefined) {
@@ -219,19 +223,11 @@ export default function BookPage() {
 
             {/* Action Buttons */}
             <div className="flex gap-4">
-              {chapters.length > 0 && (
-                <Link
-                  href={`/book/${bookId}/chapter/1`}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Start Reading
-                </Link>
-              )}
               <button
-                onClick={() => router.push(`/write/branch?bookId=${bookId}`)}
+                onClick={() => router.push(`/write/chapter?bookId=${bookId}&chapterNumber=${nextChapterNumber}`)}
                 className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
               >
-                ✍️ Start Writing
+                ✍️ Write Chapter {nextChapterNumber}
               </button>
               <button className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
                 Share
