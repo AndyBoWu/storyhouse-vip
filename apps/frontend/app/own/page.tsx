@@ -300,12 +300,6 @@ export default function MyStoriesPage() {
                           <div className="flex items-start justify-between mb-4">
                             <div className="flex-1">
                               <h3 className="text-lg font-semibold text-gray-800 mb-2 line-clamp-2">{book.title}</h3>
-                              <div className="mb-3">
-                                <p className="text-sm text-gray-600 mb-1">by</p>
-                                <p className="text-xs font-mono text-gray-700 bg-gray-100 px-2 py-1 rounded break-all">
-                                  {book.author}
-                                </p>
-                              </div>
                               <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
                                 <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
                                   Book
