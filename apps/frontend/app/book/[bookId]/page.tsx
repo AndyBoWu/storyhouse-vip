@@ -74,18 +74,37 @@ export default function BookPage() {
       }
       
       if (chaptersResponse.success && chaptersResponse.data) {
-        // Convert chapter numbers to Chapter objects with placeholder data
-        const chapterObjects = chaptersResponse.data.chapters.map((chapterNum: number) => ({
-          number: chapterNum,
-          title: `Chapter ${chapterNum}`,
-          preview: 'Chapter content preview loading...',
-          reads: 0,
-          earnings: 0,
-          wordCount: 0,
-          status: 'published' as const,
-          createdAt: new Date().toISOString()
-        }));
-        
+        // Load actual chapter details instead of placeholder data
+        const chapterPromises = chaptersResponse.data.chapters.map(async (chapterNum: number) => {
+          try {
+            const chapterResponse = await apiClient.get(`/books/${bookId}/chapter/${chapterNum}`);
+            return {
+              number: chapterNum,
+              title: chapterResponse.title || `Chapter ${chapterNum}`,
+              preview: chapterResponse.content ? chapterResponse.content.slice(0, 150) + '...' : 'Chapter content preview loading...',
+              reads: 0, // TODO: Get from metadata when available
+              earnings: 0, // TODO: Get from metadata when available  
+              wordCount: chapterResponse.wordCount || 0,
+              status: 'published' as const,
+              createdAt: chapterResponse.createdAt || new Date().toISOString()
+            };
+          } catch (error) {
+            console.error(`Failed to load chapter ${chapterNum}:`, error);
+            // Fallback to placeholder data if chapter fails to load
+            return {
+              number: chapterNum,
+              title: `Chapter ${chapterNum}`,
+              preview: 'Chapter content preview loading...',
+              reads: 0,
+              earnings: 0,
+              wordCount: 0,
+              status: 'published' as const,
+              createdAt: new Date().toISOString()
+            };
+          }
+        });
+
+        const chapterObjects = await Promise.all(chapterPromises);
         setChapters(chapterObjects);
         
         // Set the next chapter number for writing
