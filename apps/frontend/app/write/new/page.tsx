@@ -168,28 +168,24 @@ function NewStoryPageContent() {
         }
       }
 
-      // For now, we'll just register the book metadata and redirect to /own
-      // Later we can create a proper book registration API endpoint
-      console.log('📚 Book registration data:', {
-        title: storyTitle.trim(),
+      // Redirect to write page with story generation parameters
+      const params = new URLSearchParams({
         plot: plotDescription.trim(),
-        genres: selectedGenres,
-        moods: selectedMoods,
-        emojis: selectedEmojis,
-        bookCoverUrl,
-        authorAddress: userAddress?.toLowerCase(),
-        authorName: userAddress ? userAddress.slice(-4) : undefined,
+        title: storyTitle.trim() || 'New Story',
+        genre: selectedGenres[0] || 'Adventure',
+        mood: selectedMoods[0] || 'engaging',
+        chapterNumber: '1'
       })
+      
+      if (bookCoverUrl) {
+        params.append('coverUrl', bookCoverUrl)
+      }
 
-      // Simulate registration process
-      await new Promise(resolve => setTimeout(resolve, 1000))
-
-      // Redirect to /own page after successful registration
-      router.push('/own')
+      router.push(`/write?${params.toString()}`)
 
     } catch (err) {
       console.error('Registration error:', err)
-      setError(err instanceof Error ? err.message : 'Failed to register book. Please try again.')
+      setError(err instanceof Error ? err.message : 'Failed to start story generation. Please try again.')
     } finally {
       setIsGenerating(false)
     }

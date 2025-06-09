@@ -107,17 +107,18 @@ export async function POST(request: NextRequest) {
     const storyId = body.storyId || `story-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
     const chapterNumber = generationRequest.chapterNumber
 
-    // Save content to R2 storage
-    let contentUrl: string | undefined
-    try {
-      const chapterData = {
+    // DO NOT save to R2 here - this should only happen after blockchain registration
+    // The frontend will call a separate endpoint to save after MetaMask signing
+    console.log(`📝 Generated chapter ${chapterNumber} - awaiting blockchain registration before storage`)
+
+    // Prepare enhanced API response without R2 URL (no storage yet)
+    const response: EnhancedApiResponse<EnhancedGeneratedStory> = {
+      success: true,
+      data: {
+        ...enhancedResult,
+        // Include metadata for frontend to use during blockchain registration
         storyId,
         chapterNumber,
-        content: enhancedResult.content,
-        title: enhancedResult.title,
-        themes: enhancedResult.themes,
-        wordCount: enhancedResult.wordCount,
-        readingTime: enhancedResult.readingTime,
         metadata: {
           // Content Classification
           suggestedTags: enhancedResult.suggestedTags,
@@ -138,6 +139,7 @@ export async function POST(request: NextRequest) {
           // Authorship
           authorAddress: generationRequest.authorAddress?.toLowerCase(),
           authorName: generationRequest.authorName,
+          bookCoverUrl: generationRequest.bookCoverUrl,
           
           // Remix System
           isRemix: false,
@@ -148,115 +150,30 @@ export async function POST(request: NextRequest) {
           // Read-to-Earn Economics
           unlockPrice: 0.1, // TIP tokens to read
           readReward: 0.05, // TIP tokens earned for reading
-          totalReads: 0,
-          totalEarned: 0,
-          totalRevenue: 0,
           
           // Status & Lifecycle
-          status: 'published' as const,
-          visibility: 'public' as const,
+          status: 'draft' as const, // Mark as draft until blockchain registration
           generatedAt: new Date().toISOString(),
-          publishedAt: new Date().toISOString(),
-          lastModified: new Date().toISOString(),
-          
-          // Engagement
-          averageRating: 0,
-          remixCount: 0,
-          streakBonus: 0,
         }
-      }
-
-      contentUrl = await R2Service.uploadContent(
-        R2Service.generateChapterKey(storyId, chapterNumber),
-        JSON.stringify(chapterData),
-        {
-          contentType: 'application/json',
-          metadata: {
-            storyId,
-            chapterNumber: chapterNumber.toString(),
-            contentType: 'chapter',
-            generatedAt: new Date().toISOString(),
-            authorAddress: generationRequest.authorAddress?.toLowerCase() || '',
-            authorName: generationRequest.authorName || '',
-            // Business Critical Fields
-            contentRating: enhancedResult.contentRating || 'PG',
-            genre: (generationRequest.genres || []).join(','),
-            unlockPrice: '0.1',
-            readReward: '0.05',
-            licensePrice: '100',
-            isRemixable: 'true',
-            status: 'published',
-            visibility: 'public',
-          }
-        }
-      )
-
-      console.log(`📚 Chapter ${chapterNumber} saved to R2:`, contentUrl)
-    } catch (r2Error) {
-      console.error('Failed to save to R2:', r2Error)
-      // Continue without failing the entire request
+      },
+      message: 'Story generated successfully. Please sign with MetaMask to register on blockchain before publishing.'
     }
 
-                    // Prepare enhanced API response with R2 URL
-        const response: EnhancedApiResponse<EnhancedGeneratedStory> = {
-          success: true,
-          data: {
-            ...enhancedResult,
-            // These fields are included in the EnhancedGeneratedStory interface
-            ...(storyId && { storyId }),
-            ...(chapterNumber && { chapterNumber }),
-            ...(contentUrl && { contentUrl })
-          },
-      message: generationRequest.ipOptions?.registerAsIP
-        ? 'Story generated with IP registration metadata and saved to storage'
-        : 'Story generated successfully and saved to storage'
+    // IP registration must be handled client-side with MetaMask
+    // Just prepare the data structure for the frontend
+    if (generationRequest.ipOptions?.registerAsIP) {
+      response.ipData = {
+        operationId: `gen-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        requiresClientRegistration: true,
+        metadata: {
+          suggestedTags: enhancedResult.suggestedTags,
+          suggestedGenre: enhancedResult.suggestedGenre,
+          contentRating: enhancedResult.contentRating,
+          language: enhancedResult.language,
+          qualityScore: enhancedResult.qualityScore,
+          originalityScore: enhancedResult.originalityScore,
+          commercialViability: enhancedResult.commercialViability,
         }
-
-    // Add IP-specific response data if IP registration is requested
-    if (generationRequest.ipOptions?.registerAsIP && contentUrl) {
-      console.log('🔗 Attempting Story Protocol IP registration...')
-
-      try {
-        // Import Story Protocol service dynamically to avoid build issues
-        const { StoryProtocolService } = await import('@/lib/storyProtocol')
-
-        // Prepare chapter data for IP registration
-        const chapterIPData = {
-          storyId,
-          chapterNumber,
-          title: enhancedResult.title,
-          content: enhancedResult.content,
-          contentUrl,
-          metadata: {
-            suggestedTags: enhancedResult.suggestedTags,
-            suggestedGenre: enhancedResult.suggestedGenre,
-            contentRating: enhancedResult.contentRating,
-            language: enhancedResult.language,
-            qualityScore: enhancedResult.qualityScore,
-            originalityScore: enhancedResult.originalityScore,
-            commercialViability: enhancedResult.commercialViability,
-          }
-        }
-
-        // Note: IP registration should be handled client-side with wallet connection
-        // Server-side IP registration is not supported as it requires wallet client
-        response.ipData = {
-          operationId: `gen-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          transactionHash: undefined,
-          ipAssetId: undefined,
-          gasUsed: undefined
-        }
-        
-        response.message = 'Story generated and saved successfully'
-      } catch (ipError) {
-        console.error('❌ IP data preparation error:', ipError)
-        response.ipData = {
-          operationId: `gen-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          transactionHash: undefined,
-          ipAssetId: undefined,
-          gasUsed: undefined
-        }
-        response.message = 'Story generated and saved, but IP registration failed'
       }
     }
 
