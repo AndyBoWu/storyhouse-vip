@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, Suspense } from 'react'
-import { ArrowLeft, Save, Eye, Maximize2, Minimize2, Type, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, List, Quote, Rocket, Shield } from 'lucide-react'
+import { ArrowLeft, Save, Eye, Maximize2, Minimize2, Type, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, List, Quote, Rocket, Shield, Sun, Moon } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAccount } from 'wagmi'
@@ -49,6 +49,7 @@ function ChapterWritingPageContent() {
   // UI state
   const [isPreviewMode, setIsPreviewMode] = useState(false)
   const [isFocusMode, setIsFocusMode] = useState(false)
+  const [isDarkMode, setIsDarkMode] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   
@@ -273,29 +274,36 @@ function ChapterWritingPageContent() {
   
   // Focus mode component
   const FocusMode = () => (
-    <div className="fixed inset-0 bg-white z-50 flex flex-col">
+    <div className={`fixed inset-0 z-50 flex flex-col ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
       {/* Focus mode header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200">
+      <div className={`flex items-center justify-between p-4 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
         <div className="flex items-center gap-4">
           <button
             onClick={() => setIsFocusMode(false)}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-800"
+            className={`flex items-center gap-2 ${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-800'}`}
           >
             <Minimize2 className="w-4 h-4" />
             Exit Focus
           </button>
-          <div className="text-sm text-gray-500">
+          <div className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
             Chapter {chapterNumber}: {chapterData.title || 'Untitled'}
           </div>
-          <div className="text-xs text-gray-400">
+          <div className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
             Press Esc to exit
           </div>
         </div>
         <div className="flex items-center gap-4">
-          <div className="text-sm text-gray-500">
+          <button
+            onClick={() => setIsDarkMode(!isDarkMode)}
+            className={`p-2 rounded-lg transition-colors ${isDarkMode ? 'hover:bg-gray-800 text-gray-400 hover:text-gray-200' : 'hover:bg-gray-100 text-gray-600 hover:text-gray-800'}`}
+            title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
+          <div className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
             {chapterData.wordCount} words
           </div>
-          <div className="text-xs text-gray-400">
+          <div className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
             Auto-save enabled
           </div>
         </div>
@@ -307,7 +315,7 @@ function ChapterWritingPageContent() {
           value={chapterData.content}
           onChange={handleContentChange}
           placeholder="Start writing your chapter..."
-          className="w-full h-full resize-none border-none outline-none text-lg leading-relaxed"
+          className={`w-full h-full resize-none border-none outline-none text-lg leading-relaxed ${isDarkMode ? 'bg-gray-900 text-white placeholder-gray-500' : 'bg-white text-gray-900 placeholder-gray-400'}`}
           style={{ 
             fontSize: `${fontSize}px`,
             fontFamily: fontFamily,
