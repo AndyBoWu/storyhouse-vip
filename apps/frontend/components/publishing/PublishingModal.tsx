@@ -28,7 +28,7 @@ interface PublishingModalProps {
 
 type PublishingStep = 'options' | 'wallet' | 'pricing' | 'ip-setup' | 'publishing' | 'success'
 
-export default function PublishingModal({
+function PublishingModal({
   isOpen,
   onClose,
   story,
@@ -863,5 +863,6 @@ export default function PublishingModal({
   )
 }
 
-// Named export for compatibility
-export { default as PublishingModal }
+// Export both default and named
+export default PublishingModal
+export { PublishingModal }

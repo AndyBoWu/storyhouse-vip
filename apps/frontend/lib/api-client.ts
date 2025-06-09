@@ -123,6 +123,15 @@ export const apiClient = {
   async getBranchingInfo(parentBookId: string) {
     return apiRequest(`/api/books/branch?parentBookId=${parentBookId}`)
   },
+
+  async getBooks(authorAddress?: string) {
+    const params = authorAddress ? `?author=${authorAddress}` : ''
+    console.log('🔗 API Client: Getting books with params:', params)
+    console.log('🔗 API Base URL:', getApiBaseUrl())
+    const result = await apiRequest(`/api/books${params}`)
+    console.log('📋 API Client: Books response:', result)
+    return result
+  },
   
   // Discovery operations
   async getDiscovery(params: {

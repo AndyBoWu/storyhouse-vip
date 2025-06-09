@@ -8,6 +8,7 @@ import { useAccount } from 'wagmi'
 import { useSearchParams, useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { apiClient } from '@/lib/api-client'
+import { useStoryProtocol } from '@/hooks/useStoryProtocol'
 
 // Dynamically import WalletConnect to avoid hydration issues
 const WalletConnect = dynamic(() => import('@/components/WalletConnect'), {
@@ -37,6 +38,7 @@ interface GeneratedStory {
 function NewStoryPageContent() {
   const { address: userAddress } = useAccount()
   const router = useRouter()
+  const { registerChapterAsIP, isReady, isWalletConnected } = useStoryProtocol()
   const [plotDescription, setPlotDescription] = useState('A young detective discovers a hidden portal in their grandmother\'s attic that leads to different time periods. Each time they step through, they must solve a historical mystery to return home, but each journey reveals more about a family secret that spans centuries.')
   const [storyTitle, setStoryTitle] = useState('The Detective\'s Portal')
 
@@ -56,6 +58,9 @@ function NewStoryPageContent() {
 
   // Publishing modal state
   const [isPublishingModalOpen, setIsPublishingModalOpen] = useState(false)
+  
+  // Book registration state
+  const [isRegistering, setIsRegistering] = useState(false)
 
   // Advanced options (hidden by default)
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false)
@@ -136,13 +141,16 @@ function NewStoryPageContent() {
   }
 
   const handleRegisterBook = async () => {
-    if (!plotDescription.trim()) return
+    if (!plotDescription.trim() || !isWalletConnected) {
+      setError(isWalletConnected ? 'Please provide a story plot' : 'Please connect your wallet to register a book')
+      return
+    }
 
-    setIsGenerating(true)
+    setIsRegistering(true)
     setError(null)
 
     try {
-      // Upload book cover to R2 if provided
+      // Step 1: Upload book cover to R2 if provided
       let bookCoverUrl: string | undefined
       if (bookCover) {
         try {
@@ -168,26 +176,109 @@ function NewStoryPageContent() {
         }
       }
 
-      // Redirect to write page with story generation parameters
-      const params = new URLSearchParams({
-        plot: plotDescription.trim(),
-        title: storyTitle.trim() || 'New Story',
-        genre: selectedGenres[0] || 'Adventure',
-        mood: selectedMoods[0] || 'engaging',
-        chapterNumber: '1'
-      })
-      
-      if (bookCoverUrl) {
-        params.append('coverUrl', bookCoverUrl)
+      // Step 2: Register book as IP Asset on blockchain
+      const bookMetadata = {
+        title: storyTitle.trim() || 'Untitled Story',
+        description: plotDescription.trim(),
+        author: userAddress || 'Unknown',
+        genres: selectedGenres,
+        moods: selectedMoods,
+        emojis: selectedEmojis,
+        coverUrl: bookCoverUrl,
+        createdAt: new Date().toISOString()
       }
 
-      router.push(`/write?${params.toString()}`)
+      console.log('📝 Registering book on blockchain...', {
+        title: bookMetadata.title,
+        hasDescription: !!bookMetadata.description,
+        hasCover: !!bookCoverUrl,
+        author: bookMetadata.author
+      })
+
+      // Create initial chapter data for registration
+      const chapterData = {
+        storyId: `book-${Date.now()}`,
+        chapterNumber: 0, // Use 0 for book registration
+        title: bookMetadata.title,
+        content: `Book: ${bookMetadata.title}\n\nDescription: ${bookMetadata.description}`,
+        contentUrl: bookCoverUrl || '',
+        metadata: {
+          suggestedTags: [...selectedGenres, ...selectedMoods],
+          suggestedGenre: selectedGenres[0] || 'General',
+          contentRating: 'G',
+          language: 'en',
+          qualityScore: 85,
+          originalityScore: 90,
+          commercialViability: 80,
+          bookMetadata: bookMetadata
+        }
+      }
+
+      // Register with MetaMask signature
+      const registrationResult = await registerChapterAsIP(chapterData)
+
+      if (!registrationResult.success) {
+        throw new Error(registrationResult.error || 'Book registration failed')
+      }
+
+      console.log('✅ Book registration successful!', registrationResult)
+
+      // Step 3: Upload book metadata to R2 using existing book registration endpoint
+      try {
+        console.log('📝 Preparing book registration form data...')
+        const formData = new FormData()
+        formData.append('title', bookMetadata.title)
+        formData.append('description', bookMetadata.description)
+        formData.append('authorAddress', bookMetadata.author)
+        formData.append('authorName', bookMetadata.author.slice(-4)) // Short name from address
+        formData.append('genres', JSON.stringify(bookMetadata.genres))
+        formData.append('contentRating', 'G') // Default rating
+        formData.append('licenseTerms', JSON.stringify({
+          commercialUse: true,
+          derivativesAllowed: true,
+          commercialRevShare: 10
+        }))
+
+        // Add cover file if available
+        if (bookCover) {
+          formData.append('coverFile', bookCover)
+          console.log('📷 Book cover added to form data')
+        }
+
+        console.log('🚀 Calling book registration API...')
+        console.log('📊 Form data contents:', {
+          title: bookMetadata.title,
+          author: bookMetadata.author,
+          genres: bookMetadata.genres,
+          hasCover: !!bookCover
+        })
+
+        const result = await apiClient.registerBook(formData)
+        console.log('📋 Book registration API response:', result)
+
+        if (!result.success) {
+          console.error('❌ Book metadata registration failed:', result)
+          setError(`Book registration failed: ${result.error || 'Unknown error'}`)
+        } else {
+          console.log('✅ Book metadata saved to R2 successfully:', result)
+          console.log('📚 Book ID:', result.book?.bookId)
+          console.log('🔗 IP Asset ID:', result.book?.ipAssetId)
+        }
+      } catch (metadataError) {
+        console.error('❌ Book metadata registration error:', metadataError)
+        setError(`Book registration failed: ${metadataError instanceof Error ? metadataError.message : 'Unknown error'}`)
+        // Don't continue to redirect if there's an error
+        return
+      }
+
+      // Step 4: Redirect to /own page
+      router.push('/own')
 
     } catch (err) {
-      console.error('Registration error:', err)
-      setError(err instanceof Error ? err.message : 'Failed to start story generation. Please try again.')
+      console.error('❌ Book registration failed:', err)
+      setError(err instanceof Error ? err.message : 'Failed to register book. Please try again.')
     } finally {
-      setIsGenerating(false)
+      setIsRegistering(false)
     }
   }
 
@@ -447,22 +538,27 @@ function NewStoryPageContent() {
           <div className="text-center mb-6">
             <motion.button
               onClick={handleRegisterBook}
-              disabled={!plotDescription.trim() || isGenerating || isUploadingCover}
-              whileHover={plotDescription.trim() && !isGenerating && !isUploadingCover ? { scale: 1.05 } : {}}
-              whileTap={plotDescription.trim() && !isGenerating && !isUploadingCover ? { scale: 0.95 } : {}}
+              disabled={!plotDescription.trim() || !isWalletConnected || isRegistering || isUploadingCover}
+              whileHover={plotDescription.trim() && isWalletConnected && !isRegistering && !isUploadingCover ? { scale: 1.05 } : {}}
+              whileTap={plotDescription.trim() && isWalletConnected && !isRegistering && !isUploadingCover ? { scale: 0.95 } : {}}
               className={`inline-flex items-center gap-3 px-8 py-4 rounded-xl text-lg font-semibold transition-all ${
-                plotDescription.trim() && !isGenerating && !isUploadingCover
+                plotDescription.trim() && isWalletConnected && !isRegistering && !isUploadingCover
                   ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700 shadow-lg'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
               }`}
             >
               <Wand2 className="w-5 h-5" />
-              {isUploadingCover ? `Uploading cover...` : isGenerating ? `Registering book...` : `📚 Register My Book`}
+              {isUploadingCover ? `Uploading cover...` : isRegistering ? `Registering book...` : !isWalletConnected ? `Connect Wallet First` : `📚 Register My Book`}
             </motion.button>
 
-            {plotDescription.trim() && (
+            {plotDescription.trim() && isWalletConnected && (
               <p className="text-sm text-gray-500 mt-2">
-                💡 This will register your book and take you to your library where you can start writing
+                💡 This will register your book on-chain and take you to your library
+              </p>
+            )}
+            {plotDescription.trim() && !isWalletConnected && (
+              <p className="text-sm text-red-500 mt-2">
+                🔒 Please connect your wallet to register books on the blockchain
               </p>
             )}
           </div>
