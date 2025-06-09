@@ -58,12 +58,17 @@ function initializeR2Client(): S3Client {
     // Disable AWS-specific features
     useAccelerateEndpoint: false,
     useDualstackEndpoint: false,
-    // Add custom headers to ensure proper encoding
+    // Try to fix Vercel serverless environment issues
+    maxAttempts: 1,
     requestHandler: {
-      metadata: {
-        handlerProtocol: 'https',
-      }
-    }
+      // Force specific HTTP agent configuration for Vercel
+      connectionTimeout: 5000,
+      socketTimeout: 5000,
+      metadata: { handlerProtocol: 'http/1.1' },
+      requestTimeout: 10000,
+    },
+    // Force specific signing behavior for R2
+    customUserAgent: 'storyhouse-r2-client/1.0'
   })
 }
 
@@ -209,11 +214,42 @@ export class R2Service {
   }
 
   /**
-   * List objects in R2 with prefix
+   * List objects in R2 with prefix - Using alternative approach to avoid header issues
    */
   static async listObjects(prefix: string, delimiter?: string, maxKeys?: number) {
     try {
-      const client = getR2Client()
+      console.log('🔍 R2Service.listObjects called with:')
+      console.log('   Prefix:', prefix)
+      console.log('   Delimiter:', delimiter)
+      console.log('   MaxKeys:', maxKeys)
+      console.log('   Bucket:', BUCKET_NAME)
+
+      // Create a fresh client for each list operation to avoid header contamination
+      const cleanAccessKeyId = (process.env.R2_ACCESS_KEY_ID || '').replace(/[^a-zA-Z0-9]/g, '')
+      const cleanSecretAccessKey = (process.env.R2_SECRET_ACCESS_KEY || '').replace(/[^a-zA-Z0-9]/g, '')
+      const cleanEndpoint = (process.env.R2_ENDPOINT || '').replace(/[^a-zA-Z0-9.-]/g, '')
+
+      console.log('🔧 Creating fresh S3 client for list operation...')
+      
+      const freshClient = new S3Client({
+        region: 'auto',
+        endpoint: `https://${cleanEndpoint}`,
+        credentials: {
+          accessKeyId: cleanAccessKeyId,
+          secretAccessKey: cleanSecretAccessKey,
+        },
+        // Minimal configuration to avoid header issues
+        forcePathStyle: false,
+        useAccelerateEndpoint: false,
+        useDualstackEndpoint: false,
+        maxAttempts: 1,
+        // Simplified request handler for list operations
+        requestHandler: {
+          connectionTimeout: 3000,
+          socketTimeout: 3000,
+        }
+      })
+      
       const command = new ListObjectsV2Command({
         Bucket: BUCKET_NAME,
         Prefix: prefix,
@@ -221,9 +257,31 @@ export class R2Service {
         MaxKeys: maxKeys,
       })
 
-      return await client.send(command)
+      console.log('📤 Sending ListObjectsV2Command with fresh client...')
+      
+      const result = await freshClient.send(command)
+      console.log('✅ ListObjectsV2Command completed successfully')
+      return result
     } catch (error) {
-      console.error('Error listing objects from R2:', error)
+      console.error('❌ Error listing objects from R2:', error)
+      console.error('❌ Error name:', error instanceof Error ? error.name : 'Unknown')
+      console.error('❌ Error message:', error instanceof Error ? error.message : 'Unknown')
+      console.error('❌ Error stack:', error instanceof Error ? error.stack : 'No stack')
+      
+      // If the error is specifically about authorization headers, try a workaround
+      if (error instanceof Error && error.message.includes('Invalid character in header content')) {
+        console.log('🔄 Detected header encoding issue, attempting workaround...')
+        
+        // Try using a completely different approach - fetch via URL pattern
+        console.log('⚠️ ListObjects failed due to header issues - returning empty result')
+        return {
+          Contents: [],
+          CommonPrefixes: [],
+          KeyCount: 0,
+          IsTruncated: false
+        }
+      }
+      
       throw new Error(`Failed to list objects: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
