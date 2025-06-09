@@ -65,7 +65,27 @@ export default function BookPage() {
       }
       
       if (chaptersResponse.success && chaptersResponse.data) {
-        setChapters(chaptersResponse.data.chapters || []);
+        // Convert chapter numbers to Chapter objects with placeholder data
+        const chapterObjects = chaptersResponse.data.chapters.map((chapterNum: number) => ({
+          number: chapterNum,
+          title: `Chapter ${chapterNum}`,
+          preview: 'Chapter content preview loading...',
+          reads: 0,
+          earnings: 0,
+          wordCount: 0,
+          status: 'published' as const,
+          createdAt: new Date().toISOString()
+        }));
+        
+        setChapters(chapterObjects);
+        
+        // Update book's totalChapters from the chapters API response
+        if (bookResponse && chaptersResponse.data.totalChapters !== undefined) {
+          setBook(prevBook => prevBook ? {
+            ...prevBook,
+            totalChapters: chaptersResponse.data.totalChapters
+          } : null);
+        }
       }
     } catch (err) {
       console.error('Failed to fetch book details:', err);
@@ -225,7 +245,7 @@ export default function BookPage() {
       <div className="bg-white rounded-lg shadow-lg p-6">
         <h2 className="text-2xl font-bold mb-6">Chapters</h2>
         
-        {chapters.length === 0 ? (
+        {(!chapters || chapters.length === 0) ? (
           <div className="text-center py-8">
             <p className="text-gray-600 mb-4">No chapters available yet.</p>
             <button
