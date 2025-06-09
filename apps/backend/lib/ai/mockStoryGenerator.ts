@@ -152,6 +152,9 @@ export async function generateMockStory(request: StoryGenerationRequest): Promis
     content: baseStory.content,
     wordCount: baseStory.wordCount,
     readingTime: baseStory.readingTime,
-    themes: baseStory.themes
+    themes: baseStory.themes,
+    storyId: request.storyId,
+    bookId: request.bookId,
+    chapterNumber: request.chapterNumber || 1
   }
 }

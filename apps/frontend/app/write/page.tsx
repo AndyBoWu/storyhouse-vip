@@ -27,6 +27,7 @@ function WritePageContent() {
   // Check if we have URL parameters for story generation
   const continueStory = searchParams?.get('continueStory')
   const nextChapter = searchParams?.get('nextChapter')
+  const bookId = searchParams?.get('bookId')
   const storyTitle = searchParams?.get('title')
   const storyGenre = searchParams?.get('genre')
   const plotDescription = searchParams?.get('plot')
@@ -35,6 +36,7 @@ function WritePageContent() {
   
   // Auto-generate story if URL parameters are present
   useEffect(() => {
+    // Option 1: Traditional story generation with plot description
     if (plotDescription && (continueStory || chapterNumber)) {
       handleGenerateStory({
         plotDescription: decodeURIComponent(plotDescription),
@@ -45,7 +47,23 @@ function WritePageContent() {
         coverUrl: coverUrl ? decodeURIComponent(coverUrl) : undefined
       })
     }
-  }, [continueStory, nextChapter, plotDescription, chapterNumber])
+    // Option 2: Book chapter continuation (bookId + chapterNumber)
+    else if (bookId && chapterNumber && storyTitle) {
+      const chapterNum = parseInt(chapterNumber)
+      const defaultPlot = chapterNum === 1 
+        ? `Continue writing the first chapter of "${decodeURIComponent(storyTitle)}".`
+        : `Continue writing chapter ${chapterNum} of "${decodeURIComponent(storyTitle)}".`
+        
+      handleGenerateStory({
+        plotDescription: defaultPlot,
+        bookId: bookId,
+        chapterNumber: chapterNum,
+        title: storyTitle ? decodeURIComponent(storyTitle) : undefined,
+        genre: storyGenre ? decodeURIComponent(storyGenre) : undefined,
+        coverUrl: coverUrl ? decodeURIComponent(coverUrl) : undefined
+      })
+    }
+  }, [continueStory, nextChapter, plotDescription, chapterNumber, bookId, storyTitle])
   
   const handleGenerateStory = async (params) => {
     if (!isConnected || !connectedAddress) {
@@ -64,6 +82,7 @@ function WritePageContent() {
         emojis: ['✨'],
         chapterNumber: params.chapterNumber || 1,
         storyId: params.storyId,
+        bookId: params.bookId,
         authorAddress: connectedAddress,
         authorName: connectedAddress.slice(0, 6) + '...' + connectedAddress.slice(-4),
         ipOptions: {

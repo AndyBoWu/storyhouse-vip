@@ -159,10 +159,33 @@ export default function MyStoriesPage() {
   }
 
 
-  const handleStartWriting = (book: RegisteredBook) => {
-    // Navigate to write page to start writing the first chapter of this book
-    const writeUrl = `/write?bookId=${encodeURIComponent(book.id)}&title=${encodeURIComponent(book.title)}&genre=${encodeURIComponent(book.genres[0] || 'Fiction')}&description=${encodeURIComponent(book.description)}`
-    router.push(writeUrl)
+  const handleStartWriting = async (book: RegisteredBook) => {
+    try {
+      console.log('📚 Starting writing for book:', book.id)
+      
+      // Get current chapter information for this book
+      const chapterInfo = await apiClient.getBookChapters(book.id)
+      
+      let nextChapterNumber = 1
+      if (chapterInfo.success && chapterInfo.data) {
+        nextChapterNumber = chapterInfo.data.nextChapterNumber
+        console.log('📄 Next chapter number:', nextChapterNumber)
+      } else {
+        console.log('📝 No chapters found, starting with chapter 1')
+      }
+
+      // Navigate to chapter writing page with proper chapter number
+      const writeUrl = `/write/chapter?bookId=${encodeURIComponent(book.id)}&title=${encodeURIComponent(book.title)}&genre=${encodeURIComponent(book.genres[0] || 'Fiction')}&chapterNumber=${nextChapterNumber}`
+      
+      console.log('🔗 Navigating to:', writeUrl)
+      router.push(writeUrl)
+    } catch (error) {
+      console.error('❌ Error getting chapter info:', error)
+      
+      // Fallback to chapter 1 if there's an error
+      const writeUrl = `/write/chapter?bookId=${encodeURIComponent(book.id)}&title=${encodeURIComponent(book.title)}&genre=${encodeURIComponent(book.genres[0] || 'Fiction')}&chapterNumber=1`
+      router.push(writeUrl)
+    }
   }
 
   const handleViewBook = (book: RegisteredBook) => {
