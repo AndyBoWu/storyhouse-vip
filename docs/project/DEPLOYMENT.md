@@ -2,46 +2,47 @@
 
 Comprehensive guide for deploying StoryHouse.vip to production environments.
 
-## ✅ **Current Status: Cloudflare Migration Complete**
+## ✅ **Current Status: Vercel Migration Complete**
 
-- ✅ **Phase 5.2 Complete** - Cloudflare Pages hybrid architecture deployed
-- ✅ **70% Cost Reduction** - $60-100/month → $15-25/month achieved
-- ✅ **Global Performance** - 50% faster loading via Cloudflare CDN
-- ✅ **Professional Domains** - Dedicated API endpoints configured
+- ✅ **Vercel Migration Complete** - Unified deployment with dynamic routing
+- ✅ **Simplified Architecture** - Single deployment instead of hybrid setup
+- ✅ **Dynamic Routing Enabled** - Book and chapter pages with SSR support
+- ✅ **API Routes Merged** - All endpoints serving from same domain
 - ✅ **Smart Contracts** - 131/132 tests passing (99.2% success rate)
 - ✅ **Security Audited** - All vulnerabilities resolved
 - ✅ **TypeScript** - Full type safety across all packages
 
 ---
 
-## 🏗️ **Cloudflare-Optimized Deployment Architecture**
+## 🏗️ **Vercel-Unified Deployment Architecture**
 
-### **Hybrid Production Stack**
+### **Single Deployment Stack**
 
 ```
 🌐 LIVE PRODUCTION DEPLOYMENT
 
-┌─────────────────────────────────┐      ┌─────────────────────────────────┐
-│        Cloudflare Pages         │      │         Vercel API              │
-│   testnet.storyhouse.vip        │ ◄──► │  api-testnet.storyhouse.vip     │
-│                                 │      │                                 │
-│ ✅ Static SPA (Next.js export)  │      │ ✅ API Routes + AI Integration  │
-│ ✅ Global CDN (330+ locations)  │      │ ✅ Story Protocol SDK           │
-│ ✅ Forever cache static assets  │      │ ✅ R2 operations & blockchain   │
-│ ✅ 50% faster worldwide         │      │ ✅ Full server-side features    │
-│ ✅ 99.99% uptime SLA           │      │ ✅ Environment isolation        │
-└─────────────────────────────────┘      └─────────────────────────────────┘
-                │                                        │
-                │                                        │
-                ▼                                        ▼
-┌─────────────────────────────────┐      ┌─────────────────────────────────┐
-│           User Browser          │      │        Story Protocol           │
-│                                 │      │                                 │
-│ ✅ Instant static loading       │      │ ✅ Smart contracts (6 deployed) │
-│ ✅ Progressive enhancement      │      │ ✅ IP asset management          │
-│ ✅ Client-side routing          │      │ ✅ Read-to-earn system          │
-│ ✅ API calls to backend         │      │ ✅ Licensing & royalties        │
-└─────────────────────────────────┘      └─────────────────────────────────┘
+┌─────────────────────────────────────────────────────────┐
+│                    Vercel Unified App                   │
+│                 Next.js 15.3.3 SSR                     │
+│                                                         │
+│ ✅ Dynamic Routing (/book/[bookId])                    │
+│ ✅ Server-Side Rendering (SEO optimized)               │
+│ ✅ API Routes (/api/*) + AI Integration                │
+│ ✅ Story Protocol SDK + Blockchain                     │
+│ ✅ Cloudflare R2 Storage integration                   │
+│ ✅ No CORS issues (same domain)                        │
+│ ✅ Simplified deployment & maintenance                 │
+└─────────────────────────────────────────────────────────┘
+                                │
+                                ▼
+┌─────────────────────────────────────────────────────────┐
+│                   External Services                     │
+│                                                         │
+│ ✅ Story Protocol (Smart contracts)                    │
+│ ✅ Cloudflare R2 (Content storage)                     │
+│ ✅ OpenAI GPT-4 (AI generation)                        │
+│ ✅ MetaMask (Wallet integration)                       │
+└─────────────────────────────────────────────────────────┘
 ```
 
 ### **Environment Configuration**
@@ -120,39 +121,29 @@ vercel
 vercel --prod
 ```
 
-### **Manual Configuration**
+### **Deployment Configuration**
 
-**vercel.json configuration:**
+**vercel.json in apps/frontend/:**
 
 ```json
 {
-  "version": 2,
-  "builds": [
+  "buildCommand": "cd ../.. && npm run build --workspace=@storyhouse/shared && npm run build --workspace=@storyhouse/frontend",
+  "outputDirectory": ".next",
+  "devCommand": "npm run dev",
+  "installCommand": "cd ../.. && npm ci",
+  "framework": "nextjs",
+  "regions": ["iad1"],
+  "headers": [
     {
-      "src": "apps/frontend/package.json",
-      "use": "@vercel/next"
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "origin-when-cross-origin" },
+        { "key": "X-XSS-Protection", "value": "1; mode=block" }
+      ]
     }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "apps/frontend/api/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "apps/frontend/$1"
-    }
-  ],
-  "env": {
-    "STORY_PROTOCOL_RPC_URL": "@story-protocol-rpc-url",
-    "STORY_PROTOCOL_CHAIN_ID": "@story-protocol-chain-id",
-    "OPENAI_API_KEY": "@openai-api-key"
-  },
-  "build": {
-    "env": {
-      "NODE_ENV": "production"
-    }
-  }
+  ]
 }
 ```
 
@@ -161,11 +152,23 @@ vercel --prod
 Set in Vercel Dashboard → Project → Settings → Environment Variables:
 
 ```bash
-STORY_PROTOCOL_RPC_URL=https://rpc.story.foundation
-STORY_PROTOCOL_CHAIN_ID=1
-# WalletConnect not used - app uses direct MetaMask integration
+# Cloudflare R2 Storage
+R2_ACCOUNT_ID=0da36f4eefbf1078c5a04b966e8cd90d
+R2_ACCESS_KEY_ID=[encrypted]
+R2_SECRET_ACCESS_KEY=[encrypted]  
+R2_BUCKET_NAME=storyhouse-content
+R2_ENDPOINT=0da36f4eefbf1078c5a04b966e8cd90d.r2.cloudflarestorage.com
+R2_PUBLIC_URL=https://0da36f4eefbf1078c5a04b966e8cd90d.r2.cloudflarestorage.com/storyhouse-content
+
+# Story Protocol Configuration
+NEXT_PUBLIC_ENABLE_TESTNET=true
+STORY_RPC_URL=https://aeneid.storyrpc.io
+STORY_EXPLORER_URL=https://aeneid.storyscan.io
+STORY_SPG_NFT_CONTRACT=0x26b6aa7e7036fc9e8fa2d8184c2cf07ae2e2412d
+NEXT_PUBLIC_STORY_SPG_NFT_CONTRACT=0x26b6aa7e7036fc9e8fa2d8184c2cf07ae2e2412d
+
+# OpenAI Integration
 OPENAI_API_KEY=[encrypted]
-NEXT_PUBLIC_APP_ENV=production
 ```
 
 ---
