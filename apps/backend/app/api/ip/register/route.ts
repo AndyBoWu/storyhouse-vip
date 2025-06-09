@@ -5,9 +5,8 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 
-import { createIPService, defaultStoryProtocolConfig, type StoryWithIP } from '@storyhouse/shared'
-import { parseBlockchainError } from '@shared/utils/blockchainErrors'
-import { ipService } from '@/lib/ipServiceConfig'
+// Simple IP registration endpoint - blockchain integrations temporarily disabled for migration
+// TODO: Re-enable Story Protocol integration after migration is complete
 import type { Address } from 'viem'
 
 interface IPRegistrationRequest {
