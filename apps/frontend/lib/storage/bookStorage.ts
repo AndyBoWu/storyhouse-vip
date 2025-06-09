@@ -164,7 +164,7 @@ export class BookStorageService {
     const paths = this.generateBookPaths(authorAddress, slug)
     
     // Validate content type
-    if (!BOOK_SYSTEM_CONSTANTS.ALLOWED_COVER_TYPES.includes(contentType)) {
+    if (!BOOK_SYSTEM_CONSTANTS.ALLOWED_COVER_TYPES.includes(contentType as any)) {
       throw new Error(`Invalid cover type: ${contentType}`)
     }
     

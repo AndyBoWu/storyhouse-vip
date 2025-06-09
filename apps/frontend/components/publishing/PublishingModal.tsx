@@ -23,6 +23,7 @@ interface PublishingModalProps {
   story: GeneratedStory
   chapterNumber: number
   storyTitle?: string
+  onSuccess?: (result: any) => void
 }
 
 type PublishingStep = 'options' | 'wallet' | 'pricing' | 'ip-setup' | 'publishing' | 'success'
@@ -32,7 +33,8 @@ export default function PublishingModal({
   onClose,
   story,
   chapterNumber,
-  storyTitle
+  storyTitle,
+  onSuccess
 }: PublishingModalProps) {
   const [currentStep, setCurrentStep] = useState<PublishingStep>('options')
   const [publishingOption, setPublishingOption] = useState<'simple' | 'protected' | null>(null)
@@ -150,6 +152,11 @@ export default function PublishingModal({
         // Story is automatically saved to R2 during the publishing process
         // The /api/stories endpoint will fetch it from R2 when needed
         console.log('📖 Story published successfully to R2 and blockchain')
+        
+        // Call the success callback with the result
+        if (onSuccess) {
+          onSuccess(result)
+        }
       } else {
         console.error('Publishing failed:', result.error)
         // Don't reset to options, let the user see the error and try again
@@ -855,3 +862,6 @@ export default function PublishingModal({
     </AnimatePresence>
   )
 }
+
+// Named export for compatibility
+export { default as PublishingModal }
