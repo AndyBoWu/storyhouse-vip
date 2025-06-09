@@ -13,7 +13,7 @@ import {
   AuthorAddress,
   BookId,
   ChapterId
-} from '../types/book'
+} from '@storyhouse/shared'
 
 // Import from backend R2 service
 import { R2Service } from '../r2'
@@ -60,7 +60,10 @@ export class BookStorageService {
       throw new Error(`Invalid book ID format: ${bookId}`)
     }
     
-    const [authorAddress, slug] = bookId.split('-', 2)
+    const parts = bookId.split('-')
+    const authorAddress = parts[0]
+    const slug = parts.slice(1).join('-') // Join all parts after the address
+    
     return { 
       authorAddress: authorAddress as AuthorAddress, 
       slug: slug 
@@ -116,6 +119,7 @@ export class BookStorageService {
   static async getBookMetadata(bookId: BookId): Promise<BookMetadata> {
     const { authorAddress, slug } = this.parseBookId(bookId)
     const paths = this.generateBookPaths(authorAddress, slug)
+    console.log('📁 Book paths:', paths)
     
     try {
       const metadataJson = await R2Service.getContent(paths.metadataPath)
@@ -361,7 +365,7 @@ export async function getBookById(bookId: string): Promise<BookMetadata | null> 
     
     console.log('📚 Fetching book:', { bookId, authorAddress, slug });
     
-    const bookMetadata = await BookStorageService.getBookMetadata(authorAddress, slug);
+    const bookMetadata = await BookStorageService.getBookMetadata(bookId);
     return bookMetadata;
   } catch (error) {
     console.error('❌ Error fetching book by ID:', error);

@@ -5,8 +5,12 @@
  */
 
 const getApiBaseUrl = (): string => {
-  // API routes are now served from the same domain
-  // No need for cross-domain requests
+  // Check if we're in development by looking at the current URL
+  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+    return 'http://localhost:3002'
+  }
+  
+  // In production, API routes are served from the same domain
   return ''
 }
 
@@ -17,10 +21,19 @@ export async function apiRequest<T = any>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
-  // Use relative paths since API routes are in same deployment
-  const url = endpoint.startsWith('/api') 
-    ? endpoint 
-    : `/api${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`
+  const baseUrl = getApiBaseUrl()
+  
+  // Construct full URL with base URL for development, relative for production  
+  const url = baseUrl 
+    ? `${baseUrl}${endpoint.startsWith('/api') ? endpoint : `/api${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`}`
+    : (endpoint.startsWith('/api') ? endpoint : `/api${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`)
+  
+  console.log('🔍 API Request Debug:', {
+    endpoint,
+    baseUrl,
+    constructedUrl: url,
+    nodeEnv: process.env.NODE_ENV
+  })
   
   const defaultOptions: RequestInit = {
     headers: {
