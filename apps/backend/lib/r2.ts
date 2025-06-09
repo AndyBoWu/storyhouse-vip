@@ -13,10 +13,22 @@ function initializeR2Client(): S3Client {
     throw new Error(`Missing required R2 environment variables: ${missingVars.join(', ')}`)
   }
 
-  // Clean up environment variables to remove any extra quotes, whitespace, and newlines
-  const cleanAccessKeyId = (process.env.R2_ACCESS_KEY_ID || '').trim().replace(/^["']|["']$/g, '').replace(/[\r\n]/g, '')
-  const cleanSecretAccessKey = (process.env.R2_SECRET_ACCESS_KEY || '').trim().replace(/^["']|["']$/g, '').replace(/[\r\n]/g, '')
-  const cleanEndpoint = (process.env.R2_ENDPOINT || '').trim().replace(/^["']|["']$/g, '').replace(/[\r\n]/g, '')
+  // NUCLEAR CLEANING: Remove ANY potential invisible characters, quotes, whitespace
+  const rawAccessKeyId = process.env.R2_ACCESS_KEY_ID || ''
+  const rawSecretAccessKey = process.env.R2_SECRET_ACCESS_KEY || ''
+  const rawEndpoint = process.env.R2_ENDPOINT || ''
+  
+  // Log raw values for debugging (first 8 chars only)
+  console.log('🔍 Raw environment values:')
+  console.log('   Raw Access Key ID:', JSON.stringify(rawAccessKeyId.substring(0, 8)))
+  console.log('   Raw Secret Key first 8:', JSON.stringify(rawSecretAccessKey.substring(0, 8)))
+  console.log('   Raw Endpoint:', JSON.stringify(rawEndpoint.substring(0, 20)))
+  
+  // Ultra-aggressive cleaning: remove ALL non-alphanumeric characters for credentials
+  const cleanAccessKeyId = rawAccessKeyId.replace(/[^a-zA-Z0-9]/g, '')
+  const cleanSecretAccessKey = rawSecretAccessKey.replace(/[^a-zA-Z0-9]/g, '')
+  // For endpoint, only allow alphanumeric, dots, and hyphens
+  const cleanEndpoint = rawEndpoint.replace(/[^a-zA-Z0-9.-]/g, '')
 
   console.log('🔧 R2 Configuration:')
   console.log('   Access Key ID length:', cleanAccessKeyId.length)
