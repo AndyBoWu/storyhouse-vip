@@ -261,15 +261,6 @@ export default function MyStoriesPage() {
                 <div className="mb-8">
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-xl font-bold text-gray-800">📚 Registered Books</h2>
-                    {registeredBooks.length > 0 && (
-                      <button
-                        onClick={handleManualRefresh}
-                        disabled={isRefreshing}
-                        className="px-3 py-1 text-sm text-purple-600 hover:text-purple-800 border border-purple-300 rounded-lg hover:bg-purple-50 transition-all"
-                      >
-                        {isRefreshing ? 'Refreshing...' : 'Refresh'}
-                      </button>
-                    )}
                   </div>
                   
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -297,7 +288,7 @@ export default function MyStoriesPage() {
                               <img
                                 src={`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3002'}/api/books/${book.id}/cover`}
                                 alt={`${book.title} cover`}
-                                className="w-full h-32 object-cover rounded-lg"
+                                className="w-full h-48 object-cover rounded-lg"
                                 onError={(e) => {
                                   // Hide image if it fails to load
                                   e.currentTarget.style.display = 'none'
@@ -337,9 +328,6 @@ export default function MyStoriesPage() {
                             </div>
                           </div>
 
-                          <div className="mb-4">
-                            <p className="text-sm text-gray-600 line-clamp-3">{book.description}</p>
-                          </div>
 
                           <div className="flex gap-2">
                             <button 
