@@ -54,14 +54,7 @@ function ChapterWritingPageContent() {
   const [error, setError] = useState<string | null>(null)
   
   // Publishing workflow state
-  const [showLicenseSelection, setShowLicenseSelection] = useState(false)
   const [showPublishingModal, setShowPublishingModal] = useState(false)
-  const [licenseOptions, setLicenseOptions] = useState<Partial<EnhancedStoryCreationParams>>({
-    registerAsIP: false,
-    licenseType: 'standard',
-    commercialRights: true,
-    derivativeRights: true
-  })
   
   // Rich text editor state
   const [fontSize, setFontSize] = useState(16)
@@ -201,60 +194,10 @@ function ChapterWritingPageContent() {
     }
     
     setError(null)
-    setShowLicenseSelection(true)
+    // Skip license selection, go directly to publishing modal
+    setShowPublishingModal(true)
   }
   
-  const handleLicenseSelected = async (options: Partial<EnhancedStoryCreationParams>) => {
-    setLicenseOptions(options)
-    setShowLicenseSelection(false)
-    
-    if (!connectedAddress || !bookId) {
-      setError('Missing required information for publishing')
-      return
-    }
-
-    // Prepare chapter data for book chapter publishing
-    const bookChapterData = {
-      bookId,
-      chapterNumber,
-      title: chapterData.title,
-      content: chapterData.content,
-      wordCount: chapterData.wordCount,
-      readingTime: Math.ceil(chapterData.wordCount / 200),
-      authorAddress: connectedAddress,
-      authorName: `${connectedAddress.slice(-4)}`,
-      genre: genre ? decodeURIComponent(genre) : 'General',
-      contentRating: 'G' as const,
-      tags: genre ? [decodeURIComponent(genre)] : []
-    }
-
-    // Prepare publishing options
-    const publishingOptions = {
-      publishingOption: options.registerAsIP ? 'protected' : 'simple',
-      chapterPrice: 100, // Default chapter price
-      ipRegistration: options.registerAsIP,
-      licenseTerms: options.registerAsIP ? {
-        commercialUse: options.commercialRights || true,
-        derivativesAllowed: options.derivativeRights || true,
-        commercialRevShare: 2500 // 25%
-      } : undefined
-    } as const
-
-    try {
-      console.log('🚀 Starting book chapter publishing...')
-      const result = await publishBookChapter(bookChapterData, publishingOptions)
-      
-      if (result.success) {
-        console.log('✅ Chapter published successfully:', result)
-        router.push('/own')
-      } else {
-        setError(result.error || 'Publishing failed')
-      }
-    } catch (error) {
-      console.error('❌ Publishing error:', error)
-      setError(error instanceof Error ? error.message : 'Publishing failed')
-    }
-  }
   
   const handlePublishingSuccess = (result: any) => {
     console.log('Chapter published successfully:', result)
@@ -502,15 +445,15 @@ function ChapterWritingPageContent() {
                       <h3 className="font-semibold text-green-800">Ready to Publish?</h3>
                     </div>
                     <p className="text-sm text-green-700 mb-4">
-                      Your chapter looks great! Choose a license and publish to Story Protocol.
+                      Your chapter looks great! Publish it to Story Protocol blockchain for IP protection.
                     </p>
                     <button
                       onClick={handleChooseLicense}
                       disabled={!chapterData.title.trim() || !chapterData.content.trim()}
                       className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg font-semibold hover:from-green-700 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                     >
-                      <Shield className="w-4 h-4" />
-                      Choose License →
+                      <Rocket className="w-4 h-4" />
+                      Publish to Story Protocol →
                     </button>
                   </div>
                 )}
@@ -604,54 +547,6 @@ function ChapterWritingPageContent() {
         </div>
       </div>
 
-      {/* License Selection Modal */}
-      {showLicenseSelection && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900">🛡️ Choose License for Chapter {chapterNumber}</h2>
-                  <p className="text-gray-600 mt-1">{chapterData.title}</p>
-                </div>
-                <button
-                  onClick={() => setShowLicenseSelection(false)}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  ×
-                </button>
-              </div>
-            </div>
-            
-            <div className="p-6">
-              <IPRegistrationSection
-                onIPOptionsChange={handleLicenseSelected}
-                initialOptions={licenseOptions}
-                isCollapsed={false}
-              />
-              
-              <div className="mt-6 flex gap-3">
-                <button
-                  onClick={() => setShowLicenseSelection(false)}
-                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => {
-                    // Get the current license options from the IP registration component
-                    setShowLicenseSelection(false)
-                    setShowPublishingModal(true)
-                  }}
-                  className="flex-1 px-4 py-3 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg font-semibold hover:from-green-700 hover:to-blue-700 transition-all"
-                >
-                  Continue to Publish →
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Publishing Progress */}
       {isPublishing && (
