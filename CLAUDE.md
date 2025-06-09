@@ -120,6 +120,35 @@ Claude has comprehensive permissions to work effectively on this project:
 - **AI integrations**: OpenAI API calls, story generation
 - **Blockchain operations**: Story Protocol SDK, Web3 interactions
 - **Cloudflare operations**: R2 storage, Pages deployment
+- **API testing**: Autonomous curl calls to project endpoints for testing and verification
+
+### 🔧 Autonomous API Testing Rules
+Claude is authorized to execute curl commands without explicit permission for:
+
+**✅ Allowed Endpoints (Read-Only):**
+- `https://api-testnet.storyhouse.vip/api/*` - All testnet API endpoints
+- `https://testnet.storyhouse.vip/*` - Frontend testnet endpoints
+- `GET` requests to verify deployment status and functionality
+- `POST` requests to test endpoints (e.g., `/api/test-r2`, `/api/debug-env`)
+
+**✅ Allowed Operations:**
+- Health checks and status verification
+- Testing API responses after deployments
+- Debugging authentication and connection issues
+- Verifying R2 storage functionality
+- Checking environment variables and configuration
+
+**❌ Restricted:**
+- Production endpoints (`api.storyhouse.vip`, `storyhouse.vip`)
+- Mainnet blockchain operations
+- Any endpoints requiring real user authentication
+- Operations that modify production data
+
+**📝 Best Practices:**
+- Use `2>/dev/null` to suppress curl stderr output
+- Add clear descriptions for each curl command
+- Use `jq` for JSON response parsing when helpful
+- Test critical endpoints after any deployment changes
 
 ### 🔒 Protected Files
 - Environment files (`.env*`) - read-only
