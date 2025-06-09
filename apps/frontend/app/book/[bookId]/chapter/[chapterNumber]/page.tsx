@@ -60,7 +60,7 @@ export default function ChapterPage() {
     try {
       setLoading(true);
       
-      const response = await apiClient.get(`/chapters/${bookId}/${chapterNumber}`);
+      const response = await apiClient.get(`/books/${bookId}/chapter/${chapterNumber}`);
       
       if (response) {
         setChapter(response);
