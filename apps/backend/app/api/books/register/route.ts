@@ -5,7 +5,7 @@ import {
   BookMetadata,
   AuthorAddress,
   BOOK_SYSTEM_CONSTANTS 
-} from '@storyhouse/shared'
+} from '@/lib/types/book'
 import { BookStorageService } from '../../../../lib/storage/bookStorage'
 
 /**
