@@ -604,6 +604,18 @@ function ChapterWritingPageContent() {
           </div>
         </div>
       )}
+
+      {/* Publishing Modal */}
+      {showPublishingModal && (
+        <PublishingModal
+          isOpen={showPublishingModal}
+          onClose={() => setShowPublishingModal(false)}
+          story={getStoryForPublishing()}
+          chapterNumber={chapterNumber}
+          storyTitle={bookId ? `${bookId.split('-').slice(1, -1).join(' ')}` : 'Untitled Story'}
+          onSuccess={handlePublishingSuccess}
+        />
+      )}
     </div>
   )
 }
