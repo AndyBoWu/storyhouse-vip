@@ -1,19 +1,5 @@
 /**
- * Storage Layer Index
- * 
- * Exports all storage utilities for the StoryHouse.vip platform
+ * Backend Storage Layer Index
  */
 
-export { BookStorageService, bookStorage } from './bookStorage'
-export { R2Service } from '../r2'
-
-// Re-export types for convenience
-export type {
-  BookMetadata,
-  ChapterMetadata,
-  BookStoragePath,
-  ChapterStoragePath,
-  AuthorAddress,
-  BookId,
-  ChapterId
-} from '@storyhouse/shared'
+export { BookStorageService } from './bookStorage'

@@ -68,13 +68,18 @@ export function usePublishStory() {
     }
 
     try {
-      // Step 1: Use existing R2 content URL (skip IPFS)
-      if (!storyData.contentUrl) {
-        throw new Error('Content URL not available. Please regenerate the story.')
+      // Step 1: Handle content URL - either use existing or upload content
+      let finalContentUrl = storyData.contentUrl
+      
+      // If no content URL provided, this is manually written content that needs to be uploaded
+      if (!storyData.contentUrl || storyData.contentUrl.startsWith('chapter-')) {
+        console.log('📝 Manually written chapter - content will be uploaded during blockchain registration')
+        finalContentUrl = `manual-chapter-${Date.now()}` // Temporary identifier
+      } else {
+        console.log('📍 Using existing R2 content URL:', storyData.contentUrl)
       }
 
-      console.log('📍 Using R2 content URL:', storyData.contentUrl)
-      setCurrentStep('minting-nft') // Skip IPFS step
+      setCurrentStep('minting-nft')
 
       // Step 2: Check if we should use real blockchain operations or mock operations
       const isDevelopment = process.env.NODE_ENV === 'development'
@@ -147,7 +152,7 @@ export function usePublishStory() {
             ipAssetId: registeredIPAssetId,
             tokenId: mintedTokenId,
             licenseTermsId,
-            contentUrl: storyData.contentUrl,
+            contentUrl: finalContentUrl,
             explorerUrl: getExplorerUrl(mockTxHash)
           }
         }
@@ -170,7 +175,7 @@ export function usePublishStory() {
           chapterNumber: storyData.chapterNumber,
           title: storyData.title,
           content: storyData.content,
-          contentUrl: storyData.contentUrl,
+          contentUrl: finalContentUrl || '',
           metadata: {
             suggestedTags: storyData.themes,
             suggestedGenre: 'Mixed',
@@ -270,7 +275,7 @@ export function usePublishStory() {
             ipAssetId: registeredIPAssetId,
             tokenId: mintedTokenId,
             licenseTermsId,
-            contentUrl: storyData.contentUrl,
+            contentUrl: finalContentUrl,
             explorerUrl: getExplorerUrl(transactionHash)
           }
         }
