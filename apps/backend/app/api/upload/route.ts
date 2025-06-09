@@ -4,8 +4,44 @@ import { R2Service } from '../../../lib/r2'
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { content, storyId, chapterNumber, contentType = 'application/json', authorAddress, authorName } = body
+    // Check Content-Type to handle different request formats
+    const contentType = request.headers.get('content-type') || ''
+    
+    let body: any
+    if (contentType.includes('multipart/form-data')) {
+      // Handle FormData uploads
+      const formData = await request.formData()
+      body = {
+        content: formData.get('content'),
+        storyId: formData.get('storyId'),
+        chapterNumber: formData.get('chapterNumber'),
+        contentType: formData.get('contentType') || 'application/json',
+        authorAddress: formData.get('authorAddress'),
+        authorName: formData.get('authorName')
+      }
+    } else {
+      // Handle JSON uploads with error handling
+      const requestText = await request.text()
+      if (!requestText || requestText.trim() === '') {
+        return NextResponse.json(
+          { error: 'Request body is empty' },
+          { status: 400 }
+        )
+      }
+      
+      try {
+        body = JSON.parse(requestText)
+      } catch (parseError) {
+        console.error('JSON parsing error:', parseError)
+        console.error('Raw request text:', requestText.slice(0, 200) + '...')
+        return NextResponse.json(
+          { error: 'Invalid JSON format in request body' },
+          { status: 400 }
+        )
+      }
+    }
+    
+    const { content, storyId, chapterNumber, contentType: reqContentType = 'application/json', authorAddress, authorName } = body
 
     // Validate required fields
     if (!content) {
@@ -49,7 +85,7 @@ export async function POST(request: NextRequest) {
 
     // Upload to R2
     const publicUrl = await R2Service.uploadContent(key, contentToUpload, {
-      contentType,
+      contentType: reqContentType,
       metadata,
     })
 

@@ -22,14 +22,21 @@ function initializeR2Client(): S3Client {
     const cleanSecretAccessKey = (process.env.R2_SECRET_ACCESS_KEY || '').trim().replace(/^["']|["']$/g, '').replace(/[\r\n]/g, '')
     const cleanEndpoint = (process.env.R2_ENDPOINT || '').trim().replace(/^["']|["']$/g, '').replace(/[\r\n]/g, '')
 
+    // Ensure endpoint has protocol
+    const endpointUrl = cleanEndpoint.startsWith('http') 
+      ? cleanEndpoint 
+      : `https://${cleanEndpoint}`
+
     r2Client = new S3Client({
       region: 'auto',
-      endpoint: cleanEndpoint,
+      endpoint: endpointUrl,
       credentials: {
         accessKeyId: cleanAccessKeyId,
         secretAccessKey: cleanSecretAccessKey,
       },
-      forcePathStyle: true,
+      forcePathStyle: false,
+      useAccelerateEndpoint: false,
+      useDualstackEndpoint: false,
     })
     
     console.log('✅ R2 client initialized successfully for chapters')
@@ -42,7 +49,7 @@ function getR2Client(): S3Client {
   return initializeR2Client()
 }
 
-const BUCKET_NAME = process.env.R2_BUCKET_NAME
+const BUCKET_NAME = (process.env.R2_BUCKET_NAME || '').trim().replace(/[\r\n]/g, '')
 
 export async function GET(
   request: NextRequest,
@@ -87,7 +94,23 @@ export async function GET(
       Delimiter: '/'
     })
 
-    const listResponse = await client.send(listCommand)
+    let listResponse
+    try {
+      listResponse = await client.send(listCommand)
+    } catch (r2Error) {
+      console.warn('⚠️ R2 listing failed, assuming new book with no chapters:', r2Error)
+      // For new books, return default values
+      return NextResponse.json({
+        success: true,
+        data: {
+          bookId,
+          totalChapters: 0,
+          latestChapter: 0,
+          nextChapterNumber: 1,
+          chapters: []
+        }
+      })
+    }
     
     console.log('📊 Chapter listing response:', {
       KeyCount: listResponse.KeyCount,

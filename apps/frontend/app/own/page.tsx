@@ -189,14 +189,8 @@ export default function MyStoriesPage() {
   }
 
   const handleViewBook = (book: RegisteredBook) => {
-    // Navigate to book details page (or table of contents if it has chapters)
-    if (book.chapters > 0) {
-      const tocUrl = `/stories#${book.author}/${book.slug}/toc`
-      router.push(tocUrl)
-    } else {
-      // Show book details or start writing
-      handleStartWriting(book)
-    }
+    // Navigate to the new book landing page
+    router.push(`/book/${book.id}`)
   }
 
   return (

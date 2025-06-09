@@ -1,14 +1,9 @@
 /**
- * Book Registration & Branching System - R2 Storage Layer
+ * Book Registration & Branching System - R2 Storage Layer (Backend)
  * 
- * Handles all storage operations for the book system including:
- * - Book metadata storage with {authorAddress}-{bookSlug} structure
- * - Chapter content storage with hybrid references
- * - Book cover image storage and management
- * - Cross-book chapter resolution for hybrid reading
+ * Backend version of the book storage service that uses the backend R2 configuration
  */
 
-import { R2Service, UploadOptions } from '../r2'
 import { 
   BookMetadata, 
   ChapterMetadata, 
@@ -20,6 +15,9 @@ import {
   ChapterId
 } from '@storyhouse/shared'
 
+// Import from backend R2 service
+import { R2Service } from '../r2'
+
 export class BookStorageService {
   
   // ===== PATH GENERATION =====
@@ -29,7 +27,8 @@ export class BookStorageService {
    */
   static generateBookPaths(authorAddress: AuthorAddress, slug: string): BookStoragePath {
     const bookId = `${authorAddress.toLowerCase()}-${slug}`
-    const bookFolder = `${BOOK_SYSTEM_CONSTANTS.BOOKS_ROOT_PATH}/${bookId}`
+    // Store with structure: books/{authorAddress}/{slug}/ (remove leading slash)
+    const bookFolder = `${BOOK_SYSTEM_CONSTANTS.BOOKS_ROOT_PATH.replace(/^\//, '')}/${authorAddress.toLowerCase()}/${slug}`
     
     return {
       bookFolder,
@@ -83,6 +82,9 @@ export class BookStorageService {
     try {
       const metadataJson = JSON.stringify(metadata, null, 2)
       
+      console.log('📂 Uploading to path:', paths.metadataPath)
+      console.log('📝 Metadata size:', metadataJson.length, 'characters')
+      
       const url = await R2Service.uploadContent(
         paths.metadataPath,
         metadataJson,
@@ -100,9 +102,10 @@ export class BookStorageService {
         }
       )
       
+      console.log('✅ Successfully uploaded book metadata to:', url)
       return url
     } catch (error) {
-      console.error('Error storing book metadata:', error)
+      console.error('❌ Error storing book metadata:', error)
       throw new Error(`Failed to store book metadata for ${metadata.bookId}`)
     }
   }
@@ -122,35 +125,6 @@ export class BookStorageService {
       throw new Error(`Book not found: ${bookId}`)
     }
   }
-  
-  /**
-   * Update book metadata (for adding chapters, updating stats, etc.)
-   */
-  static async updateBookMetadata(
-    bookId: BookId,
-    updates: Partial<BookMetadata>
-  ): Promise<string> {
-    try {
-      // Get existing metadata
-      const existingMetadata = await this.getBookMetadata(bookId)
-      
-      // Merge updates
-      const updatedMetadata: BookMetadata = {
-        ...existingMetadata,
-        ...updates,
-        updatedAt: new Date().toISOString()
-      }
-      
-      // Store updated metadata
-      const { authorAddress, slug } = this.parseBookId(bookId)
-      return await this.storeBookMetadata(authorAddress, slug, updatedMetadata)
-    } catch (error) {
-      console.error('Error updating book metadata:', error)
-      throw new Error(`Failed to update book metadata for ${bookId}`)
-    }
-  }
-  
-  // ===== BOOK COVER OPERATIONS =====
   
   /**
    * Store book cover image
@@ -207,184 +181,6 @@ export class BookStorageService {
     } catch (error) {
       // Don't throw if cover doesn't exist
       console.warn('Cover not found or already deleted:', paths.coverPath)
-    }
-  }
-  
-  // ===== CHAPTER OPERATIONS =====
-  
-  /**
-   * Store chapter content and metadata
-   */
-  static async storeChapter(
-    bookId: BookId,
-    chapterNumber: number,
-    chapterMetadata: ChapterMetadata
-  ): Promise<{ contentUrl: string; metadataUrl: string }> {
-    const { authorAddress, slug } = this.parseBookId(bookId)
-    const bookPaths = this.generateBookPaths(authorAddress, slug)
-    const chapterPaths = this.generateChapterPaths(bookPaths, chapterNumber)
-    
-    try {
-      // Store chapter content
-      const contentData = {
-        chapterId: chapterMetadata.chapterId,
-        chapterNumber: chapterMetadata.chapterNumber,
-        title: chapterMetadata.title,
-        content: chapterMetadata.content,
-        summary: chapterMetadata.summary,
-        wordCount: chapterMetadata.wordCount,
-        readingTime: chapterMetadata.readingTime,
-        createdAt: chapterMetadata.createdAt
-      }
-      
-      const contentUrl = await R2Service.uploadContent(
-        chapterPaths.contentPath,
-        JSON.stringify(contentData, null, 2),
-        {
-          contentType: 'application/json',
-          metadata: {
-            chapterId: chapterMetadata.chapterId,
-            bookId,
-            chapterNumber: chapterNumber.toString(),
-            authorAddress: chapterMetadata.authorAddress,
-            wordCount: chapterMetadata.wordCount.toString(),
-            createdAt: chapterMetadata.createdAt
-          }
-        }
-      )
-      
-      // Store chapter metadata (without content to keep it smaller)
-      const metadataOnly = { ...chapterMetadata }
-      delete (metadataOnly as any).content // Remove content from metadata file
-      
-      const metadataUrl = await R2Service.uploadContent(
-        chapterPaths.metadataPath,
-        JSON.stringify(metadataOnly, null, 2),
-        {
-          contentType: 'application/json',
-          metadata: {
-            chapterId: chapterMetadata.chapterId,
-            bookId,
-            chapterNumber: chapterNumber.toString(),
-            authorAddress: chapterMetadata.authorAddress,
-            type: 'chapter-metadata'
-          }
-        }
-      )
-      
-      return { contentUrl, metadataUrl }
-    } catch (error) {
-      console.error('Error storing chapter:', error)
-      throw new Error(`Failed to store chapter ${chapterNumber} for book ${bookId}`)
-    }
-  }
-  
-  /**
-   * Retrieve chapter content and metadata
-   */
-  static async getChapter(bookId: BookId, chapterNumber: number): Promise<ChapterMetadata> {
-    const { authorAddress, slug } = this.parseBookId(bookId)
-    const bookPaths = this.generateBookPaths(authorAddress, slug)
-    const chapterPaths = this.generateChapterPaths(bookPaths, chapterNumber)
-    
-    try {
-      // Get content and metadata separately
-      const [contentJson, metadataJson] = await Promise.all([
-        R2Service.getContent(chapterPaths.contentPath),
-        R2Service.getContent(chapterPaths.metadataPath)
-      ])
-      
-      const contentData = JSON.parse(contentJson)
-      const metadataData = JSON.parse(metadataJson)
-      
-      // Merge content back into metadata
-      const fullChapter: ChapterMetadata = {
-        ...metadataData,
-        content: contentData.content
-      }
-      
-      return fullChapter
-    } catch (error) {
-      console.error('Error retrieving chapter:', error)
-      throw new Error(`Chapter ${chapterNumber} not found in book ${bookId}`)
-    }
-  }
-  
-  // ===== HYBRID READING OPERATIONS =====
-  
-  /**
-   * Resolve chapter from potentially different book (for branched reading)
-   */
-  static async resolveChapter(
-    requestedBookId: BookId,
-    chapterNumber: number
-  ): Promise<{
-    chapter: ChapterMetadata;
-    source: {
-      bookId: BookId;
-      authorAddress: AuthorAddress;
-      isOriginalContent: boolean;
-    };
-  }> {
-    try {
-      // Get the book metadata to check chapter map
-      const bookMetadata = await this.getBookMetadata(requestedBookId)
-      
-      // Check if chapter exists in chapter map
-      const chapterKey = `ch${chapterNumber}`
-      const chapterPath = bookMetadata.chapterMap[chapterKey]
-      
-      if (!chapterPath) {
-        throw new Error(`Chapter ${chapterNumber} not found in book ${requestedBookId}`)
-      }
-      
-      // Determine source book from chapter path
-      // Path format: "0x1234-detective/chapters/ch1" or "0x5678-detective-sf/chapters/ch4"
-      const sourceBookMatch = chapterPath.match(/^([^\/]+)\/chapters\//)
-      if (!sourceBookMatch) {
-        throw new Error(`Invalid chapter path format: ${chapterPath}`)
-      }
-      
-      const sourceBookId = sourceBookMatch[1] as BookId
-      const isOriginalContent = sourceBookId === requestedBookId
-      
-      // Get chapter from source book
-      const chapter = await this.getChapter(sourceBookId, chapterNumber)
-      
-      const { authorAddress } = this.parseBookId(sourceBookId)
-      
-      return {
-        chapter,
-        source: {
-          bookId: sourceBookId,
-          authorAddress,
-          isOriginalContent
-        }
-      }
-    } catch (error) {
-      console.error('Error resolving chapter:', error)
-      throw new Error(`Failed to resolve chapter ${chapterNumber} from book ${requestedBookId}`)
-    }
-  }
-  
-  // ===== DISCOVERY OPERATIONS =====
-  
-  /**
-   * List all books by author
-   */
-  static async listBooksByAuthor(authorAddress: AuthorAddress): Promise<BookMetadata[]> {
-    // This would typically use R2's list operations or a separate index
-    // For now, we'll implement a simple version that could be enhanced with proper indexing
-    
-    try {
-      // In a full implementation, you'd maintain an index of books per author
-      // For the MVP, we'll need to scan the books directory
-      
-      // This is a simplified implementation - in production you'd want proper indexing
-      throw new Error('Book discovery by author not yet implemented - requires proper indexing')
-    } catch (error) {
-      console.error('Error listing books by author:', error)
-      throw new Error(`Failed to list books for author ${authorAddress}`)
     }
   }
   
@@ -466,27 +262,109 @@ export class BookStorageService {
   }
   
   /**
-   * Update chapter map when adding new chapters
+   * Store chapter content to R2
    */
-  static updateChapterMap(
-    bookMetadata: BookMetadata,
+  static async storeChapterContent(
+    authorAddress: AuthorAddress,
+    slug: string,
     chapterNumber: number,
-    bookId: BookId
-  ): BookMetadata {
-    const chapterKey = `ch${chapterNumber}`
-    const chapterPath = `${bookId}/chapters/${chapterKey}`
-    
-    return {
-      ...bookMetadata,
-      chapterMap: {
-        ...bookMetadata.chapterMap,
-        [chapterKey]: chapterPath
-      },
-      totalChapters: Math.max(bookMetadata.totalChapters, chapterNumber),
-      updatedAt: new Date().toISOString()
+    chapterData: ChapterMetadata
+  ): Promise<string> {
+    try {
+      const bookPaths = this.generateBookPaths(authorAddress, slug)
+      const chapterPaths = this.generateChapterPaths(bookPaths, chapterNumber)
+      
+      console.log('💾 Storing chapter content to:', chapterPaths.contentPath)
+      
+      // Store chapter content as JSON
+      const contentUrl = await R2Service.uploadContent(
+        chapterPaths.contentPath,
+        JSON.stringify(chapterData, null, 2),
+        {
+          contentType: 'application/json',
+          metadata: {
+            bookId: chapterData.bookId,
+            chapterNumber: chapterNumber.toString(),
+            contentType: 'chapter',
+            authorAddress: authorAddress.toLowerCase(),
+            authorName: chapterData.authorName,
+            title: chapterData.title,
+            wordCount: chapterData.wordCount.toString(),
+            uploadedAt: new Date().toISOString()
+          }
+        }
+      )
+      
+      console.log('✅ Chapter content stored successfully:', contentUrl)
+      return contentUrl
+      
+    } catch (error) {
+      console.error('❌ Failed to store chapter content:', error)
+      throw new Error(`Failed to store chapter content: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
+  }
+
+  /**
+   * Get chapter content from R2
+   */
+  static async getChapterContent(
+    authorAddress: AuthorAddress,
+    slug: string,
+    chapterNumber: number
+  ): Promise<ChapterMetadata> {
+    try {
+      const bookPaths = this.generateBookPaths(authorAddress, slug)
+      const chapterPaths = this.generateChapterPaths(bookPaths, chapterNumber)
+      
+      const content = await R2Service.getContent(chapterPaths.contentPath)
+      return JSON.parse(content) as ChapterMetadata
+      
+    } catch (error) {
+      console.error('❌ Failed to get chapter content:', error)
+      throw new Error(`Chapter not found: ${authorAddress}/${slug}/ch${chapterNumber}`)
+    }
+  }
+
+  /**
+   * Get all book metadata for discovery purposes
+   * Note: This is a simplified implementation that would benefit from indexing in production
+   */
+  static async getAllBooksMetadata(): Promise<BookMetadata[]> {
+    try {
+      // In production, this would use an index or database
+      // For now, we'll return empty array as this is mainly for discovery
+      // The actual implementation would require R2 listing capabilities
+      console.warn('getAllBooksMetadata: Not implemented - requires R2 bucket listing')
+      return []
+    } catch (error) {
+      console.error('Error retrieving all books metadata:', error)
+      return []
     }
   }
 }
 
-// Export default instance for convenience
-export const bookStorage = BookStorageService;
+/**
+ * Get book by ID
+ */
+export async function getBookById(bookId: string): Promise<BookMetadata | null> {
+  try {
+    // Parse bookId to get authorAddress and slug
+    const parts = bookId.split('-');
+    if (parts.length < 2) {
+      console.error('Invalid book ID format:', bookId);
+      return null;
+    }
+    
+    // Ethereum address is 42 chars (0x + 40 hex chars)
+    const authorAddress = parts[0] as AuthorAddress;
+    const slug = parts.slice(1).join('-'); // Handle slugs with hyphens
+    
+    console.log('📚 Fetching book:', { bookId, authorAddress, slug });
+    
+    const bookMetadata = await BookStorageService.getBookMetadata(bookId as BookId);
+    return bookMetadata;
+  } catch (error) {
+    console.error('❌ Error fetching book by ID:', error);
+    return null;
+  }
+}

@@ -23,12 +23,23 @@ function initializeR2Client(): S3Client {
     throw new Error(`Missing required R2 environment variables: ${missingVars.join(', ')}`)
   }
 
+  // Clean environment variables to prevent header encoding issues
+  const cleanAccessKeyId = (process.env.R2_ACCESS_KEY_ID || '').trim().replace(/[\r\n\t]/g, '').replace(/^["']|["']$/g, '')
+  const cleanSecretAccessKey = (process.env.R2_SECRET_ACCESS_KEY || '').trim().replace(/[\r\n\t]/g, '').replace(/^["']|["']$/g, '')
+  const cleanEndpoint = (process.env.R2_ENDPOINT || '').trim().replace(/[\r\n\t]/g, '').replace(/^["']|["']$/g, '')
+
+  console.log('🔧 Cleaned credentials length:', {
+    accessKeyId: cleanAccessKeyId.length,
+    secretAccessKey: cleanSecretAccessKey.length,
+    endpoint: cleanEndpoint.length
+  })
+
   const client = new S3Client({
     region: 'auto',
-    endpoint: `https://${process.env.R2_ENDPOINT || ''}`,
+    endpoint: `https://${cleanEndpoint}`,
     credentials: {
-      accessKeyId: process.env.R2_ACCESS_KEY_ID || '',
-      secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
+      accessKeyId: cleanAccessKeyId,
+      secretAccessKey: cleanSecretAccessKey,
     },
     // Add additional options to help with header issues
     forcePathStyle: false,
