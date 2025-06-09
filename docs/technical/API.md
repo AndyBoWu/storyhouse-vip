@@ -19,8 +19,10 @@ Currently using session-based authentication. API keys coming in Phase 5.
 
 ## 🔗 **Real Blockchain Integration Status**
 
-**✅ Phase 5.0 COMPLETE**: All API endpoints now feature comprehensive enhancements:
+**✅ Phase 5.4 COMPLETE**: All API endpoints now feature comprehensive enhancements:
 
+- ✅ **Chapter Writing System** with dedicated writing interface and smart chapter detection
+- ✅ **Chapter Count API** for automatic chapter numbering and continuation workflow
 - ✅ **Enhanced Metadata System** with 25+ tracked fields per chapter
 - ✅ **User Attribution** with complete author tracking and wallet integration
 - ✅ **Read-to-Earn Economics** with full token flow tracking
@@ -574,6 +576,45 @@ GET /api/books/[bookId]/derivatives
     "totalRevenue": 45.67
   }
 }
+```
+
+### **Get Book Chapters Information** ✨ NEW!
+
+Get chapter count and information for a specific book to determine next chapter number.
+
+```http
+GET /api/books/[bookId]/chapters
+```
+
+**Parameters:**
+- `bookId` (required): The book ID (format: `{authorAddress}-{slug}`)
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "bookId": "0x1234567890123456789012345678901234567890-detective-portal",
+    "totalChapters": 3,
+    "latestChapter": 3,
+    "nextChapterNumber": 4,
+    "chapters": [1, 2, 3]
+  }
+}
+```
+
+**Use Cases:**
+- **Chapter Writing Interface**: Automatically determine next chapter number
+- **Writing Workflow**: Continue from last chapter for book continuation
+- **Progress Tracking**: Show book completion status
+
+**Example Usage:**
+```javascript
+// Get chapter info before starting new chapter
+const chapterInfo = await fetch(`/api/books/${bookId}/chapters`)
+const { data } = await chapterInfo.json()
+console.log(`Next chapter to write: ${data.nextChapterNumber}`)
 ```
 
 ---
