@@ -1,13 +1,17 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { ArrowLeft, Save, Eye, Maximize2, Minimize2, Type, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, List, Quote } from 'lucide-react'
+import { useState, useEffect, useRef, Suspense } from 'react'
+import { ArrowLeft, Save, Eye, Maximize2, Minimize2, Type, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, List, Quote, Rocket, Shield } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAccount } from 'wagmi'
 import { apiClient } from '@/lib/api-client'
 import dynamic from 'next/dynamic'
 import QuickNavigation from '@/components/ui/QuickNavigation'
+import IPRegistrationSection from '@/components/creator/IPRegistrationSection'
+import PublishingModal from '@/components/publishing/PublishingModal'
+import { usePublishBookChapter } from '@/hooks/usePublishBookChapter'
+import type { EnhancedStoryCreationParams } from '@storyhouse/shared'
 
 // Dynamically import WalletConnect to avoid hydration issues
 const WalletConnect = dynamic(() => import('@/components/WalletConnect'), {
@@ -22,10 +26,11 @@ interface ChapterData {
   wordCount: number
 }
 
-export default function ChapterWritingPage() {
+function ChapterWritingPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { address: connectedAddress, isConnected } = useAccount()
+  const { publishBookChapter, isPublishing, currentStep, publishResult, reset } = usePublishBookChapter()
   
   // URL parameters
   const bookId = searchParams?.get('bookId')
@@ -45,8 +50,17 @@ export default function ChapterWritingPage() {
   const [isPreviewMode, setIsPreviewMode] = useState(false)
   const [isFocusMode, setIsFocusMode] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
-  const [isPublishing, setIsPublishing] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  
+  // Publishing workflow state
+  const [showLicenseSelection, setShowLicenseSelection] = useState(false)
+  const [showPublishingModal, setShowPublishingModal] = useState(false)
+  const [licenseOptions, setLicenseOptions] = useState<Partial<EnhancedStoryCreationParams>>({
+    registerAsIP: false,
+    licenseType: 'standard',
+    commercialRights: true,
+    derivativeRights: true
+  })
   
   // Rich text editor state
   const [fontSize, setFontSize] = useState(16)
@@ -173,8 +187,8 @@ export default function ChapterWritingPage() {
     return () => document.removeEventListener('keydown', handleEscKey)
   }, [isFocusMode])
   
-  // Handle publish chapter
-  const handlePublishChapter = async () => {
+  // Publishing workflow handlers
+  const handleChooseLicense = () => {
     if (!chapterData.title.trim()) {
       setError('Chapter title is required')
       return
@@ -185,37 +199,77 @@ export default function ChapterWritingPage() {
       return
     }
     
-    setIsPublishing(true)
     setError(null)
+    setShowLicenseSelection(true)
+  }
+  
+  const handleLicenseSelected = async (options: Partial<EnhancedStoryCreationParams>) => {
+    setLicenseOptions(options)
+    setShowLicenseSelection(false)
     
+    if (!connectedAddress || !bookId) {
+      setError('Missing required information for publishing')
+      return
+    }
+
+    // Prepare chapter data for book chapter publishing
+    const bookChapterData = {
+      bookId,
+      chapterNumber,
+      title: chapterData.title,
+      content: chapterData.content,
+      wordCount: chapterData.wordCount,
+      readingTime: Math.ceil(chapterData.wordCount / 200),
+      authorAddress: connectedAddress,
+      authorName: `${connectedAddress.slice(-4)}`,
+      genre: genre ? decodeURIComponent(genre) : 'General',
+      contentRating: 'G' as const,
+      tags: genre ? [decodeURIComponent(genre)] : []
+    }
+
+    // Prepare publishing options
+    const publishingOptions = {
+      publishingOption: options.registerAsIP ? 'protected' : 'simple',
+      chapterPrice: 100, // Default chapter price
+      ipRegistration: options.registerAsIP,
+      licenseTerms: options.registerAsIP ? {
+        commercialUse: options.commercialRights || true,
+        derivativesAllowed: options.derivativeRights || true,
+        commercialRevShare: 2500 // 25%
+      } : undefined
+    } as const
+
     try {
-      // Create chapter metadata
-      const chapterMetadata = {
-        bookId,
-        chapterNumber,
-        title: chapterData.title,
-        subtitle: chapterData.subtitle,
-        content: chapterData.content,
-        wordCount: chapterData.wordCount,
-        authorAddress: connectedAddress,
-        createdAt: new Date().toISOString()
-      }
+      console.log('🚀 Starting book chapter publishing...')
+      const result = await publishBookChapter(bookChapterData, publishingOptions)
       
-      // Here you would call your publishing API
-      console.log('Publishing chapter:', chapterMetadata)
-      
-      // For now, just simulate success
-      setTimeout(() => {
-        setIsPublishing(false)
+      if (result.success) {
+        console.log('✅ Chapter published successfully:', result)
         router.push('/own')
-      }, 2000)
-      
+      } else {
+        setError(result.error || 'Publishing failed')
+      }
     } catch (error) {
-      console.error('Error publishing chapter:', error)
-      setError('Failed to publish chapter. Please try again.')
-      setIsPublishing(false)
+      console.error('❌ Publishing error:', error)
+      setError(error instanceof Error ? error.message : 'Publishing failed')
     }
   }
+  
+  const handlePublishingSuccess = (result: any) => {
+    console.log('Chapter published successfully:', result)
+    setShowPublishingModal(false)
+    router.push('/own')
+  }
+  
+  // Convert chapter data to the format expected by PublishingModal
+  const getStoryForPublishing = () => ({
+    title: chapterData.title,
+    content: chapterData.content,
+    wordCount: chapterData.wordCount,
+    readingTime: Math.ceil(chapterData.wordCount / 200),
+    themes: genre ? [decodeURIComponent(genre)] : [], // Use genre from URL
+    contentUrl: `chapter-${bookId}-${chapterNumber}` // Generate a temporary identifier
+  })
   
   // Focus mode component
   const FocusMode = () => (
@@ -241,13 +295,9 @@ export default function ChapterWritingPage() {
           <div className="text-sm text-gray-500">
             {chapterData.wordCount} words
           </div>
-          <button
-            onClick={handleSaveDraft}
-            disabled={isSaving}
-            className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-md"
-          >
-            {isSaving ? 'Saving...' : 'Save'}
-          </button>
+          <div className="text-xs text-gray-400">
+            Auto-save enabled
+          </div>
         </div>
       </div>
       
@@ -436,6 +486,27 @@ export default function ChapterWritingPage() {
             {/* Sidebar */}
             <div className="lg:col-span-1">
               <div className="bg-white rounded-xl shadow-lg p-6 sticky top-8">
+                {/* Ready to Publish section - only show in Preview mode */}
+                {isPreviewMode && (
+                  <div className="mb-6 p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-green-200">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Rocket className="w-5 h-5 text-green-600" />
+                      <h3 className="font-semibold text-green-800">Ready to Publish?</h3>
+                    </div>
+                    <p className="text-sm text-green-700 mb-4">
+                      Your chapter looks great! Choose a license and publish to Story Protocol.
+                    </p>
+                    <button
+                      onClick={handleChooseLicense}
+                      disabled={!chapterData.title.trim() || !chapterData.content.trim()}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg font-semibold hover:from-green-700 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                    >
+                      <Shield className="w-4 h-4" />
+                      Choose License →
+                    </button>
+                  </div>
+                )}
+
                 <h3 className="font-semibold text-gray-800 mb-4">Chapter Stats</h3>
                 
                 <div className="space-y-3 mb-6">
@@ -471,34 +542,6 @@ export default function ChapterWritingPage() {
                   </button>
                 </div>
 
-                <div className="space-y-3">
-                  <button
-                    onClick={handleSaveDraft}
-                    disabled={isSaving}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 text-gray-700"
-                  >
-                    <Save className="w-4 h-4" />
-                    {isSaving ? 'Saving...' : 'Save Draft'}
-                  </button>
-                  
-                  <button
-                    onClick={handlePublishChapter}
-                    disabled={isPublishing || !chapterData.title.trim() || !chapterData.content.trim()}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isPublishing ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        Publishing...
-                      </>
-                    ) : (
-                      <>
-                        <Eye className="w-4 h-4" />
-                        Publish
-                      </>
-                    )}
-                  </button>
-                </div>
 
                 <div className="mt-6 p-4 bg-purple-50 rounded-lg">
                   <h4 className="text-sm font-medium text-purple-800 mb-2">💡 Writing Tips</h4>
@@ -514,6 +557,124 @@ export default function ChapterWritingPage() {
           </div>
         </div>
       </div>
+
+      {/* License Selection Modal */}
+      {showLicenseSelection && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">🛡️ Choose License for Chapter {chapterNumber}</h2>
+                  <p className="text-gray-600 mt-1">{chapterData.title}</p>
+                </div>
+                <button
+                  onClick={() => setShowLicenseSelection(false)}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+            
+            <div className="p-6">
+              <IPRegistrationSection
+                onIPOptionsChange={handleLicenseSelected}
+                initialOptions={licenseOptions}
+                isCollapsed={false}
+              />
+              
+              <div className="mt-6 flex gap-3">
+                <button
+                  onClick={() => setShowLicenseSelection(false)}
+                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    // Get the current license options from the IP registration component
+                    setShowLicenseSelection(false)
+                    setShowPublishingModal(true)
+                  }}
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg font-semibold hover:from-green-700 hover:to-blue-700 transition-all"
+                >
+                  Continue to Publish →
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Publishing Progress */}
+      {isPublishing && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-8 max-w-md w-full mx-4">
+            <h3 className="text-xl font-bold text-gray-800 mb-4">Publishing Chapter</h3>
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                {currentStep === 'validating' ? (
+                  <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                ) : (
+                  <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                    <span className="text-white text-xs">✓</span>
+                  </div>
+                )}
+                <span className="text-gray-700">Validating chapter data</span>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                {currentStep === 'minting-nft' || currentStep === 'registering-ip' || currentStep === 'creating-license' || currentStep === 'attaching-license' ? (
+                  <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                ) : currentStep === 'saving-to-storage' || currentStep === 'success' ? (
+                  <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                    <span className="text-white text-xs">✓</span>
+                  </div>
+                ) : (
+                  <div className="w-5 h-5 bg-gray-300 rounded-full"></div>
+                )}
+                <span className="text-gray-700">Blockchain registration</span>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                {currentStep === 'saving-to-storage' ? (
+                  <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                ) : currentStep === 'success' ? (
+                  <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                    <span className="text-white text-xs">✓</span>
+                  </div>
+                ) : (
+                  <div className="w-5 h-5 bg-gray-300 rounded-full"></div>
+                )}
+                <span className="text-gray-700">Saving to storage</span>
+              </div>
+            </div>
+            
+            <div className="mt-6 text-center">
+              <p className="text-sm text-gray-600">
+                {currentStep === 'validating' && 'Checking chapter data...'}
+                {(currentStep === 'minting-nft' || currentStep === 'registering-ip') && 'Registering on blockchain...'}
+                {(currentStep === 'creating-license' || currentStep === 'attaching-license') && 'Setting up licensing...'}
+                {currentStep === 'saving-to-storage' && 'Uploading to storage...'}
+                {currentStep === 'success' && 'Chapter published successfully!'}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
+  )
+}
+
+export default function ChapterWritingPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-b from-orange-100 via-pink-100 to-blue-200 flex items-center justify-center">
+        <div className="text-lg">Loading chapter editor...</div>
+      </div>
+    }>
+      <ChapterWritingPageContent />
+    </Suspense>
   )
 }

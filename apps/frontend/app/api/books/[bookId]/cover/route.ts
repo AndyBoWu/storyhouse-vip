@@ -1,0 +1,115 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { GetObjectCommand } from '@aws-sdk/client-s3'
+import { S3Client } from '@aws-sdk/client-s3'
+
+// Initialize R2 client for direct image serving
+let r2Client: S3Client
+
+function initializeR2Client(): S3Client {
+  const requiredEnvVars = ['R2_ENDPOINT', 'R2_ACCESS_KEY_ID', 'R2_SECRET_ACCESS_KEY', 'R2_BUCKET_NAME']
+  const missingVars = requiredEnvVars.filter(varName => !process.env[varName])
+  
+  if (missingVars.length > 0) {
+    throw new Error(`Missing required R2 environment variables: ${missingVars.join(', ')}`)
+  }
+
+  return new S3Client({
+    region: 'auto',
+    endpoint: `https://${process.env.R2_ENDPOINT || ''}`,
+    credentials: {
+      accessKeyId: process.env.R2_ACCESS_KEY_ID || '',
+      secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
+    },
+    forcePathStyle: false,
+    useAccelerateEndpoint: false,
+    useDualstackEndpoint: false,
+  })
+}
+
+function getR2Client(): S3Client {
+  if (!r2Client) {
+    r2Client = initializeR2Client()
+  }
+  return r2Client
+}
+
+const BUCKET_NAME = (process.env.R2_BUCKET_NAME || '').trim().replace(/[\r\n]/g, '')
+
+/**
+ * GET /api/books/[bookId]/cover
+ * 
+ * Serve book cover images directly from R2 storage
+ * This provides permanent access to covers while keeping the bucket private
+ */
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ bookId: string }> }
+) {
+  try {
+    const { bookId } = await params
+    
+    // Parse bookId to get author address and slug
+    const parts = bookId.split('-')
+    if (parts.length < 2) {
+      return new NextResponse('Invalid book ID format', { status: 400 })
+    }
+    
+    // Extract author address (first part) and slug (rest joined with -)
+    const authorAddress = parts[0]
+    const slug = parts.slice(1).join('-')
+    
+    // Generate the cover key
+    const coverKey = `books/${authorAddress}/${slug}/cover.jpg`
+    
+    console.log('🖼️ Serving cover image:', coverKey)
+    
+    // Fetch the image from R2
+    const client = getR2Client()
+    const command = new GetObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: coverKey,
+    })
+    
+    const response = await client.send(command)
+    
+    if (!response.Body) {
+      return new NextResponse('Cover image not found', { status: 404 })
+    }
+    
+    // Convert the stream to buffer
+    const chunks: Uint8Array[] = []
+    const reader = response.Body.transformToWebStream().getReader()
+    
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      chunks.push(value)
+    }
+    
+    const imageBuffer = Buffer.concat(chunks)
+    
+    console.log('✅ Cover image served successfully')
+    
+    // Return the image with proper headers
+    return new NextResponse(imageBuffer, {
+      status: 200,
+      headers: {
+        'Content-Type': response.ContentType || 'image/jpeg',
+        'Content-Length': response.ContentLength?.toString() || imageBuffer.length.toString(),
+        'Cache-Control': 'public, max-age=31536000, immutable', // Cache for 1 year
+        'ETag': response.ETag || '',
+        'Last-Modified': response.LastModified?.toUTCString() || '',
+      },
+    })
+    
+  } catch (error) {
+    console.error('❌ Error serving cover image:', error)
+    
+    // Check for specific R2 errors
+    if ((error as any)?.name === 'NoSuchKey') {
+      return new NextResponse('Cover image not found', { status: 404 })
+    }
+    
+    return new NextResponse('Failed to load cover image', { status: 500 })
+  }
+}

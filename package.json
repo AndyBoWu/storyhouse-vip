@@ -16,13 +16,9 @@
     "test": "npm run test --workspace=@storyhouse/contracts",
     "lint": "npm run lint --workspace=@storyhouse/frontend",
     "type-check": "npm run type-check --workspace=@storyhouse/shared && npm run type-check --workspace=@storyhouse/frontend",
-    "cf:build": "cd apps/frontend && CLOUDFLARE_BUILD=true npm run build",
-    "cf:dev": "npm run cf:build && wrangler pages dev apps/frontend/out --compatibility-date=2024-06-07",
-    "cf:deploy": "npm run cf:build && wrangler pages deploy apps/frontend/out",
-    "cf:deploy:staging": "npm run cf:build && wrangler pages deploy apps/frontend/out --env staging",
-    "cf:deploy:production": "npm run cf:build && wrangler pages deploy apps/frontend/out --env production",
-    "cf:tail": "wrangler pages deployment tail",
-    "cf:analyze": "npm run build && npx next-bundle-analyzer"
+    "deploy": "cd apps/frontend && vercel --prod",
+    "deploy:preview": "cd apps/frontend && vercel",
+    "analyze": "npm run build && npx next-bundle-analyzer"
   },
   "devDependencies": {
     "@cloudflare/next-on-pages": "^1.13.12",
