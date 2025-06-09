@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import apiClient from '@/lib/api-client';
+import ChapterAccessControl from '@/components/ui/ChapterAccessControl';
+import { useChapterAccess } from '@/hooks/useChapterAccess';
 // import ReadingProgressBar from '@/components/ui/ReadingProgressBar';
 // import ReadingPreferences from '@/components/ui/ReadingPreferences';
 
@@ -33,15 +35,26 @@ export default function ChapterPage() {
   const [chapter, setChapter] = useState<ChapterContent | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [hasAccess, setHasAccess] = useState(false);
   const [fontSize, setFontSize] = useState<'small' | 'medium' | 'large'>('medium');
   const [theme, setTheme] = useState<'light' | 'dark' | 'sepia'>('light');
   const [readingProgress, setReadingProgress] = useState(0);
+  
+  const { getChapterPricing } = useChapterAccess();
 
   useEffect(() => {
     if (bookId && chapterNumber) {
-      fetchChapterContent();
+      // Check if this is a free chapter (1-3) - grant immediate access
+      const pricing = getChapterPricing(chapterNumber);
+      if (pricing.isFree) {
+        setHasAccess(true);
+        fetchChapterContent();
+      } else {
+        // For paid chapters, only load basic info until unlocked
+        fetchChapterInfo();
+      }
     }
-  }, [bookId, chapterNumber]);
+  }, [bookId, chapterNumber, getChapterPricing]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -71,6 +84,32 @@ export default function ChapterPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchChapterInfo = async () => {
+    try {
+      setLoading(true);
+      
+      // For paid chapters, only fetch basic info (title, author, etc.) without content
+      const response = await apiClient.get(`/books/${bookId}/chapter/${chapterNumber}/info`);
+      
+      if (response) {
+        setChapter({
+          ...response,
+          content: '' // No content until unlocked
+        });
+      }
+    } catch (err) {
+      console.error('Failed to fetch chapter info:', err);
+      setError('Failed to load chapter information');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAccessGranted = () => {
+    setHasAccess(true);
+    fetchChapterContent();
   };
 
   const getThemeClasses = () => {
@@ -146,64 +185,84 @@ export default function ChapterPage() {
 
       {/* Chapter Content */}
       <article className="container mx-auto px-4 py-8 max-w-4xl">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">
-            Chapter {chapter.chapterNumber}: {chapter.title}
-          </h1>
-          <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-            <span>by {chapter.authorAddress.slice(0, 6)}...{chapter.authorAddress.slice(-4)}</span>
-            <span>•</span>
-            <span>{chapter.wordCount} words</span>
-            <span>•</span>
-            <span>{chapter.readingTime} min read</span>
+        {/* Show access control if user doesn't have access */}
+        {!hasAccess && chapter && (
+          <div className="mb-8">
+            <ChapterAccessControl
+              bookId={bookId}
+              chapterNumber={chapterNumber}
+              chapterTitle={chapter.title}
+              onAccessGranted={handleAccessGranted}
+              className="mb-6"
+            />
           </div>
-        </div>
+        )}
 
-        <div className={`prose prose-gray dark:prose-invert max-w-none ${getFontSizeClass()}`}>
-          <div 
-            className="whitespace-pre-wrap"
-            dangerouslySetInnerHTML={{ __html: chapter.content }}
-          />
-        </div>
+        {/* Show content only if user has access */}
+        {hasAccess && chapter && (
+          <>
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold mb-2">
+                Chapter {chapter.chapterNumber}: {chapter.title}
+              </h1>
+              <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+                <span>by {chapter.authorAddress.slice(0, 6)}...{chapter.authorAddress.slice(-4)}</span>
+                <span>•</span>
+                <span>{chapter.wordCount} words</span>
+                <span>•</span>
+                <span>{chapter.readingTime} min read</span>
+              </div>
+            </div>
 
-        {/* Navigation */}
-        <div className="mt-12 pt-8 border-t">
-          <div className="flex justify-between items-center">
-            {chapter.previousChapter ? (
+            <div className={`prose prose-gray dark:prose-invert max-w-none ${getFontSizeClass()}`}>
+              <div 
+                className="whitespace-pre-wrap"
+                dangerouslySetInnerHTML={{ __html: chapter.content }}
+              />
+            </div>
+          </>
+        )}
+
+        {/* Navigation - only show when user has access */}
+        {hasAccess && chapter && (
+          <div className="mt-12 pt-8 border-t">
+            <div className="flex justify-between items-center">
+              {chapter.previousChapter ? (
+                <Link
+                  href={`/book/${bookId}/chapter/${chapter.previousChapter}`}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                >
+                  ← Previous Chapter
+                </Link>
+              ) : (
+                <div />
+              )}
+
               <Link
-                href={`/book/${bookId}/chapter/${chapter.previousChapter}`}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                href={`/book/${bookId}`}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
               >
-                ← Previous Chapter
+                Table of Contents
               </Link>
-            ) : (
-              <div />
-            )}
 
-            <Link
-              href={`/book/${bookId}`}
-              className="px-4 py-2 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
-            >
-              Table of Contents
-            </Link>
-
-            {chapter.nextChapter && chapter.nextChapter <= chapter.totalChapters ? (
-              <Link
-                href={`/book/${bookId}/chapter/${chapter.nextChapter}`}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-              >
-                Next Chapter →
-              </Link>
-            ) : (
-              <button
-                onClick={() => router.push(`/write/chapter?bookId=${bookId}&chapterNumber=${chapter.chapterNumber + 1}`)}
-                className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
-              >
-                ✍️ Write Next Chapter
-              </button>
-            )}
+              {chapter.nextChapter && chapter.nextChapter <= chapter.totalChapters ? (
+                <Link
+                  href={`/book/${bookId}/chapter/${chapter.nextChapter}`}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                >
+                  Next Chapter →
+                </Link>
+              ) : (
+                <button
+                  onClick={() => router.push(`/write/chapter?bookId=${bookId}&chapterNumber=${chapter.chapterNumber + 1}`)}
+                  className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+                >
+                  ✍️ Write Next Chapter
+                </button>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </article>
     </div>
   );

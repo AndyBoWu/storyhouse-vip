@@ -72,22 +72,22 @@ contract RemixLicensingController is Ownable, Pausable, ReentrancyGuard {
         rewardsManager = RewardsManager(_rewardsManager);
         tipToken = TIPToken(_tipToken);
 
-        // Initialize default license types
+        // Initialize default license types (aligned with design spec)
         licenseTypes["standard"] = LicenseTerms({
-            baseFee: 100 * 10 ** 18, // 100 TIP
-            royaltyPercentage: 500, // 5% (500 basis points)
+            baseFee: 2 * 10 ** 18, // 2.0 TIP (as per design spec)
+            royaltyPercentage: 2500, // 25% (2500 basis points)
             isActive: true
         });
 
         licenseTypes["premium"] = LicenseTerms({
-            baseFee: 500 * 10 ** 18, // 500 TIP
-            royaltyPercentage: 1000, // 10% (1000 basis points)
+            baseFee: 20 * 10 ** 18, // 20 TIP
+            royaltyPercentage: 3000, // 30% (3000 basis points)
             isActive: true
         });
 
         licenseTypes["exclusive"] = LicenseTerms({
-            baseFee: 2000 * 10 ** 18, // 2000 TIP
-            royaltyPercentage: 2000, // 20% (2000 basis points)
+            baseFee: 100 * 10 ** 18, // 100 TIP
+            royaltyPercentage: 5000, // 50% (5000 basis points)
             isActive: true
         });
     }
