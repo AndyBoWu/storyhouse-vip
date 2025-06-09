@@ -104,6 +104,11 @@ export function usePublishBookChapter() {
       setCurrentStep('saving-to-storage')
       console.log('💾 Step 2: Saving chapter to R2 storage...')
 
+      // Dynamic pricing: first 3 chapters are free
+      const isFreeChapter = chapterData.chapterNumber <= 3
+      const unlockPrice = isFreeChapter ? 0 : 0.5
+      const readReward = isFreeChapter ? 0.05 : 0.1
+
       const chapterSaveData = {
         bookId: chapterData.bookId,
         chapterNumber: chapterData.chapterNumber,
@@ -121,10 +126,11 @@ export function usePublishBookChapter() {
         // Blockchain registration proof
         ipAssetId: blockchainResult.data?.ipAssetId,
         transactionHash: blockchainResult.data?.transactionHash,
-        // Economics
-        unlockPrice: 0.1,
-        readReward: 0.05,
-        licensePrice: options.chapterPrice || 100
+        // Economics with dynamic pricing
+        unlockPrice,
+        readReward,
+        licensePrice: options.chapterPrice || 100,
+        isFree: isFreeChapter
       }
 
       const saveResult = await apiClient.saveBookChapter(chapterData.bookId, chapterSaveData)
