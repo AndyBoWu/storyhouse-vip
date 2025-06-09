@@ -23,6 +23,7 @@ interface PublishingModalProps {
   story: GeneratedStory
   chapterNumber: number
   storyTitle?: string
+  bookId?: string
   onSuccess?: (result: any) => void
 }
 
@@ -34,6 +35,7 @@ function PublishingModal({
   story,
   chapterNumber,
   storyTitle,
+  bookId,
   onSuccess
 }: PublishingModalProps) {
   const [currentStep, setCurrentStep] = useState<PublishingStep>('options')
@@ -144,7 +146,7 @@ function PublishingModal({
         themes: story.themes,
         chapterNumber,
         contentUrl: story.contentUrl // Pass the R2 URL
-      }, options)
+      }, options, bookId)
 
             if (result.success) {
         setCurrentStep('success')

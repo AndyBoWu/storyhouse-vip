@@ -43,6 +43,7 @@ type PublishStep =
   | 'registering-ip'
   | 'creating-license'
   | 'attaching-license'
+  | 'saving-to-storage'
   | 'success'
   | 'error'
 
@@ -60,7 +61,7 @@ export function usePublishStory() {
     hash: txHash,
   })
 
-  const publishStory = async (storyData: StoryData, options: PublishOptions): Promise<PublishResult> => {
+  const publishStory = async (storyData: StoryData, options: PublishOptions, bookId?: string): Promise<PublishResult> => {
     if (!address) {
       const error = 'Wallet not connected'
       setPublishResult({ success: false, error })
@@ -228,6 +229,39 @@ export function usePublishStory() {
         console.log('🎫 Token ID:', mintedTokenId.toString())
         console.log('📝 IP Asset ID:', registeredIPAssetId)
         console.log('🔗 Transaction:', transactionHash)
+
+        // Step 3: Save chapter content to R2 storage
+        setCurrentStep('saving-to-storage' as any)
+        console.log('💾 Saving chapter content to R2 storage...')
+        
+        // Use provided bookId or generate one as fallback
+        const finalBookId = bookId || `${address.toLowerCase()}-${storyData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${storyData.chapterNumber}`
+        
+        const chapterSaveResponse = await fetch(`/api/books/${encodeURIComponent(finalBookId)}/chapters/save`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            bookId: finalBookId,
+            chapterNumber: storyData.chapterNumber,
+            title: storyData.title,
+            content: storyData.content,
+            wordCount: storyData.wordCount,
+            readingTime: storyData.readingTime,
+            authorAddress: address.toLowerCase(),
+            authorName: `${address.slice(-4)}`,
+            ipAssetId: registeredIPAssetId,
+            transactionHash: transactionHash,
+            genre: storyData.themes[0] || 'General',
+            generationMethod: 'human' as const
+          })
+        })
+
+        if (!chapterSaveResponse.ok) {
+          console.warn('⚠️ Failed to save chapter content to R2, but blockchain registration succeeded')
+        } else {
+          const saveResult = await chapterSaveResponse.json()
+          console.log('✅ Chapter content saved to R2:', saveResult.data?.contentUrl)
+        }
 
         // Handle license terms
         let licenseTermsId: bigint | undefined
