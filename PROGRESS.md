@@ -25,15 +25,8 @@ Reviewing deployment status and project progress. Successfully deployed hybrid a
 - Services Running: None locally (deployed to cloud)
 
 ## Deployment Status
-**Testnet:**
-- Frontend: https://testnet.storyhouse.vip/ (Cloudflare Pages)
-- Backend: https://api-testnet.storyhouse.vip/ (Vercel)
-
-**Mainnet:**
-- Frontend: https://storyhouse.vip/ (Cloudflare Pages)
-- Backend: https://api.storyhouse.vip/ (Vercel)
-
-Status: Phase 5.3 Complete - Full SPA optimization
+- All deployments operational (URLs in CLAUDE.md)
+- Status: Phase 5.3 Complete - Full SPA optimization
 
 ## Notes for Next Session
 - Both deployments are live and operational
