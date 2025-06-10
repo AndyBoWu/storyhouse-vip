@@ -26,7 +26,7 @@ import QuickNavigation from '../../../components/ui/QuickNavigation'
 import type {
   EnhancedGeneratedStory,
   EnhancedStoryCreationParams
-} from '@storyhouse/shared'
+} from '@/lib/types/shared'
 
 interface GeneratedStory {
   title: string

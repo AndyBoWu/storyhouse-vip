@@ -11,7 +11,7 @@ import QuickNavigation from '@/components/ui/QuickNavigation'
 import IPRegistrationSection from '@/components/creator/IPRegistrationSection'
 import PublishingModal from '@/components/publishing/PublishingModal'
 import { usePublishBookChapter } from '@/hooks/usePublishBookChapter'
-import type { EnhancedStoryCreationParams } from '@storyhouse/shared'
+import type { EnhancedStoryCreationParams } from '@/lib/types/shared'
 
 // Dynamically import WalletConnect to avoid hydration issues
 const WalletConnect = dynamic(() => import('@/components/WalletConnect'), {

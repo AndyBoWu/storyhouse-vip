@@ -24,7 +24,7 @@ import {
 import type {
   StoryCollection,
   EnhancedStoryCreationParams
-} from '@storyhouse/shared'
+} from '../../lib/types/shared'
 
 interface CollectionSectionProps {
   onCollectionOptionsChange: (options: Partial<EnhancedStoryCreationParams>) => void
