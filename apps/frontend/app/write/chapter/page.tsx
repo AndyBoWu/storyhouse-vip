@@ -613,7 +613,7 @@ function ChapterWritingPageContent() {
           story={getStoryForPublishing()}
           chapterNumber={chapterNumber}
           storyTitle={bookId ? `${bookId.split('-').slice(1, -1).join(' ')}` : 'Untitled Story'}
-          bookId={bookId}
+          bookId={bookId || undefined}
           onSuccess={handlePublishingSuccess}
         />
       )}

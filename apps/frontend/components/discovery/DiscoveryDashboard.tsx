@@ -15,6 +15,7 @@ import {
   DollarSign
 } from 'lucide-react'
 import Link from 'next/link'
+import { apiClient } from '@/lib/api-client'
 
 interface BookSummary {
   bookId: string
@@ -127,8 +128,7 @@ export default function DiscoveryDashboard() {
   const loadSection = async (sectionKey: keyof typeof sections, params: any) => {
     try {
       const queryParams = new URLSearchParams(params).toString()
-      const response = await fetch(`/api/discovery?${queryParams}`)
-      const data = await response.json()
+      const data = await apiClient.get(`/discovery?${queryParams}`)
 
       if (data.success) {
         setSections(prev => ({

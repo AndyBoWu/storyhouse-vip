@@ -6,14 +6,37 @@
 
 import { 
   BookMetadata, 
-  ChapterMetadata, 
-  BookStoragePath, 
-  ChapterStoragePath,
-  BOOK_SYSTEM_CONSTANTS,
+  ChapterMetadata,
   AuthorAddress,
   BookId,
   ChapterId
-} from '@storyhouse/shared'
+} from '../types/book'
+
+// Storage path types
+interface BookStoragePath {
+  rootPath: string
+  metadataPath: string
+  chaptersPath: string
+  coverPath: string
+}
+
+interface ChapterStoragePath {
+  chapterPath: string
+  contentPath: string
+}
+
+// Constants
+const BOOK_SYSTEM_CONSTANTS = {
+  FREE_CHAPTERS_COUNT: 3,
+  DEFAULT_UNLOCK_PRICE: 0.5,
+  DEFAULT_READ_REWARD: 0.1,
+  DEFAULT_LICENSE_PRICE: 2.0,
+  BOOKS_ROOT_PATH: 'books',
+  STORIES_ROOT_PATH: 'stories',
+  METADATA_FILENAME: 'metadata.json',
+  COVER_FILENAME: 'cover.jpg',
+  CHAPTERS_FOLDER_NAME: 'chapters'
+}
 
 // Import from backend R2 service
 import { R2Service } from '../r2'
