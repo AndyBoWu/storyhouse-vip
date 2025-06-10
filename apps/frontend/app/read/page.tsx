@@ -47,18 +47,18 @@ export default function ReadPage() {
         const data = await apiClient.getStories()
 
         if (data.success && data.stories) {
-          // Convert to PublicStory format and add mock data for demo
-          const publicStories: PublicStory[] = data.stories.map((story: any, index: number) => ({
+          // Convert to PublicStory format using real data
+          const publicStories: PublicStory[] = data.stories.map((story: any) => ({
             id: story.id,
             title: story.title,
-            author: `Author ${index + 1}`, // Mock author data
+            author: story.authorName || story.authorAddress?.slice(0, 6) + '...' + story.authorAddress?.slice(-4) || 'Unknown',
             genre: story.genre,
             chapters: story.chapters,
             lastUpdated: story.lastUpdated,
-            totalReads: Math.floor(Math.random() * 1000) + 50, // Mock read count
-            rating: Math.floor(Math.random() * 20 + 80) / 20, // Mock rating 4.0-5.0
+            totalReads: story.totalReads || 0,
+            rating: story.rating || 0,
             preview: story.preview,
-            tags: [story.genre.toLowerCase(), 'featured'] // Mock tags
+            tags: story.tags || [story.genre?.toLowerCase()].filter(Boolean)
           }))
           setStories(publicStories)
         }

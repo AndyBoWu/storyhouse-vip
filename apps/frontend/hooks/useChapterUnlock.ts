@@ -231,13 +231,14 @@ export function useChapterUnlock() {
     try {
       const bookIdBytes32 = stringToBytes32(bookId)
       
+      // TODO: Implement actual smart contract read call
       // This would use a read contract hook in a real implementation
-      // For now, return mock data based on chapter number
+      // For now, return basic pricing model: first 3 chapters free, others 10 TIP
       const isFree = chapterNumber <= 3
-      const price = isFree ? 0n : parseEther('0.5')
+      const price = isFree ? 0n : parseEther('10')
       
       return {
-        canAccess: true,
+        canAccess: true, // For development - in production this would check actual access
         price
       }
     } catch (err) {
