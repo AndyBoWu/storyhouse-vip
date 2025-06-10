@@ -54,53 +54,32 @@ export default function CollectionSection({
     }
   })
 
-  // Mock existing collections (in real app, this would come from API)
-  const [existingCollections] = useState<StoryCollection[]>([
-    {
-      id: 'col-1',
-      name: 'Mystery Chronicles',
-      description: 'A collection of thrilling mystery stories',
-      creatorAddress: '0x123...',
-      isPublic: true,
-      allowContributions: true,
-      requireApproval: false,
-      revenueShare: { creator: 70, collection: 20, platform: 10 },
-      creators: ['0x123...', '0x456...'],
-      stories: ['story-1', 'story-2'],
-      ipAssets: ['ip-1', 'ip-2'],
-      genre: 'Mystery',
-      theme: 'Detective Stories',
-      tags: ['mystery', 'detective', 'thriller'],
-      totalEarnings: 1250,
-      memberCount: 5,
-      storyCount: 12,
-      totalReads: 2340,
-      createdAt: new Date('2024-01-15'),
-      updatedAt: new Date('2024-01-20')
-    },
-    {
-      id: 'col-2',
-      name: 'Sci-Fi Universe',
-      description: 'Collaborative science fiction world-building',
-      creatorAddress: '0x789...',
-      isPublic: true,
-      allowContributions: true,
-      requireApproval: true,
-      revenueShare: { creator: 60, collection: 30, platform: 10 },
-      creators: ['0x789...'],
-      stories: ['story-3'],
-      ipAssets: ['ip-3'],
-      genre: 'Sci-Fi',
-      theme: 'Space Exploration',
-      tags: ['sci-fi', 'space', 'future'],
-      totalEarnings: 890,
-      memberCount: 3,
-      storyCount: 8,
-      totalReads: 1560,
-      createdAt: new Date('2024-01-10'),
-      updatedAt: new Date('2024-01-18')
+  // Load existing collections from API
+  const [existingCollections, setExistingCollections] = useState<StoryCollection[]>([])
+  const [isLoadingCollections, setIsLoadingCollections] = useState(false)
+
+  useEffect(() => {
+    const loadCollections = async () => {
+      setIsLoadingCollections(true)
+      try {
+        // TODO: Replace with actual API call to fetch user's collections
+        // const response = await apiClient.getCollections()
+        // setExistingCollections(response.collections || [])
+        
+        // For now, show empty state until collections API is implemented
+        setExistingCollections([])
+      } catch (error) {
+        console.error('Error loading collections:', error)
+        setExistingCollections([])
+      } finally {
+        setIsLoadingCollections(false)
+      }
     }
-  ])
+
+    if (isExpanded) {
+      loadCollections()
+    }
+  }, [isExpanded])
 
   const filteredCollections = existingCollections.filter(collection =>
     collection.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -358,12 +337,23 @@ export default function CollectionSection({
                     ))}
                   </div>
 
-                  {filteredCollections.length === 0 && (
+                  {isLoadingCollections ? (
+                    <div className="text-center py-8 text-gray-500">
+                      <div className="w-8 h-8 border-2 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                      <p>Loading collections...</p>
+                    </div>
+                  ) : filteredCollections.length === 0 && searchTerm ? (
                     <div className="text-center py-8 text-gray-500">
                       <Users className="w-12 h-12 text-gray-300 mx-auto mb-4" />
                       <p>No collections found matching your search.</p>
                     </div>
-                  )}
+                  ) : filteredCollections.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                      <Users className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                      <p>No collections available yet.</p>
+                      <p className="text-sm mt-2">Create your first collection to group related stories.</p>
+                    </div>
+                  ) : null}
                 </motion.div>
               )}
 

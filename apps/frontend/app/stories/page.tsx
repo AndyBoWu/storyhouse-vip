@@ -53,29 +53,38 @@ function StoriesContent() {
     setError('')
     
     try {
-      // For now, we'll create mock data since we don't have a specific story details endpoint
-      // In a real implementation, you'd call: apiClient.getStoryDetails(address, slug)
-      
-      // Mock story details based on the slug
-      const mockStory: StoryDetails = {
-        id: `story-${address}-${slug}`,
-        title: slug.split('-').map(word => 
-          word.charAt(0).toUpperCase() + word.slice(1)
-        ).join(' '),
-        authorAddress: address,
-        authorName: address.slice(-4),
-        genre: 'Mystery',
-        description: 'A thrilling tale that will keep you on the edge of your seat.',
-        totalChapters: 4,
-        chapters: [
-          { number: 1, title: 'The Discovery', wordCount: 2500, readingTime: 10, isUnlocked: true },
-          { number: 2, title: 'The Investigation', wordCount: 2800, readingTime: 11, isUnlocked: true },
-          { number: 3, title: 'The Revelation', wordCount: 3200, readingTime: 13, isUnlocked: false, unlockPrice: 0.1 },
-          { number: 4, title: 'The Resolution', wordCount: 2900, readingTime: 12, isUnlocked: false, unlockPrice: 0.1 }
-        ]
+      // Try to get story details from the API
+      const bookId = `${address}-${slug}`
+      const [bookResponse, chaptersResponse] = await Promise.all([
+        apiClient.get(`/books/${bookId}`),
+        apiClient.getBookChapters(bookId)
+      ])
+
+      if (bookResponse && chaptersResponse.success) {
+        const storyDetails: StoryDetails = {
+          id: bookId,
+          title: bookResponse.title || slug.split('-').map(word => 
+            word.charAt(0).toUpperCase() + word.slice(1)
+          ).join(' '),
+          authorAddress: address,
+          authorName: bookResponse.authorName || address.slice(0, 6) + '...' + address.slice(-4),
+          genre: bookResponse.genre || 'Story',
+          description: bookResponse.description || 'No description available.',
+          totalChapters: chaptersResponse.data?.totalChapters || 0,
+          chapters: chaptersResponse.data?.chapters?.map((chapterNum: number) => ({
+            number: chapterNum,
+            title: `Chapter ${chapterNum}`,
+            wordCount: 0, // Will be loaded when viewing individual chapters
+            readingTime: 0,
+            isUnlocked: chapterNum <= 3, // First 3 chapters are free
+            unlockPrice: chapterNum > 3 ? 10 : undefined // 10 TIP for paid chapters
+          })) || []
+        }
+        
+        setStoryDetails(storyDetails)
+      } else {
+        setError('Story not found')
       }
-      
-      setStoryDetails(mockStory)
     } catch (err) {
       setError('Failed to load story details')
       console.error('Error loading story:', err)
