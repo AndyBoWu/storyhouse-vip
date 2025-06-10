@@ -29,26 +29,37 @@ Tech Stack: Next.js 15.3.3, TypeScript, Story Protocol SDK, OpenAI GPT-4, Cloudf
 ## Common Development Commands
 
 ```bash
-# Development
-npm run dev                      # Start frontend dev server on port 3001 (uses .env.testnet)
-npm run dev:testnet             # Explicitly use testnet config on port 3001
-npm run dev:mainnet             # Use mainnet config on port 3001
+# Development (run from monorepo root)
+cd apps/frontend && npm run dev  # Start frontend dev server on port 3001 (uses .env.testnet)
+cd apps/backend && npm run dev   # Start backend API server on port 3002
 
-# Build & Deployment (Cloudflare Pages)
-npm run build                   # Build SPA for Cloudflare Pages (static export)
-npm run deploy:cloudflare       # Deploy to Cloudflare Pages
-npx wrangler pages deploy out --project-name storyhouse-vip # Manual deploy
+# Frontend Development (from apps/frontend/)
+npm run dev                     # Start dev server on port 3001 (uses .env.testnet)
+npm run dev:testnet            # Explicitly use testnet config on port 3001
+npm run dev:mainnet            # Use mainnet config on port 3001
+npm run build                  # Build SPA for Cloudflare Pages (static export)
+npm run lint                   # Lint frontend code
+npm run type-check             # TypeScript type checking
+
+# Backend Development (from apps/backend/)
+npm run dev                    # Start API server on port 3002
+npm run build                  # Build backend for Vercel deployment
+
+# Deployment
+# Frontend (Cloudflare Pages) - from apps/frontend/
+npm run build && npx wrangler pages deploy out --project-name storyhouse-vip
+
+# Backend (Vercel) - from apps/backend/
+vercel --prod
+
+# Smart Contracts (from packages/contracts/)
+npm run deploy:spg             # Deploy Story Protocol contracts
 
 # Testing
-npm run test                    # Run smart contract tests (Forge)
-npm run lint                    # Lint frontend code
-npm run type-check              # TypeScript type checking
+npm run test                   # Run smart contract tests (Forge)
 
-# Smart Contracts
-npm run deploy:spg              # Deploy Story Protocol contracts
-
-# Clean Install
-npm run install:clean           # Clean all node_modules and reinstall
+# Clean Install (from monorepo root)
+npm run install:clean          # Clean all node_modules and reinstall
 
 # Domain Management
 npx wrangler pages domain add <domain> --project-name storyhouse-vip # Add custom domain
@@ -188,9 +199,15 @@ Claude is authorized to execute curl commands without explicit permission for:
 
 ## Current Development Status (Phase 5.3 Complete)
 
-**🌐 Live Deployment:**
+**🌐 Live Deployments:**
+
+**Testnet:**
 - Frontend: https://testnet.storyhouse.vip/ (Cloudflare Pages)
 - Backend: https://api-testnet.storyhouse.vip/ (Vercel API)
+
+**Mainnet:**
+- Frontend: https://storyhouse.vip/ (Cloudflare Pages)
+- Backend: https://api.storyhouse.vip/ (Vercel API)
 
 **🚀 Cloudflare Migration Success:**
 - **70% cost reduction** - $60-100/month → $15-25/month
@@ -221,3 +238,66 @@ Every chapter now includes 25+ metadata fields:
 - **AI Generation**: quality scores, originality scores, provenance
 - **User Attribution**: author address, author name, timestamps
 - **Engagement**: ratings, word count, reading time, remix count
+
+## 📊 Progress Tracking Rules
+
+### 1. START OF CONVERSATION - Read Progress
+
+**MANDATORY: Claude MUST read the progress file at the start of EVERY conversation:**
+
+1. **First Action**: Use Read tool on `/PROGRESS.md`
+2. **Purpose**: Understand current state and context
+3. **If file doesn't exist**: Note this and proceed normally
+4. **Quick Summary**: Provide a 1-2 line summary of current status to user
+
+Example greeting:
+```
+"I see you were working on [current focus from PROGRESS.md]. Ready to continue!"
+```
+
+### 2. END OF CONVERSATION - Write Progress
+
+**MANDATORY: Claude MUST update the progress file before conversation ends:**
+
+1. **File Location**: `/PROGRESS.md` (root directory)
+2. **Action**: OVERWRITE the entire file (not append)
+3. **When**: Before conversation ends OR when significant progress is made
+
+### Progress File Format
+
+```markdown
+# StoryHouse Progress Report
+Last Updated: [ISO 8601 timestamp]
+
+## Current Focus
+[1-2 sentences describing what was being worked on]
+
+## Completed This Session
+- [Bullet points of completed tasks]
+- [Include specific file paths modified]
+
+## Next Steps
+- [What needs to be done next]
+- [Any blockers or issues]
+
+## Key Decisions Made
+- [Important technical decisions]
+- [Architecture changes]
+
+## Active Work
+- Branch: [current git branch]
+- Feature: [what feature/fix is being developed]
+- Services Running: [frontend/backend status]
+
+## Notes for Next Session
+- [Any important context or reminders]
+- [Unfinished tasks that were in progress]
+```
+
+### Implementation Rules
+- **Always Read First**: Check PROGRESS.md before any other action
+- **Always Write Last**: Update PROGRESS.md before ending conversation
+- **Include specific file paths**: List exact files that were modified
+- **Be concise but comprehensive**: Aim for 20-50 lines total
+- **Use clear timestamps**: ISO 8601 format (YYYY-MM-DD HH:MM:SS)
+- **Track partial progress**: Even if task isn't complete, note what was done
