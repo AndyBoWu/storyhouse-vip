@@ -217,25 +217,19 @@ export default function ReadPage() {
                   >
                     {/* Book Cover */}
                     <div className="aspect-[3/4] w-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center">
-                      {story.coverImage ? (
-                        <img
-                          src={story.coverImage}
-                          alt={story.title}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.style.display = 'none';
-                            const parent = target.parentElement;
-                            if (parent) {
-                              parent.innerHTML = `<span class="text-white text-4xl font-bold">${story.title.charAt(0)}</span>`;
-                            }
-                          }}
-                        />
-                      ) : (
-                        <span className="text-white text-4xl font-bold">
-                          {story.title.charAt(0)}
-                        </span>
-                      )}
+                      <img
+                        src={`${process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api-testnet.storyhouse.vip'}/api/books/${story.id}/cover`}
+                        alt={`${story.title} cover`}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                          const parent = target.parentElement;
+                          if (parent) {
+                            parent.innerHTML = `<span class="text-white text-4xl font-bold">${story.title.charAt(0)}</span>`;
+                          }
+                        }}
+                      />
                     </div>
 
                     <div className="p-6">
