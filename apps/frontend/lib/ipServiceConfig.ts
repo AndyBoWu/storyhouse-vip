@@ -7,11 +7,10 @@ import {
   createIPService,
   defaultStoryProtocolConfig,
   type StoryProtocolConfig
-} from '@storyhouse/shared'
+} from './types/shared'
 
 // Environment-based configuration
 const storyProtocolConfig: StoryProtocolConfig = {
-  ...defaultStoryProtocolConfig,
   chainId: parseInt(process.env.NEXT_PUBLIC_STORY_PROTOCOL_CHAIN_ID || '1315'),
   rpcUrl: process.env.NEXT_PUBLIC_STORY_PROTOCOL_RPC_URL || 'https://aeneid.storyrpc.io',
   apiKey: process.env.STORY_PROTOCOL_API_KEY, // Server-side only
@@ -23,6 +22,16 @@ const storyProtocolConfig: StoryProtocolConfig = {
     royaltyModule: process.env.NEXT_PUBLIC_ROYALTY_MODULE_ADDRESS as `0x${string}`,
     groupModule: process.env.NEXT_PUBLIC_GROUP_MODULE_ADDRESS as `0x${string}`,
   },
+
+  // Default license tiers
+  defaultLicenseTiers: {},
+
+  // Collection settings
+  defaultCollectionSettings: {
+    revenueShareCreator: 70,
+    revenueShareCollection: 20,
+    revenueSharePlatform: 10
+  }
 }
 
 // Create IP service instance

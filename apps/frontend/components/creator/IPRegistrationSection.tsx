@@ -23,7 +23,7 @@ import {
 import type {
   LicenseTier,
   EnhancedStoryCreationParams
-} from '@storyhouse/shared'
+} from '../../lib/types/shared'
 
 interface IPRegistrationSectionProps {
   onIPOptionsChange: (options: Partial<EnhancedStoryCreationParams>) => void

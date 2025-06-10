@@ -13,7 +13,7 @@ import {
   AuthorAddress,
   BookId,
   ChapterId
-} from '@storyhouse/shared'
+} from '../types/shared'
 
 // Import from backend R2 service
 import { R2Service } from '../r2'

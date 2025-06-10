@@ -21,7 +21,7 @@ import {
 import type {
   EnhancedStory,
   LicenseTier
-} from '@storyhouse/shared'
+} from '../../lib/types/shared'
 
 interface IPStatusIndicatorProps {
   story?: EnhancedStory | null
