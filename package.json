@@ -19,6 +19,8 @@
     "test:local": "./tests/scripts/test-local-services.sh",
     "test:contracts": "node ./tests/scripts/test-contracts.js",
     "test:quick": "npm run test:local && npm run test:integration",
+    "test:watch": "vitest --watch",
+    "prepare": "husky install",
     "lint": "npm run lint --workspace=@storyhouse/frontend",
     "type-check": "npm run type-check --workspace=@storyhouse/shared && npm run type-check --workspace=@storyhouse/frontend",
     "deploy": "cd apps/frontend && vercel --prod",
@@ -29,9 +31,12 @@
     "@cloudflare/next-on-pages": "^1.13.12",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.2.0",
     "prettier": "^3.5.3",
     "prettier-plugin-tailwindcss": "^0.5.14",
     "typescript": "^5.8.3",
+    "vitest": "^1.6.0",
     "wrangler": "^3.78.12"
   },
   "engines": {
