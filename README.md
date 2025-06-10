@@ -116,19 +116,19 @@
 
 ---
 
-## 🏗️ **Vercel-Unified Architecture**
+## 🏗️ **Vercel-Only Architecture**
 
-### **Single Deployment Structure** (✅ Simplified & Optimized)
+### **Unified Deployment Structure** (✅ Simplified & Optimized)
 
 ```
 🌐 PRODUCTION ARCHITECTURE
 ┌─────────────────────────────────────────────────────────┐
-│                    Vercel Deployment                     │
-│       storyhouse-bgk8qwlrc-andy-wus-projects            │
+│                  Vercel Frontend + Backend               │
+│          Unified Next.js Deployment                     │
 │                                                         │
+│  ✅ Frontend: Next.js 15.3.3 with SSR                  │
+│  ✅ Backend: API Routes (/api/*) + AI Integration       │
 │  ✅ Dynamic Routing (/book/[bookId])                    │
-│  ✅ Server-Side Rendering (SEO optimized)               │
-│  ✅ API Routes (/api/*) + AI Integration                │
 │  ✅ Story Protocol SDK + Blockchain transactions        │
 │  ✅ Cloudflare R2 Storage integration                   │
 │  ✅ No CORS issues (same domain)                        │
@@ -137,18 +137,19 @@
 📁 MONOREPO STRUCTURE
 storyhouse-vip/
 ├── apps/
-│   └── frontend/                # Next.js 15.3.3 Unified App
-│       ├── app/
-│       │   ├── api/            # API routes (merged from backend)
-│       │   ├── book/           # Dynamic book pages [bookId]
-│       │   └── ...             # All pages and routes
-│       ├── components/         # React components
-│       ├── lib/               # Utilities + API client
-│       └── vercel.json        # Deployment configuration
+│   ├── frontend/              # Next.js 15.3.3 Frontend (Vercel)
+│   │   ├── app/              # Frontend pages and components
+│   │   ├── components/       # React components
+│   │   ├── lib/              # Frontend utilities
+│   │   └── vercel.json       # Frontend deployment config
+│   └── backend/              # Next.js API Backend (Vercel)
+│       ├── app/api/          # API routes and endpoints
+│       ├── lib/              # Backend utilities
+│       └── vercel.json       # Backend deployment config
 ├── packages/
-│   ├── contracts/              # Smart contracts (DEPLOYED ✅)
-│   └── shared/                 # TypeScript utilities
-└── docs/                       # Updated documentation
+│   ├── contracts/            # Smart contracts (DEPLOYED ✅)
+│   └── shared/               # TypeScript utilities
+└── docs/                     # Updated documentation
 ```
 
 ### **Book Registration & Branching System** (NEW!)
@@ -298,16 +299,24 @@ Our documentation has been completely restructured for easy navigation:
 
 ## 🚢 **Deployment**
 
-### **Live Testnet Deployment**
+### **Live Deployments**
 
-🌐 **Current Status**: **LIVE and FUNCTIONAL - VERCEL UNIFIED**
-🔗 **Application**: [https://storyhouse-bgk8qwlrc-andy-wus-projects.vercel.app/](https://storyhouse-bgk8qwlrc-andy-wus-projects.vercel.app/)
+🌐 **Frontend (Vercel)**: **LIVE**
+🌐 **Backend (Vercel)**: **LIVE**
+
+**Testnet Environment:**
+- Frontend: https://testnet.storyhouse.vip/
+- Backend: https://api-testnet.storyhouse.vip/
+
+**Production Environment:**
+- Frontend: https://storyhouse.vip/
+- Backend: https://api.storyhouse.vip/
 
 ### **Architecture Improvements**
-- ✅ **Simplified Infrastructure**: Single deployment instead of hybrid setup
-- ✅ **Dynamic Routing Enabled**: Book and chapter pages with SSR support
-- ✅ **No CORS Issues**: All API calls on same domain
-- ✅ **Better SEO**: Server-side rendering for search engines
+- ✅ **Unified Vercel Hosting**: Both frontend and backend on Vercel platform
+- ✅ **Separate Deployments**: Frontend and backend deployed independently
+- ✅ **Domain Management**: Cloudflare DNS with Vercel hosting
+- ✅ **Simplified Maintenance**: Single platform for all deployments
 
 ### **Features Available on Testnet**
 
@@ -337,11 +346,15 @@ Our documentation has been completely restructured for easy navigation:
 ### **Local Development**
 
 ```bash
-# Start development server
-npm run dev
+# Start frontend development (port 3001)
+cd apps/frontend && npm run dev
+
+# Start backend development (port 3002) 
+cd apps/backend && npm run dev
 
 # Build for production
-npm run build
+cd apps/frontend && npm run build
+cd apps/backend && npm run build
 
 # Run smart contract tests
 npm run test
@@ -635,7 +648,7 @@ git push origin feature/enhancement
 
 Ready to see **chapter-level IP monetization** and **read-to-earn economics** in action?
 
-- **🌐 Live Testnet**: [https://storyhouse-bgk8qwlrc-andy-wus-projects.vercel.app/](https://storyhouse-bgk8qwlrc-andy-wus-projects.vercel.app/)
+- **🌐 Live Testnet**: [https://testnet.storyhouse.vip/](https://testnet.storyhouse.vip/)
 - **📖 Documentation**: [./docs/README.md](./docs/README.md)
 - **🎨 Complete UX Design**: [./docs/product/DESIGN.md](./docs/product/DESIGN.md)
 - **🚀 Quick Start**: [./docs/setup/DEVELOPMENT.md](./docs/setup/DEVELOPMENT.md)
@@ -656,4 +669,4 @@ Every chapter tells a story. Every story deserves to be monetized from day one. 
 **🎯 Target**: 50M+ writers worldwide seeking better monetization + 2B+ readers globally
 **💡 Innovation**: First platform enabling chapter-level IP management with read-to-earn economics
 
-**Ready to revolutionize publishing? Start with Chapter 1 at [https://storyhouse-bgk8qwlrc-andy-wus-projects.vercel.app/](https://storyhouse-bgk8qwlrc-andy-wus-projects.vercel.app/)**
+**Ready to revolutionize publishing? Start with Chapter 1 at [https://testnet.storyhouse.vip/](https://testnet.storyhouse.vip/)**
