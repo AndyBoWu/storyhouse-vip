@@ -37,7 +37,7 @@ export async function GET(
       authorAddress: book.author,
       authorName: book.authorName || 'Anonymous',
       description: book.description,
-      coverUrl: `/api/books/${bookId}/cover`, // Use proxy endpoint instead of direct R2 URL
+      coverUrl: `${process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api-testnet.storyhouse.vip'}/api/books/${bookId}/cover`, // Use absolute URL for cover
       genre: book.genres || [],
       totalChapters: book.chapters || 0,
       totalReads: book.totalReads || 0,
