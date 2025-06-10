@@ -168,7 +168,7 @@ export default function WalletConnect() {
           className="flex items-center gap-2 bg-white/60 backdrop-blur-sm hover:bg-white/80 text-gray-800 px-6 py-3 rounded-full transition-all border border-white/50 text-sm font-semibold"
         >
           💳
-          <span>{formatAddress(address.toLowerCase())}</span>
+          <span>{formatAddress(address)}</span>
         </button>
 
         {showDetails && (
@@ -182,7 +182,7 @@ export default function WalletConnect() {
                   </label>
                   <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-lg">
                     <span className="text-sm font-mono text-gray-800 flex-1">
-                      {address.toLowerCase()}
+                      {address}
                     </span>
                     <button
                       onClick={copyAddress}
