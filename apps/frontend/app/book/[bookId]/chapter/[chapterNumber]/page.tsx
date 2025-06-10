@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useAccount } from 'wagmi';
 import Link from 'next/link';
 import apiClient from '@/lib/api-client';
 import ChapterAccessControl from '@/components/ui/ChapterAccessControl';
@@ -29,6 +30,7 @@ interface ChapterContent {
 export default function ChapterPage() {
   const params = useParams();
   const router = useRouter();
+  const { address } = useAccount();
   const bookId = params.bookId as string;
   const chapterNumber = parseInt(params.chapterNumber as string);
   
@@ -42,19 +44,52 @@ export default function ChapterPage() {
   
   const { getChapterPricing } = useChapterAccess();
 
+  // Helper function to check if current user is the book owner
+  const isBookOwner = (chapter: ChapterContent | null): boolean => {
+    if (!address || !chapter) return false;
+    return address.toLowerCase() === chapter.authorAddress.toLowerCase();
+  };
+
   useEffect(() => {
     if (bookId && chapterNumber) {
-      // Check if this is a free chapter (1-3) - grant immediate access
-      const pricing = getChapterPricing(chapterNumber);
-      if (pricing.isFree) {
-        setHasAccess(true);
-        fetchChapterContent();
-      } else {
-        // For paid chapters, only load basic info until unlocked
-        fetchChapterInfo();
-      }
+      initializeChapter();
     }
-  }, [bookId, chapterNumber, getChapterPricing]);
+  }, [bookId, chapterNumber, address]); // Include address to re-run when wallet connects
+
+  const initializeChapter = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Always fetch basic info first to get author address
+      const chapterInfo = await apiClient.get(`/books/${bookId}/chapter/${chapterNumber}/info`);
+      
+      if (chapterInfo) {
+        const pricing = getChapterPricing(chapterNumber);
+        const userIsOwner = address && address.toLowerCase() === chapterInfo.authorAddress.toLowerCase();
+        
+        // Determine if user should have access
+        if (pricing.isFree || userIsOwner) {
+          // Fetch full content
+          const fullChapter = await apiClient.get(`/books/${bookId}/chapter/${chapterNumber}`);
+          setChapter(fullChapter);
+          setHasAccess(true);
+        } else {
+          // Set info-only chapter (no content)
+          setChapter({
+            ...chapterInfo,
+            content: '' // No content for non-owners of paid chapters
+          });
+          setHasAccess(false);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load chapter:', err);
+      setError('Failed to load chapter');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -69,47 +104,16 @@ export default function ChapterPage() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const fetchChapterContent = async () => {
+  const handleAccessGranted = async () => {
     try {
-      setLoading(true);
-      
-      const response = await apiClient.get(`/books/${bookId}/chapter/${chapterNumber}`);
-      
-      if (response) {
-        setChapter(response);
-      }
+      // When access is granted (e.g., after payment), fetch full content
+      const fullChapter = await apiClient.get(`/books/${bookId}/chapter/${chapterNumber}`);
+      setChapter(fullChapter);
+      setHasAccess(true);
     } catch (err) {
-      console.error('Failed to fetch chapter:', err);
+      console.error('Failed to fetch chapter content after unlock:', err);
       setError('Failed to load chapter content');
-    } finally {
-      setLoading(false);
     }
-  };
-
-  const fetchChapterInfo = async () => {
-    try {
-      setLoading(true);
-      
-      // For paid chapters, only fetch basic info (title, author, etc.) without content
-      const response = await apiClient.get(`/books/${bookId}/chapter/${chapterNumber}/info`);
-      
-      if (response) {
-        setChapter({
-          ...response,
-          content: '' // No content until unlocked
-        });
-      }
-    } catch (err) {
-      console.error('Failed to fetch chapter info:', err);
-      setError('Failed to load chapter information');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleAccessGranted = () => {
-    setHasAccess(true);
-    fetchChapterContent();
   };
 
   const getThemeClasses = () => {
@@ -207,6 +211,12 @@ export default function ChapterPage() {
               </h1>
               <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
                 <span>by {chapter.authorAddress.slice(0, 6)}...{chapter.authorAddress.slice(-4)}</span>
+                {isBookOwner(chapter) && (
+                  <>
+                    <span>•</span>
+                    <span className="text-green-600 font-medium">Your Book</span>
+                  </>
+                )}
                 <span>•</span>
                 <span>{chapter.wordCount} words</span>
                 <span>•</span>
