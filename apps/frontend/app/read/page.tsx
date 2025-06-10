@@ -216,16 +216,26 @@ export default function ReadPage() {
                     className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200 hover:shadow-xl transition-all cursor-pointer"
                   >
                     {/* Book Cover */}
-                    <div className="aspect-[3/4] w-full bg-gray-100">
-                      <img
-                        src={story.coverImage || 'https://via.placeholder.com/300x400/6366f1/ffffff?text=' + encodeURIComponent(story.title.charAt(0))}
-                        alt={story.title}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.src = 'https://via.placeholder.com/300x400/6366f1/ffffff?text=' + encodeURIComponent(story.title.charAt(0));
-                        }}
-                      />
+                    <div className="aspect-[3/4] w-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center">
+                      {story.coverImage ? (
+                        <img
+                          src={story.coverImage}
+                          alt={story.title}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                            const parent = target.parentElement;
+                            if (parent) {
+                              parent.innerHTML = `<span class="text-white text-4xl font-bold">${story.title.charAt(0)}</span>`;
+                            }
+                          }}
+                        />
+                      ) : (
+                        <span className="text-white text-4xl font-bold">
+                          {story.title.charAt(0)}
+                        </span>
+                      )}
                     </div>
 
                     <div className="p-6">
