@@ -49,8 +49,8 @@ export default function MyStoriesPage() {
     setMounted(true)
   }, [])
 
-  // Debug logging - Updated 2025-06-10 18:20
-  console.log('🔍 MyStoriesPage render (UPDATED):', {
+  // Debug logging - FORCE DEPLOY 2025-06-10 18:30
+  console.log('🔍 MyStoriesPage render (FORCE DEPLOY):', {
     connectedAddress,
     isConnected,
     registeredBooksCount: registeredBooks.length,
