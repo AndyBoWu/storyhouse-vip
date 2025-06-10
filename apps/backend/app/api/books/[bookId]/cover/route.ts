@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { GetObjectCommand } from '@aws-sdk/client-s3'
 import { S3Client } from '@aws-sdk/client-s3'
 
-// Initialize R2 client for direct image serving
+// Initialize R2 client for direct image serving with header cleaning
 let r2Client: S3Client
 
 function initializeR2Client(): S3Client {
@@ -13,16 +13,35 @@ function initializeR2Client(): S3Client {
     throw new Error(`Missing required R2 environment variables: ${missingVars.join(', ')}`)
   }
 
+  // NUCLEAR CLEANING: Remove ANY potential invisible characters, quotes, whitespace
+  const rawAccessKeyId = process.env.R2_ACCESS_KEY_ID || ''
+  const rawSecretAccessKey = process.env.R2_SECRET_ACCESS_KEY || ''
+  const rawEndpoint = process.env.R2_ENDPOINT || ''
+  
+  // Ultra-aggressive cleaning: remove ALL non-alphanumeric characters for credentials
+  const cleanAccessKeyId = rawAccessKeyId.replace(/[^a-zA-Z0-9]/g, '')
+  const cleanSecretAccessKey = rawSecretAccessKey.replace(/[^a-zA-Z0-9]/g, '')
+  // For endpoint, only allow alphanumeric, dots, and hyphens
+  const cleanEndpoint = rawEndpoint.replace(/[^a-zA-Z0-9.-]/g, '')
+
   return new S3Client({
     region: 'auto',
-    endpoint: `https://${process.env.R2_ENDPOINT || ''}`,
+    endpoint: `https://${cleanEndpoint}`,
     credentials: {
-      accessKeyId: process.env.R2_ACCESS_KEY_ID || '',
-      secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
+      accessKeyId: cleanAccessKeyId,
+      secretAccessKey: cleanSecretAccessKey,
     },
     forcePathStyle: false,
     useAccelerateEndpoint: false,
     useDualstackEndpoint: false,
+    maxAttempts: 1,
+    requestHandler: {
+      connectionTimeout: 5000,
+      socketTimeout: 5000,
+      metadata: { handlerProtocol: 'http/1.1' },
+      requestTimeout: 10000,
+    },
+    customUserAgent: 'storyhouse-r2-client/1.0'
   })
 }
 

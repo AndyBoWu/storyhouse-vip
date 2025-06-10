@@ -303,8 +303,12 @@ export async function GET(request: NextRequest) {
             const chapterCount = await getChapterCount(authorFromPrefix, bookSlug)
             console.log(`      📊 Chapter count: ${chapterCount}`)
 
+            // Generate the correct cover URL using the API endpoint
+            const bookId = `${authorFromPrefix}-${bookSlug}`
+            const coverUrl = `/api/books/${bookId}/cover`
+
             const book: RegisteredBook = {
-              id: `${authorFromPrefix}-${bookSlug}`,
+              id: bookId,
               title: bookData.title || 'Untitled Book',
               description: bookData.description || '',
               author: bookData.authorAddress || authorFromPrefix,
@@ -312,7 +316,7 @@ export async function GET(request: NextRequest) {
               genres: bookData.genres || [],
               moods: bookData.moods,
               emojis: bookData.emojis,
-              coverUrl: bookData.coverUrl,
+              coverUrl: coverUrl, // Use API endpoint instead of direct R2 URL
               createdAt: bookData.createdAt || bookData.registeredAt || new Date().toISOString(),
               registeredAt: bookData.registeredAt,
               ipAssetId: bookData.ipAssetId,
