@@ -2,11 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { ListObjectsV2Command, GetObjectCommand } from '@aws-sdk/client-s3'
 import { S3Client } from '@aws-sdk/client-s3'
 
-// Initialize R2 client
+// Use the cleaned R2 client initialization with header sanitization
 let r2Client: S3Client
 
 function initializeR2Client(): S3Client {
-  console.log('🔧 Initializing R2 client for books...')
+  console.log('🔧 Initializing R2 client for books with header cleaning...')
   
   const requiredEnvVars = ['R2_ENDPOINT', 'R2_ACCESS_KEY_ID', 'R2_SECRET_ACCESS_KEY', 'R2_BUCKET_NAME']
   const missingVars = requiredEnvVars.filter(varName => !process.env[varName])
@@ -15,19 +15,53 @@ function initializeR2Client(): S3Client {
     throw new Error(`Missing required R2 environment variables: ${missingVars.join(', ')}`)
   }
 
+  // NUCLEAR CLEANING: Remove ANY potential invisible characters, quotes, whitespace
+  const rawAccessKeyId = process.env.R2_ACCESS_KEY_ID || ''
+  const rawSecretAccessKey = process.env.R2_SECRET_ACCESS_KEY || ''
+  const rawEndpoint = process.env.R2_ENDPOINT || ''
+  
+  // Ultra-aggressive cleaning: remove ALL non-alphanumeric characters for credentials
+  const cleanAccessKeyId = rawAccessKeyId.replace(/[^a-zA-Z0-9]/g, '')
+  const cleanSecretAccessKey = rawSecretAccessKey.replace(/[^a-zA-Z0-9]/g, '')
+  // For endpoint, only allow alphanumeric, dots, and hyphens
+  const cleanEndpoint = rawEndpoint.replace(/[^a-zA-Z0-9.-]/g, '')
+
+  console.log('🔧 R2 Configuration for books:')
+  console.log('   Access Key ID length:', cleanAccessKeyId.length)
+  console.log('   Secret Access Key length:', cleanSecretAccessKey.length)
+  console.log('   Endpoint:', cleanEndpoint)
+
+  // Additional validation to ensure credentials are clean
+  if (!cleanAccessKeyId || !cleanSecretAccessKey || !cleanEndpoint) {
+    throw new Error('R2 credentials are empty after cleaning')
+  }
+
   const client = new S3Client({
     region: 'auto',
-    endpoint: `https://${process.env.R2_ENDPOINT || ''}`,
+    endpoint: `https://${cleanEndpoint}`,
     credentials: {
-      accessKeyId: process.env.R2_ACCESS_KEY_ID || '',
-      secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
+      accessKeyId: cleanAccessKeyId,
+      secretAccessKey: cleanSecretAccessKey,
     },
+    // R2-specific configuration
     forcePathStyle: false,
+    // Disable AWS-specific features
     useAccelerateEndpoint: false,
     useDualstackEndpoint: false,
+    // Try to fix Vercel serverless environment issues
+    maxAttempts: 1,
+    requestHandler: {
+      // Force specific HTTP agent configuration for Vercel
+      connectionTimeout: 5000,
+      socketTimeout: 5000,
+      metadata: { handlerProtocol: 'http/1.1' },
+      requestTimeout: 10000,
+    },
+    // Force specific signing behavior for R2
+    customUserAgent: 'storyhouse-r2-client/1.0'
   })
   
-  console.log('✅ R2 client initialized successfully for books')
+  console.log('✅ R2 client initialized successfully for books with header cleaning')
   return client
 }
 
@@ -38,11 +72,36 @@ function getR2Client(): S3Client {
   return r2Client
 }
 
-const BUCKET_NAME = (process.env.R2_BUCKET_NAME || '').trim().replace(/[\r\n]/g, '')
+const BUCKET_NAME = (process.env.R2_BUCKET_NAME || '').trim().replace(/^["']|["']$/g, '').replace(/[\r\n]/g, '')
 
 // Helper function to get actual chapter count for a book
-async function getChapterCount(client: S3Client, authorAddress: string, slug: string): Promise<number> {
+async function getChapterCount(authorAddress: string, slug: string): Promise<number> {
   try {
+    console.log(`🔢 Getting chapter count for ${authorAddress}/${slug}...`)
+    
+    // Create a fresh client for this operation to avoid header contamination
+    const cleanAccessKeyId = (process.env.R2_ACCESS_KEY_ID || '').replace(/[^a-zA-Z0-9]/g, '')
+    const cleanSecretAccessKey = (process.env.R2_SECRET_ACCESS_KEY || '').replace(/[^a-zA-Z0-9]/g, '')
+    const cleanEndpoint = (process.env.R2_ENDPOINT || '').replace(/[^a-zA-Z0-9.-]/g, '')
+
+    const freshClient = new S3Client({
+      region: 'auto',
+      endpoint: `https://${cleanEndpoint}`,
+      credentials: {
+        accessKeyId: cleanAccessKeyId,
+        secretAccessKey: cleanSecretAccessKey,
+      },
+      // Minimal configuration to avoid header issues
+      forcePathStyle: false,
+      useAccelerateEndpoint: false,
+      useDualstackEndpoint: false,
+      maxAttempts: 1,
+      requestHandler: {
+        connectionTimeout: 3000,
+        socketTimeout: 3000,
+      }
+    })
+
     const chaptersPrefix = `books/${authorAddress}/${slug}/chapters/`
     
     const listCommand = new ListObjectsV2Command({
@@ -51,7 +110,7 @@ async function getChapterCount(client: S3Client, authorAddress: string, slug: st
       Delimiter: '/'
     })
 
-    const listResponse = await client.send(listCommand)
+    const listResponse = await freshClient.send(listCommand)
     
     // Count chapter directories (ch1/, ch2/, etc.)
     const chapters: number[] = []
@@ -67,6 +126,7 @@ async function getChapterCount(client: S3Client, authorAddress: string, slug: st
       }
     }
 
+    console.log(`📊 Found ${chapters.length} chapters for ${authorAddress}/${slug}`)
     return chapters.length
   } catch (error) {
     console.warn(`⚠️ Failed to get chapter count for ${authorAddress}/${slug}:`, error)
@@ -240,7 +300,7 @@ export async function GET(request: NextRequest) {
 
             // Get actual chapter count
             console.log(`      🔢 Getting chapter count for ${bookSlug}...`)
-            const chapterCount = await getChapterCount(client, authorFromPrefix, bookSlug)
+            const chapterCount = await getChapterCount(authorFromPrefix, bookSlug)
             console.log(`      📊 Chapter count: ${chapterCount}`)
 
             const book: RegisteredBook = {
