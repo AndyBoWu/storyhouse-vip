@@ -1,9 +1,8 @@
 {
-  "buildCommand": "cd ../.. && npm run build --workspace=@storyhouse/shared && npm run build --workspace=@storyhouse/frontend",
-  "outputDirectory": ".next",
-  "devCommand": "npm run dev",
-  "installCommand": "cd ../.. && npm ci",
   "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "installCommand": "npm ci",
   "regions": ["iad1"],
   "headers": [
     {
@@ -26,12 +25,6 @@
           "value": "1; mode=block"
         }
       ]
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/$1"
     }
   ]
 }
