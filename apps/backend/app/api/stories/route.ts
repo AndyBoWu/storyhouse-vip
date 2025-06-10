@@ -40,6 +40,7 @@ export interface StoryFromR2 {
 
 /**
  * GET /api/stories - Fetch all published stories from R2
+ * TEMPORARY: Also check books/ if stories/ is empty and author param is provided
  */
 export async function GET(request: NextRequest) {
   try {
@@ -47,6 +48,10 @@ export async function GET(request: NextRequest) {
     console.log('🔧 R2 Configuration:')
     console.log('   PUBLIC_URL:', PUBLIC_URL)
 
+    // Check if there's an author parameter (for /own page compatibility)
+    const { searchParams } = new URL(request.url)
+    const authorAddress = searchParams.get('author')
+    
     console.log('🔍 Listing objects with prefix "stories/"...')
 
     let listResponse
@@ -82,6 +87,46 @@ export async function GET(request: NextRequest) {
         })
 
         if (!allObjectsResponse.Contents || allObjectsResponse.Contents.length === 0) {
+          // TEMPORARY: If no stories found but author provided, redirect to books API
+          if (authorAddress) {
+            console.log(`🔄 No stories found, redirecting to books API for author: ${authorAddress}`)
+            
+            // Import books route logic
+            const { GET: getBooksHandler } = await import('../books/route')
+            const booksRequest = new NextRequest(request.url.replace('/api/stories', '/api/books'))
+            const booksResponse = await getBooksHandler(booksRequest)
+            const booksData = await booksResponse.json()
+            
+            if (booksData.success && booksData.books) {
+              // Transform books to stories format for compatibility
+              const storiesFromBooks = booksData.books.map((book: any) => ({
+                id: book.id,
+                title: book.title,
+                genre: book.genres?.[0] || 'Fiction',
+                chapters: book.chapters || 0,
+                lastUpdated: 'recently',
+                earnings: 0,
+                preview: book.description || '',
+                contentUrl: book.coverUrl || '',
+                publishedAt: book.createdAt || new Date().toISOString(),
+                authorAddress: book.author,
+                authorName: book.authorName
+              }))
+              
+              return NextResponse.json({
+                success: true,
+                stories: storiesFromBooks,
+                message: `Found ${storiesFromBooks.length} books from books/ directory`,
+                debug: {
+                  fallbackToBooks: true,
+                  authorAddress,
+                  originalStoriesCount: 0,
+                  booksCount: storiesFromBooks.length
+                }
+              })
+            }
+          }
+          
           return NextResponse.json({
             success: true,
             stories: [],
