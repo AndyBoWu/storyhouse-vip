@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { BookStorageService } from '../../../../../../lib/storage/bookStorage'
-import type { ChapterMetadata } from '@storyhouse/shared'
+import type { ChapterMetadata } from '../../../../../../lib/types/book'
 
 interface SaveChapterRequest {
   bookId: string

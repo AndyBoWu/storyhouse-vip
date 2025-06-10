@@ -14,7 +14,7 @@ export interface BookMetadata {
   genre: string
   createdAt: string
   updatedAt: string
-  chapters: ChapterMetadata[]
+  chapters: number  // Changed from ChapterMetadata[] to number count
   parentBookId?: BookId
   branchPoint?: number
   description?: string
@@ -23,21 +23,72 @@ export interface BookMetadata {
   isPublic: boolean
   totalChapters: number
   wordCount: number
+  
+  // Additional fields for enhanced metadata
+  ipAssetId?: string
+  tokenId?: string
+  transactionHash?: string
+  status?: string
+  totalReads?: number
+  totalEarnings?: number
+  rating?: number
+  genres?: string[]
+  coverUrl?: string
 }
 
 export interface ChapterMetadata {
-  id: ChapterId
+  // Core identification
+  chapterId: ChapterId
   bookId: BookId
   chapterNumber: number
   title: string
-  content: string
-  author: AuthorAddress
-  authorName?: string
-  createdAt: string
-  wordCount: number
-  isPublished: boolean
   summary?: string
+  content: string
+  
+  // Author info
+  authorAddress: AuthorAddress
+  authorName?: string
+  
+  // IP Registration
+  ipAssetId?: string
+  parentIpAssetId?: string
+  transactionHash?: string
+  
+  // Economics
+  unlockPrice: number
+  readReward: number
+  licensePrice: number
+  totalRevenue: number
+  
+  // Content Metrics
+  wordCount: number
+  readingTime: number
+  qualityScore?: number
+  originalityScore?: number
+  
+  // Generation Details
+  generationMethod: 'ai' | 'human' | 'hybrid'
+  aiPrompt?: string
+  aiModel?: string
+  
+  // Engagement
+  totalReads: number
+  averageRating: number
+  
+  // Classification
+  genre?: string
+  mood?: string
+  contentRating?: 'G' | 'PG' | 'PG-13' | 'R' | 'NC-17'
   tags?: string[]
+  
+  // Timestamps
+  createdAt: string
+  updatedAt: string
+  
+  // Legacy fields for compatibility
+  id?: ChapterId
+  author?: AuthorAddress
+  isPublished?: boolean
 }
 
 export interface BookStoragePath {

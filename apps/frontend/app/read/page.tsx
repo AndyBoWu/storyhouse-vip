@@ -6,6 +6,7 @@ import { ArrowLeft, Search, Filter, TrendingUp, Clock, Star } from 'lucide-react
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import QuickNavigation from '@/components/ui/QuickNavigation'
+import { apiClient } from '@/lib/api-client'
 
 // Dynamically import WalletConnect to avoid hydration issues
 const WalletConnect = dynamic(() => import('@/components/WalletConnect'), {
@@ -43,8 +44,7 @@ export default function ReadPage() {
       try {
         // For now, we'll use the same API but filter to show "public" stories
         // In a real implementation, you'd have a separate endpoint for public stories
-        const response = await fetch('/api/stories')
-        const data = await response.json()
+        const data = await apiClient.getStories()
 
         if (data.success && data.stories) {
           // Convert to PublicStory format and add mock data for demo

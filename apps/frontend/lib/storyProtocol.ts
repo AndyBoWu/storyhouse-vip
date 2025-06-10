@@ -2,6 +2,7 @@ import { StoryConfig, StoryClient } from '@story-protocol/core-sdk'
 import { http, Address, WalletClient, custom, createPublicClient, PublicClient, Hex, decodeEventLog } from 'viem'
 import { Account } from 'viem/accounts'
 import { STORY_PROTOCOL_CONTRACTS } from '@/lib/contracts/storyProtocol'
+import { apiClient } from './api-client'
 
 // Aeneid testnet is not a default chain in Viem, so we define it manually.
 const aeneid = {
@@ -171,22 +172,18 @@ export class StoryProtocolService {
 
       // Try to upload to R2 for proper metadata hosting
       try {
-        const uploadResponse = await fetch('/api/upload', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            content: nftMetadata,
-            storyId: `nft-metadata-${chapterData.storyId}-ch${chapterData.chapterNumber}`,
-            contentType: 'application/json'
-          })
-        })
+        const formData = new FormData()
+        formData.append('content', JSON.stringify(nftMetadata))
+        formData.append('storyId', `nft-metadata-${chapterData.storyId}-ch${chapterData.chapterNumber}`)
+        formData.append('contentType', 'application/json')
+        
+        const uploadResponse = await apiClient.uploadContent(formData)
 
-        if (!uploadResponse.ok) {
+        if (!uploadResponse.success) {
           throw new Error('Failed to upload NFT metadata to R2')
         }
 
-        const uploadResult = await uploadResponse.json()
-        metadataUri = uploadResult.url
+        metadataUri = uploadResponse.url
         console.log('✅ NFT metadata uploaded to R2:', metadataUri)
       } catch (uploadError) {
         console.warn('⚠️ R2 upload failed, using minimal metadata:', uploadError)

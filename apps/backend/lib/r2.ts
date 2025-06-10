@@ -89,6 +89,36 @@ export interface UploadOptions {
   metadata?: Record<string, string>
 }
 
+/**
+ * Sanitize metadata values to ensure they are valid for HTTP headers
+ */
+function sanitizeMetadata(metadata?: Record<string, string>): Record<string, string> | undefined {
+  if (!metadata) return undefined
+  
+  const sanitized: Record<string, string> = {}
+  for (const [key, value] of Object.entries(metadata)) {
+    console.log(`🧼 Sanitizing metadata "${key}": "${value}"`)
+    
+    // Remove or replace invalid characters in HTTP header values
+    // AWS S3/R2 metadata has strict requirements for header values
+    const sanitizedValue = value
+      .replace(/[\x00-\x1F\x7F-\xFF]/g, '') // Remove control chars and non-ASCII
+      .replace(/['"''""`]/g, '') // Remove all types of quotes and apostrophes
+      .replace(/[\r\n\t]/g, ' ') // Replace newlines and tabs with spaces
+      .replace(/[^\x20-\x7E]/g, '') // Keep only ASCII printable chars
+      .replace(/[^\w\s\-.,()]/g, '') // Remove special chars except word chars, spaces, hyphens, periods, commas, parentheses
+      .trim()
+    
+    console.log(`🧼 Sanitized to: "${sanitizedValue}"`)
+    
+    if (sanitizedValue) {
+      sanitized[key] = sanitizedValue
+    }
+  }
+  
+  return Object.keys(sanitized).length > 0 ? sanitized : undefined
+}
+
 export class R2Service {
   /**
    * Upload content to R2
@@ -111,7 +141,7 @@ export class R2Service {
         Key: key,
         Body: content,
         ContentType: options.contentType || 'text/plain',
-        Metadata: options.metadata,
+        Metadata: sanitizeMetadata(options.metadata),
         // R2 doesn't support ACLs - objects are public via bucket settings
       })
 

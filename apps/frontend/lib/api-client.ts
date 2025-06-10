@@ -5,12 +5,17 @@
  */
 
 const getApiBaseUrl = (): string => {
+  // Use environment variable if set (for hybrid deployment)
+  if (process.env.NEXT_PUBLIC_API_BASE_URL) {
+    return process.env.NEXT_PUBLIC_API_BASE_URL
+  }
+  
   // Check if we're in development by looking at the current URL
   if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
     return 'http://localhost:3002'
   }
   
-  // In production, API routes are served from the same domain
+  // In production without explicit API URL, assume same-domain
   return ''
 }
 

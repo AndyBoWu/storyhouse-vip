@@ -15,6 +15,7 @@ import {
   CreateLicenseTermsParams
 } from '@/lib/contracts/storyProtocol'
 import { StoryProtocolService } from '@/lib/storyProtocol'
+import { apiClient } from '@/lib/api-client'
 
 interface StoryData {
   title: string
@@ -237,10 +238,8 @@ export function usePublishStory() {
         // Use provided bookId or generate one as fallback (without chapter number)
         const finalBookId = bookId || `${address.toLowerCase()}-${storyData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
         
-        const chapterSaveResponse = await fetch(`/api/books/${encodeURIComponent(finalBookId)}/chapters/save`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
+        try {
+          const saveResult = await apiClient.saveBookChapter(finalBookId, {
             bookId: finalBookId,
             chapterNumber: storyData.chapterNumber,
             title: storyData.title,
@@ -254,15 +253,11 @@ export function usePublishStory() {
             genre: storyData.themes[0] || 'General',
             generationMethod: 'human' as const
           })
-        })
 
-        if (!chapterSaveResponse.ok) {
-          const errorText = await chapterSaveResponse.text()
-          console.error('❌ Failed to save chapter content to R2:', errorText)
-          throw new Error(`Failed to save chapter content to R2: ${chapterSaveResponse.status} ${errorText}`)
-        } else {
-          const saveResult = await chapterSaveResponse.json()
           console.log('✅ Chapter content saved to R2:', saveResult.data?.contentUrl)
+        } catch (saveError) {
+          console.error('❌ Failed to save chapter content to R2:', saveError)
+          throw new Error(`Failed to save chapter content to R2: ${saveError instanceof Error ? saveError.message : 'Unknown error'}`)
         }
 
         // Handle license terms

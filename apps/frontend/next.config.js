@@ -11,7 +11,7 @@ const nextConfig = {
     formats: ['image/avif', 'image/webp'],
   },
   
-  // API routes will be served from same domain in Vercel
+  // API routes will be served from backend domain
   env: {
     NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL || '',
   },
