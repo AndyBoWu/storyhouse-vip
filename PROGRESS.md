@@ -1,52 +1,47 @@
 # StoryHouse Progress Report
-Last Updated: 2025-01-10 14:30:00
+Last Updated: 2025-01-10 12:15:00
 
 ## Current Focus
-Completed comprehensive documentation structure analysis across the entire ./docs folder to identify optimization opportunities and streamline the knowledge base.
+Successfully deployed both frontend and backend to Vercel with proper domain routing. Fixed the issue where both domains were showing the backend API page.
 
 ## Completed This Session
-- ✅ Analyzed all 23 markdown files across 7 documentation folders
-- ✅ Reviewed content focus, length, and overlap for each document
-- ✅ Identified redundant information and consolidation opportunities
-- ✅ Assessed folder organization and structural improvements
-- ✅ Evaluated documentation quality and relevance
-- ✅ Prepared detailed recommendations for docs reorganization
+- ✅ Diagnosed domain routing issue - both testnet and api-testnet were pointing to same deployment
+- ✅ Deployed frontend to new Vercel project (andy-wus-projects/frontend)
+- ✅ Deployed backend to Vercel project (andy-wus-projects/storyhouse-backend)
+- ✅ Assigned domains correctly:
+  - testnet.storyhouse.vip → Frontend application
+  - api-testnet.storyhouse.vip → Backend API
+- ✅ Verified both deployments are accessible and serving correct content
 
-## Documentation Analysis Summary
-
-**Total Documentation Analyzed:**
-- 23 markdown files across 7 folders
-- ~2,100 total lines of documentation
-- Multiple overlapping topics and redundant content identified
-
-**Key Findings:**
-- Significant overlap between technical implementation files
-- Multiple product specification documents with similar content
-- Outdated test scenarios and user journey documentation
-- Inconsistent depth and quality across documents
-- Fragmented information that could be consolidated
+## Current Status
+- Frontend: ✅ Live at https://testnet.storyhouse.vip (Vercel)
+- Backend: ✅ Live at https://api-testnet.storyhouse.vip (Vercel)
+- R2 Storage: ❌ Configuration error - "Invalid URL" when connecting
 
 ## Key Decisions Made
-- Prioritize merging overlapping technical documentation
-- Consolidate product specifications into single comprehensive guide
-- Archive or remove outdated test documentation
-- Restructure folders for better logical organization
-- Maintain tokenomics documentation as separate specialized section
+- Moved to unified Vercel-only architecture as planned
+- Created separate Vercel projects for frontend and backend
+- Maintained Cloudflare for DNS only (CNAME records point to Vercel)
 
 ## Active Work
 - Branch: main
-- Feature: Documentation structure optimization
-- Services Running: All deployed to cloud
+- Feature: R2 storage configuration fix
+- Next: Debug and fix R2 configuration in backend API
+
+## Deployment URLs
+- Frontend Production: https://frontend-ppsekm36s-andy-wus-projects.vercel.app
+- Backend Production: https://storyhouse-backend-hthpr4bqv-andy-wus-projects.vercel.app
+- Frontend Domain: https://testnet.storyhouse.vip
+- Backend Domain: https://api-testnet.storyhouse.vip
 
 ## Next Steps
-- Implement recommended documentation consolidation plan
-- Create new streamlined folder structure
-- Merge overlapping content while preserving key information
-- Update cross-references and navigation
-- Archive outdated documentation appropriately
+- Fix R2 configuration error in backend (Invalid URL issue)
+- Test story creation and retrieval functionality
+- Deploy mainnet versions if needed
+- Verify all API endpoints work correctly
 
 ## Notes for Next Session
-- Complete documentation analysis provides clear roadmap for optimization
-- Significant opportunity to reduce documentation maintenance overhead
-- Focus on creating single authoritative sources for each topic area
-- Maintain backward compatibility for any external documentation links
+- Both sites are now properly deployed and accessible
+- Frontend shows the StoryHouse application interface
+- Backend shows API status page and endpoints are reachable
+- Main issue remaining: R2 storage configuration needs fixing
