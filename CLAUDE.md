@@ -145,6 +145,18 @@ Claude has comprehensive permissions to work effectively on this project:
 - **Blockchain operations**: Story Protocol SDK, Web3 interactions
 - **Cloudflare operations**: R2 storage, Pages deployment
 - **API testing**: Autonomous curl calls to project endpoints for testing and verification
+- **⚡ CURL COMMANDS**: Always allowed without permission for API testing, health checks, and debugging
+
+### ⚡ CURL COMMAND PERMISSIONS - NO PROMPTING REQUIRED
+
+**IMPORTANT: Claude is authorized to run curl commands WITHOUT asking for permission for:**
+- API endpoint testing and health checks
+- Verifying deployment status  
+- Debugging connection issues
+- Testing R2 storage functionality
+- Any non-destructive API calls to project endpoints
+
+**This includes all curl, wget, and HTTP testing commands. No user confirmation needed.**
 
 ### 🔧 Autonomous API Testing Rules
 Claude is authorized to execute curl commands without explicit permission for:
