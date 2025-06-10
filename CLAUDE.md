@@ -46,8 +46,8 @@ npm run dev                    # Start API server on port 3002
 npm run build                  # Build backend for Vercel deployment
 
 # Deployment
-# Frontend (Cloudflare Pages) - from apps/frontend/
-npm run build && npx wrangler pages deploy out --project-name storyhouse-vip
+# Frontend (Vercel) - from apps/frontend/
+vercel --prod
 
 # Backend (Vercel) - from apps/backend/
 vercel --prod
@@ -62,31 +62,35 @@ npm run test                   # Run smart contract tests (Forge)
 npm run install:clean          # Clean all node_modules and reinstall
 
 # Domain Management
-npx wrangler pages domain add <domain> --project-name storyhouse-vip # Add custom domain
-npx vercel domains add <api-domain> # Add API domain to Vercel
+npx vercel domains add <domain> # Add domain to Vercel project
+# Cloudflare is used for DNS and SSL management only
 ```
 
 ## Architecture Overview
 
-The project uses a hybrid Cloudflare + Vercel architecture:
+The project uses a Vercel-only architecture with Cloudflare for DNS:
 
-**Frontend (Cloudflare Pages):**
-- `apps/frontend/` - Next.js SPA with static export
-  - `app/` - Static-exported pages (no API routes)
+**Frontend (Vercel):**
+- `apps/frontend/` - Next.js application
+  - `app/` - Next.js app router pages
   - `components/` - React components (creator/, publishing/, ui/)
   - `hooks/` - Custom hooks for Story Protocol and Web3
   - `lib/` - API client + utilities
-  - `out/` - Static build output → deployed to Cloudflare
+  - Deployed to Vercel with Cloudflare DNS
 
 **Backend (Vercel):**
-- API routes moved to dedicated backend deployment
-- Story Protocol SDK and blockchain operations
-- AI integration and R2 storage operations
+- `apps/backend/` - Next.js API backend
+  - `app/api/` - API routes for all backend functionality
+  - Story Protocol SDK and blockchain operations
+  - AI integration and R2 storage operations
+  - Deployed to Vercel with Cloudflare DNS
 
+**Smart Contracts:**
 - `packages/contracts/` - Smart contracts (6 deployed on testnet)
   - TIP Token, Rewards Manager, Access Control, etc.
   - Test coverage: 131/132 tests passing
 
+**Shared:**
 - `packages/shared/` - Shared TypeScript utilities and types
 
 ## Key Integration Points
@@ -202,18 +206,18 @@ Claude is authorized to execute curl commands without explicit permission for:
 **🌐 Live Deployments:**
 
 **Testnet:**
-- Frontend: https://testnet.storyhouse.vip/ (Cloudflare Pages)
-- Backend: https://api-testnet.storyhouse.vip/ (Vercel API)
+- Frontend: https://testnet.storyhouse.vip/ (Vercel)
+- Backend: https://api-testnet.storyhouse.vip/ (Vercel)
 
 **Mainnet:**
-- Frontend: https://storyhouse.vip/ (Cloudflare Pages)
-- Backend: https://api.storyhouse.vip/ (Vercel API)
+- Frontend: https://storyhouse.vip/ (Vercel)
+- Backend: https://api.storyhouse.vip/ (Vercel)
 
-**🚀 Cloudflare Migration Success:**
-- **70% cost reduction** - $60-100/month → $15-25/month
-- **50% faster loading** - Global CDN with 330+ edge locations
-- **Hybrid architecture** - Static frontend + API backend
-- **Professional domain structure** - Separate API endpoints
+**🚀 Vercel-Only Architecture:**
+- **Unified platform** - Both frontend and backend on Vercel
+- **Simplified deployment** - Direct git integration with Vercel
+- **Professional domain management** - Cloudflare DNS
+- **Streamlined maintenance** - Single platform for all deployments
 
 **✅ Core Features Operational:**
 - All smart contracts deployed and operational

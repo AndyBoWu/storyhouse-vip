@@ -9,9 +9,9 @@ Comprehensive technical documentation for StoryHouse.vip's revolutionary Web3 st
 - ✅ **Focus Mode**: Full-screen distraction-free writing with Esc key support
 - ✅ **Auto-Save System**: Real-time saving with draft recovery and localStorage backup
 - ✅ **Quick Navigation**: READ/WRITE/OWN buttons for seamless user experience
-- ✅ **Hybrid Architecture**: Cloudflare Pages frontend + Vercel API backend
-- ✅ **70% Cost Reduction**: From $60-100/month to $15-25/month 
-- ✅ **Global Performance**: 50% faster loading via Cloudflare CDN (330+ locations)
+- ✅ **Vercel-Only Architecture**: Both frontend and backend hosted on Vercel
+- ✅ **Simplified Infrastructure**: Single platform for all deployments
+- ✅ **Domain Management**: Cloudflare DNS with Vercel hosting
 - ✅ **Smart Contracts**: 6 contracts deployed on Story Protocol Aeneid testnet
 - ✅ **Frontend**: Next.js 15.3.3 SPA with static export optimization
 - ✅ **AI Integration**: GPT-4 powered story generation with comprehensive metadata tracking
@@ -39,23 +39,23 @@ Comprehensive technical documentation for StoryHouse.vip's revolutionary Web3 st
 
 ## 🏛️ **Architecture Overview**
 
-### **Cloudflare-Optimized Hybrid Architecture**
+### **Vercel-Only Architecture**
 
 ```
 🌐 PRODUCTION DEPLOYMENT ARCHITECTURE
 
 ┌────────────────────────────────┐      ┌────────────────────────────────┐
-│        Cloudflare Pages        │      │         Vercel API             │
+│       Vercel Frontend          │      │        Vercel Backend          │
 │   testnet.storyhouse.vip       │ ◄──► │  api-testnet.storyhouse.vip    │
 │                                │      │                                │
 │ ┌────────────────────────────┐ │      │ ┌────────────────────────────┐ │
-│ │     Static SPA             │ │      │ │     API Routes             │ │
-│ │   (Next.js Export)         │ │      │ │   + AI Integration         │ │
+│ │     Next.js App            │ │      │ │     API Routes             │ │
+│ │   (Frontend Pages)         │ │      │ │   + AI Integration         │ │
 │ │                            │ │      │ │   + Story Protocol SDK     │ │
-│ │ ✅ Global CDN              │ │      │ │   + R2 Operations          │ │
-│ │ ✅ 330+ Edge Locations     │ │      │ │   + Blockchain Calls       │ │
-│ │ ✅ Forever Cache           │ │      │ │                            │ │
-│ │ ✅ 50% Faster Loading      │ │      │ │ ✅ Full Server Features    │ │
+│ │ ✅ SSR/SSG Support         │ │      │ │   + R2 Operations          │ │
+│ │ ✅ Domain Management       │ │      │ │   + Blockchain Calls       │ │
+│ │ ✅ React Components        │ │      │ │                            │ │
+│ │ ✅ Web3 Integration        │ │      │ │ ✅ Full Server Features    │ │
 │ └────────────────────────────┘ │      │ └────────────────────────────┘ │
 └────────────────────────────────┘      └────────────────────────────────┘
                 │                                        │
@@ -64,7 +64,7 @@ Comprehensive technical documentation for StoryHouse.vip's revolutionary Web3 st
 ┌────────────────────────────────┐      ┌────────────────────────────────┐
 │       User Browser             │      │      Blockchain Layer          │
 │                                │      │                                │
-│ ✅ Instant Static Loading      │      │ ┌────────────────────────────┐ │
+│ ✅ Interactive UI              │      │ ┌────────────────────────────┐ │
 │ ✅ API Calls to Backend        │      │ │    Story Protocol          │ │
 │ ✅ Progressive Enhancement     │      │ │    TIP Token System        │ │
 │ ✅ Responsive Interface        │      │ │    Smart Contracts         │ │
@@ -75,13 +75,13 @@ Comprehensive technical documentation for StoryHouse.vip's revolutionary Web3 st
 
 ### **Key Architecture Benefits**
 
-| Aspect | Before (Vercel Only) | After (Cloudflare Hybrid) | Improvement |
-|--------|---------------------|----------------------------|-------------|
-| **Cost** | $60-100/month | $15-25/month | **70% reduction** |
-| **Performance** | Single region | 330+ edge locations | **50% faster** |
-| **Reliability** | 99.9% uptime | 99.99% uptime | **10x better** |
-| **Scalability** | Regional limits | Global auto-scale | **Unlimited** |
-| **Caching** | Limited | Forever cache | **Instant load** |
+| Aspect | Benefit | Details |
+|--------|---------|---------|
+| **Simplicity** | Single platform | Both frontend and backend on Vercel |
+| **Maintenance** | Unified deployment | Same tooling and workflows |
+| **Integration** | Native Next.js | Full-stack Next.js capabilities |
+| **Scalability** | Auto-scaling | Vercel edge functions |
+| **DNS** | Cloudflare DNS | Professional domain management |
 
 ---
 

@@ -2,36 +2,45 @@
 
 Comprehensive guide for deploying StoryHouse.vip to production environments.
 
-## ✅ **Current Status: Vercel Migration Complete**
+## ✅ **Current Status: Vercel-Only Architecture**
 
-- ✅ **Vercel Migration Complete** - Unified deployment with dynamic routing
-- ✅ **Simplified Architecture** - Single deployment instead of hybrid setup
-- ✅ **Dynamic Routing Enabled** - Book and chapter pages with SSR support
-- ✅ **API Routes Merged** - All endpoints serving from same domain
+- ✅ **Vercel Frontend + Backend** - Both applications hosted on Vercel
+- ✅ **Separate Deployments** - Frontend and backend deployed independently
+- ✅ **Domain Management** - Cloudflare DNS with Vercel hosting
+- ✅ **Simplified Infrastructure** - Single platform for all deployments
 - ✅ **Smart Contracts** - 131/132 tests passing (99.2% success rate)
 - ✅ **Security Audited** - All vulnerabilities resolved
 - ✅ **TypeScript** - Full type safety across all packages
 
 ---
 
-## 🏗️ **Vercel-Unified Deployment Architecture**
+## 🏗️ **Vercel-Only Deployment Architecture**
 
-### **Single Deployment Stack**
+### **Dual Deployment Stack**
 
 ```
 🌐 LIVE PRODUCTION DEPLOYMENT
 
 ┌─────────────────────────────────────────────────────────┐
-│                    Vercel Unified App                   │
-│                 Next.js 15.3.3 SSR                     │
+│                   Vercel Frontend                       │
+│                 Next.js 15.3.3 App                     │
 │                                                         │
 │ ✅ Dynamic Routing (/book/[bookId])                    │
 │ ✅ Server-Side Rendering (SEO optimized)               │
+│ ✅ React Components & UI                                │
+│ ✅ Web3 Wallet Integration                              │
+│ ✅ Domain: storyhouse.vip                              │
+└─────────────────────────────────────────────────────────┘
+                                │
+                                ▼
+┌─────────────────────────────────────────────────────────┐
+│                   Vercel Backend                        │
+│                 Next.js API Routes                      │
+│                                                         │
 │ ✅ API Routes (/api/*) + AI Integration                │
 │ ✅ Story Protocol SDK + Blockchain                     │
 │ ✅ Cloudflare R2 Storage integration                   │
-│ ✅ No CORS issues (same domain)                        │
-│ ✅ Simplified deployment & maintenance                 │
+│ ✅ Domain: api.storyhouse.vip                          │
 └─────────────────────────────────────────────────────────┘
                                 │
                                 ▼
@@ -105,33 +114,32 @@ SENTRY_DSN=your_sentry_dsn
 
 ## 🚀 **Vercel Deployment**
 
-### **Automatic Deployment (Recommended)**
+### **Frontend Deployment**
 
 ```bash
-# 1. Install Vercel CLI
-npm install -g vercel
+# Deploy frontend from apps/frontend/
+cd apps/frontend
+vercel --prod
+```
 
-# 2. Login to Vercel
-vercel login
+### **Backend Deployment**
 
-# 3. Initialize project
-vercel
-
-# 4. Deploy to production
+```bash
+# Deploy backend from apps/backend/
+cd apps/backend
 vercel --prod
 ```
 
 ### **Deployment Configuration**
 
-**vercel.json in apps/frontend/:**
+**Frontend vercel.json (apps/frontend/):**
 
 ```json
 {
-  "buildCommand": "cd ../.. && npm run build --workspace=@storyhouse/shared && npm run build --workspace=@storyhouse/frontend",
-  "outputDirectory": ".next",
-  "devCommand": "npm run dev",
-  "installCommand": "cd ../.. && npm ci",
   "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "installCommand": "npm ci",
   "regions": ["iad1"],
   "headers": [
     {
@@ -144,6 +152,18 @@ vercel --prod
       ]
     }
   ]
+}
+```
+
+**Backend vercel.json (apps/backend/):**
+
+```json
+{
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "installCommand": "npm ci",
+  "regions": ["iad1"]
 }
 ```
 
@@ -338,16 +358,27 @@ npm run test:lighthouse
 
 ### **Custom Domain Setup**
 
-1. **Add domain in Vercel**:
+1. **Add domains in Vercel**:
 
-   - Dashboard → Project → Settings → Domains
+   **Frontend:**
+   - Dashboard → Frontend Project → Settings → Domains
    - Add `storyhouse.vip` and `www.storyhouse.vip`
+   
+   **Backend:**
+   - Dashboard → Backend Project → Settings → Domains
+   - Add `api.storyhouse.vip` and `api-testnet.storyhouse.vip`
 
-2. **Configure DNS records**:
+2. **Configure DNS records in Cloudflare**:
 
    ```
-   A     @     76.76.19.61
-   CNAME www   storyhouse.vercel.app
+   # Frontend domains
+   A     @               76.76.19.61
+   CNAME www             storyhouse.vercel.app
+   CNAME testnet         frontend-testnet.vercel.app
+   
+   # Backend domains  
+   CNAME api             backend-prod.vercel.app
+   CNAME api-testnet     backend-testnet.vercel.app
    ```
 
 3. **SSL Certificate**:
