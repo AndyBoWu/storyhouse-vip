@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { GitBranch, Users, BookOpen, TrendingUp, DollarSign, ChevronRight, ChevronDown } from 'lucide-react'
+import { GitBranch, Users, BookOpen, TrendingUp, DollarSign, ChevronRight, ChevronDown, Info, Sparkles } from 'lucide-react'
 import { apiClient } from '@/lib/api-client'
 
 interface BookDerivationNode {
@@ -14,6 +14,16 @@ interface BookDerivationNode {
   totalReads: number
   createdAt: string
   derivatives: BookDerivationNode[]
+  // AI similarity data
+  similarityScore?: number
+  qualityScore?: number
+  influenceScore?: number
+  similarityBreakdown?: {
+    content: number
+    structure: number
+    theme: number
+    style: number
+  }
 }
 
 interface FamilyTreeAnalytics {
@@ -43,6 +53,7 @@ export default function BookFamilyTree({
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set())
+  const [hoveredNode, setHoveredNode] = useState<string | null>(null)
 
   useEffect(() => {
     loadFamilyTree()
@@ -99,11 +110,25 @@ export default function BookFamilyTree({
     })
   }
 
-  const renderTreeNode = (node: BookDerivationNode, depth: number = 0, isLast: boolean = false) => {
+  const getSimilarityColor = (score: number) => {
+    if (score >= 80) return { border: 'border-red-400', bg: 'bg-red-50', text: 'text-red-600' }
+    if (score >= 60) return { border: 'border-yellow-400', bg: 'bg-yellow-50', text: 'text-yellow-600' }
+    return { border: 'border-green-400', bg: 'bg-green-50', text: 'text-green-600' }
+  }
+
+  const getSimilarityLabel = (score: number) => {
+    if (score >= 80) return 'High'
+    if (score >= 60) return 'Medium'
+    return 'Low'
+  }
+
+  const renderTreeNode = (node: BookDerivationNode, depth: number = 0, isLast: boolean = false, parentNode?: BookDerivationNode) => {
     const isExpanded = expandedNodes.has(node.bookId)
     const hasDerivatives = node.derivatives.length > 0
     const isRoot = depth === 0
     const isTarget = node.bookId === bookId
+    const similarityScore = node.similarityScore || 75
+    const similarityStyle = getSimilarityColor(similarityScore)
 
     return (
       <motion.div
@@ -113,18 +138,35 @@ export default function BookFamilyTree({
         transition={{ duration: 0.3, delay: depth * 0.1 }}
         className={`relative ${depth > 0 ? 'ml-6' : ''}`}
       >
-        {/* Connecting lines */}
+        {/* Connecting lines with similarity coloring */}
         {depth > 0 && (
-          <div className="absolute left-[-24px] top-0 w-6 h-6 border-l-2 border-b-2 border-gray-300"></div>
+          <>
+            <div 
+              className={`absolute left-[-24px] top-0 w-6 h-6 border-l-2 border-b-2 ${
+                similarityScore >= 80 ? 'border-red-400' : 
+                similarityScore >= 60 ? 'border-yellow-400' : 
+                'border-green-400'
+              }`}
+              style={{ borderWidth: similarityScore >= 80 ? '3px' : '2px' }}
+            />
+            {/* Similarity indicator on the line */}
+            <div className={`absolute left-[-28px] top-[-8px] px-1 py-0.5 rounded text-xs font-medium ${similarityStyle.bg} ${similarityStyle.text}`}>
+              {similarityScore}%
+            </div>
+          </>
         )}
         
         {/* Node content */}
-        <div className={`
-          flex items-center gap-3 p-4 rounded-lg border-2 transition-all mb-2
-          ${isTarget ? 'border-purple-400 bg-purple-50' : 
-            isRoot ? 'border-blue-400 bg-blue-50' : 
-            'border-gray-200 bg-white hover:border-gray-300'}
-        `}>
+        <div 
+          className={`
+            flex items-center gap-3 p-4 rounded-lg border-2 transition-all mb-2 relative
+            ${isTarget ? 'border-purple-400 bg-purple-50' : 
+              isRoot ? 'border-blue-400 bg-blue-50' : 
+              'border-gray-200 bg-white hover:border-gray-300'}
+          `}
+          onMouseEnter={() => setHoveredNode(node.bookId)}
+          onMouseLeave={() => setHoveredNode(null)}
+        >
           {/* Expand/collapse button */}
           {hasDerivatives && (
             <button
@@ -163,6 +205,17 @@ export default function BookFamilyTree({
                   Current
                 </span>
               )}
+              {!isRoot && node.similarityScore && (
+                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${similarityStyle.bg} ${similarityStyle.text}`}>
+                  {getSimilarityLabel(similarityScore)}
+                </span>
+              )}
+              {node.qualityScore && node.qualityScore >= 8 && (
+                <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <Sparkles className="w-3 h-3" />
+                  High Quality
+                </span>
+              )}
             </div>
             
             <div className="flex items-center gap-4 text-sm text-gray-600">
@@ -179,14 +232,65 @@ export default function BookFamilyTree({
             </div>
           </div>
           
-          {/* Derivative count */}
-          {hasDerivatives && (
-            <div className="flex-shrink-0 flex items-center gap-1 text-sm text-gray-600">
-              <GitBranch className="w-4 h-4" />
-              <span>{node.derivatives.length}</span>
-            </div>
-          )}
+          {/* Derivative count and AI indicators */}
+          <div className="flex-shrink-0 flex flex-col items-end gap-2">
+            {hasDerivatives && (
+              <div className="flex items-center gap-1 text-sm text-gray-600">
+                <GitBranch className="w-4 h-4" />
+                <span>{node.derivatives.length}</span>
+              </div>
+            )}
+            {node.influenceScore && (
+              <div className="flex items-center gap-1 text-xs font-medium text-purple-600">
+                <TrendingUp className="w-3 h-3" />
+                <span>{node.influenceScore.toFixed(1)}</span>
+              </div>
+            )}
+          </div>
         </div>
+
+        {/* Similarity breakdown tooltip */}
+        {hoveredNode === node.bookId && node.similarityBreakdown && !isRoot && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            className="absolute z-10 top-full left-4 mt-2 bg-white rounded-lg shadow-lg p-4 border border-gray-200 min-w-[200px]"
+            onMouseEnter={() => setHoveredNode(node.bookId)}
+            onMouseLeave={() => setHoveredNode(null)}
+          >
+            <h5 className="font-medium text-sm text-gray-900 mb-2 flex items-center gap-2">
+              <Info className="w-4 h-4" />
+              AI Analysis Details
+            </h5>
+            <div className="space-y-2 text-xs">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Content:</span>
+                <span className="font-medium">{node.similarityBreakdown.content}%</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Structure:</span>
+                <span className="font-medium">{node.similarityBreakdown.structure}%</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Theme:</span>
+                <span className="font-medium">{node.similarityBreakdown.theme}%</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Style:</span>
+                <span className="font-medium">{node.similarityBreakdown.style}%</span>
+              </div>
+            </div>
+            {node.qualityScore && (
+              <div className="mt-2 pt-2 border-t border-gray-200">
+                <div className="flex justify-between text-xs">
+                  <span className="text-gray-600">Quality Score:</span>
+                  <span className="font-medium">{node.qualityScore.toFixed(1)}/10</span>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        )}
         
         {/* Derivatives */}
         <AnimatePresence>
@@ -199,7 +303,7 @@ export default function BookFamilyTree({
               className="ml-4 border-l-2 border-gray-200 pl-2"
             >
               {node.derivatives.map((derivative, index) => 
-                renderTreeNode(derivative, depth + 1, index === node.derivatives.length - 1)
+                renderTreeNode(derivative, depth + 1, index === node.derivatives.length - 1, node)
               )}
             </motion.div>
           )}

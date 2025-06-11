@@ -431,3 +431,86 @@ export const defaultStoryProtocolConfig: Partial<StoryProtocolConfig> = {
     revenueSharePlatform: 10
   }
 }
+
+// ===== DERIVATIVE ANALYTICS TYPES =====
+
+export interface DerivativeAnalytics {
+  storyId: string
+  totalDerivatives: number
+  totalRevenue: number
+  influenceScore: number
+  derivatives: {
+    id: string
+    title: string
+    author: string
+    similarityScore: number
+    qualityScore: number
+    revenue: number
+    reads: number
+    createdAt: string
+  }[]
+  performanceMetrics: {
+    avgRevenuePerDerivative: number
+    avgQualityScore: number
+    avgSimilarityScore: number
+    topPerformingDerivative?: string
+  }
+  trends: {
+    month: string
+    derivativesCreated: number
+    revenueGenerated: number
+  }[]
+}
+
+export interface ContentSimilarityAnalysis {
+  originalId: string
+  derivativeId: string
+  overallSimilarity: number
+  similarityBreakdown: {
+    content: number
+    structure: number
+    theme: number
+    style: number
+  }
+  confidence: number
+  analysisTimestamp: string
+  recommendations: string[]
+}
+
+export interface InfluenceMetrics {
+  authorAddress: string
+  totalInfluenceScore: number
+  storiesAnalyzed: number
+  derivativeStats: {
+    totalDerivativesCreated: number
+    avgQualityOfDerivatives: number
+    totalRevenueFromDerivatives: number
+  }
+  topInfluentialStories: {
+    storyId: string
+    title: string
+    influenceScore: number
+    derivativeCount: number
+  }[]
+  influenceTrend: 'rising' | 'stable' | 'falling'
+  percentileRank: number
+}
+
+export interface QualityAssessment {
+  storyId: string
+  overallQuality: number
+  qualityMetrics: {
+    originality: number
+    engagement: number
+    technical: number
+    commercial: number
+  }
+  comparisonToOriginal?: {
+    originalId: string
+    qualityDelta: number
+    performanceDelta: number
+  }
+  recommendations: string[]
+  qualityTrend: 'improving' | 'stable' | 'declining'
+  aiConfidence: number
+}
