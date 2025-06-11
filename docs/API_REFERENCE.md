@@ -45,7 +45,7 @@ POST /api/royalties/claim
     "amountClaimed": 125.50,
     "tipTokens": 2500,
     "transactionHash": "0xabc123...",
-    "claimedAt": "2025-06-11T15:15:22.579Z",
+    "claimedAt": "YYYY-MM-DDTHH:MM:SS.SSSZ",
     "gasUsed": 21000,
     "status": "completed"
   }
@@ -68,7 +68,7 @@ GET /api/royalties/claimable/[chapterId]
     "chapterId": "0x1234567890abcdef",
     "claimableAmount": 125.50,
     "totalRevenue": 500.00,
-    "lastClaimedAt": "2025-06-01T10:30:00Z",
+    "lastClaimedAt": "YYYY-MM-DDTHH:MM:SS.SSSZ",
     "royaltyPercentage": 25,
     "licenseTier": "Premium",
     "readCount": 150,
@@ -108,7 +108,7 @@ GET /api/royalties/history/[authorAddress]
         "bookTitle": "The Digital Realm",
         "chapterNumber": 1,
         "amountClaimed": 125.50,
-        "claimedAt": "2025-06-11T15:15:22.579Z",
+        "claimedAt": "YYYY-MM-DDTHH:MM:SS.SSSZ",
         "transactionHash": "0xabc123...",
         "status": "completed"
       }
@@ -117,8 +117,8 @@ GET /api/royalties/history/[authorAddress]
       "averageClaimAmount": 166.67,
       "topPerformingChapter": "0x1234567890abcdef",
       "monthlyTrend": [
-        {"month": "2025-06", "amount": 500.00},
-        {"month": "2025-05", "amount": 400.00}
+        {"month": "YYYY-MM", "amount": 500.00},
+        {"month": "YYYY-MM", "amount": 400.00}
       ]
     }
   }
@@ -172,7 +172,7 @@ GET /api/royalties/preview
         "investment_cost": 500.00,
         "total_returns": 1500.00,
         "roi_percentage": 200.00,
-        "break_even_date": "2025-03-15"
+        "break_even_date": "YYYY-MM-DD"
       },
       "engagement_stats": {
         "average_read_time": 8.5,
@@ -203,7 +203,7 @@ GET /api/royalties/notifications/[authorAddress]
         "type": "royalty_ready",
         "chapterId": "0x1234567890abcdef",
         "amount": 125.50,
-        "createdAt": "2025-06-11T15:15:22.579Z",
+        "createdAt": "YYYY-MM-DDTHH:MM:SS.SSSZ",
         "read": false,
         "priority": "high"
       }
@@ -216,7 +216,7 @@ GET /api/royalties/notifications/[authorAddress]
     },
     "delivery_stats": {
       "success_rate": 95.5,
-      "last_delivery": "2025-06-11T14:30:00Z",
+      "last_delivery": "YYYY-MM-DDTHH:MM:SS.SSSZ",
       "total_sent": 42
     }
   }
@@ -293,7 +293,7 @@ POST /api/ip/license/attach
     "licenseTermsId": "lt_1234567890_abcdef123",
     "ipAssetId": "0x1234567890abcdef",
     "transactionHash": "0xabc123...",
-    "effectiveDate": "2025-06-11T15:15:22.579Z"
+    "effectiveDate": "YYYY-MM-DDTHH:MM:SS.SSSZ"
   }
 }
 ```

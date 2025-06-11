@@ -63,7 +63,7 @@ GET /api/stories
       "earnings": 0,
       "preview": "Detective Sarah Chen never believed in magic until she encountered the strange case...",
       "contentUrl": "https://r2.example.com/stories/story_1703123456/chapters/1.json",
-      "publishedAt": "2024-12-21T10:30:00Z",
+      "publishedAt": "YYYY-MM-DDTHH:MM:SSZ",
       "authorAddress": "0x1234567890123456789012345678901234567890",
       "authorName": "0x1234...7890",
       "contentRating": "PG-13",
@@ -122,8 +122,8 @@ GET /api/stories/[walletAddress]/[storySlug]/chapters
     "averageRating": 4.2,
     "description": "A gripping mystery series following Detective Sarah Chen...",
     "tags": ["mystery", "detective", "urban"],
-    "createdAt": "2024-12-21T10:30:00Z",
-    "updatedAt": "2024-12-21T14:30:00Z"
+    "createdAt": "YYYY-MM-DDTHH:MM:SSZ",
+    "updatedAt": "YYYY-MM-DDTHH:MM:SSZ"
   },
   "chapters": [
     {
@@ -136,7 +136,7 @@ GET /api/stories/[walletAddress]/[storySlug]/chapters
       "readReward": 0.05,
       "totalReads": 45,
       "isUnlocked": false,
-      "createdAt": "2024-12-21T10:30:00Z",
+      "createdAt": "YYYY-MM-DDTHH:MM:SSZ",
       "genre": "Mystery",
       "mood": "mysterious",
       "contentRating": "PG-13"
@@ -151,7 +151,7 @@ GET /api/stories/[walletAddress]/[storySlug]/chapters
       "readReward": 0.05,
       "totalReads": 32,
       "isUnlocked": false,
-      "createdAt": "2024-12-21T12:15:00Z",
+      "createdAt": "YYYY-MM-DDTHH:MM:SSZ",
       "genre": "Mystery",
       "mood": "suspenseful",
       "contentRating": "PG-13"
@@ -217,9 +217,9 @@ GET /api/chapters/[storyId]/[chapterNumber]
       "totalRevenue": 4.5,
       "status": "published",
       "visibility": "public",
-      "generatedAt": "2024-12-21T10:30:00Z",
-      "publishedAt": "2024-12-21T10:30:00Z",
-      "lastModified": "2024-12-21T10:30:00Z",
+      "generatedAt": "YYYY-MM-DDTHH:MM:SSZ",
+      "publishedAt": "YYYY-MM-DDTHH:MM:SSZ",
+      "lastModified": "YYYY-MM-DDTHH:MM:SSZ",
       "averageRating": 4.2,
       "remixCount": 0,
       "streakBonus": 0
@@ -389,8 +389,8 @@ GET /api/books/[bookId]
     "totalReads": 0,
     "averageRating": 0,
     "totalRevenue": 0,
-    "createdAt": "2024-12-21T10:30:00Z",
-    "updatedAt": "2024-12-21T10:30:00Z"
+    "createdAt": "YYYY-MM-DDTHH:MM:SSZ",
+    "updatedAt": "YYYY-MM-DDTHH:MM:SSZ"
   }
 }
 ```
@@ -429,7 +429,7 @@ GET /api/books
       "totalReads": 150,
       "derivativeBooks": ["0x5678-detective-portal-sf", "0x9abc-detective-portal-dark"],
       "isRemixable": true,
-      "createdAt": "2024-12-20T08:00:00Z"
+      "createdAt": "YYYY-MM-DDTHH:MM:SSZ"
     },
     {
       "bookId": "0x5678-detective-portal-sf",
@@ -445,7 +445,7 @@ GET /api/books
       "totalReads": 89,
       "derivativeBooks": [],
       "isRemixable": true,
-      "createdAt": "2024-12-21T10:30:00Z"
+      "createdAt": "YYYY-MM-DDTHH:MM:SSZ"
     }
   ],
   "pagination": {
@@ -505,7 +505,7 @@ GET /api/books/[bookId]/chapters/[chapterNumber]
       "qualityScore": 89,
       "originalityScore": 92,
       "generationMethod": "ai",
-      "createdAt": "2024-12-20T12:15:00Z"
+      "createdAt": "YYYY-MM-DDTHH:MM:SSZ"
     }
   }
 }
@@ -531,7 +531,7 @@ GET /api/books/[bookId]/derivatives
       "authorName": "Detective Writer",
       "totalChapters": 3,
       "totalReads": 150,
-      "createdAt": "2024-12-20T08:00:00Z"
+      "createdAt": "YYYY-MM-DDTHH:MM:SSZ"
     },
     "derivatives": [
       {
@@ -541,7 +541,7 @@ GET /api/books/[bookId]/derivatives
         "branchPoint": "ch3",
         "totalChapters": 6,
         "totalReads": 89,
-        "createdAt": "2024-12-21T10:30:00Z",
+        "createdAt": "YYYY-MM-DDTHH:MM:SSZ",
         "derivatives": []
       },
       {
@@ -808,7 +808,7 @@ POST /api/ip/register
       "wordCount": 1987,
       "language": "en",
       "tags": ["mystery", "fantasy", "urban"],
-      "createdAt": "2024-12-21T10:30:00Z",
+      "createdAt": "YYYY-MM-DDTHH:MM:SSZ",
       "author": "0x1234567890123456789012345678901234567890"
     },
     "licenseTermsIds": ["0xdef456..."]
@@ -852,7 +852,7 @@ GET /api/ip/register?storyId=story_1703123456
     "storyId": "story_1703123456",
     "operationType": "register",
     "status": "success",
-    "createdAt": "2024-12-21T10:30:00Z",
+    "createdAt": "YYYY-MM-DDTHH:MM:SSZ",
     "updatedAt": "2024-12-21T10:32:15Z",
     "ipAssetId": "0xa1b2c3d4e5f6789012345678901234567890abcd",
     "transactionHash": "0x1a2b3c4d5e6f789012345678901234567890abcdef123456789",
