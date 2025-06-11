@@ -435,13 +435,344 @@ export interface ClaimRoyaltyResponse {
   error?: string
 }
 
-// Event types for real-time updates
+// =============================================================================
+// STORY PROTOCOL SDK DERIVATIVE REGISTRATION TYPES
+// =============================================================================
+
+// Derivative registration data for SDK integration
+export interface DerivativeRegistrationData {
+  // Source content information
+  parentIpId: string
+  parentChapterId: string
+  parentLicenseTermsId?: string
+
+  // Derivative content information
+  derivativeContent: EnhancedChapterIPData
+  derivativeType: 'remix' | 'sequel' | 'adaptation' | 'translation' | 'other'
+  
+  // Relationship metadata
+  similarityScore?: number
+  aiAnalysisId?: string
+  influenceFactors?: string[]
+  
+  // License inheritance
+  inheritParentLicense: boolean
+  customLicenseTermsId?: string
+  
+  // Attribution information
+  attributionText: string
+  creatorNotes?: string
+}
+
+// Derivative registration result from SDK
+export interface DerivativeRegistrationResult {
+  success: boolean
+  derivativeIpId?: string
+  transactionHash?: Hash
+  parentChildRelationship?: {
+    parentIpId: string
+    childIpId: string
+    licenseTermsId: string
+  }
+  
+  // AI Analysis Integration
+  aiSimilarityScore?: number
+  qualityComparison?: {
+    parentQuality: number
+    derivativeQuality: number
+    improvementAreas?: string[]
+  }
+  
+  // Economic projections
+  revenueProjection?: {
+    estimatedParentRoyalty: number
+    estimatedDerivativeRevenue: number
+    licenseInheritance: boolean
+  }
+  
+  error?: string
+  simulationMode?: boolean
+  registrationTime?: Date
+}
+
+// Derivative tree node for family tree visualization
+export interface DerivativeTree {
+  ipId: string
+  chapterId: string
+  title: string
+  creatorAddress: Address
+  
+  // Relationship data
+  parentIpId?: string
+  children: DerivativeTree[]
+  depth: number
+  
+  // AI Analysis integration
+  similarityToParent?: number
+  qualityScore?: number
+  influenceMetrics?: {
+    totalDerivatives: number
+    avgSimilarityScore: number
+    qualityTrend: 'improving' | 'declining' | 'stable'
+  }
+  
+  // License and revenue data
+  licenseTermsId?: string
+  licenseTier?: string
+  totalRevenue?: number
+  royaltiesGenerated?: number
+}
+
+// License inheritance analysis result
+export interface LicenseInheritanceInfo {
+  parentLicenseTermsId: string
+  parentLicenseTier: string
+  canInherit: boolean
+  inheritanceConditions: string[]
+  suggestedLicenseTermsId?: string
+  economicImplications: {
+    parentRoyaltyPercentage: number
+    derivativeRoyaltyShare: number
+    platformFee: number
+  }
+}
+
+// Derivative query options for complex filtering
+export interface DerivativeQueryOptions {
+  includeAiAnalysis?: boolean
+  includeLicenseDetails?: boolean
+  includeRevenueData?: boolean
+  depth?: number // How many generations deep to query
+  filters?: {
+    licenseTierFilter?: string[]
+    qualityThreshold?: number
+    similarityThreshold?: number
+    revenueThreshold?: number
+    creatorFilter?: Address[]
+    dateRange?: { from: string; to: string }
+    derivativeTypeFilter?: DerivativeRegistrationData['derivativeType'][]
+  }
+}
+
+// Auto-detection options for AI-powered parent finding
+export interface AutoDetectionOptions {
+  minimumSimilarityThreshold?: number
+  maxParentCandidates?: number
+  requireManualConfirmation?: boolean
+}
+
+// Potential parent candidate from AI analysis
+export interface ParentCandidate {
+  ipId: string
+  chapterId: string
+  title: string
+  similarityScore: number
+  licenseTermsId?: string
+  analysisId: string
+  influenceFactors: string[]
+  compatibilityScore: number
+}
+
+// Derivative complexity analysis
+export interface DerivativeComplexity {
+  complexity: 'simple' | 'moderate' | 'complex'
+  factors: string[]
+  estimatedGasCost: number
+  requiredSteps: string[]
+  potentialIssues: string[]
+}
+
+// License compatibility analysis
+export interface LicenseCompatibility {
+  isCompatible: boolean
+  compatibilityScore: number
+  restrictions: string[]
+  recommendations: string[]
+  economicImplications: {
+    costIncrease: number
+    revenueImpact: number
+    royaltyChanges: number
+  }
+}
+
+// Derivative workflow status tracking
+export interface DerivativeWorkflowStatus {
+  workflowId: string
+  currentStep: 'analysis' | 'registration' | 'licensing' | 'confirmation' | 'complete'
+  progress: number // 0-100
+  estimatedTimeRemaining: number // minutes
+  
+  stepResults: {
+    aiAnalysis?: {
+      completed: boolean
+      similarityScore?: number
+      parentCandidates?: ParentCandidate[]
+    }
+    ipRegistration?: {
+      completed: boolean
+      ipAssetId?: string
+      transactionHash?: Hash
+    }
+    licenseInheritance?: {
+      completed: boolean
+      licenseTermsId?: string
+      canInherit?: boolean
+    }
+    derivativeRegistration?: {
+      completed: boolean
+      derivativeIpId?: string
+      transactionHash?: Hash
+    }
+  }
+  
+  errors: string[]
+  warnings: string[]
+}
+
+// =============================================================================
+// ENHANCED ROYALTY TYPES FOR DERIVATIVE INTEGRATION
+// =============================================================================
+
+// Enhanced royalty claim response with derivative context
+export interface EnhancedClaimRoyaltyResponse extends ClaimRoyaltyResponse {
+  // TIP token integration
+  tipTokenAmount?: number
+  platformFee?: number
+  
+  // Chapter-specific information
+  chapterInfo?: {
+    chapterId: string
+    licenseTier: string
+    totalRevenue: number
+  }
+  
+  // Derivative context
+  derivativeRoyalties?: {
+    fromChildIpId: string
+    amount: bigint
+    percentage: number
+  }[]
+  
+  // Simulation mode for development
+  simulationMode?: boolean
+  simulationReason?: string
+  retryRecommendation?: string
+}
+
+// Claimable royalties info with derivative breakdown
+export interface ClaimableRoyaltiesInfo {
+  totalClaimable: number
+  licenseTier?: string
+  
+  royaltyBreakdown: {
+    baseRoyalties: number
+    bonusRoyalties: number
+    tipTokenRewards: number
+    derivativeRoyalties?: number
+  }
+  
+  derivativeSources?: {
+    childIpId: string
+    childTitle: string
+    contributionAmount: number
+    royaltyPercentage: number
+  }[]
+  
+  lastUpdated: string
+}
+
+// Royalty sharing distribution with derivative context
+export interface RoyaltySharingDistribution {
+  originalCreator: {
+    address: Address
+    amount: bigint
+    percentage: number
+  }
+  
+  platform: {
+    amount: bigint
+    percentage: number
+  }
+  
+  derivatives: Array<{
+    address: Address
+    amount: bigint
+    percentage: number
+    derivativeId: string
+  }>
+  
+  totalDistributed: bigint
+}
+
+// Chapter royalty metadata for tracking
+export interface ChapterRoyaltyMetadata {
+  chapterId: string
+  ipAssetId: string
+  licenseTier: string
+  
+  royaltyData: {
+    totalEarned: number
+    totalClaimed: number
+    pendingClaim: number
+    lastClaimDate?: Date
+  }
+  
+  derivativeData: {
+    childrenCount: number
+    totalChildRevenue: number
+    averageRoyaltyRate: number
+  }
+  
+  performance: {
+    readCount: number
+    engagementScore: number
+    qualityScore: number
+  }
+}
+
+// Royalty error information for enhanced error handling
+export interface RoyaltyErrorInfo {
+  message: string
+  retryable: boolean
+  category: 'wallet_error' | 'network_error' | 'gas_error' | 'royalty_error' | 'unknown_error'
+  suggestedActions: string[]
+}
+
+// TIP token conversion utilities
+export interface TipTokenConversion {
+  ethAmount: number
+  tipAmount: number
+  conversionRate: number
+  platformFee: number
+  netAmount: number
+}
+
+// Event types for real-time updates including derivatives
 export interface IPAssetEvent {
-  type: 'registered' | 'licensed' | 'derivative_created' | 'royalty_distributed'
+  type: 'registered' | 'licensed' | 'derivative_created' | 'derivative_registered' | 'royalty_distributed' | 'license_inherited'
   ipAssetId: string
   storyId?: string
   transactionHash: Hash
   blockNumber: number
   timestamp: string
-  data: Record<string, any>
+  
+  // Enhanced event data for derivatives
+  data: Record<string, any> & {
+    derivativeData?: {
+      parentIpId?: string
+      childIpId?: string
+      derivativeType?: DerivativeRegistrationData['derivativeType']
+      similarityScore?: number
+    }
+    licenseData?: {
+      licenseTermsId?: string
+      canInherit?: boolean
+      licenseTier?: string
+    }
+    royaltyData?: {
+      amount?: bigint
+      currency?: Address
+      fromDerivative?: boolean
+    }
+  }
 }
