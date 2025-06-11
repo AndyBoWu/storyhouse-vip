@@ -26,6 +26,14 @@ Readers earn $TIP tokens for reading the first 3 chapters, then pay to unlock pr
 ### AI-Powered Remix Economy
 Authors can remix existing chapters with AI assistance and automated licensing.
 
+### 3-Tier Programmable IP License System
+StoryHouse implements sophisticated on-chain licensing through Story Protocol:
+- **Standard License ($100)**: 5% royalty, non-exclusive commercial use
+- **Premium License ($500)**: 10% royalty, enhanced commercial rights
+- **Exclusive License ($2,000)**: 20% royalty, exclusive adaptation rights
+
+[Learn more about our licensing system →](./docs/technical/LICENSING_SYSTEM.md)
+
 ## 🔗 Smart Contract Addresses
 
 **Network:** Story Protocol Aeneid Testnet (Chain ID: 1315)
