@@ -148,8 +148,14 @@ export async function POST(request: NextRequest) {
           // Remix System
           isRemix: false,
           isRemixable: true,
-          licensePrice: 100, // Default license price in TIP
-          royaltyPercentage: 5, // Default 5% royalty
+          
+          // License configuration based on request
+          licenseTier: generationRequest.ipOptions?.licenseType || 'premium',
+          licensePrice: generationRequest.ipOptions?.licenseType === 'free' ? 0 : 
+                       generationRequest.ipOptions?.licenseType === 'exclusive' ? 1000 : 100,
+          royaltyPercentage: generationRequest.ipOptions?.licenseType === 'free' ? 0 :
+                            generationRequest.ipOptions?.licenseType === 'exclusive' ? 25 : 
+                            generationRequest.ipOptions?.licenseType === 'premium' ? 10 : 5,
           
           // Read-to-Earn Economics
           unlockPrice: 0.1, // TIP tokens to read

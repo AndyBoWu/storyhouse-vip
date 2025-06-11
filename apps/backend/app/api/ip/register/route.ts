@@ -4,10 +4,19 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-
-// Simple IP registration endpoint - blockchain integrations temporarily disabled for migration
-// TODO: Re-enable Story Protocol integration after migration is complete
+import { ipService } from '@/lib/ipServiceConfig'
 import type { Address } from 'viem'
+import type { StoryWithIP } from '@storyhouse/shared'
+
+// Helper function to parse blockchain errors
+function parseBlockchainError(error: any) {
+  const errorMessage = error?.message || error?.toString() || 'Unknown error'
+  return {
+    type: 'blockchain_error',
+    userMessage: `Blockchain operation failed: ${errorMessage}`,
+    details: errorMessage
+  }
+}
 
 interface IPRegistrationRequest {
   storyId: string
