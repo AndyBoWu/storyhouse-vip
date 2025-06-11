@@ -248,7 +248,62 @@
 
 ---
 
-## 🎯 **User Journey 6: End-to-End Story Lifecycle**
+## 💰 **User Journey 6: Creator Royalty Management**
+
+### **Test Steps:**
+
+1. **Navigate to Royalty Dashboard**
+
+   - Go to `/creator/royalties` page
+   - Verify 3-tab interface loads correctly
+   - Check wallet connection requirement
+
+2. **Test Claimable Royalties Tab**
+
+   - Navigate to "Claimable" tab
+   - Verify real-time chapter royalty amounts display
+   - Test individual chapter claiming functionality
+   - Check gas estimation and transaction preview
+
+3. **Test Royalty History Tab**
+
+   - Navigate to "History" tab
+   - Verify complete transaction history displays
+   - Check chapter-level breakdown and analytics
+   - Test export functionality for records
+
+4. **Test Analytics Tab**
+
+   - Navigate to "Analytics" tab
+   - Verify ROI analysis and tier optimization displays
+   - Check break-even calculations and forecasting
+   - Test economic modeling recommendations
+
+5. **Test Notification Management**
+
+   - Access notification preferences
+   - Configure multi-channel delivery options
+   - Test notification triggers and delivery tracking
+   - Verify 95% delivery success rate monitoring
+
+### **Expected Results:**
+
+- ✅ All 3 tabs load and function correctly
+- ✅ Real-time royalty claiming works with validation
+- ✅ Analytics provide actionable optimization insights
+- ✅ Notification system delivers alerts reliably
+- ✅ Performance targets <2s response times achieved
+
+### **Test Data to Record:**
+
+- Claimable royalty amount: `________________`
+- Claiming transaction hash: `________________`
+- Analytics ROI calculation: `________________`
+- Notification delivery rate: `________________`
+
+---
+
+## 🎯 **User Journey 7: End-to-End Story Lifecycle**
 
 ### **Test Steps:**
 
@@ -351,7 +406,8 @@
 - [ ] **Journey 3**: Reading & chapter rewards
 - [ ] **Journey 4**: Dashboard analytics
 - [ ] **Journey 5**: Contract integration
-- [ ] **Journey 6**: End-to-end lifecycle
+- [ ] **Journey 6**: Creator royalty management
+- [ ] **Journey 7**: End-to-end lifecycle
 
 ### **Final Verification:**
 
@@ -361,6 +417,11 @@
 - [ ] All links and external integrations work
 - [ ] Error handling provides clear feedback
 - [ ] Real-time updates function properly
+- [ ] **Royalty system fully operational**
+- [ ] **5 royalty API endpoints respond <2s**
+- [ ] **Multi-tier revenue sharing accurate**
+- [ ] **Notification delivery >95% success rate**
+- [ ] **Economic analytics provide optimization insights**
 
 ---
 
