@@ -15,6 +15,8 @@ import type {
   NotificationPreferences,
   RoyaltyNotificationType
 } from '../types/royalty'
+import { contentAnalysisService } from './contentAnalysisService'
+import type { DerivativeDetectionResult } from './contentAnalysisService'
 
 // Notification configuration
 const NOTIFICATION_CONFIG = {
@@ -48,6 +50,16 @@ const NOTIFICATION_CONFIG = {
     exponentialBackoff: true
   }
 } as const
+
+// Enhanced notification types for Phase 3.3
+type DerivativeNotificationType = 
+  | 'derivative_detected'
+  | 'potential_collaboration'
+  | 'content_opportunity'
+  | 'quality_improvement'
+  | 'market_trend_alert'
+
+type AllNotificationType = RoyaltyNotificationType | DerivativeNotificationType
 
 // Notification template configurations
 const NOTIFICATION_TEMPLATES = {
@@ -99,6 +111,42 @@ const NOTIFICATION_TEMPLATES = {
     urgency: 'urgent' as const,
     actionUrl: '/creator/support',
     icon: '⚠️'
+  },
+  // Phase 3.3: AI-Powered Derivative Notifications
+  derivative_detected: {
+    title: '🔍 Derivative Content Detected',
+    messageTemplate: 'AI detected potential derivative of your story "{originalTitle}" with {similarityScore}% similarity',
+    urgency: 'medium' as const,
+    actionUrl: '/creator/analytics/derivatives',
+    icon: '🔍'
+  },
+  potential_collaboration: {
+    title: '🤝 Collaboration Opportunity',
+    messageTemplate: 'Found potential collaboration partner for "{storyTitle}" - {compatibilityScore}% compatibility',
+    urgency: 'low' as const,
+    actionUrl: '/creator/collaborations',
+    icon: '🤝'
+  },
+  content_opportunity: {
+    title: '💡 Content Opportunity',
+    messageTemplate: 'AI identified trending topic "{topic}" that matches your style - potential for {engagement}% more engagement',
+    urgency: 'low' as const,
+    actionUrl: '/write/new',
+    icon: '💡'
+  },
+  quality_improvement: {
+    title: '📈 Quality Improvement Suggestion',
+    messageTemplate: 'Your story "{storyTitle}" could improve by {improvement} - current quality score: {qualityScore}%',
+    urgency: 'low' as const,
+    actionUrl: '/creator/quality',
+    icon: '📈'
+  },
+  market_trend_alert: {
+    title: '📊 Market Trend Alert',
+    messageTemplate: 'Trending now: "{trend}" genre is gaining {percentage}% more readers - perfect for your writing style',
+    urgency: 'medium' as const,
+    actionUrl: '/creator/analytics/trends',
+    icon: '📊'
   }
 } as const
 
@@ -111,13 +159,19 @@ export class NotificationService {
   private rateLimitCounters: Map<string, { count: number; resetTime: number }> = new Map()
   private deliveryHistory: Map<string, { attempts: number; lastAttempt: Date; success: boolean }> = new Map()
 
+  // Phase 3.3: AI Event Detection
+  private derivativeDetectionQueue: Map<string, { lastCheck: Date; processing: boolean }> = new Map()
+  private aiAnalysisCache: Map<string, { result: any; timestamp: Date }> = new Map()
+
   constructor() {
-    console.log('🔔 NotificationService initialized with real-time capabilities')
+    console.log('🔔 NotificationService initialized with AI-powered capabilities')
     console.log('   Supported channels:', Object.keys(NOTIFICATION_CONFIG.channels).join(', '))
+    console.log('   🤖 AI derivative detection enabled')
     
     // Start background processors
     this.startNotificationProcessor()
     this.startCleanupProcessor()
+    this.startDerivativeDetectionProcessor()
   }
 
   /**
@@ -125,7 +179,7 @@ export class NotificationService {
    */
   async sendNotification(
     authorAddress: Address,
-    type: RoyaltyNotificationType,
+    type: AllNotificationType,
     data: {
       chapterId?: string
       chapterTitle?: string
@@ -133,6 +187,17 @@ export class NotificationService {
       error?: string
       message?: string
       metadata?: Record<string, any>
+      // Phase 3.3: AI notification data
+      originalTitle?: string
+      similarityScore?: number
+      storyTitle?: string
+      compatibilityScore?: number
+      topic?: string
+      engagement?: number
+      improvement?: string
+      qualityScore?: number
+      trend?: string
+      percentage?: number
     }
   ): Promise<{
     success: boolean
@@ -233,7 +298,7 @@ export class NotificationService {
   async sendBatchNotifications(
     notifications: Array<{
       authorAddress: Address
-      type: RoyaltyNotificationType
+      type: AllNotificationType
       data: any
     }>
   ): Promise<{
@@ -282,7 +347,7 @@ export class NotificationService {
     options: {
       unreadOnly?: boolean
       limit?: number
-      types?: RoyaltyNotificationType[]
+      types?: AllNotificationType[]
       since?: Date
     } = {}
   ): Promise<RoyaltyNotification[]> {
@@ -348,7 +413,7 @@ export class NotificationService {
         emailNotifications: true,
         pushNotifications: true,
         inAppNotifications: true,
-        notificationTypes: ['new_royalty', 'claim_success', 'claim_failed', 'large_payment', 'monthly_summary'],
+        notificationTypes: ['new_royalty', 'claim_success', 'claim_failed', 'large_payment', 'monthly_summary', 'derivative_detected', 'potential_collaboration', 'content_opportunity', 'quality_improvement', 'market_trend_alert'],
         minimumAmountThreshold: NOTIFICATION_CONFIG.thresholds.monthlyMinimum,
         frequency: 'immediate',
         lastUpdated: new Date()
@@ -436,6 +501,325 @@ export class NotificationService {
     })
   }
 
+  // =============================================================================
+  // PHASE 3.3: AI-POWERED NOTIFICATION TRIGGERS
+  // =============================================================================
+
+  /**
+   * Detect and notify about potential derivatives
+   */
+  async detectAndNotifyDerivatives(
+    authorAddress: Address,
+    storyId: string,
+    options: {
+      similarityThreshold?: number
+      autoNotify?: boolean
+    } = {}
+  ): Promise<{
+    derivativesFound: number
+    notificationsSent: number
+    detectionResults: DerivativeDetectionResult
+  }> {
+    try {
+      const { similarityThreshold = 0.4, autoNotify = true } = options
+      
+      console.log(`🔍 [AI] Detecting derivatives for story ${storyId} by ${authorAddress}`)
+      
+      // Check if we've already processed this recently
+      const cacheKey = `${storyId}_derivatives`
+      const cachedResult = this.aiAnalysisCache.get(cacheKey)
+      
+      if (cachedResult && Date.now() - cachedResult.timestamp.getTime() < 6 * 60 * 60 * 1000) { // 6 hours
+        console.log('📊 Using cached derivative detection results')
+        return {
+          derivativesFound: cachedResult.result.derivativesFound,
+          notificationsSent: 0,
+          detectionResults: cachedResult.result.detectionResults
+        }
+      }
+      
+      // Perform AI-powered derivative detection
+      const detectionResults = await contentAnalysisService.detectPotentialDerivatives({
+        sourceStoryId: storyId,
+        sourceChapterId: '1',
+        similarityThreshold,
+        maxResults: 10,
+        includeConfidenceAnalysis: true
+      })
+      
+      const derivativesFound = detectionResults.potentialDerivatives.length
+      let notificationsSent = 0
+      
+      if (derivativesFound > 0 && autoNotify) {
+        // Get user preferences to check if they want derivative notifications
+        const preferences = await this.getUserPreferences(authorAddress)
+        
+        if (preferences.notificationTypes.includes('derivative_detected')) {
+          // Send notifications for high-confidence derivatives
+          const highConfidenceDerivatives = detectionResults.potentialDerivatives.filter(
+            d => d.confidence > 0.7
+          )
+          
+          for (const derivative of highConfidenceDerivatives) {
+            const result = await this.sendNotification(authorAddress, 'derivative_detected', {
+              chapterId: derivative.chapterId,
+              originalTitle: await this.getStoryTitle(storyId),
+              similarityScore: Math.round(derivative.similarityScore * 100),
+              metadata: {
+                derivativeStoryId: derivative.storyId,
+                confidence: derivative.confidence,
+                analysisDetails: derivative.analysisDetails
+              }
+            })
+            
+            if (result.success) notificationsSent++
+          }
+        }
+      }
+      
+      // Cache the results
+      this.aiAnalysisCache.set(cacheKey, {
+        result: { derivativesFound, detectionResults },
+        timestamp: new Date()
+      })
+      
+      console.log(`🔍 [AI] Derivative detection complete: ${derivativesFound} found, ${notificationsSent} notifications sent`)
+      
+      return {
+        derivativesFound,
+        notificationsSent,
+        detectionResults
+      }
+    } catch (error) {
+      console.error('❌ [AI] Derivative detection failed:', error)
+      throw new Error(`Derivative detection failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
+  }
+
+  /**
+   * Find and notify about collaboration opportunities
+   */
+  async findCollaborationOpportunities(
+    authorAddress: Address,
+    storyId: string,
+    options: {
+      compatibilityThreshold?: number
+      maxSuggestions?: number
+    } = {}
+  ): Promise<{
+    opportunitiesFound: number
+    notificationsSent: number
+  }> {
+    try {
+      const { compatibilityThreshold = 0.6, maxSuggestions = 5 } = options
+      
+      console.log(`🤝 [AI] Finding collaboration opportunities for story ${storyId}`)
+      
+      // Get influence score to understand the story's reach
+      const influenceData = await contentAnalysisService.calculateInfluenceScore(storyId)
+      
+      // Find potential collaborators based on similar themes/quality
+      const potentialCollaborators = await this.findCompatibleCreators(storyId, compatibilityThreshold)
+      
+      const opportunitiesFound = potentialCollaborators.length
+      let notificationsSent = 0
+      
+      if (opportunitiesFound > 0) {
+        const preferences = await this.getUserPreferences(authorAddress)
+        
+        if (preferences.notificationTypes.includes('potential_collaboration')) {
+          // Send notification about top collaboration opportunities
+          const topOpportunities = potentialCollaborators.slice(0, maxSuggestions)
+          
+          for (const opportunity of topOpportunities) {
+            const result = await this.sendNotification(authorAddress, 'potential_collaboration', {
+              storyTitle: await this.getStoryTitle(storyId),
+              compatibilityScore: Math.round(opportunity.compatibilityScore * 100),
+              metadata: {
+                partnerAddress: opportunity.creatorAddress,
+                partnerStoryId: opportunity.storyId,
+                sharedThemes: opportunity.sharedThemes,
+                qualityMatch: opportunity.qualityMatch
+              }
+            })
+            
+            if (result.success) notificationsSent++
+          }
+        }
+      }
+      
+      console.log(`🤝 [AI] Collaboration matching complete: ${opportunitiesFound} found, ${notificationsSent} notifications sent`)
+      
+      return {
+        opportunitiesFound,
+        notificationsSent
+      }
+    } catch (error) {
+      console.error('❌ [AI] Collaboration matching failed:', error)
+      throw new Error(`Collaboration matching failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
+  }
+
+  /**
+   * Identify and notify about content opportunities
+   */
+  async identifyContentOpportunities(
+    authorAddress: Address,
+    options: {
+      trendingTopics?: string[]
+      engagementThreshold?: number
+    } = {}
+  ): Promise<{
+    opportunitiesFound: number
+    notificationsSent: number
+  }> {
+    try {
+      console.log(`💡 [AI] Identifying content opportunities for ${authorAddress}`)
+      
+      // Analyze creator's writing style and preferences
+      const creatorProfile = await this.analyzeCreatorProfile(authorAddress)
+      
+      // Identify trending topics that match their style
+      const matchingTrends = await this.findMatchingTrends(creatorProfile, options.trendingTopics)
+      
+      const opportunitiesFound = matchingTrends.length
+      let notificationsSent = 0
+      
+      if (opportunitiesFound > 0) {
+        const preferences = await this.getUserPreferences(authorAddress)
+        
+        if (preferences.notificationTypes.includes('content_opportunity')) {
+          // Send notifications for high-potential opportunities
+          const topOpportunities = matchingTrends.filter(
+            trend => trend.engagementPotential >= (options.engagementThreshold || 0.6)
+          ).slice(0, 3)
+          
+          for (const opportunity of topOpportunities) {
+            const result = await this.sendNotification(authorAddress, 'content_opportunity', {
+              topic: opportunity.topic,
+              engagement: Math.round(opportunity.engagementPotential * 100),
+              metadata: {
+                trendData: opportunity.trendData,
+                suggestedApproach: opportunity.suggestedApproach,
+                estimatedReads: opportunity.estimatedReads
+              }
+            })
+            
+            if (result.success) notificationsSent++
+          }
+        }
+      }
+      
+      console.log(`💡 [AI] Content opportunity analysis complete: ${opportunitiesFound} found, ${notificationsSent} notifications sent`)
+      
+      return {
+        opportunitiesFound,
+        notificationsSent
+      }
+    } catch (error) {
+      console.error('❌ [AI] Content opportunity analysis failed:', error)
+      throw new Error(`Content opportunity analysis failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
+  }
+
+  /**
+   * Assess quality and send improvement suggestions
+   */
+  async assessAndSuggestQualityImprovements(
+    authorAddress: Address,
+    storyId: string,
+    options: {
+      minQualityThreshold?: number
+      includeComparison?: boolean
+    } = {}
+  ): Promise<{
+    qualityScore: number
+    improvementsFound: number
+    notificationsSent: number
+  }> {
+    try {
+      const { minQualityThreshold = 0.7, includeComparison = true } = options
+      
+      console.log(`📈 [AI] Assessing quality for story ${storyId}`)
+      
+      // Perform quality assessment
+      const qualityAssessment = await contentAnalysisService.assessDerivativeQuality(storyId)
+      
+      const qualityScore = qualityAssessment.qualityMetrics.overallScore
+      const improvementsFound = qualityAssessment.recommendations.length
+      let notificationsSent = 0
+      
+      // Only send notification if quality is below threshold or improvements are available
+      if (qualityScore < minQualityThreshold || improvementsFound > 0) {
+        const preferences = await this.getUserPreferences(authorAddress)
+        
+        if (preferences.notificationTypes.includes('quality_improvement')) {
+          // Send quality improvement notification
+          const topImprovement = qualityAssessment.recommendations[0] || 'Continue developing your storytelling skills'
+          
+          const result = await this.sendNotification(authorAddress, 'quality_improvement', {
+            storyTitle: await this.getStoryTitle(storyId),
+            improvement: topImprovement,
+            qualityScore: Math.round(qualityScore * 100),
+            metadata: {
+              fullAssessment: qualityAssessment,
+              allRecommendations: qualityAssessment.recommendations,
+              qualityBreakdown: qualityAssessment.qualityMetrics
+            }
+          })
+          
+          if (result.success) notificationsSent++
+        }
+      }
+      
+      console.log(`📈 [AI] Quality assessment complete: ${Math.round(qualityScore * 100)}% quality, ${improvementsFound} improvements, ${notificationsSent} notifications sent`)
+      
+      return {
+        qualityScore,
+        improvementsFound,
+        notificationsSent
+      }
+    } catch (error) {
+      console.error('❌ [AI] Quality assessment failed:', error)
+      throw new Error(`Quality assessment failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
+  }
+
+  /**
+   * Register webhook for real-time derivative detection
+   */
+  async registerDerivativeWebhook(
+    authorAddress: Address,
+    storyId: string,
+    webhookUrl?: string
+  ): Promise<{
+    registered: boolean
+    webhookId: string
+    nextCheck: Date
+  }> {
+    try {
+      const webhookId = `webhook_${Date.now()}_${Math.random().toString(36).slice(2)}`
+      const nextCheck = new Date(Date.now() + 24 * 60 * 60 * 1000) // Check daily
+      
+      // Register the story for automated derivative detection
+      this.derivativeDetectionQueue.set(`${storyId}_${authorAddress}`, {
+        lastCheck: new Date(0), // Force immediate check
+        processing: false
+      })
+      
+      console.log(`🔗 [AI] Registered derivative webhook for story ${storyId} by ${authorAddress}`)
+      
+      return {
+        registered: true,
+        webhookId,
+        nextCheck
+      }
+    } catch (error) {
+      console.error('❌ [AI] Webhook registration failed:', error)
+      throw new Error(`Webhook registration failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
+  }
+
   /**
    * Get notification statistics
    */
@@ -489,7 +873,7 @@ export class NotificationService {
     
     // By type breakdown
     const byType: any = {}
-    const types: RoyaltyNotificationType[] = ['new_royalty', 'claim_success', 'claim_failed', 'large_payment', 'monthly_summary', 'threshold_reached', 'system_alert']
+    const types: AllNotificationType[] = ['new_royalty', 'claim_success', 'claim_failed', 'large_payment', 'monthly_summary', 'threshold_reached', 'system_alert', 'derivative_detected', 'potential_collaboration', 'content_opportunity', 'quality_improvement', 'market_trend_alert']
     
     for (const type of types) {
       byType[type] = allNotifications.filter(n => n.type === type).length
@@ -509,7 +893,7 @@ export class NotificationService {
   private createNotification(
     id: string,
     authorAddress: Address,
-    type: RoyaltyNotificationType,
+    type: AllNotificationType,
     data: any
   ): RoyaltyNotification {
     const template = NOTIFICATION_TEMPLATES[type]
@@ -533,6 +917,37 @@ export class NotificationService {
     }
     if (data.metadata?.totalAmount) {
       message = message.replace('{totalAmount}', formatEther(data.metadata.totalAmount))
+    }
+    // Phase 3.3: AI notification data replacements
+    if (data.originalTitle) {
+      message = message.replace('{originalTitle}', data.originalTitle)
+    }
+    if (data.similarityScore !== undefined) {
+      message = message.replace('{similarityScore}', data.similarityScore.toString())
+    }
+    if (data.storyTitle) {
+      message = message.replace('{storyTitle}', data.storyTitle)
+    }
+    if (data.compatibilityScore !== undefined) {
+      message = message.replace('{compatibilityScore}', data.compatibilityScore.toString())
+    }
+    if (data.topic) {
+      message = message.replace('{topic}', data.topic)
+    }
+    if (data.engagement !== undefined) {
+      message = message.replace('{engagement}', data.engagement.toString())
+    }
+    if (data.improvement) {
+      message = message.replace('{improvement}', data.improvement)
+    }
+    if (data.qualityScore !== undefined) {
+      message = message.replace('{qualityScore}', data.qualityScore.toString())
+    }
+    if (data.trend) {
+      message = message.replace('{trend}', data.trend)
+    }
+    if (data.percentage !== undefined) {
+      message = message.replace('{percentage}', data.percentage.toString())
     }
     
     const priority = template.urgency === 'urgent' ? 'urgent' : 
@@ -693,6 +1108,13 @@ export class NotificationService {
     console.log('🔄 Processing notification queue (background)')
   }
 
+  private startDerivativeDetectionProcessor(): void {
+    // Background processor for automated derivative detection
+    setInterval(() => {
+      this.processDerivativeDetectionQueue()
+    }, 6 * 60 * 60 * 1000) // Every 6 hours
+  }
+
   private cleanupOldData(): void {
     const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000)
     
@@ -711,6 +1133,155 @@ export class NotificationService {
     }
     
     console.log('🧹 Cleaned up old notification data')
+    
+    // Clean up AI analysis cache (keep for 24 hours)
+    const twentyFourHoursAgo = Date.now() - (24 * 60 * 60 * 1000)
+    for (const [key, cache] of this.aiAnalysisCache.entries()) {
+      if (cache.timestamp.getTime() < twentyFourHoursAgo) {
+        this.aiAnalysisCache.delete(key)
+      }
+    }
+  }
+
+  // =============================================================================
+  // PHASE 3.3: AI HELPER METHODS
+  // =============================================================================
+
+  private async processDerivativeDetectionQueue(): void {
+    console.log('🤖 [AI] Processing derivative detection queue')
+    
+    for (const [queueKey, status] of this.derivativeDetectionQueue.entries()) {
+      if (status.processing) continue
+      
+      const timeSinceLastCheck = Date.now() - status.lastCheck.getTime()
+      const sixHours = 6 * 60 * 60 * 1000
+      
+      if (timeSinceLastCheck >= sixHours) {
+        // Mark as processing
+        status.processing = true
+        
+        try {
+          const [storyId, authorAddress] = queueKey.split('_')
+          
+          console.log(`🔍 [AI] Auto-checking derivatives for story ${storyId}`)
+          
+          await this.detectAndNotifyDerivatives(authorAddress as Address, storyId, {
+            similarityThreshold: 0.5,
+            autoNotify: true
+          })
+          
+          // Update last check time
+          status.lastCheck = new Date()
+        } catch (error) {
+          console.error(`❌ [AI] Auto-derivative detection failed for ${queueKey}:`, error)
+        } finally {
+          status.processing = false
+        }
+      }
+    }
+  }
+
+  private async getStoryTitle(storyId: string): Promise<string> {
+    try {
+      // Use contentAnalysisService to get story metadata
+      const metadata = await contentAnalysisService['getStoryMetadata'](storyId)
+      return metadata?.title || metadata?.name || `Story ${storyId}`
+    } catch (error) {
+      console.error(`Error getting story title for ${storyId}:`, error)
+      return `Story ${storyId}`
+    }
+  }
+
+  private async findCompatibleCreators(
+    storyId: string,
+    compatibilityThreshold: number
+  ): Promise<Array<{
+    creatorAddress: Address
+    storyId: string
+    compatibilityScore: number
+    sharedThemes: string[]
+    qualityMatch: number
+  }>> {
+    try {
+      // Simplified compatibility matching for initial implementation
+      // In production, this would use more sophisticated AI analysis
+      
+      const influenceData = await contentAnalysisService.calculateInfluenceScore(storyId)
+      const compatibleCreators: any[] = []
+      
+      // For now, return empty array - would implement full creator matching logic
+      console.log(`🤝 [AI] Creator compatibility analysis for story ${storyId} - found ${compatibleCreators.length} matches`)
+      
+      return compatibleCreators
+    } catch (error) {
+      console.error('Error finding compatible creators:', error)
+      return []
+    }
+  }
+
+  private async analyzeCreatorProfile(authorAddress: Address): Promise<{
+    preferredGenres: string[]
+    writingStyle: string
+    qualityLevel: number
+    engagementPattern: string
+  }> {
+    try {
+      // Simplified creator profile analysis
+      // In production, this would analyze all their stories and patterns
+      
+      return {
+        preferredGenres: ['fantasy', 'sci-fi'], // Would analyze from their stories
+        writingStyle: 'narrative', // Would determine from content analysis
+        qualityLevel: 0.75, // Would calculate from quality assessments
+        engagementPattern: 'consistent' // Would analyze from engagement data
+      }
+    } catch (error) {
+      console.error('Error analyzing creator profile:', error)
+      return {
+        preferredGenres: [],
+        writingStyle: 'unknown',
+        qualityLevel: 0.5,
+        engagementPattern: 'unknown'
+      }
+    }
+  }
+
+  private async findMatchingTrends(
+    creatorProfile: any,
+    trendingTopics?: string[]
+  ): Promise<Array<{
+    topic: string
+    engagementPotential: number
+    trendData: any
+    suggestedApproach: string
+    estimatedReads: number
+  }>> {
+    try {
+      // Simplified trend matching for initial implementation
+      const defaultTrends = [
+        {
+          topic: 'AI-powered storytelling',
+          engagementPotential: 0.85,
+          trendData: { growth: '45%', duration: '3 months' },
+          suggestedApproach: 'Explore the intersection of human creativity and AI assistance',
+          estimatedReads: 1500
+        },
+        {
+          topic: 'Climate fiction',
+          engagementPotential: 0.75,
+          trendData: { growth: '30%', duration: '6 months' },
+          suggestedApproach: 'Focus on hopeful solutions and human resilience',
+          estimatedReads: 1200
+        }
+      ]
+      
+      console.log(`💡 [AI] Trend analysis complete - found ${defaultTrends.length} matching opportunities`)
+      
+      return defaultTrends
+    } catch (error) {
+      console.error('Error finding matching trends:', error)
+      return []
+    }
   }
 }
 

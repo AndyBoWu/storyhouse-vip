@@ -236,6 +236,213 @@ export const apiClient = {
   async getQualityAssessment(storyId: string): Promise<{ success: boolean; data: QualityAssessment }> {
     return apiRequest(`/api/discovery?type=quality-assessment&storyId=${storyId}`)
   },
+
+  // =============================================================================
+  // PHASE 3.3: NOTIFICATION SYSTEM API METHODS
+  // =============================================================================
+
+  /**
+   * Fetch notifications for a user with optional filtering
+   */
+  async getNotifications(authorAddress: string, options: {
+    unreadOnly?: boolean;
+    limit?: number;
+    types?: string[];
+    since?: Date;
+  } = {}) {
+    const params = new URLSearchParams({
+      authorAddress,
+      ...(options.unreadOnly && { unreadOnly: 'true' }),
+      ...(options.limit && { limit: options.limit.toString() }),
+      ...(options.types && { types: options.types.join(',') }),
+      ...(options.since && { since: options.since.toISOString() })
+    })
+    
+    return apiRequest(`/api/notifications?${params}`)
+  },
+
+  /**
+   * Get notifications for a specific author (alternative endpoint)
+   */
+  async getAuthorNotifications(authorAddress: string, options: {
+    unreadOnly?: boolean;
+    limit?: number;
+    types?: string[];
+    since?: Date;
+  } = {}) {
+    const params = new URLSearchParams({
+      ...(options.unreadOnly && { unreadOnly: 'true' }),
+      ...(options.limit && { limit: options.limit.toString() }),
+      ...(options.types && { types: options.types.join(',') }),
+      ...(options.since && { since: options.since.toISOString() })
+    })
+    
+    return apiRequest(`/api/notifications/${authorAddress}?${params}`)
+  },
+
+  /**
+   * Send a manual notification (for testing or admin purposes)
+   */
+  async sendNotification(data: {
+    authorAddress: string;
+    type: string;
+    data?: Record<string, any>;
+  }) {
+    return apiRequest('/api/notifications', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    })
+  },
+
+  /**
+   * Get notification preferences for a user
+   */
+  async getNotificationPreferences(authorAddress: string) {
+    return apiRequest(`/api/notifications/${authorAddress}/preferences`)
+  },
+
+  /**
+   * Update notification preferences for a user
+   */
+  async updateNotificationPreferences(authorAddress: string, preferences: {
+    emailNotifications?: boolean;
+    pushNotifications?: boolean;
+    inAppNotifications?: boolean;
+    notificationTypes?: string[];
+    minimumAmountThreshold?: string;
+    frequency?: 'immediate' | 'hourly' | 'daily' | 'weekly';
+  }) {
+    return apiRequest(`/api/notifications/${authorAddress}/preferences`, {
+      method: 'PUT',
+      body: JSON.stringify(preferences)
+    })
+  },
+
+  /**
+   * Mark notifications as read
+   */
+  async markNotificationsAsRead(authorAddress: string, notificationIds: string[]) {
+    return apiRequest(`/api/notifications/${authorAddress}/mark-read`, {
+      method: 'PUT',
+      body: JSON.stringify({ notificationIds })
+    })
+  },
+
+  /**
+   * Register webhook for automated derivative detection
+   */
+  async registerNotificationWebhook(data: {
+    authorAddress: string;
+    storyId: string;
+    webhookUrl?: string;
+    eventTypes?: string[];
+  }) {
+    return apiRequest('/api/notifications/webhooks', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    })
+  },
+
+  /**
+   * Get webhook status and statistics
+   */
+  async getNotificationWebhookStats(authorAddress?: string) {
+    const params = authorAddress ? `?authorAddress=${authorAddress}` : ''
+    return apiRequest(`/api/notifications/webhooks${params}`)
+  },
+
+  /**
+   * Trigger derivative detection and notification
+   */
+  async triggerDerivativeDetection(data: {
+    authorAddress: string;
+    storyId: string;
+    similarityThreshold?: number;
+    autoNotify?: boolean;
+  }) {
+    return apiRequest('/api/notifications/derivatives', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    })
+  },
+
+  /**
+   * Get derivative events for a user
+   */
+  async getDerivativeEvents(authorAddress: string, options: {
+    limit?: number;
+    unprocessedOnly?: boolean;
+  } = {}) {
+    const params = new URLSearchParams({
+      authorAddress,
+      ...(options.limit && { limit: options.limit.toString() }),
+      ...(options.unprocessedOnly && { unprocessedOnly: 'true' })
+    })
+    
+    return apiRequest(`/api/notifications/derivatives?${params}`)
+  },
+
+  /**
+   * Trigger content opportunity analysis
+   */
+  async triggerOpportunityAnalysis(data: {
+    authorAddress: string;
+    analysisType: 'collaboration' | 'content' | 'all';
+    storyId?: string;
+    engagementThreshold?: number;
+  }) {
+    return apiRequest('/api/notifications/opportunities', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    })
+  },
+
+  /**
+   * Get opportunity events for a user
+   */
+  async getOpportunityEvents(authorAddress: string, options: {
+    types?: string[];
+    limit?: number;
+  } = {}) {
+    const params = new URLSearchParams({
+      authorAddress,
+      ...(options.types && { types: options.types.join(',') }),
+      ...(options.limit && { limit: options.limit.toString() })
+    })
+    
+    return apiRequest(`/api/notifications/opportunities?${params}`)
+  },
+
+  /**
+   * Trigger quality assessment and improvement suggestions
+   */
+  async triggerQualityAssessment(data: {
+    authorAddress: string;
+    storyId: string;
+    minQualityThreshold?: number;
+    includeComparison?: boolean;
+  }) {
+    return apiRequest('/api/notifications/quality', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    })
+  },
+
+  /**
+   * Get quality events for a user
+   */
+  async getQualityEvents(authorAddress: string, options: {
+    limit?: number;
+    unprocessedOnly?: boolean;
+  } = {}) {
+    const params = new URLSearchParams({
+      authorAddress,
+      ...(options.limit && { limit: options.limit.toString() }),
+      ...(options.unprocessedOnly && { unprocessedOnly: 'true' })
+    })
+    
+    return apiRequest(`/api/notifications/quality?${params}`)
+  },
 }
 
 /**
