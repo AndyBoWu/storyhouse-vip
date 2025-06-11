@@ -151,32 +151,28 @@ Implement Story Protocol SDK enhancements in **5 strategic phases** with increme
 ### **Phase 2: Royalty Distribution System** 🎯 READY TO START
 *Priority: High | Status: 🎯 **Ready for Implementation***
 
-#### 2.1 Royalty Claiming Infrastructure
-- ⏳ **Task**: Implement `claimChapterRoyalties()` method
-- ⏳ **Task**: Add batch royalty claiming functionality
-- ⏳ **Task**: Create royalty calculation utilities
-- ⏳ **Task**: Implement transaction monitoring and retry logic
-- **Files**: New `packages/shared/src/services/royaltyService.ts`
-- **Timeline**: Week 4 (July 2025)
-- **Success Criteria**: Authors can successfully claim royalties from derivatives
+**📋 Detailed Implementation Plan**: See [`phase-2-royalty-distribution-implementation-plan.md`](./phase-2-royalty-distribution-implementation-plan.md) for comprehensive tickets and technical specifications.
 
-#### 2.2 Royalty Dashboard & UI
-- ⏳ **Task**: Create `RoyaltyDashboard` component
-- ⏳ **Task**: Show claimable royalties per chapter
-- ⏳ **Task**: Display royalty history and analytics
-- ⏳ **Task**: Add one-click "claim all" functionality
-- **Files**: `apps/frontend/components/creator/RoyaltyDashboard.tsx`
-- **Timeline**: Week 5 (July 2025)
-- **Success Criteria**: Comprehensive royalty management interface
+#### 2.1 Core Infrastructure (Weeks 1-2)
+- ⏳ **Ticket 2.1.1**: Extend AdvancedStoryProtocolService for royalty operations
+- ⏳ **Ticket 2.1.2**: Create RoyaltyService for business logic and TIP integration
+- ⏳ **Ticket 2.1.3**: Create royalty claiming API endpoints
+- **Key Features**: Individual chapter claiming, real blockchain integration, comprehensive error handling
+- **Success Criteria**: Manual royalty claiming operational with TIP token integration
 
-#### 2.3 Economic Integration
-- ⏳ **Task**: Connect royalties to TIP token rewards system
-- ⏳ **Task**: Implement platform revenue sharing (e.g., 5% platform fee)
-- ⏳ **Task**: Add royalty preview calculations
-- ⏳ **Task**: Create economic modeling for sustainable rates
-- **Files**: `apps/frontend/hooks/useRoyaltyClaiming.ts`
-- **Timeline**: Week 6 (July 2025)
-- **Success Criteria**: Integrated royalty system with existing economics
+#### 2.2 TIP Token Integration (Weeks 3-4)
+- ⏳ **Ticket 2.2.1**: Implement TIP token distribution system
+- ⏳ **Ticket 2.2.2**: Create economic integration with existing TIP system
+- ⏳ **Ticket 2.2.3**: Add royalty preview and calculation tools
+- **Key Features**: Automatic TIP token conversion, platform fee handling, economic modeling
+- **Success Criteria**: Seamless integration with existing TIP token economics
+
+#### 2.3 Notifications & Manual Claiming UI (Weeks 5-6)
+- ⏳ **Ticket 2.3.1**: Implement real-time royalty notifications
+- ⏳ **Ticket 2.3.2**: Create individual chapter claiming interface
+- ⏳ **Ticket 2.3.3**: Add basic royalty analytics dashboard
+- **Key Features**: Real-time notifications, user-friendly claiming UI, performance analytics
+- **Success Criteria**: Complete creator royalty management experience
 
 ### **Phase 3: Derivative & Remix System** (Weeks 7-10)
 *Priority: High | Status: ⏳ Pending*
@@ -324,12 +320,29 @@ Implement Story Protocol SDK enhancements in **5 strategic phases** with increme
 ```
 
 ### Phase 2 Files - READY FOR IMPLEMENTATION 🎯
+**📋 See [Phase 2 Detailed Plan](./phase-2-royalty-distribution-implementation-plan.md) for complete file specifications**
+
 ```
-# Royalty Services (To Be Created)
+# Core Services (2.1)
 ⏳ apps/backend/lib/services/royaltyService.ts
-⏳ apps/frontend/hooks/useRoyaltyClaiming.ts
-⏳ apps/frontend/components/creator/RoyaltyDashboard.tsx
+⏳ apps/backend/lib/services/notificationService.ts
+⏳ apps/backend/lib/utils/royaltyCalculations.ts
+⏳ apps/backend/lib/utils/tipTokenUtils.ts
+
+# API Endpoints (2.1)
+⏳ apps/backend/app/api/royalties/claim/route.ts
+⏳ apps/backend/app/api/royalties/claimable/[chapterId]/route.ts
+⏳ apps/backend/app/api/royalties/history/[authorAddress]/route.ts
+
+# Frontend Components (2.3)
 ⏳ apps/frontend/app/creator/royalties/page.tsx
+⏳ apps/frontend/components/creator/ChapterRoyaltyCard.tsx
+⏳ apps/frontend/components/creator/RoyaltyAnalytics.tsx
+⏳ apps/frontend/hooks/useChapterRoyalties.ts
+
+# Enhanced Type Definitions (2.1-2.2)
+⏳ apps/backend/lib/types/royalty.ts
+⏳ apps/backend/lib/types/economics.ts
 ```
 
 ### Documentation Updates ✅ COMPLETED
@@ -337,6 +350,7 @@ Implement Story Protocol SDK enhancements in **5 strategic phases** with increme
 ✅ docs/plan/sdk-upgrade-and-pil-implementation-plan.md
 ✅ docs/plan/sdk-v1.3.2-breaking-changes-summary.md
 ✅ docs/plan/story-protocol-sdk-enhancement-plan.md
+✅ docs/plan/phase-2-royalty-distribution-implementation-plan.md (NEW)
 ✅ PROGRESS.md
 ✅ README.md (enhanced with PIL system documentation)
 ```
