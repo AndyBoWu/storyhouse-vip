@@ -188,6 +188,30 @@ export const apiClient = {
       body: JSON.stringify(chapterData),
     })
   },
+
+  // Royalty operations
+  async claimRoyalty(data: { chapterId: string; authorAddress: string }) {
+    return apiRequest('/api/royalties/claim', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  },
+
+  async getClaimableRoyalties(chapterId: string) {
+    return apiRequest(`/api/royalties/claimable/${chapterId}`)
+  },
+
+  async getRoyaltyHistory(authorAddress: string) {
+    return apiRequest(`/api/royalties/history/${authorAddress}`)
+  },
+
+  async getRoyaltyPreview() {
+    return apiRequest('/api/royalties/preview')
+  },
+
+  async getRoyaltyNotifications(authorAddress: string) {
+    return apiRequest(`/api/royalties/notifications/${authorAddress}`)
+  },
 }
 
 /**
