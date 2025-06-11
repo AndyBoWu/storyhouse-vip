@@ -4,6 +4,7 @@ import { WagmiProvider } from 'wagmi'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { config } from '@/lib/web3/config'
 import { ReactNode, useMemo } from 'react'
+import NotificationProvider from '@/components/providers/NotificationProvider'
 
 // Create a singleton query client to prevent multiple instances
 let queryClientInstance: QueryClient | null = null
@@ -30,7 +31,9 @@ export default function Web3Provider({ children }: { children: ReactNode }) {
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-        {children}
+        <NotificationProvider>
+          {children}
+        </NotificationProvider>
       </QueryClientProvider>
     </WagmiProvider>
   )
