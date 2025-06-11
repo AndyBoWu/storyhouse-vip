@@ -1,16 +1,16 @@
 # 📚 StoryHouse.vip - Read, Earn, Create, Remix 🚀
 
-Revolutionary Web3 storytelling platform built on Story Protocol enabling chapter-level IP asset management, read-to-earn mechanics, and AI-powered remix creation.
+Revolutionary Web3 storytelling platform built on Story Protocol enabling chapter-level IP asset management, read-to-earn mechanics, and AI-powered remix creation with comprehensive license management.
 
 ## 🌐 Live Deployments
 
 **Testnet:**
-- Frontend: https://testnet.storyhouse.vip/
-- Backend: https://api-testnet.storyhouse.vip/
+- Frontend: https://testnet.storyhouse.vip/ (Vercel)
+- Backend: https://api-testnet.storyhouse.vip/ (Vercel)
 
 **Production:**
-- Frontend: https://storyhouse.vip/
-- Backend: https://api.storyhouse.vip/
+- Frontend: https://storyhouse.vip/ (Vercel)
+- Backend: https://api.storyhouse.vip/ (Vercel)
 
 ## 🎯 What Makes StoryHouse Different
 
@@ -27,12 +27,16 @@ Readers earn $TIP tokens for reading the first 3 chapters, then pay to unlock pr
 Authors can remix existing chapters with AI assistance and automated licensing.
 
 ### 3-Tier Programmable IP License System
-StoryHouse implements sophisticated on-chain licensing through Story Protocol:
-- **Standard License ($100)**: 5% royalty, non-exclusive commercial use
-- **Premium License ($500)**: 10% royalty, enhanced commercial rights
-- **Exclusive License ($2,000)**: 20% royalty, exclusive adaptation rights
+StoryHouse implements sophisticated on-chain licensing through Story Protocol with comprehensive UI management:
+- **Free License (0 TIP)**: Attribution required, non-commercial use, audience building
+- **Premium License (0.1 TIP)**: 25% royalty, commercial use permitted, derivatives allowed
+- **Exclusive License (0.5 TIP)**: 15% royalty, full commercial rights, exclusive licensing
 
-[Learn more about our licensing system →](./docs/technical/LICENSING_SYSTEM.md)
+**New License Management System:**
+- Interactive license display components with pricing calculators
+- Revenue projections and read-to-earn economics
+- Detailed permissions and rights comparison tables
+- Chapter-based strategy (free chapters 1-3, monetized 4+)
 
 ## 🔗 Smart Contract Addresses
 
@@ -49,17 +53,19 @@ StoryHouse implements sophisticated on-chain licensing through Story Protocol:
 
 ## 🏗️ Architecture
 
-### Vercel-Only Hosting
+### Dual Vercel Deployment Architecture
 ```
-┌─────────────────┐    ┌─────────────────┐
-│  Frontend       │    │  Backend        │
-│  (Vercel)       │◄──►│  (Vercel)       │
-│  Next.js App    │    │  API Routes     │
-└─────────────────┘    └─────────────────┘
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│  Frontend       │    │  Backend        │    │  License        │
+│  (Vercel)       │◄──►│  (Vercel)       │◄──►│  Management     │
+│  Next.js App    │    │  API Routes     │    │  System         │
+│  + License UI   │    │  + Story Proto  │    │  (React)        │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
-**Frontend:** Next.js app with React components, Web3 integration
+**Frontend:** Next.js app with React components, Web3 integration, comprehensive license UI
 **Backend:** Next.js API routes with Story Protocol SDK, AI integration, R2 storage
+**License System:** Interactive components for license management, pricing, and permissions
 
 ## 🚀 Quick Start
 
@@ -69,41 +75,57 @@ git clone https://github.com/AndyBoWu/storyhouse-vip.git
 cd storyhouse-vip
 npm install
 
-# Start development
+# Start development (from separate terminals)
 cd apps/frontend && npm run dev  # Frontend on port 3001
 cd apps/backend && npm run dev   # Backend on port 3002
+
+# Build for production
+cd apps/frontend && npm run build  # Static export for Vercel
+cd apps/backend && npm run build   # API build for Vercel
 ```
 
 ## 📊 Tech Stack
 
-| Layer | Technology | Version |
-|-------|------------|---------|
-| Frontend | Next.js | 15.3.3 |
-| Language | TypeScript | 5.8.3 |
-| Styling | Tailwind CSS | 3.4.17 |
-| Blockchain | Story Protocol SDK | 1.3.1 |
-| AI | OpenAI GPT-4 | Latest |
-| Storage | Cloudflare R2 | - |
-| Hosting | Vercel | - |
+| Layer | Technology | Version | Notes |
+|-------|------------|---------|-------|
+| Frontend | Next.js | 15.3.3 | Static export + React components |
+| Backend | Next.js API | 15.3.3 | API routes + Story Protocol |
+| Language | TypeScript | 5.8.3 | Full type safety |
+| Styling | Tailwind CSS | 3.4.17 | + Framer Motion animations |
+| Blockchain | Story Protocol SDK | 1.3.1 | IP asset management |
+| AI | OpenAI GPT-4 | Latest | Story generation + AI features |
+| Storage | Cloudflare R2 | - | Global CDN + content storage |
+| Hosting | Vercel | - | Dual deployment architecture |
+| License UI | React Components | Custom | Interactive license management |
 
 ## 📚 Documentation
 
-- [Development Setup](./docs/setup/DEVELOPMENT.md)
-- [API Documentation](./docs/technical/API.md)
-- [Smart Contracts](./docs/technical/CONTRACTS.md)
-- [Deployment Guide](./docs/project/DEPLOYMENT.md)
+- [Development Setup](./docs/setup/DEVELOPMENT.md) - Environment setup and local development
+- [API Documentation](./docs/technical/API.md) - Backend API endpoints and usage
+- [Smart Contracts](./docs/technical/CONTRACTS.md) - Blockchain contracts and deployment
+- [License System](./docs/technical/LICENSE_COMPONENTS.md) - License UI components and usage
+- [Deployment Guide](./docs/project/DEPLOYMENT.md) - Production deployment on Vercel
 
 ## 🎮 User Journeys
 
-**Writers:** Create content with AI → Register chapter IP → Earn from sales & licensing
-**Readers:** Browse stories → Read 3 chapters FREE → Pay to unlock premium chapters
-**Remixers:** Find content → Purchase license → Create derivatives → Earn revenue
+**Writers:** Create content with AI → Choose license tier → Register chapter IP → Earn from sales & licensing
+**Readers:** Browse stories → Read 3 chapters FREE → Pay to unlock premium chapters → Earn TIP tokens
+**Remixers:** Find content → View license options → Purchase appropriate license → Create derivatives → Earn revenue
+
+## ✨ Recent Achievements
+
+- ✅ **License Management System** - Complete UI for license display, pricing, and permissions
+- ✅ **Dual Vercel Architecture** - Professional frontend/backend separation with custom domains
+- ✅ **Story Protocol Integration** - Full blockchain IP asset registration and management
+- ✅ **Read-to-Earn Economics** - TIP token rewards and creator revenue sharing
+- ✅ **AI Story Generation** - GPT-4 powered content creation with metadata tracking
+- ✅ **Chapter-Based Strategy** - Free chapters 1-3, monetized chapters 4+ with license management
 
 ## 🔮 Roadmap
 
-- **Phase 4:** Database integration, user authentication
-- **Phase 5:** Multi-chain support, mobile app
-- **Phase 6:** Enterprise features, global scaling
+- **Phase 6:** Story marketplace and discovery features
+- **Phase 7:** Multi-chain support and mobile app
+- **Phase 8:** Enterprise features and global scaling
 
 ---
 
