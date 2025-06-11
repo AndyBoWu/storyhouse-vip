@@ -227,6 +227,9 @@ export interface EnhancedGeneratedStory {
   qualityScore: number    // 0-100
   originalityScore: number // 0-100
   commercialViability: number // 0-100
+  
+  // License information
+  licenseTier?: 'standard' | 'premium' | 'exclusive'
 }
 
 // ===== BOOK SYSTEM TYPES =====

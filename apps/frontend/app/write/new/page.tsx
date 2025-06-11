@@ -18,6 +18,8 @@ const WalletConnect = dynamic(() => import('@/components/WalletConnect'), {
 
 // Import enhanced components (only used in advanced mode)
 import IPRegistrationSection from '../../../components/creator/IPRegistrationSection'
+import LicenseSelector from '../../../components/licensing/LicenseSelector'
+import type { LicenseTemplate } from '../../../components/licensing/LicenseSelector'
 import CollectionSection from '../../../components/creator/CollectionSection'
 import IPStatusIndicator from '../../../components/creator/IPStatusIndicator'
 import StoryContentDisplay from '../../../components/ui/StoryContentDisplay'
@@ -72,6 +74,7 @@ function NewStoryPageContent() {
     derivativeRights: true
   })
   const [collectionOptions, setCollectionOptions] = useState<Partial<EnhancedStoryCreationParams>>({})
+  const [selectedLicenseTemplate, setSelectedLicenseTemplate] = useState<LicenseTemplate | null>(null)
 
   const genres = ['Mystery', 'Romance', 'Sci-Fi', 'Fantasy', 'Horror', 'Comedy', 'Adventure', 'Drama']
   const moods = ['Dark & Gritty', 'Light & Whimsical', 'Epic Adventure', 'Romantic', 'Suspenseful', 'Humorous']
@@ -83,6 +86,16 @@ function NewStoryPageContent() {
     } else {
       setSelection([...currentSelection, item])
     }
+  }
+
+  const handleLicenseSelect = (licenseId: string, template: LicenseTemplate) => {
+    setSelectedLicenseTemplate(template)
+    setIPOptions({
+      ...ipOptions,
+      licenseType: licenseId as 'standard' | 'premium' | 'exclusive',
+      commercialRights: template.terms.commercialUse,
+      derivativeRights: template.terms.derivativesAllowed
+    })
   }
 
   // Book cover upload functions
@@ -236,7 +249,7 @@ function NewStoryPageContent() {
         formData.append('contentRating', 'G') // Default rating
         // Use selected license configuration
         const licenseConfig = {
-          commercialUse: ipOptions.licenseType !== 'free',
+          commercialUse: ipOptions.licenseType !== 'standard',
           derivativesAllowed: true,
           commercialRevShare: ipOptions.licenseType === 'exclusive' ? 25 : 
                               ipOptions.licenseType === 'premium' ? 10 : 0,
@@ -592,53 +605,46 @@ function NewStoryPageContent() {
                 exit={{ opacity: 0, height: 0 }}
                 className="mt-6 space-y-4"
               >
-                {/* License Selection */}
+                {/* Enhanced PIL License Selection */}
                 <div className="bg-white rounded-xl shadow-lg p-6">
-                  <h4 className="font-medium text-gray-800 mb-4">🏷️ License Configuration</h4>
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="radio"
-                        name="licenseType"
-                        value="free"
-                        checked={ipOptions.licenseType === 'free'}
-                        onChange={(e) => setIPOptions({...ipOptions, licenseType: e.target.value as 'standard' | 'premium' | 'exclusive'})}
-                        className="text-green-600"
-                      />
-                      <div className="flex-1">
-                        <span className="font-medium text-green-700">Free License</span>
-                        <p className="text-sm text-green-600">Open access with attribution. Great for building audience.</p>
+                  <LicenseSelector
+                    selectedLicense={ipOptions.licenseType || 'standard'}
+                    onLicenseSelect={handleLicenseSelect}
+                    onCustomLicense={() => {
+                      // TODO: Implement custom license modal
+                      console.log('Custom license creation - coming soon!')
+                    }}
+                  />
+                  
+                  {selectedLicenseTemplate && (
+                    <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                      <h5 className="text-sm font-medium text-gray-800 mb-2">Selected License Summary</h5>
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <span className="text-gray-600">Price:</span>
+                          <span className="ml-2 font-medium">{selectedLicenseTemplate.price} {selectedLicenseTemplate.currency}</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-600">Commercial Use:</span>
+                          <span className={`ml-2 font-medium ${selectedLicenseTemplate.terms.commercialUse ? 'text-green-600' : 'text-red-600'}`}>
+                            {selectedLicenseTemplate.terms.commercialUse ? 'Allowed' : 'Not Allowed'}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-gray-600">Derivatives:</span>
+                          <span className={`ml-2 font-medium ${selectedLicenseTemplate.terms.derivativesAllowed ? 'text-green-600' : 'text-red-600'}`}>
+                            {selectedLicenseTemplate.terms.derivativesAllowed ? 'Allowed' : 'Not Allowed'}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-gray-600">Revenue Share:</span>
+                          <span className="ml-2 font-medium text-purple-600">
+                            {selectedLicenseTemplate.terms.commercialRevShare}%
+                          </span>
+                        </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="radio"
-                        name="licenseType"
-                        value="premium"
-                        checked={ipOptions.licenseType === 'premium' || ipOptions.licenseType === 'standard'}
-                        onChange={(e) => setIPOptions({...ipOptions, licenseType: 'premium'})}
-                        className="text-blue-600"
-                      />
-                      <div className="flex-1">
-                        <span className="font-medium text-blue-700">Premium License</span>
-                        <p className="text-sm text-blue-600">Commercial use allowed, 100 TIP license fee, 10% royalty</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="radio"
-                        name="licenseType"
-                        value="exclusive"
-                        checked={ipOptions.licenseType === 'exclusive'}
-                        onChange={(e) => setIPOptions({...ipOptions, licenseType: e.target.value as 'standard' | 'premium' | 'exclusive'})}
-                        className="text-purple-600"
-                      />
-                      <div className="flex-1">
-                        <span className="font-medium text-purple-700">Exclusive License</span>
-                        <p className="text-sm text-purple-600">Full commercial rights, 1000 TIP license fee, 25% royalty</p>
-                      </div>
-                    </div>
-                  </div>
+                  )}
                 </div>
 
                 <div className="bg-blue-50 rounded-lg p-4">
