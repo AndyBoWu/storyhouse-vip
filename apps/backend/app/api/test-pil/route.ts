@@ -5,10 +5,21 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 
+// Add BigInt serialization support
+declare global {
+  interface BigInt {
+    toJSON(): string;
+  }
+}
+
+BigInt.prototype.toJSON = function() {
+  return this.toString();
+};
+
 export async function GET(request: NextRequest) {
   try {
-    // Import the enhanced service
-    const { AdvancedStoryProtocolService, LICENSE_TIERS } = await import('@storyhouse/shared')
+    // Import the enhanced service from local copy
+    const { AdvancedStoryProtocolService, LICENSE_TIERS } = await import('../../../lib/services/advancedStoryProtocolService')
     
     // Test service instantiation
     const service = new AdvancedStoryProtocolService()

@@ -34,6 +34,7 @@ interface GeneratedStory {
     isRemixable: boolean
     status: 'draft'
     generatedAt: string
+    licenseTier?: 'standard' | 'premium' | 'exclusive'
   }
 }
 
