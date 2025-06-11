@@ -1,45 +1,34 @@
-# 📚 StoryHouse.vip Documentation
+# StoryHouse.vip Documentation
 
-Complete documentation for the revolutionary Web3 storytelling platform.
+## Quick Navigation
 
-## 🚀 Quick Start
+### Core Documentation
+- [**Technical Architecture**](./TECHNICAL_ARCHITECTURE.md) - System design and technology stack
+- [**API Reference**](./API_REFERENCE.md) - Complete API documentation  
+- [**Development Guide**](./DEVELOPMENT_GUIDE.md) - Setup and development workflow
+- [**Testing Strategy**](./TESTING_STRATEGY.md) - Testing approach and tools
 
-- **[Development Guide](./DEVELOPMENT_GUIDE.md)** - Complete setup and development workflow
-- **[Deployment Guide](./project/DEPLOYMENT.md)** - Deploy to production
+### Implementation Plans
+- [**Story Protocol SDK Enhancement Plan**](./plan/story-protocol-sdk-enhancement-plan.md) - 16-week roadmap for advanced features
+- [**SDK v1.3.2 Breaking Changes**](./plan/sdk-v1.3.2-breaking-changes-summary.md) - Migration guide and fixes
+- [**PIL Implementation Plan**](./plan/sdk-upgrade-and-pil-implementation-plan.md) - Complete licensing system implementation
 
-## 📋 Core Documentation
+### Technical Deep Dives
+- [**Story Protocol Integration**](./technical/STORY_PROTOCOL_INTEGRATION.md) - Blockchain IP asset management
+- [**Licensing System**](./technical/LICENSING_SYSTEM.md) - PIL licensing architecture
+- [**License Components**](./technical/LICENSE_COMPONENTS.md) - UI component documentation
 
-- **[Technical Architecture](./TECHNICAL_ARCHITECTURE.md)** - Complete technical overview
-- **[API Reference](./API_REFERENCE.md)** - Complete API documentation
-- **[Project Overview](./project/OVERVIEW.md)** - Vision and core innovation
-- **[Roadmap](./project/ROADMAP.md)** - Development phases and milestones
+### Project Management
+- [**Deployment Guide**](./project/DEPLOYMENT.md) - Production deployment on Vercel
+- [**Project Overview**](./project/OVERVIEW.md) - High-level project structure
 
-## 🎨 Product Documentation
+## Current Status
 
-- **[Specification](./product/SPECIFICATION.md)** - Feature requirements
-- **[Design](./product/DESIGN.md)** - User experience wireframes
-- **[User Journeys](./product/TEST_USER_JOURNEYS.md)** - Testing scenarios
-- **[Branching Model](./product/USER_SCENARIO_BRANCHING_MODEL.md)** - Collaborative storytelling
+**Phase 5.3 Complete** - Full PIL licensing system operational with Story Protocol SDK v1.3.2 integration.
 
-## 💰 Tokenomics
+## Next Steps
 
-- **[Overview](./tokenomics/README.md)** - Token economics and distribution
-- **[Developer Guide](./tokenomics/TIP_TOKEN_DEVELOPER_GUIDE.md)** - Technical implementation
-- **[Whitepaper](./tokenomics/TOKENOMICS_WHITEPAPER.md)** - Complete economic model
-
-## 🔧 Specialized Resources
-
-- **[Contracts & Diagrams](./contracts-diagrams/)** - Technical diagrams and contract specs
-- **[Story Protocol Integration](./technical/STORY_PROTOCOL_INTEGRATION.md)** - Current blockchain integration
-
-## 📋 Implementation Plans
-
-- **[Story Protocol SDK Enhancement Plan](./plan/story-protocol-sdk-enhancement-plan.md)** - Comprehensive enhancement strategy
-
-## 📦 Archive
-
-- **[Archived Files](./archive/)** - Previous versions and legacy documentation
-
----
-
-**Need help?** Check the relevant documentation section above or explore the live platform at [https://testnet.storyhouse.vip/](https://testnet.storyhouse.vip/)
+Refer to the [Story Protocol SDK Enhancement Plan](./plan/story-protocol-sdk-enhancement-plan.md) for upcoming features:
+- Phase 6: Royalty distribution system
+- Phase 7: Derivative & remix features  
+- Phase 8: Group IP collections

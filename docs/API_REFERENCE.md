@@ -1,13 +1,10 @@
-# 🔧 API Reference
+# API Reference
 
-Comprehensive API documentation for StoryHouse.vip's Web3 storytelling platform.
+## Overview
 
-## 🌟 Overview
-
-StoryHouse.vip provides a RESTful API for creating, managing, and licensing IP assets on the blockchain. Features enhanced metadata system, user attribution, and real Story Protocol integration.
+StoryHouse.vip provides a RESTful API for creating, managing, and licensing IP assets with PIL (Programmable IP License) support.
 
 ### Base URLs
-
 ```
 Production: https://api.storyhouse.vip/api
 Testnet: https://api-testnet.storyhouse.vip/api  
@@ -15,23 +12,94 @@ Development: http://localhost:3002/api
 ```
 
 ### Authentication
-
-Currently using session-based authentication. API keys coming in future versions.
+Session-based authentication with Web3 wallet integration.
 
 ---
 
-## 📚 Stories & Books API
+## PIL Licensing API
+
+### Get License Templates
+
+Retrieve available PIL license templates.
+
+```http
+GET /api/licenses/templates
+```
+
+**Query Parameters:**
+- `id` (optional): Get specific template by ID
+- `category` (optional): Filter by category (open, commercial, exclusive)
+
+**Response:**
+```json
+{
+  "success": true,
+  "templates": [
+    {
+      "id": "standard",
+      "name": "Standard License",
+      "displayName": "Free License",
+      "description": "Open access with attribution required",
+      "price": 0,
+      "currency": "TIP",
+      "terms": {
+        "commercialUse": false,
+        "derivativesAllowed": true,
+        "attribution": true,
+        "commercialRevShare": 0
+      },
+      "royaltyPolicy": {
+        "type": "LAP",
+        "percentage": 0
+      }
+    }
+  ]
+}
+```
+
+### Attach License to IP Asset
+
+Attach a PIL license to an existing IP asset.
+
+```http
+POST /api/ip/license/attach
+```
+
+**Request Body:**
+```json
+{
+  "ipAssetId": "0x1234567890abcdef",
+  "licenseTemplateId": "premium",
+  "walletAddress": "0x9876543210fedcba",
+  "chainId": 1315
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "PIL license attached successfully",
+  "data": {
+    "licenseTermsId": "lt_1234567890_abcdef123",
+    "ipAssetId": "0x1234567890abcdef",
+    "transactionHash": "0xabc123...",
+    "effectiveDate": "2025-06-11T15:15:22.579Z"
+  }
+}
+```
+
+---
+
+## Stories & Content API
 
 ### Get All Stories
 
-Fetch all published stories from R2 storage with enhanced metadata.
+Fetch published stories from R2 storage.
 
 ```http
 GET /api/stories
 ```
-
-**Query Parameters:**
-- `cache` (optional): Set to "false" to bypass cache and force refresh
 
 **Response:**
 ```json
@@ -40,38 +108,19 @@ GET /api/stories
   "stories": [
     {
       "id": "story_1703123456",
-      "title": "The Shadowbrook Mysteries",
+      "title": "The Detective's Portal",
       "genre": "Mystery",
       "chapters": 3,
-      "lastUpdated": "2 hours ago",
-      "earnings": 0,
-      "preview": "Detective Sarah Chen never believed in magic...",
-      "contentUrl": "https://r2-endpoint/stories/story_1703123456/chapters/1.json",
       "authorAddress": "0x1234567890123456789012345678901234567890",
-      "authorName": "0x1234...7890",
-      "contentRating": "PG-13",
-      "unlockPrice": 0.1,
-      "readReward": 0.05,
-      "licensePrice": 100,
-      "isRemixable": true,
-      "totalReads": 0,
-      "wordCount": 1987,
-      "readingTime": 8,
-      "mood": "mysterious",
-      "tags": ["mystery", "fantasy", "urban"],
-      "qualityScore": 87,
-      "originalityScore": 94,
-      "isRemix": false,
-      "generationMethod": "ai"
+      "contentUrl": "https://r2-endpoint/stories/story_1703123456.json"
     }
-  ],
-  "count": 1
+  ]
 }
 ```
 
 ### Get Books
 
-Fetch all books (hierarchical IP structure).
+Retrieve book metadata with enhanced information.
 
 ```http
 GET /api/books
@@ -85,133 +134,74 @@ GET /api/books
     {
       "bookId": "0x1234-detective-portal",
       "title": "The Detective's Portal",
-      "description": "A mystery that spans dimensions",
       "authorAddress": "0x1234567890123456789012345678901234567890",
-      "authorName": "Andy",
-      "slug": "detective-portal",
-      "coverUrl": "https://r2-endpoint/books/0x1234-detective-portal/cover.jpg",
-      "ipAssetId": "0xabc...",
-      "licenseTermsId": "123",
-      "chapters": 6,
-      "derivativeBooks": ["0x5678-detective-portal-sf"],
-      "chapterMap": {
-        "ch1": "0x1234-detective-portal/chapters/ch1",
-        "ch2": "0x1234-detective-portal/chapters/ch2",
-        "ch3": "0x1234-detective-portal/chapters/ch3"
-      },
-      "originalAuthors": {
-        "0x1234567890123456789012345678901234567890": {
-          "chapters": ["ch1", "ch2", "ch3"],
-          "revenueShare": 60
-        }
+      "authorName": "Alice",
+      "totalChapters": 5,
+      "publishedChapters": 3,
+      "ipAssetId": "0xabcdef1234567890",
+      "licenseInfo": {
+        "templateId": "premium",
+        "commercialUse": true,
+        "royaltyPercentage": 10
       }
     }
   ]
 }
 ```
 
-### Register Book
+---
 
-Register a new book as a parent IP asset.
+## Chapter Management API
+
+### Get Chapter Info
+
+Retrieve detailed chapter information.
 
 ```http
-POST /api/books/register
-```
-
-**Request Body:**
-```json
-{
-  "title": "My Epic Story",
-  "description": "An adventure across time and space",
-  "authorAddress": "0x1234567890123456789012345678901234567890",
-  "authorName": "Author Name",
-  "coverFile": "base64_encoded_image_data",
-  "licenseTerms": {
-    "commercialUse": true,
-    "derivativesAllowed": true,
-    "royaltyPercentage": 10
-  }
-}
+GET /api/books/[bookId]/chapter/[chapterNumber]/info
 ```
 
 **Response:**
 ```json
 {
   "success": true,
-  "book": {
-    "bookId": "0x1234-my-epic-story",
-    "ipAssetId": "0xabc123...",
-    "transactionHash": "0xdef456...",
-    "coverUrl": "https://r2-endpoint/books/0x1234-my-epic-story/cover.jpg"
-  }
-}
-```
-
-### Create Derivative Book
-
-Branch from an existing book to create a derivative.
-
-```http
-POST /api/books/branch
-```
-
-**Request Body:**
-```json
-{
-  "parentBookId": "0x1234-detective-portal",
-  "branchPoint": "ch3",
-  "title": "Detective Portal: Sci-Fi Adventure", 
-  "description": "Taking the story in a sci-fi direction",
-  "authorAddress": "0x5678901234567890123456789012345678901234",
-  "authorName": "Boris",
-  "coverFile": "base64_encoded_image_data"
-}
-```
-
-### Get Book Details
-
-Fetch complete book metadata and chapter information.
-
-```http
-GET /api/books/{bookId}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "book": {
+  "chapter": {
     "bookId": "0x1234-detective-portal",
-    "title": "The Detective's Portal",
-    "chapters": [
-      {
-        "chapterNumber": 1,
-        "title": "The Beginning",
-        "summary": "Detective Sarah Chen discovers the portal",
-        "wordCount": 2450,
-        "readingTime": 10,
-        "unlockPrice": 0,
-        "readReward": 0.05,
-        "isUnlocked": true,
-        "contentUrl": "https://r2-endpoint/.../ch1.json"
-      }
-    ],
-    "totalChapters": 6,
-    "familyTree": {
-      "parent": null,
-      "derivatives": ["0x5678-detective-portal-sf"]
-    }
+    "chapterNumber": 1,
+    "title": "The Discovery",
+    "wordCount": 2500,
+    "readingTime": 10,
+    "unlockPrice": 0,
+    "readReward": 5,
+    "ipAssetId": "0xchapter123...",
+    "licenseAttached": true
   }
+}
+```
+
+### Unlock Chapter
+
+Purchase access to a premium chapter.
+
+```http
+POST /api/books/[bookId]/chapter/[chapterNumber]/unlock
+```
+
+**Request Body:**
+```json
+{
+  "userAddress": "0x9876543210fedcba",
+  "paymentMethod": "TIP"
 }
 ```
 
 ---
 
-## 🤖 AI Generation API
+## Story Generation API
 
-### Generate Story
+### Generate Story Content
 
-Create AI-generated content with automatic R2 storage and optional IP registration.
+Create AI-powered story content with PIL metadata.
 
 ```http
 POST /api/generate
@@ -220,17 +210,10 @@ POST /api/generate
 **Request Body:**
 ```json
 {
-  "plotDescription": "A detective discovers a portal to another dimension",
-  "genres": ["mystery", "sci-fi"],
-  "moods": ["mysterious", "exciting"],
-  "emojis": ["🕵️", "🌀", "🔍"],
-  "chapterNumber": 1,
-  "previousContent": "",
-  "storyTitle": "The Portal Detective",
-  "authorAddress": "0x1234567890123456789012345678901234567890",
-  "ipOptions": {
-    "registerAsIP": true
-  }
+  "prompt": "A detective discovers a hidden portal",
+  "genre": "Mystery",
+  "mood": "Suspenseful",
+  "licensePreference": "premium"
 }
 ```
 
@@ -238,346 +221,115 @@ POST /api/generate
 ```json
 {
   "success": true,
+  "story": {
+    "title": "The Portal Detective",
+    "content": "Detective Sarah Chen never believed in magic...",
+    "metadata": {
+      "wordCount": 1500,
+      "readingTime": 6,
+      "qualityScore": 85,
+      "licenseTier": "premium"
+    }
+  }
+}
+```
+
+---
+
+## Utility APIs
+
+### Test PIL Integration
+
+Test Story Protocol SDK v1.3.2 compatibility.
+
+```http
+GET /api/test-pil
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "PIL Integration Test Successful!",
   "data": {
-    "title": "Chapter 1: The Discovery",
-    "content": "Detective Sarah Chen had seen many strange cases...",
-    "storyId": "story_1703123456",
-    "chapterNumber": 1,
-    "contentUrl": "https://r2-endpoint/stories/story_1703123456/chapters/1.json",
-    "metadata": {
-      "suggestedTags": ["mystery", "portal", "discovery"],
-      "suggestedGenre": "Mystery Sci-Fi",
-      "contentRating": "PG-13",
-      "qualityScore": 87,
-      "originalityScore": 94,
-      "commercialViability": 76,
-      "generatedAt": "2024-12-21T10:30:00Z"
-    }
-  },
-  "ipData": {
-    "operationId": "gen-1703123456-abc123",
-    "transactionHash": "0xdef456...",
-    "ipAssetId": "0xabc789...",
-    "gasUsed": "245000"
-  },
-  "message": "Story generated, saved to storage, and registered as IP asset!"
-}
-```
-
----
-
-## 📖 Chapter Management API
-
-### Get Chapter Count
-
-Get the current number of chapters for a story (used for automatic numbering).
-
-```http
-GET /api/books/{bookId}/chapters
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "count": 3,
-  "nextChapterNumber": 4,
-  "chapters": [
-    {
-      "chapterNumber": 1,
-      "title": "The Beginning",
-      "wordCount": 2450,
-      "readingTime": 10,
-      "unlockPrice": 0,
-      "readReward": 0.05,
-      "isUnlocked": true
-    }
-  ]
-}
-```
-
-### Save Chapter
-
-Save a new chapter to a book.
-
-```http
-POST /api/books/{bookId}/chapters/save
-```
-
-**Request Body:**
-```json
-{
-  "chapterNumber": 4,
-  "title": "The New Discovery",
-  "content": "Chapter content here...",
-  "authorAddress": "0x1234567890123456789012345678901234567890",
-  "metadata": {
-    "genre": ["mystery", "sci-fi"],
-    "mood": "exciting",
-    "contentRating": "PG-13"
-  }
-}
-```
-
-### Get Chapter Content
-
-Retrieve a specific chapter's content.
-
-```http
-GET /api/books/{bookId}/chapter/{chapterNumber}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "chapter": {
-    "chapterNumber": 1,
-    "title": "The Beginning",
-    "content": "Full chapter content...",
-    "wordCount": 2450,
-    "readingTime": 10,
-    "unlockPrice": 0,
-    "readReward": 0.05,
-    "metadata": {
-      "authorAddress": "0x1234567890123456789012345678901234567890",
-      "createdAt": "2024-12-21T10:30:00Z",
-      "genre": ["mystery"],
-      "mood": "mysterious"
+    "serviceStatus": {
+      "initialized": false,
+      "chainId": 1315,
+      "availableTiers": ["standard", "premium", "exclusive"]
     }
   }
 }
-```
-
-### Unlock Chapter
-
-Unlock premium chapter content (paid content).
-
-```http
-POST /api/books/{bookId}/chapter/{chapterNumber}/unlock
-```
-
-**Request Body:**
-```json
-{
-  "userAddress": "0x9876543210987654321098765432109876543210",
-  "paymentProof": "transaction_hash_or_signature"
-}
-```
-
----
-
-## 🔗 Story Protocol IP Management
-
-### Register IP Asset
-
-Register content as an IP asset on Story Protocol.
-
-```http
-POST /api/ip/register
-```
-
-**Request Body:**
-```json
-{
-  "contentType": "chapter", // or "book"
-  "title": "Chapter 1: The Beginning",
-  "description": "First chapter of an epic story",
-  "contentUrl": "https://r2-endpoint/stories/123/chapters/1.json",
-  "authorAddress": "0x1234567890123456789012345678901234567890",
-  "metadata": {
-    "genre": ["fantasy"],
-    "wordCount": 2450,
-    "qualityScore": 87
-  }
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "ipAssetId": "0xabc123...",
-  "tokenId": "456",
-  "transactionHash": "0xdef789...",
-  "gasUsed": "245000",
-  "blockNumber": "12345678"
-}
-```
-
-### Create License Terms
-
-Create licensing terms for IP assets.
-
-```http
-POST /api/ip/license
-```
-
-**Request Body:**
-```json
-{
-  "ipAssetId": "0xabc123...",
-  "licenseType": "standard", // standard, premium, exclusive
-  "terms": {
-    "commercialUse": true,
-    "derivativesAllowed": true,
-    "royaltyPercentage": 10,
-    "price": "100000000000000000000" // 100 TIP tokens in wei
-  }
-}
-```
-
----
-
-## 📊 Collections & Discovery
-
-### Get Collections
-
-Fetch curated story collections.
-
-```http
-GET /api/collections
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "collections": [
-    {
-      "id": "trending",
-      "title": "Trending Stories",
-      "description": "Most popular stories this week",
-      "stories": [
-        {
-          "id": "story_123",
-          "title": "The Portal Detective",
-          "preview": "A detective discovers...",
-          "metrics": {
-            "reads": 1250,
-            "rating": 4.8,
-            "earnings": 450.75
-          }
-        }
-      ]
-    }
-  ]
-}
-```
-
-### Get Discovery Feed
-
-Get personalized story recommendations.
-
-```http
-GET /api/discovery
-```
-
-**Query Parameters:**
-- `userAddress` (optional): User wallet address for personalization
-- `genre` (optional): Filter by genre
-- `mood` (optional): Filter by mood
-
----
-
-## 🔄 Upload & Storage
-
-### Upload Content
-
-Manual upload to R2 storage.
-
-```http
-POST /api/upload
-```
-
-**Request Body:**
-```json
-{
-  "content": "Content to upload",
-  "storyId": "story_123", 
-  "chapterNumber": 1,
-  "contentType": "application/json"
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "url": "https://r2-endpoint/stories/story_123/chapters/1.json",
-  "key": "stories/story_123/chapters/1.json",
-  "metadata": {
-    "storyId": "story_123",
-    "chapterNumber": "1",
-    "contentType": "chapter",
-    "uploadedAt": "2024-12-21T10:30:00Z"
-  }
-}
-```
-
----
-
-## 🚨 Error Handling
-
-### Error Response Format
-
-```json
-{
-  "success": false,
-  "error": "Error description",
-  "code": "ERROR_CODE",
-  "details": {
-    "field": "Specific error details",
-    "timestamp": "2024-12-21T10:30:00Z"
-  }
-}
-```
-
-### Common Error Codes
-
-| Code | Description | HTTP Status |
-|------|-------------|-------------|
-| `INVALID_INPUT` | Request validation failed | 400 |
-| `UNAUTHORIZED` | Authentication required | 401 |
-| `FORBIDDEN` | Insufficient permissions | 403 |
-| `NOT_FOUND` | Resource not found | 404 |
-| `BLOCKCHAIN_ERROR` | Blockchain operation failed | 500 |
-| `STORAGE_ERROR` | R2 storage operation failed | 500 |
-| `AI_ERROR` | AI generation failed | 500 |
-
----
-
-## 🧪 Testing
-
-### Health Check
-
-```http
-GET /api/test
 ```
 
 ### Debug Environment
+
+Check environment configuration.
 
 ```http
 GET /api/debug-env
 ```
 
-### Test R2 Connection
-
-```http
-GET /api/test-r2
-```
-
-### Test Story Protocol
-
-```http
-POST /api/story-protocol
-Content-Type: application/json
-
+**Response:**
+```json
 {
-  "action": "test"
+  "success": true,
+  "environment": {
+    "hasR2BucketName": true,
+    "hasR2AccessKey": true,
+    "hasStoryProtocolConfig": true,
+    "nodeEnv": "development"
+  }
 }
 ```
 
 ---
 
-**API Status**: ✅ **Production Ready** with comprehensive IP management and real blockchain integration.
+## Error Handling
+
+All API endpoints follow consistent error response format:
+
+```json
+{
+  "success": false,
+  "error": "Error description",
+  "details": "Additional error details",
+  "troubleshooting": {
+    "commonIssues": ["Issue 1", "Issue 2"],
+    "solutions": ["Solution 1", "Solution 2"]
+  }
+}
+```
+
+### Common HTTP Status Codes
+- `200`: Success
+- `400`: Bad Request (invalid parameters)
+- `404`: Not Found (resource doesn't exist)
+- `500`: Internal Server Error
+
+---
+
+## Rate Limiting
+
+Current API limits:
+- Development: No limits
+- Production: 100 requests per minute per IP
+
+## SDKs and Libraries
+
+### Story Protocol Integration
+```typescript
+import { StoryConfig, StoryClient } from '@story-protocol/core-sdk'
+
+const config: StoryConfig = {
+  chainId: 1315,
+  transport: http('https://aeneid.storyrpc.io')
+}
+```
+
+### Frontend Integration
+```typescript
+import { apiClient } from '@/lib/api-client'
+
+const templates = await apiClient.getLicenseTemplates()
+const result = await apiClient.attachLicense(ipAssetId, templateId)
+```
