@@ -5,7 +5,7 @@ import { STORY_PROTOCOL_CONTRACTS } from '@/lib/contracts/storyProtocol'
 
 // Aeneid testnet is not a default chain in Viem, so we define it manually.
 const aeneid = {
-  id: 13371,
+  id: 1315,
   name: 'Aeneid',
   nativeCurrency: {
     decimals: 18,
@@ -105,7 +105,7 @@ export const createStoryClientFromWallet = (walletClient: WalletClient): StoryCl
   const config: StoryConfig = {
     account: walletClient.account,
     transport: custom(walletClient),
-    chainId: 'aeneid',
+    chainId: 1315,
   }
 
   return StoryClient.newClient(config)
@@ -443,7 +443,7 @@ export class StoryProtocolService {
     return {
       hasSpgNftContract: !!(spgContract && spgContract !== '0x_your_spg_nft_contract_address_optional'),
       spgNftContract: spgContract || 'Not configured',
-      chainId: 'aeneid',
+      chainId: 13371,
       rpcUrl: 'https://aeneid.storyrpc.io',
       connectedWallet: walletAddress || 'Not connected'
     }

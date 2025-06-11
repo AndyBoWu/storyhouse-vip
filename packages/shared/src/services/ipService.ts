@@ -106,7 +106,7 @@ export class IPService {
       const storyConfig: StoryConfig = {
         account: this.blockchainConfig.account,
         transport: http(this.blockchainConfig.rpcUrl),
-        chainId: 'aeneid', // Story Protocol SDK uses string chain IDs
+        chainId: 13371, // Story Protocol SDK v1.3.2+ uses numeric chain IDs
       }
 
       this.storyClient = StoryClient.newClient(storyConfig)
