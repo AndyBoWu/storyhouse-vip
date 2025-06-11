@@ -206,7 +206,7 @@ export class IPService {
             nftMetadataURI: '', // IPFS URI for NFT metadata
             nftMetadataHash: '0x0' // Hash of NFT metadata
           },
-          txOptions: { waitForTransaction: true }
+          txOptions: {}
         })
 
         // Option 2: Use register for existing NFTs
@@ -296,7 +296,7 @@ export class IPService {
           derivativeRevCeiling: 0n,
           currency: '0x1514000000000000000000000000000000000000' as Address, // WIP token
           uri: '',
-          txOptions: { waitForTransaction: true }
+          txOptions: {}
         })
 
         const licenseTerms: LicenseTerms = {
@@ -356,7 +356,7 @@ export class IPService {
         const attachResult = await this.storyClient!.license.attachLicenseTerms({
           ipId: ipAssetId as Address,
           licenseTermsId,
-          txOptions: { waitForTransaction: true }
+          txOptions: {}
         })
 
         return {
@@ -410,7 +410,7 @@ export class IPService {
           maxRevenueShare: 100, // 100% max revenue share
           amount: 1,
           receiver: recipient,
-          txOptions: { waitForTransaction: true }
+          txOptions: {}
         })
 
         const licenseToken: LicenseToken = {
@@ -472,7 +472,7 @@ export class IPService {
           childIpId: derivativeNftContract, // The derivative IP Asset ID
           parentIpIds: parentIpAssetIds as Address[],
           licenseTermsIds: licenseTokenIds, // Use licenseTermsIds instead of licenseTokenIds
-          txOptions: { waitForTransaction: true }
+          txOptions: {}
         })
 
         return {
