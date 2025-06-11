@@ -27,7 +27,7 @@ interface PublishingModalProps {
   onSuccess?: (result: any) => void
 }
 
-type PublishingStep = 'options' | 'wallet' | 'pricing' | 'ip-setup' | 'publishing' | 'success'
+type PublishingStep = 'options' | 'wallet' | 'license' | 'pricing' | 'ip-setup' | 'publishing' | 'success'
 
 function PublishingModal({
   isOpen,
@@ -40,6 +40,7 @@ function PublishingModal({
 }: PublishingModalProps) {
   const [currentStep, setCurrentStep] = useState<PublishingStep>('options')
   const [publishingOption, setPublishingOption] = useState<'simple' | 'protected' | null>(null)
+  const [licenseTier, setLicenseTier] = useState<'free' | 'premium' | 'exclusive'>('premium')
   const [chapterPrice, setChapterPrice] = useState(0.1)
   const [ipRegistration, setIpRegistration] = useState(false)
   const [isClient, setIsClient] = useState(false)
@@ -70,6 +71,8 @@ function PublishingModal({
     if (isOpen) {
       setCurrentStep('options')
       setPublishingOption(null)
+      // Auto-set license tier based on chapter number
+      setLicenseTier(chapterNumber <= 3 ? 'free' : 'premium')
       // Set chapter price to 0 for chapters 1-3, default 0.1 for others
       setChapterPrice(chapterNumber <= 3 ? 0 : 0.1)
       resetPublishing()
@@ -85,15 +88,16 @@ function PublishingModal({
       }
 
       if (publishingOption === 'simple') {
-        // Chapters 1-3 are free, skip pricing step
+        // Chapters 1-3 are free, skip license and pricing steps
         if (chapterNumber <= 3) {
           setChapterPrice(0) // Set price to 0 for free chapters
+          setLicenseTier('free') // Auto-set to free license
           setCurrentStep('publishing') // Skip directly to publishing
         } else {
-          setCurrentStep('pricing') // Show pricing for paid chapters
+          setCurrentStep('license') // Show license selection for paid chapters
         }
       } else {
-        setCurrentStep('ip-setup')
+        setCurrentStep('license') // Show license selection for protected publishing
       }
     } catch (error) {
       console.error('Wallet connection failed:', error)
@@ -128,12 +132,13 @@ function PublishingModal({
       const options = {
         publishingOption: publishingOption!,
         chapterPrice,
+        licenseTier,
         ...(publishingOption === 'protected' && {
           ipRegistration,
           licenseTerms: {
-            commercialUse: true,
+            commercialUse: licenseTier !== 'free',
             derivativesAllowed: true,
-            commercialRevShare: 25, // 25% royalty to creator
+            commercialRevShare: licenseTier === 'exclusive' ? 25 : (licenseTier === 'premium' ? 10 : 0),
           }
         })
       }
@@ -171,10 +176,10 @@ function PublishingModal({
   }
 
   const getStepProgress = () => {
-    // Chapters 1-3 skip pricing step
+    // Chapters 1-3 skip license and pricing steps
     const steps = chapterNumber <= 3
       ? ['options', 'wallet', 'publishing', 'success']
-      : ['options', 'wallet', 'pricing', 'publishing', 'success']
+      : ['options', 'wallet', 'license', 'pricing', 'publishing', 'success']
     return (steps.indexOf(currentStep) + 1) / steps.length * 100
   }
 
@@ -466,9 +471,10 @@ function PublishingModal({
                           // Always use simple publishing with Story Protocol
                           if (chapterNumber <= 3) {
                             setChapterPrice(0) // Ensure price is 0 for free chapters
+                            setLicenseTier('free') // Ensure free license
                             handlePublish() // Go directly to publishing
                           } else {
-                            setCurrentStep('pricing') // Show pricing for paid chapters
+                            setCurrentStep('license') // Show license selection for paid chapters
                           }
                         }}
                         className="flex-1 px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg font-medium hover:from-green-700 hover:to-emerald-700 transition-all"
@@ -489,7 +495,173 @@ function PublishingModal({
                 </motion.div>
               )}
 
-              {/* Step 3: Pricing Setup */}
+              {/* Step 3: License Tier Selection */}
+              {currentStep === 'license' && chapterNumber > 3 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="space-y-6"
+                >
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">🏷️ Choose License Tier</h3>
+                    <p className="text-gray-600">
+                      Select how others can use your chapter. Higher tiers earn more revenue but allow more usage rights.
+                    </p>
+                  </div>
+
+                  <div className="space-y-4">
+                    {/* FREE License Tier */}
+                    <motion.button
+                      onClick={() => setLicenseTier('free')}
+                      whileHover={{ scale: 1.02 }}
+                      className={`w-full p-6 border-2 rounded-xl text-left transition-all ${
+                        licenseTier === 'free'
+                          ? 'border-green-500 bg-green-50'
+                          : 'border-gray-200 hover:border-green-300'
+                      }`}
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="p-3 bg-green-100 rounded-lg">
+                          <span className="text-green-600 font-bold text-lg">FREE</span>
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="text-lg font-semibold text-gray-900 mb-2">🆓 Free License</h4>
+                          <p className="text-gray-600 mb-3">
+                            Open access with attribution required. Perfect for building audience.
+                          </p>
+                          <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div className="space-y-1">
+                              <div className="text-green-700">✅ Attribution required</div>
+                              <div className="text-green-700">✅ Non-commercial use</div>
+                              <div className="text-green-700">✅ Derivatives allowed</div>
+                            </div>
+                            <div className="space-y-1">
+                              <div className="text-gray-600"><strong>0 TIP</strong> license fee</div>
+                              <div className="text-gray-600"><strong>0%</strong> royalty</div>
+                              <div className="text-red-600">❌ No commercial use</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.button>
+
+                    {/* PREMIUM License Tier */}
+                    <motion.button
+                      onClick={() => setLicenseTier('premium')}
+                      whileHover={{ scale: 1.02 }}
+                      className={`w-full p-6 border-2 rounded-xl text-left transition-all ${
+                        licenseTier === 'premium'
+                          ? 'border-blue-500 bg-blue-50'
+                          : 'border-gray-200 hover:border-blue-300'
+                      }`}
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="p-3 bg-blue-100 rounded-lg">
+                          <span className="text-blue-600 font-bold text-lg">PRO</span>
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="text-lg font-semibold text-gray-900 mb-2">💼 Premium License</h4>
+                          <p className="text-gray-600 mb-3">
+                            Commercial use with royalty sharing. Best balance of access and revenue.
+                          </p>
+                          <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div className="space-y-1">
+                              <div className="text-blue-700">✅ Commercial use allowed</div>
+                              <div className="text-blue-700">✅ Derivatives allowed</div>
+                              <div className="text-blue-700">✅ Multi-channel distribution</div>
+                            </div>
+                            <div className="space-y-1">
+                              <div className="text-gray-600"><strong>100 TIP</strong> license fee</div>
+                              <div className="text-blue-600"><strong>10%</strong> ongoing royalty</div>
+                              <div className="text-green-600">💰 Steady revenue stream</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.button>
+
+                    {/* EXCLUSIVE License Tier */}
+                    <motion.button
+                      onClick={() => setLicenseTier('exclusive')}
+                      whileHover={{ scale: 1.02 }}
+                      className={`w-full p-6 border-2 rounded-xl text-left transition-all ${
+                        licenseTier === 'exclusive'
+                          ? 'border-purple-500 bg-purple-50'
+                          : 'border-gray-200 hover:border-purple-300'
+                      }`}
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="p-3 bg-purple-100 rounded-lg">
+                          <span className="text-purple-600 font-bold text-lg">VIP</span>
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="text-lg font-semibold text-gray-900 mb-2">👑 Exclusive License</h4>
+                          <p className="text-gray-600 mb-3">
+                            Full commercial rights with high royalties. Premium content with maximum revenue.
+                          </p>
+                          <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div className="space-y-1">
+                              <div className="text-purple-700">✅ Full commercial rights</div>
+                              <div className="text-purple-700">✅ Exclusive licensing</div>
+                              <div className="text-purple-700">✅ All channels allowed</div>
+                            </div>
+                            <div className="space-y-1">
+                              <div className="text-gray-600"><strong>1000 TIP</strong> license fee</div>
+                              <div className="text-purple-600"><strong>25%</strong> ongoing royalty</div>
+                              <div className="text-green-600">💎 Maximum revenue</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.button>
+                  </div>
+
+                  {/* License Impact Summary */}
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <h4 className="font-medium text-gray-900 mb-3">📊 License Impact</h4>
+                    <div className="grid grid-cols-1 gap-2 text-sm">
+                      {licenseTier === 'free' && (
+                        <>
+                          <div className="text-gray-600">• Readers can use your content for non-commercial purposes with attribution</div>
+                          <div className="text-gray-600">• Great for building audience and establishing reputation</div>
+                          <div className="text-gray-600">• No licensing revenue, but drives readership for paid chapters</div>
+                        </>
+                      )}
+                      {licenseTier === 'premium' && (
+                        <>
+                          <div className="text-blue-600">• Others pay 100 TIP to license your content for commercial use</div>
+                          <div className="text-blue-600">• You earn 10% royalty on all revenue from derivative works</div>
+                          <div className="text-blue-600">• Balanced approach: accessible but revenue-generating</div>
+                        </>
+                      )}
+                      {licenseTier === 'exclusive' && (
+                        <>
+                          <div className="text-purple-600">• High barrier to entry (1000 TIP) attracts serious licensees</div>
+                          <div className="text-purple-600">• You earn 25% royalty on all revenue from licensed works</div>
+                          <div className="text-purple-600">• Maximum revenue potential for premium content</div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setCurrentStep('wallet')}
+                      className="flex-1 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      ← Back
+                    </button>
+                    <button
+                      onClick={() => setCurrentStep('pricing')}
+                      className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all"
+                    >
+                      Continue to Pricing →
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Step 4: Pricing Setup */}
               {currentStep === 'pricing' && chapterNumber > 3 && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -559,7 +731,7 @@ function PublishingModal({
 
                   <div className="flex gap-3">
                     <button
-                      onClick={() => setCurrentStep('wallet')}
+                      onClick={() => setCurrentStep('license')}
                       className="flex-1 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                     >
                       ← Back
@@ -575,7 +747,7 @@ function PublishingModal({
                 </motion.div>
               )}
 
-              {/* Step 4: IP Setup (for protected publishing) */}
+              {/* Step 5: IP Setup (for protected publishing) */}
               {currentStep === 'ip-setup' && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -633,7 +805,7 @@ function PublishingModal({
 
                   <div className="flex gap-3">
                     <button
-                      onClick={() => setCurrentStep('wallet')}
+                      onClick={() => setCurrentStep('license')}
                       className="flex-1 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                     >
                       ← Back
@@ -649,7 +821,7 @@ function PublishingModal({
                 </motion.div>
               )}
 
-              {/* Step 5: Publishing Progress */}
+              {/* Step 6: Publishing Progress */}
               {currentStep === 'publishing' && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -771,7 +943,7 @@ function PublishingModal({
                 </motion.div>
               )}
 
-              {/* Step 6: Success */}
+              {/* Step 7: Success */}
               {currentStep === 'success' && publishResult?.success && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
