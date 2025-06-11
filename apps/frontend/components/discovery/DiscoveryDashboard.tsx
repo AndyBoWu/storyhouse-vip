@@ -12,7 +12,10 @@ import {
   ChevronRight,
   Star,
   Eye,
-  DollarSign
+  DollarSign,
+  Sparkles,
+  Award,
+  Info
 } from 'lucide-react'
 import Link from 'next/link'
 import { apiClient } from '@/lib/api-client'
@@ -32,6 +35,12 @@ interface BookSummary {
   parentBook?: string
   branchPoint?: string
   derivativeBooks?: string[]
+  // AI Quality Metrics
+  qualityScore?: number
+  similarityScore?: number
+  influenceScore?: number
+  aiRecommended?: boolean
+  qualityTrend?: 'rising' | 'stable' | 'falling'
 }
 
 interface DiscoverySection {
@@ -46,11 +55,14 @@ interface DiscoverySection {
 export default function DiscoveryDashboard() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedGenre, setSelectedGenre] = useState<string>('')
+  const [qualityFilter, setQualityFilter] = useState<'all' | 'high' | 'rising'>('all')
+  const [similarityFilter, setSimilarityFilter] = useState<'all' | 'low' | 'medium' | 'high'>('all')
   const [sections, setSections] = useState<{
     trending: DiscoverySection
     mostRemixed: DiscoverySection
     collaborative: DiscoverySection
     newReleases: DiscoverySection
+    aiRecommended: DiscoverySection
   }>({
     trending: {
       title: 'Trending Stories',
@@ -80,6 +92,14 @@ export default function DiscoveryDashboard() {
       title: 'New Releases',
       description: 'Recently published original stories',
       icon: <BookOpen className="w-5 h-5" />,
+      books: [],
+      loading: true,
+      error: null
+    },
+    aiRecommended: {
+      title: 'AI Recommended Derivatives',
+      description: 'High-quality derivatives suggested by AI analysis',
+      icon: <Sparkles className="w-5 h-5" />,
       books: [],
       loading: true,
       error: null
@@ -121,6 +141,14 @@ export default function DiscoveryDashboard() {
     loadSection('newReleases', {
       type: 'recommendations',
       limit: 8,
+      includeMetrics: true
+    })
+
+    // Load AI recommended derivatives
+    loadSection('aiRecommended', {
+      type: 'quality-assessment',
+      limit: 6,
+      minQualityScore: 8,
       includeMetrics: true
     })
   }
@@ -260,6 +288,24 @@ export default function DiscoveryDashboard() {
                   Remixable
                 </span>
               )}
+              {book.qualityScore && book.qualityScore >= 8 && (
+                <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <Award className="w-3 h-3" />
+                  High Quality
+                </span>
+              )}
+              {book.aiRecommended && (
+                <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <Sparkles className="w-3 h-3" />
+                  AI Pick
+                </span>
+              )}
+              {book.qualityTrend === 'rising' && (
+                <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <TrendingUp className="w-3 h-3" />
+                  Rising
+                </span>
+              )}
             </div>
 
             {/* Creation date */}
@@ -355,6 +401,27 @@ export default function DiscoveryDashboard() {
               ))}
             </select>
             
+            <select
+              value={qualityFilter}
+              onChange={(e) => setQualityFilter(e.target.value as any)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="all">All Quality</option>
+              <option value="high">High Quality</option>
+              <option value="rising">Rising Stars</option>
+            </select>
+            
+            <select
+              value={similarityFilter}
+              onChange={(e) => setSimilarityFilter(e.target.value as any)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="all">All Similarity</option>
+              <option value="low">Low (&lt;40%)</option>
+              <option value="medium">Medium (40-70%)</option>
+              <option value="high">High (&gt;70%)</option>
+            </select>
+            
             <button
               onClick={handleSearch}
               className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
@@ -368,9 +435,59 @@ export default function DiscoveryDashboard() {
 
       {/* Discovery Sections */}
       {renderSection('trending')}
+      {renderSection('aiRecommended')}
       {renderSection('mostRemixed')}
       {renderSection('collaborative')}
       {renderSection('newReleases')}
+
+      {/* Similar Content You Might Like */}
+      <div className="mb-8 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg p-6">
+        <div className="flex items-center gap-3 mb-4">
+          <Info className="w-5 h-5 text-indigo-600" />
+          <h3 className="text-lg font-semibold text-gray-800">
+            Similar Content You Might Like
+          </h3>
+        </div>
+        <p className="text-sm text-gray-600 mb-4">
+          Based on your reading history and preferences, our AI suggests these stories
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Mock similar content recommendations */}
+          <div className="bg-white rounded-lg p-4 border border-gray-200">
+            <h4 className="font-medium text-gray-800 mb-1">The Quantum Echo</h4>
+            <p className="text-sm text-gray-600 mb-2">87% match to your interests</p>
+            <div className="flex items-center gap-2 text-xs text-gray-500">
+              <span className="px-2 py-1 bg-indigo-100 text-indigo-700 rounded-full">Sci-Fi</span>
+              <span className="flex items-center gap-1">
+                <Star className="w-3 h-3 text-yellow-500" />
+                4.8
+              </span>
+            </div>
+          </div>
+          <div className="bg-white rounded-lg p-4 border border-gray-200">
+            <h4 className="font-medium text-gray-800 mb-1">Chronicles of Tomorrow</h4>
+            <p className="text-sm text-gray-600 mb-2">92% match to your interests</p>
+            <div className="flex items-center gap-2 text-xs text-gray-500">
+              <span className="px-2 py-1 bg-indigo-100 text-indigo-700 rounded-full">Adventure</span>
+              <span className="flex items-center gap-1">
+                <Star className="w-3 h-3 text-yellow-500" />
+                4.9
+              </span>
+            </div>
+          </div>
+          <div className="bg-white rounded-lg p-4 border border-gray-200">
+            <h4 className="font-medium text-gray-800 mb-1">Digital Dreams</h4>
+            <p className="text-sm text-gray-600 mb-2">84% match to your interests</p>
+            <div className="flex items-center gap-2 text-xs text-gray-500">
+              <span className="px-2 py-1 bg-indigo-100 text-indigo-700 rounded-full">Cyberpunk</span>
+              <span className="flex items-center gap-1">
+                <Star className="w-3 h-3 text-yellow-500" />
+                4.7
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Call to Action */}
       <div className="bg-gradient-to-r from-purple-100 to-blue-100 rounded-lg p-8 text-center">

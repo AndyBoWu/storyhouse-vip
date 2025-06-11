@@ -4,6 +4,13 @@
  * Routes API calls to same-domain API routes in Vercel deployment
  */
 
+import type { 
+  DerivativeAnalytics, 
+  ContentSimilarityAnalysis, 
+  InfluenceMetrics, 
+  QualityAssessment 
+} from './types/shared'
+
 const getApiBaseUrl = (): string => {
   // Use environment variable if set (for hybrid deployment)
   if (process.env.NEXT_PUBLIC_API_BASE_URL) {
@@ -211,6 +218,23 @@ export const apiClient = {
 
   async getRoyaltyNotifications(authorAddress: string) {
     return apiRequest(`/api/royalties/notifications/${authorAddress}`)
+  },
+
+  // Derivative Analytics operations
+  async getDerivativeAnalytics(storyId: string): Promise<{ success: boolean; data: DerivativeAnalytics }> {
+    return apiRequest(`/api/discovery?type=derivative-analytics&storyId=${storyId}`)
+  },
+
+  async getContentSimilarity(originalId: string, derivativeId: string): Promise<{ success: boolean; data: ContentSimilarityAnalysis }> {
+    return apiRequest(`/api/discovery?type=content-similarity&originalId=${originalId}&derivativeId=${derivativeId}`)
+  },
+
+  async getInfluenceMetrics(authorAddress: string): Promise<{ success: boolean; data: InfluenceMetrics }> {
+    return apiRequest(`/api/discovery?type=influence-analysis&authorAddress=${authorAddress}`)
+  },
+
+  async getQualityAssessment(storyId: string): Promise<{ success: boolean; data: QualityAssessment }> {
+    return apiRequest(`/api/discovery?type=quality-assessment&storyId=${storyId}`)
   },
 }
 

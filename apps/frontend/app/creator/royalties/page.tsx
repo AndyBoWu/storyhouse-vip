@@ -20,12 +20,23 @@ import {
   Calendar,
   Target,
   Award,
-  Info
+  Info,
+  GitBranch,
+  Sparkles,
+  BarChart3,
+  Users
 } from 'lucide-react'
 import Link from 'next/link'
 import { apiClient } from '@/lib/api-client'
 import dynamic from 'next/dynamic'
 import QuickNavigation from '@/components/ui/QuickNavigation'
+import {
+  DerivativeInfluenceChart,
+  DerivativePerformanceComparison,
+  ContentSimilarityIndicator,
+  DerivativeRevenueTracking,
+  QualityAssessmentDisplay
+} from '@/components/creator/DerivativeAnalytics'
 
 const WalletConnect = dynamic(() => import('@/components/WalletConnect'), {
   ssr: false,
@@ -86,7 +97,7 @@ export default function RoyaltiesPage() {
   const [royaltyPreview, setRoyaltyPreview] = useState<RoyaltyPreview | null>(null)
   
   // UI states
-  const [activeTab, setActiveTab] = useState<'claimable' | 'history' | 'analytics'>('claimable')
+  const [activeTab, setActiveTab] = useState<'claimable' | 'history' | 'analytics' | 'derivatives'>('claimable')
   const [isLoadingClaimable, setIsLoadingClaimable] = useState(false)
   const [isLoadingHistory, setIsLoadingHistory] = useState(false)
   const [isLoadingPreview, setIsLoadingPreview] = useState(false)
@@ -496,7 +507,8 @@ export default function RoyaltiesPage() {
                     {[
                       { id: 'claimable', label: 'Claimable Royalties', icon: Coins },
                       { id: 'history', label: 'Claim History', icon: Clock },
-                      { id: 'analytics', label: 'Analytics', icon: TrendingUp }
+                      { id: 'analytics', label: 'Analytics', icon: TrendingUp },
+                      { id: 'derivatives', label: 'Derivative Analytics', icon: GitBranch }
                     ].map((tab) => {
                       const Icon = tab.icon
                       return (
@@ -800,6 +812,157 @@ export default function RoyaltiesPage() {
                             </p>
                           </div>
                         )}
+                      </motion.div>
+                    )}
+
+                    {activeTab === 'derivatives' && (
+                      <motion.div
+                        key="derivatives"
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        className="space-y-6"
+                      >
+                        {/* Your Content's Influence Section */}
+                        <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-6 border border-purple-200">
+                          <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                            <Sparkles className="w-5 h-5 text-purple-600" />
+                            Your Content's Influence
+                          </h3>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <div className="bg-white rounded-lg p-4 shadow-sm">
+                              <p className="text-sm text-gray-600 mb-1">Total Derivatives</p>
+                              <p className="text-2xl font-bold text-purple-600">12</p>
+                              <p className="text-xs text-green-600 mt-1">+3 this month</p>
+                            </div>
+                            <div className="bg-white rounded-lg p-4 shadow-sm">
+                              <p className="text-sm text-gray-600 mb-1">Influence Score</p>
+                              <p className="text-2xl font-bold text-blue-600">8.7</p>
+                              <p className="text-xs text-gray-500 mt-1">Top 15%</p>
+                            </div>
+                            <div className="bg-white rounded-lg p-4 shadow-sm">
+                              <p className="text-sm text-gray-600 mb-1">Revenue from Derivatives</p>
+                              <p className="text-2xl font-bold text-green-600">$234.50</p>
+                              <p className="text-xs text-green-600 mt-1">+12% vs last month</p>
+                            </div>
+                          </div>
+
+                          {/* Derivative Performance Chart */}
+                          <DerivativeInfluenceChart />
+                        </div>
+
+                        {/* Derivatives You've Created Section */}
+                        <div className="bg-white rounded-xl p-6 border border-gray-200">
+                          <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                            <GitBranch className="w-5 h-5 text-blue-600" />
+                            Derivatives You've Created
+                          </h3>
+
+                          <div className="space-y-4">
+                            {/* Sample derivative item */}
+                            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <h4 className="font-medium text-gray-900">The Digital Realm: Echoes</h4>
+                                  <p className="text-sm text-gray-600 mt-1">
+                                    Based on "The Digital Realm" by 0xAbc...def
+                                  </p>
+                                  <div className="flex items-center gap-4 mt-3 text-sm">
+                                    <div className="flex items-center gap-1">
+                                      <Users className="w-4 h-4 text-gray-400" />
+                                      <span className="text-gray-600">156 reads</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <TrendingUp className="w-4 h-4 text-gray-400" />
+                                      <span className="text-gray-600">85% similarity</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <DollarSign className="w-4 h-4 text-gray-400" />
+                                      <span className="text-gray-600">$45.30 revenue</span>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="ml-4">
+                                  <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+                                    High Quality
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Another sample */}
+                            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <h4 className="font-medium text-gray-900">Cyber Chronicles: Reborn</h4>
+                                  <p className="text-sm text-gray-600 mt-1">
+                                    Based on "Cyber Chronicles" by 0x123...789
+                                  </p>
+                                  <div className="flex items-center gap-4 mt-3 text-sm">
+                                    <div className="flex items-center gap-1">
+                                      <Users className="w-4 h-4 text-gray-400" />
+                                      <span className="text-gray-600">89 reads</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <TrendingUp className="w-4 h-4 text-gray-400" />
+                                      <span className="text-gray-600">72% similarity</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <DollarSign className="w-4 h-4 text-gray-400" />
+                                      <span className="text-gray-600">$23.10 revenue</span>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="ml-4">
+                                  <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">
+                                    Medium Quality
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Performance & Quality Analytics Row */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          {/* Performance Comparison */}
+                          <DerivativePerformanceComparison />
+                          
+                          {/* Quality Assessment */}
+                          <QualityAssessmentDisplay />
+                        </div>
+
+                        {/* Similarity & Revenue Analytics Row */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          {/* Content Similarity */}
+                          <ContentSimilarityIndicator similarityScore={82} />
+                          
+                          {/* Revenue Tracking */}
+                          <DerivativeRevenueTracking />
+                        </div>
+
+                        {/* AI-Powered Insights */}
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                          <h3 className="font-semibold text-blue-900 mb-4 flex items-center gap-2">
+                            <Info className="w-5 h-5" />
+                            AI-Powered Insights
+                          </h3>
+                          <div className="space-y-2">
+                            <div className="flex items-start gap-2">
+                              <div className="w-2 h-2 bg-blue-600 rounded-full mt-2"></div>
+                              <p className="text-blue-800">Your sci-fi chapters inspire 3x more derivatives than average</p>
+                            </div>
+                            <div className="flex items-start gap-2">
+                              <div className="w-2 h-2 bg-blue-600 rounded-full mt-2"></div>
+                              <p className="text-blue-800">Derivatives of your Chapter 3 perform 45% better than originals</p>
+                            </div>
+                            <div className="flex items-start gap-2">
+                              <div className="w-2 h-2 bg-blue-600 rounded-full mt-2"></div>
+                              <p className="text-blue-800">Consider creating derivatives of "The Quantum Paradox" - high potential detected</p>
+                            </div>
+                          </div>
+                        </div>
                       </motion.div>
                     )}
                   </AnimatePresence>
