@@ -8,6 +8,7 @@ import {
   BookDerivationTreeResponse,
   BookDerivationNode
 } from '@storyhouse/shared'
+import { contentAnalysisService } from '@/lib/services/contentAnalysisService'
 
 /**
  * GET /api/discovery
@@ -17,13 +18,15 @@ import {
  * and revenue attribution transparency for the collaborative storytelling platform.
  * 
  * Query Parameters:
- * - type: "recommendations" | "derivatives" | "family-tree" | "author-network" | "similar"
+ * - type: "recommendations" | "derivatives" | "family-tree" | "author-network" | "similar" | "content-similarity" | "influence-analysis" | "quality-assessment"
  * - bookId: Target book for relationship queries
  * - authorAddress: Filter by author
  * - genre: Filter by genre
  * - limit: Results limit (default 20)
  * - includeRevenue: Include revenue attribution data
  * - includeMetrics: Include engagement metrics
+ * - similarityThreshold: Minimum similarity score for AI analysis (default 0.3)
+ * - includeConfidence: Include AI confidence scores in results
  */
 export async function GET(request: NextRequest) {
   try {
@@ -36,6 +39,8 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20')
     const includeRevenue = searchParams.get('includeRevenue') === 'true'
     const includeMetrics = searchParams.get('includeMetrics') === 'true'
+    const similarityThreshold = parseFloat(searchParams.get('similarityThreshold') || '0.3')
+    const includeConfidence = searchParams.get('includeConfidence') === 'true'
     
     console.log(`🔍 Discovery request: ${discoveryType}`, {
       bookId,
@@ -43,7 +48,9 @@ export async function GET(request: NextRequest) {
       genre,
       limit,
       includeRevenue,
-      includeMetrics
+      includeMetrics,
+      similarityThreshold,
+      includeConfidence
     })
 
     switch (discoveryType) {
@@ -54,7 +61,7 @@ export async function GET(request: NextRequest) {
             error: 'bookId required for family-tree discovery'
           }, { status: 400 })
         }
-        return await handleFamilyTreeDiscovery(bookId, includeRevenue, includeMetrics)
+        return await handleFamilyTreeDiscovery(bookId, includeRevenue, includeMetrics, includeConfidence)
         
       case 'derivatives':
         if (!bookId) {
@@ -83,6 +90,33 @@ export async function GET(request: NextRequest) {
         }
         return await handleSimilarBooksDiscovery(bookId, limit, includeMetrics)
         
+      case 'content-similarity':
+        if (!bookId) {
+          return NextResponse.json({
+            success: false,
+            error: 'bookId required for content-similarity analysis'
+          }, { status: 400 })
+        }
+        return await handleContentSimilarityDiscovery(bookId, limit, similarityThreshold, includeConfidence)
+        
+      case 'influence-analysis':
+        if (!bookId) {
+          return NextResponse.json({
+            success: false,
+            error: 'bookId required for influence analysis'
+          }, { status: 400 })
+        }
+        return await handleInfluenceAnalysisDiscovery(bookId, includeMetrics)
+        
+      case 'quality-assessment':
+        if (!bookId) {
+          return NextResponse.json({
+            success: false,
+            error: 'bookId required for quality assessment'
+          }, { status: 400 })
+        }
+        return await handleQualityAssessmentDiscovery(bookId)
+        
       case 'recommendations':
       default:
         return await handleRecommendationsDiscovery({
@@ -109,7 +143,8 @@ export async function GET(request: NextRequest) {
 async function handleFamilyTreeDiscovery(
   bookId: string, 
   includeRevenue: boolean, 
-  includeMetrics: boolean
+  includeMetrics: boolean,
+  includeAISimilarity: boolean = false
 ): Promise<NextResponse> {
   try {
     // Load the target book
@@ -130,7 +165,7 @@ async function handleFamilyTreeDiscovery(
     }
     
     // Build the complete family tree
-    const familyTree = await buildDerivationTree(rootBook, includeRevenue, includeMetrics)
+    const familyTree = await buildDerivationTree(rootBook, includeRevenue, includeMetrics, includeAISimilarity)
     
     // Calculate analytics for the entire family
     const analytics = calculateFamilyAnalytics(familyTree)
@@ -162,6 +197,7 @@ async function buildDerivationTree(
   book: BookMetadata, 
   includeRevenue: boolean, 
   includeMetrics: boolean,
+  includeAISimilarity: boolean = false,
   visitedBooks: Set<string> = new Set()
 ): Promise<BookDerivationNode> {
   // Prevent infinite loops
@@ -190,8 +226,29 @@ async function buildDerivationTree(
         derivativeBook, 
         includeRevenue, 
         includeMetrics, 
+        includeAISimilarity,
         new Set(visitedBooks)
       )
+
+      // Add AI similarity analysis if requested
+      if (includeAISimilarity) {
+        try {
+          const similarityResult = await contentAnalysisService.analyzeContentSimilarity(
+            book.bookId,
+            '1',
+            derivativeBook.bookId,
+            '1'
+          )
+          
+          derivativeNode.aiSimilarity = {
+            similarityScore: similarityResult.similarityScore,
+            confidence: similarityResult.confidence,
+            factors: similarityResult.factors
+          }
+        } catch (error) {
+          console.warn(`Could not analyze similarity between ${book.bookId} and ${derivativeBook.bookId}:`, error)
+        }
+      }
       derivatives.push(derivativeNode)
     } catch (error) {
       console.warn(`Derivative book not found: ${derivativeId}`)
@@ -502,5 +559,194 @@ function calculateFamilyAnalytics(tree: BookDerivationNode): {
     totalReads,
     averageRating: 0, // Would calculate from detailed metrics
     totalRevenue: 0   // Would calculate from revenue data
+  }
+}
+
+// =============================================================================
+// PHASE 3.1.3: AI-POWERED DERIVATIVE ANALYSIS HANDLERS
+// =============================================================================
+
+/**
+ * AI-powered content similarity discovery using OpenAI embeddings
+ */
+async function handleContentSimilarityDiscovery(
+  bookId: string,
+  limit: number,
+  similarityThreshold: number,
+  includeConfidence: boolean
+): Promise<NextResponse> {
+  try {
+    console.log(`🤖 AI content similarity analysis for book ${bookId}`)
+    
+    // Use content analysis service to detect potential derivatives
+    const derivativeResults = await contentAnalysisService.detectPotentialDerivatives({
+      sourceStoryId: bookId,
+      sourceChapterId: '1',
+      similarityThreshold,
+      maxResults: limit,
+      includeConfidenceAnalysis: includeConfidence
+    })
+
+    // Convert to discovery response format
+    const books: (BookSummary & {
+      similarityScore?: number
+      confidence?: number
+      analysisDetails?: any
+    })[] = []
+
+    for (const derivative of derivativeResults.potentialDerivatives) {
+      try {
+        const bookMetadata = await BookStorageService.getBookMetadata(derivative.storyId)
+        const summary = createBookSummary(bookMetadata, false, true)
+        
+        // Add AI analysis data
+        books.push({
+          ...summary,
+          similarityScore: derivative.similarityScore,
+          confidence: derivative.confidence,
+          analysisDetails: includeConfidence ? derivative.analysisDetails : undefined
+        })
+      } catch (error) {
+        console.warn(`Book metadata not found for ${derivative.storyId}`)
+        continue
+      }
+    }
+
+    const response = {
+      success: true,
+      books,
+      pagination: {
+        total: books.length,
+        limit,
+        offset: 0,
+        hasMore: false
+      },
+      aiAnalysis: {
+        analysisType: 'content-similarity',
+        sourceBookId: bookId,
+        similarityThreshold,
+        analysisMetadata: derivativeResults.analysisMetadata
+      }
+    }
+
+    console.log(`🤖 Content similarity analysis complete: ${books.length} results`)
+    return NextResponse.json(response)
+
+  } catch (error) {
+    console.error('Content similarity discovery error:', error)
+    return NextResponse.json({
+      success: false,
+      error: 'Failed to perform AI content similarity analysis'
+    }, { status: 500 })
+  }
+}
+
+/**
+ * Influence analysis discovery showing how much a story influences others
+ */
+async function handleInfluenceAnalysisDiscovery(
+  bookId: string,
+  includeMetrics: boolean
+): Promise<NextResponse> {
+  try {
+    console.log(`📈 Influence analysis for book ${bookId}`)
+    
+    // Calculate influence score using content analysis service
+    const influenceScore = await contentAnalysisService.calculateInfluenceScore(bookId)
+
+    // Get detailed book information for influenced derivatives
+    const influencedBooks: (BookSummary & {
+      similarityScore?: number
+      qualityRatio?: number
+      engagementRatio?: number
+    })[] = []
+
+    for (const derivative of influenceScore.derivativeBreakdown) {
+      try {
+        const bookMetadata = await BookStorageService.getBookMetadata(derivative.derivativeId)
+        const summary = createBookSummary(bookMetadata, false, includeMetrics)
+        
+        influencedBooks.push({
+          ...summary,
+          similarityScore: derivative.similarityScore,
+          qualityRatio: derivative.qualityRatio,
+          engagementRatio: derivative.engagementRatio
+        })
+      } catch (error) {
+        console.warn(`Book metadata not found for ${derivative.derivativeId}`)
+        continue
+      }
+    }
+
+    const response = {
+      success: true,
+      books: influencedBooks,
+      pagination: {
+        total: influencedBooks.length,
+        limit: influencedBooks.length,
+        offset: 0,
+        hasMore: false
+      },
+      influenceAnalysis: {
+        storyId: bookId,
+        influenceMetrics: influenceScore.influenceMetrics,
+        trendsAnalysis: influenceScore.trendsAnalysis,
+        analysisTimestamp: new Date().toISOString()
+      }
+    }
+
+    console.log(`📈 Influence analysis complete: ${(influenceScore.influenceMetrics.overallInfluence * 100).toFixed(1)}% influence score`)
+    return NextResponse.json(response)
+
+  } catch (error) {
+    console.error('Influence analysis discovery error:', error)
+    return NextResponse.json({
+      success: false,
+      error: 'Failed to perform influence analysis'
+    }, { status: 500 })
+  }
+}
+
+/**
+ * Quality assessment discovery for a story
+ */
+async function handleQualityAssessmentDiscovery(bookId: string): Promise<NextResponse> {
+  try {
+    console.log(`🎯 Quality assessment for book ${bookId}`)
+    
+    // Get book metadata to check if it's a derivative
+    const bookMetadata = await BookStorageService.getBookMetadata(bookId)
+    const originalStoryId = bookMetadata.parentBook
+
+    // Perform quality assessment
+    const qualityAssessment = await contentAnalysisService.assessDerivativeQuality(
+      bookId,
+      originalStoryId
+    )
+
+    // Create book summary
+    const bookSummary = createBookSummary(bookMetadata, false, true)
+
+    const response = {
+      success: true,
+      book: bookSummary,
+      qualityAssessment: {
+        storyId: qualityAssessment.storyId,
+        qualityMetrics: qualityAssessment.qualityMetrics,
+        comparisonToOriginal: qualityAssessment.comparisonToOriginal,
+        recommendations: qualityAssessment.recommendations,
+        assessmentTimestamp: qualityAssessment.assessmentTimestamp
+      }
+    }
+
+    console.log(`🎯 Quality assessment complete: ${(qualityAssessment.qualityMetrics.overallScore * 100).toFixed(1)}% quality score`)
+    return NextResponse.json(response)
+
+  } catch (error) {
+    console.error('Quality assessment discovery error:', error)
+    return NextResponse.json({
+      success: false,
+      error: 'Failed to perform quality assessment'
+    }, { status: 500 })
   }
 }

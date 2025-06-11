@@ -142,6 +142,18 @@ export interface R2ChapterGenealogy {
     licenseTokenId?: string
     createdAt: string
     transactionHash?: Hash
+    // Phase 3.1.4: AI Similarity Data
+    aiSimilarity?: {
+      similarityScore: number
+      confidence: number
+      analysisTimestamp: string
+      factors: {
+        contentSimilarity: number
+        structuralSimilarity: number
+        themeSimilarity: number
+        styleSimilarity: number
+      }
+    }
   }>
   
   // Royalty Flow Tracking
@@ -157,6 +169,68 @@ export interface R2ChapterGenealogy {
   generationLevel: number // 0 = original, 1 = first derivative, etc.
   branchId?: string
   branchName?: string
+  
+  // Phase 3.1.4: AI Content Analysis Data
+  aiAnalysis?: {
+    // Content Similarity Scores
+    similarityScores: {
+      [relatedIpAssetId: string]: {
+        score: number
+        confidence: number
+        lastAnalyzed: string
+        factors: {
+          contentSimilarity: number
+          structuralSimilarity: number
+          themeSimilarity: number
+          styleSimilarity: number
+        }
+      }
+    }
+    
+    // Influence Metrics
+    influenceMetrics: {
+      totalDerivatives: number
+      averageSimilarity: number
+      qualityScore: number
+      reachScore: number
+      overallInfluence: number
+      lastCalculated: string
+    }
+    
+    // Quality Assessment
+    qualityAssessment: {
+      overallScore: number
+      readabilityScore: number
+      engagementScore: number
+      originalityScore: number
+      completionScore: number
+      comparisonToOriginal?: {
+        originalIpAssetId: string
+        qualityRatio: number
+        strengthsOverOriginal: string[]
+        areasForImprovement: string[]
+      }
+      assessmentTimestamp: string
+    }
+    
+    // Derivative Detection Cache
+    derivativeDetectionCache: {
+      potentialDerivatives: Array<{
+        ipAssetId: string
+        similarityScore: number
+        confidence: number
+        detectedAt: string
+      }>
+      lastScan: string
+      scanThreshold: number
+    }
+    
+    // Content Fingerprint for Quick Comparison
+    contentFingerprint?: string
+    
+    // Analysis Version for Future Compatibility
+    analysisVersion: string
+  }
   
   // Update Tracking
   lastUpdated: string
@@ -437,5 +511,275 @@ export function getDefaultLicenseTerms(tier: 'free' | 'premium' | 'exclusive'): 
 }
 
 // Version constants
-export const R2_SCHEMA_VERSION = '2.0.0' // Updated for license enhancement
-export const CURRENT_DATA_VERSION = 1
+export const R2_SCHEMA_VERSION = '2.1.0' // Updated for AI analysis enhancement
+export const CURRENT_DATA_VERSION = 2
+export const AI_ANALYSIS_VERSION = '1.0.0' // Phase 3.1.4
+
+// =============================================================================
+// PHASE 3.1.4: AI ANALYSIS HELPER FUNCTIONS
+// =============================================================================
+
+/**
+ * Initialize AI analysis data for new chapters
+ */
+export function initializeAIAnalysis(): R2ChapterGenealogy['aiAnalysis'] {
+  return {
+    similarityScores: {},
+    influenceMetrics: {
+      totalDerivatives: 0,
+      averageSimilarity: 0,
+      qualityScore: 0,
+      reachScore: 0,
+      overallInfluence: 0,
+      lastCalculated: new Date().toISOString()
+    },
+    qualityAssessment: {
+      overallScore: 0,
+      readabilityScore: 0,
+      engagementScore: 0,
+      originalityScore: 0,
+      completionScore: 0,
+      assessmentTimestamp: new Date().toISOString()
+    },
+    derivativeDetectionCache: {
+      potentialDerivatives: [],
+      lastScan: new Date().toISOString(),
+      scanThreshold: 0.3
+    },
+    analysisVersion: AI_ANALYSIS_VERSION
+  }
+}
+
+/**
+ * Update similarity score in R2 metadata
+ */
+export function updateSimilarityScore(
+  genealogy: R2ChapterGenealogy,
+  relatedIpAssetId: string,
+  similarityData: {
+    score: number
+    confidence: number
+    factors: {
+      contentSimilarity: number
+      structuralSimilarity: number
+      themeSimilarity: number
+      styleSimilarity: number
+    }
+  }
+): R2ChapterGenealogy {
+  const updatedGenealogy = { ...genealogy }
+  
+  // Initialize aiAnalysis if it doesn't exist
+  if (!updatedGenealogy.aiAnalysis) {
+    updatedGenealogy.aiAnalysis = initializeAIAnalysis()
+  }
+  
+  // Update similarity score
+  updatedGenealogy.aiAnalysis!.similarityScores[relatedIpAssetId] = {
+    ...similarityData,
+    lastAnalyzed: new Date().toISOString()
+  }
+  
+  // Update genealogy metadata
+  updatedGenealogy.lastUpdated = new Date().toISOString()
+  updatedGenealogy.genealogyVersion = (updatedGenealogy.genealogyVersion || 0) + 1
+  
+  return updatedGenealogy
+}
+
+/**
+ * Update influence metrics in R2 metadata
+ */
+export function updateInfluenceMetrics(
+  genealogy: R2ChapterGenealogy,
+  influenceData: {
+    totalDerivatives: number
+    averageSimilarity: number
+    qualityScore: number
+    reachScore: number
+    overallInfluence: number
+  }
+): R2ChapterGenealogy {
+  const updatedGenealogy = { ...genealogy }
+  
+  // Initialize aiAnalysis if it doesn't exist
+  if (!updatedGenealogy.aiAnalysis) {
+    updatedGenealogy.aiAnalysis = initializeAIAnalysis()
+  }
+  
+  // Update influence metrics
+  updatedGenealogy.aiAnalysis!.influenceMetrics = {
+    ...influenceData,
+    lastCalculated: new Date().toISOString()
+  }
+  
+  // Update genealogy metadata
+  updatedGenealogy.lastUpdated = new Date().toISOString()
+  updatedGenealogy.genealogyVersion = (updatedGenealogy.genealogyVersion || 0) + 1
+  
+  return updatedGenealogy
+}
+
+/**
+ * Update quality assessment in R2 metadata
+ */
+export function updateQualityAssessment(
+  genealogy: R2ChapterGenealogy,
+  qualityData: {
+    overallScore: number
+    readabilityScore: number
+    engagementScore: number
+    originalityScore: number
+    completionScore: number
+    comparisonToOriginal?: {
+      originalIpAssetId: string
+      qualityRatio: number
+      strengthsOverOriginal: string[]
+      areasForImprovement: string[]
+    }
+  }
+): R2ChapterGenealogy {
+  const updatedGenealogy = { ...genealogy }
+  
+  // Initialize aiAnalysis if it doesn't exist
+  if (!updatedGenealogy.aiAnalysis) {
+    updatedGenealogy.aiAnalysis = initializeAIAnalysis()
+  }
+  
+  // Update quality assessment
+  updatedGenealogy.aiAnalysis!.qualityAssessment = {
+    ...qualityData,
+    assessmentTimestamp: new Date().toISOString()
+  }
+  
+  // Update genealogy metadata
+  updatedGenealogy.lastUpdated = new Date().toISOString()
+  updatedGenealogy.genealogyVersion = (updatedGenealogy.genealogyVersion || 0) + 1
+  
+  return updatedGenealogy
+}
+
+/**
+ * Update derivative detection cache
+ */
+export function updateDerivativeCache(
+  genealogy: R2ChapterGenealogy,
+  potentialDerivatives: Array<{
+    ipAssetId: string
+    similarityScore: number
+    confidence: number
+  }>,
+  scanThreshold: number = 0.3
+): R2ChapterGenealogy {
+  const updatedGenealogy = { ...genealogy }
+  
+  // Initialize aiAnalysis if it doesn't exist
+  if (!updatedGenealogy.aiAnalysis) {
+    updatedGenealogy.aiAnalysis = initializeAIAnalysis()
+  }
+  
+  // Update derivative detection cache
+  updatedGenealogy.aiAnalysis!.derivativeDetectionCache = {
+    potentialDerivatives: potentialDerivatives.map(d => ({
+      ...d,
+      detectedAt: new Date().toISOString()
+    })),
+    lastScan: new Date().toISOString(),
+    scanThreshold
+  }
+  
+  // Update genealogy metadata
+  updatedGenealogy.lastUpdated = new Date().toISOString()
+  updatedGenealogy.genealogyVersion = (updatedGenealogy.genealogyVersion || 0) + 1
+  
+  return updatedGenealogy
+}
+
+/**
+ * Set content fingerprint for quick similarity comparisons
+ */
+export function setContentFingerprint(
+  genealogy: R2ChapterGenealogy,
+  fingerprint: string
+): R2ChapterGenealogy {
+  const updatedGenealogy = { ...genealogy }
+  
+  // Initialize aiAnalysis if it doesn't exist
+  if (!updatedGenealogy.aiAnalysis) {
+    updatedGenealogy.aiAnalysis = initializeAIAnalysis()
+  }
+  
+  // Set content fingerprint
+  updatedGenealogy.aiAnalysis!.contentFingerprint = fingerprint
+  
+  // Update genealogy metadata
+  updatedGenealogy.lastUpdated = new Date().toISOString()
+  updatedGenealogy.genealogyVersion = (updatedGenealogy.genealogyVersion || 0) + 1
+  
+  return updatedGenealogy
+}
+
+/**
+ * Get similarity score for a specific related IP asset
+ */
+export function getSimilarityScore(
+  genealogy: R2ChapterGenealogy,
+  relatedIpAssetId: string
+): {
+  score: number
+  confidence: number
+  lastAnalyzed: string
+  factors: {
+    contentSimilarity: number
+    structuralSimilarity: number
+    themeSimilarity: number
+    styleSimilarity: number
+  }
+} | null {
+  return genealogy.aiAnalysis?.similarityScores[relatedIpAssetId] || null
+}
+
+/**
+ * Check if AI analysis data needs updating based on age
+ */
+export function needsAIAnalysisUpdate(
+  genealogy: R2ChapterGenealogy,
+  maxAgeHours: number = 24
+): boolean {
+  if (!genealogy.aiAnalysis) return true
+  
+  const lastCalculated = new Date(genealogy.aiAnalysis.influenceMetrics.lastCalculated)
+  const maxAge = maxAgeHours * 60 * 60 * 1000 // Convert to milliseconds
+  const now = new Date()
+  
+  return (now.getTime() - lastCalculated.getTime()) > maxAge
+}
+
+/**
+ * Migrate existing genealogy data to include AI analysis
+ */
+export function migrateToAIAnalysisSchema(
+  existingGenealogy: Partial<R2ChapterGenealogy>
+): R2ChapterGenealogy {
+  const migratedGenealogy: R2ChapterGenealogy = {
+    // Preserve existing data
+    parentIpAssetIds: existingGenealogy.parentIpAssetIds || [],
+    childIpAssetIds: existingGenealogy.childIpAssetIds || [],
+    ancestorIds: existingGenealogy.ancestorIds || [],
+    descendantIds: existingGenealogy.descendantIds || [],
+    relationships: existingGenealogy.relationships || [],
+    royaltyFlow: existingGenealogy.royaltyFlow || [],
+    generationLevel: existingGenealogy.generationLevel || 0,
+    branchId: existingGenealogy.branchId,
+    branchName: existingGenealogy.branchName,
+    
+    // Add AI analysis
+    aiAnalysis: existingGenealogy.aiAnalysis || initializeAIAnalysis(),
+    
+    // Update metadata
+    lastUpdated: new Date().toISOString(),
+    genealogyVersion: (existingGenealogy.genealogyVersion || 0) + 1
+  }
+  
+  return migratedGenealogy
+}
