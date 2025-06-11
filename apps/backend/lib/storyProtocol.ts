@@ -443,7 +443,7 @@ export class StoryProtocolService {
     return {
       hasSpgNftContract: !!(spgContract && spgContract !== '0x_your_spg_nft_contract_address_optional'),
       spgNftContract: spgContract || 'Not configured',
-      chainId: 13371,
+      chainId: 1315,
       rpcUrl: 'https://aeneid.storyrpc.io',
       connectedWallet: walletAddress || 'Not connected'
     }
