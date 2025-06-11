@@ -51,7 +51,11 @@ export type {
   PurchaseLicenseResponse,
   CreateDerivativeResponse,
   ClaimRoyaltyResponse,
-  IPAssetEvent
+  IPAssetEvent,
+  LicenseTermsConfig,
+  EnhancedChapterIPData,
+  EnhancedIPRegistrationResult,
+  ChapterGenealogy
 } from './types/ip'
 
 // Export IP service
@@ -60,6 +64,15 @@ export {
   createIPService,
   defaultStoryProtocolConfig
 } from './services/ipService'
+
+// Export advanced Story Protocol service
+export {
+  AdvancedStoryProtocolService,
+  LICENSE_TIERS,
+  ROYALTY_POLICIES,
+  TIPTokenEconomicsCalculator,
+  advancedStoryProtocolService
+} from './services/advancedStoryProtocolService'
 
 // Export data service
 export {

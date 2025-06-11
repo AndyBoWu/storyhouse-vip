@@ -205,23 +205,51 @@ export class AdvancedStoryProtocolService {
         contentRestrictions: licenseConfig.contentRestrictions,
       }
 
-      // TODO: Find the correct method name for v1.3.2 - registerLicenseTerms doesn't exist
-      // const result = await this.client.license.registerLicenseTerms(licenseTermsParams)
-      
-      // For now, return a mock result until we find the correct method
-      const mockResult = {
-        txHash: `0x${Math.random().toString(16).substr(2, 64)}` as Hash,
-        licenseTermsId: `${Date.now()}`
+      // Use the correct SDK v1.3.2 method: registerPILTerms
+      const pilTermsParams = {
+        transferable: licenseConfig.transferable,
+        royaltyPolicy: licenseConfig.royaltyPolicy,
+        defaultMintingFee: licenseConfig.defaultMintingFee,
+        expiration: BigInt(licenseConfig.expiration),
+        commercialUse: licenseConfig.commercialUse,
+        commercialAttribution: licenseConfig.commercialAttribution,
+        commercializerChecker: '0x0000000000000000000000000000000000000000' as Address, // No restrictions
+        commercializerCheckerData: '0x' as `0x${string}`,
+        commercialRevShare: licenseConfig.royaltyPercentage,
+        commercialRevCeiling: BigInt(0), // No ceiling
+        derivativesAllowed: licenseConfig.derivativesAllowed,
+        derivativesAttribution: licenseConfig.derivativesAttribution,
+        derivativesApproval: false, // No approval needed
+        derivativesReciprocal: licenseConfig.shareAlike || false,
+        derivativeRevCeiling: BigInt(0), // No ceiling
+        currency: '0x1514000000000000000000000000000000000000' as Address, // WIP token address
+        uri: '', // License metadata URI (can be empty for now)
+        txOptions: {}
       }
 
-      console.log('⚠️ Using mock license terms creation for SDK v1.3.2')
-      console.log('🔗 Mock Transaction:', mockResult.txHash)
-      console.log('📄 Mock License Terms ID:', mockResult.licenseTermsId)
+      console.log('🔗 Creating PIL terms with Story Protocol SDK v1.3.2...')
+      console.log('📋 PIL parameters:', {
+        tier: licenseConfig.tier,
+        commercialUse: pilTermsParams.commercialUse,
+        derivativesAllowed: pilTermsParams.derivativesAllowed,
+        royaltyPercentage: pilTermsParams.commercialRevShare,
+        defaultMintingFee: pilTermsParams.defaultMintingFee.toString()
+      })
+
+      const result = await this.client.license.registerPILTerms(pilTermsParams)
+
+      if (!result.txHash) {
+        throw new Error('Failed to create PIL terms - no transaction hash returned')
+      }
+
+      console.log('✅ PIL terms created successfully!')
+      console.log('🔗 Transaction:', result.txHash)
+      console.log('📄 License Terms ID:', result.licenseTermsId)
 
       return {
         success: true,
-        licenseTermsId: mockResult.licenseTermsId,
-        transactionHash: mockResult.txHash,
+        licenseTermsId: result.licenseTermsId?.toString(),
+        transactionHash: result.txHash,
       }
 
     } catch (error) {
@@ -343,6 +371,7 @@ export class AdvancedStoryProtocolService {
           const attachResult = await this.client.license.attachLicenseTerms({
             ipId: registrationResult.ipId!,
             licenseTermsId: licenseTermsId,
+            txOptions: {}
           })
           console.log('✅ License terms attached:', attachResult.txHash)
         } catch (licenseError) {

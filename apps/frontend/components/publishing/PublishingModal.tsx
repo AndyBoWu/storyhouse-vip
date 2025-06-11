@@ -6,6 +6,7 @@ import { X, Wallet, Shield, Coins, Clock, BookOpen, TrendingUp, CheckCircle, Ale
 import { useAccount, useConnect, useDisconnect } from 'wagmi'
 import { injected } from 'wagmi/connectors'
 import { usePublishStory } from '@/hooks/usePublishStory'
+import { useEnhancedStoryProtocol } from '@/hooks/useEnhancedStoryProtocol'
 import { getExplorerUrl, getIPAssetUrl } from '@/lib/contracts/storyProtocol'
 
 interface GeneratedStory {
