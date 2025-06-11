@@ -234,11 +234,17 @@ function NewStoryPageContent() {
         formData.append('authorName', bookMetadata.author.slice(-4)) // Short name from address
         formData.append('genres', JSON.stringify(bookMetadata.genres))
         formData.append('contentRating', 'G') // Default rating
-        formData.append('licenseTerms', JSON.stringify({
-          commercialUse: true,
+        // Use selected license configuration
+        const licenseConfig = {
+          commercialUse: ipOptions.licenseType !== 'free',
           derivativesAllowed: true,
-          commercialRevShare: 10
-        }))
+          commercialRevShare: ipOptions.licenseType === 'exclusive' ? 25 : 
+                              ipOptions.licenseType === 'premium' ? 10 : 0,
+          licenseType: ipOptions.licenseType,
+          licensePrice: ipOptions.licenseType === 'exclusive' ? 1000 :
+                       ipOptions.licenseType === 'premium' ? 100 : 0
+        }
+        formData.append('licenseTerms', JSON.stringify(licenseConfig))
 
         // Add cover file if available
         if (bookCover) {
@@ -586,6 +592,55 @@ function NewStoryPageContent() {
                 exit={{ opacity: 0, height: 0 }}
                 className="mt-6 space-y-4"
               >
+                {/* License Selection */}
+                <div className="bg-white rounded-xl shadow-lg p-6">
+                  <h4 className="font-medium text-gray-800 mb-4">🏷️ License Configuration</h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="radio"
+                        name="licenseType"
+                        value="free"
+                        checked={ipOptions.licenseType === 'free'}
+                        onChange={(e) => setIPOptions({...ipOptions, licenseType: e.target.value as 'standard' | 'premium' | 'exclusive'})}
+                        className="text-green-600"
+                      />
+                      <div className="flex-1">
+                        <span className="font-medium text-green-700">Free License</span>
+                        <p className="text-sm text-green-600">Open access with attribution. Great for building audience.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="radio"
+                        name="licenseType"
+                        value="premium"
+                        checked={ipOptions.licenseType === 'premium' || ipOptions.licenseType === 'standard'}
+                        onChange={(e) => setIPOptions({...ipOptions, licenseType: 'premium'})}
+                        className="text-blue-600"
+                      />
+                      <div className="flex-1">
+                        <span className="font-medium text-blue-700">Premium License</span>
+                        <p className="text-sm text-blue-600">Commercial use allowed, 100 TIP license fee, 10% royalty</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="radio"
+                        name="licenseType"
+                        value="exclusive"
+                        checked={ipOptions.licenseType === 'exclusive'}
+                        onChange={(e) => setIPOptions({...ipOptions, licenseType: e.target.value as 'standard' | 'premium' | 'exclusive'})}
+                        className="text-purple-600"
+                      />
+                      <div className="flex-1">
+                        <span className="font-medium text-purple-700">Exclusive License</span>
+                        <p className="text-sm text-purple-600">Full commercial rights, 1000 TIP license fee, 25% royalty</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="bg-blue-50 rounded-lg p-4">
                   <h4 className="font-medium text-blue-800 mb-2">📚 What are Story Collections?</h4>
                   <p className="text-sm text-blue-700">Group stories together for shared themes and revenue. Perfect for series or related content.</p>

@@ -149,6 +149,22 @@ export default function StoryGenerationInterface({
             </div>
           </div>
 
+          {/* License Information */}
+          {generatedStory.metadata.licenseTier && (
+            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-blue-800">License Tier:</span>
+                  <span className="text-sm text-blue-700 capitalize">{generatedStory.metadata.licenseTier}</span>
+                </div>
+                <div className="flex items-center gap-4 text-sm text-blue-700">
+                  <span>Price: {generatedStory.metadata.licensePrice} TIP</span>
+                  <span>Royalty: {generatedStory.metadata.royaltyPercentage}%</span>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Tags */}
           <div className="mt-4">
             <div className="text-sm text-gray-600 mb-2">Suggested Tags:</div>
