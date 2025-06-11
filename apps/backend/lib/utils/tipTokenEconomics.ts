@@ -476,7 +476,4 @@ export class TIPTokenEconomicsService {
 // Export singleton instance
 export const tipTokenEconomicsService = new TIPTokenEconomicsService()
 
-// Export configuration
-export { TIP_ECONOMICS_CONFIG }
-
 export default tipTokenEconomicsService
