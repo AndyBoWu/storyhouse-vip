@@ -110,7 +110,7 @@ class IPService {
         id: `0x${Math.random().toString(16).substring(2, 42)}`,
         tokenContract: nftContract,
         tokenId: tokenId,
-        chainId: '1315', // Aeneid testnet
+        chainId: 1315, // Aeneid testnet
         metadata: {
           name: story.title,
           description: story.content.substring(0, 200),
