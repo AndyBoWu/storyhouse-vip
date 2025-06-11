@@ -8,8 +8,8 @@ Revolutionary Web3 storytelling platform built on Story Protocol enabling chapte
 - Frontend: https://testnet.storyhouse.vip/ 
 - Backend: https://api-testnet.storyhouse.vip/
 
-**Production:**
-- Frontend: https://storyhouse.vip/
+**Production:** *(Under Planning)*
+- Frontend: https://storyhouse.vip/ 
 - Backend: https://api.storyhouse.vip/
 
 ## 🎯 Core Features
