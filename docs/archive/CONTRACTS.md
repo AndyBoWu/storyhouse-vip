@@ -10,7 +10,7 @@ StoryHouse.vip utilizes a comprehensive smart contract system built on OpenZeppe
 
 **Deployment Status**: ✅ **FULLY OPERATIONAL**
 **Network**: Story Protocol Aeneid Testnet (Chain ID: 1315)
-**Deployment Date**: June 4, 2025
+**Status**: Deployed
 **Total Cost**: ~0.0144 ETH (~$30-40 USD)
 
 ### **📍 Deployed Contract Addresses**

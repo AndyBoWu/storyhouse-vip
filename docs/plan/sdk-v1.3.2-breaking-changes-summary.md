@@ -1,7 +1,7 @@
 # Story Protocol SDK v1.3.2 Breaking Changes Summary
 
 ## Overview
-✅ **COMPLETED** - This document summarizes the breaking changes encountered and successfully resolved during the upgrade from Story Protocol SDK v1.3.1 to v1.3.2, completed on June 11, 2025. Updated December 11, 2025.
+✅ **COMPLETED** - This document summarizes the breaking changes encountered and successfully resolved during the upgrade from Story Protocol SDK v1.3.1 to v1.3.2.
 
 **Final Status**: All breaking changes resolved with enhanced PIL licensing system fully operational
 

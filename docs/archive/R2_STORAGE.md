@@ -86,7 +86,7 @@ Endpoint: `POST /api/upload`
     "storyId": "story-123",
     "chapterNumber": "1",
     "contentType": "chapter",
-    "uploadedAt": "2025-06-06T14:15:00.000Z"
+    "uploadedAt": "YYYY-MM-DDTHH:MM:SS.SSSZ"
   }
 }
 ```
@@ -162,7 +162,7 @@ Each R2 stored chapter includes Story Protocol ready metadata:
     "qualityScore": 100,
     "originalityScore": 80,
     "commercialViability": 62,
-    "generatedAt": "2025-06-06T14:15:00.000Z"
+    "generatedAt": "YYYY-MM-DDTHH:MM:SS.SSSZ"
   }
 }
 ```
