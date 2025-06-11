@@ -185,3 +185,110 @@ export interface StoryWithIP {
 export type IPAssetId = string
 export type LicenseTermsId = string
 export type CollectionId = string
+
+// ============================================================================
+// PHASE 2 ROYALTY OPERATION TYPES (Ticket 2.1.1)
+// ============================================================================
+
+// Enhanced Royalty Response for Phase 2 operations
+export interface EnhancedClaimRoyaltyResponse {
+  success: boolean
+  amount?: bigint
+  transactionHash?: Hash
+  error?: string
+  // Phase 2 enhancements
+  tipTokenAmount?: number
+  platformFee?: number
+  chapterInfo?: {
+    chapterId: string
+    licenseTier: string
+    totalRevenue: number
+  }
+  simulationMode?: boolean
+  simulationReason?: string
+  retryRecommendation?: string
+}
+
+// Claimable Royalties Information
+export interface ClaimableRoyaltiesInfo {
+  totalClaimable: number
+  licenseTier?: string
+  royaltyBreakdown: {
+    baseRoyalties: number
+    bonusRoyalties: number
+    tipTokenRewards: number
+  }
+  lastUpdated: string
+}
+
+// Royalty Sharing Distribution
+export interface RoyaltySharingDistribution {
+  originalCreator: {
+    address: Address
+    amount: bigint
+    percentage: number
+  }
+  platform: {
+    amount: bigint
+    percentage: number
+  }
+  derivatives: Array<{
+    address: Address
+    amount: bigint
+    percentage: number
+    derivativeId: string
+  }>
+  totalDistributed: bigint
+}
+
+// Chapter Royalty Usage Data
+export interface ChapterRoyaltyUsage {
+  chapterId: string
+  totalReads: number
+  totalLicenses: number
+  averageReadingTime: number
+  qualityScore?: number
+  engagementMetrics: {
+    completionRate: number
+    returnReaderRate: number
+    shareRate: number
+  }
+  revenueMetrics: {
+    readRevenue: number
+    licenseRevenue: number
+    derivativeRevenue: number
+  }
+}
+
+// Chapter Metadata for Royalty Operations
+export interface ChapterRoyaltyMetadata {
+  chapterId: string
+  licenseTier: 'free' | 'premium' | 'exclusive'
+  authorAddress: Address
+  ipAssetId?: string
+  royaltyPercentage: number
+  createdAt: string
+  qualityScore?: number
+  engagement?: {
+    totalReads: number
+    averageTime: number
+    completionRate: number
+  }
+}
+
+// Royalty Error Categories for Enhanced Error Handling
+export interface RoyaltyErrorInfo {
+  message: string
+  retryable: boolean
+  category: 'wallet_error' | 'network_error' | 'gas_error' | 'royalty_error' | 'unknown_error'
+  suggestedActions?: string[]
+}
+
+// TIP Token Conversion Information
+export interface TipTokenConversion {
+  ethAmount: number
+  tipTokenAmount: number
+  conversionRate: number
+  platformFee: number
+  netAmount: number
+}
