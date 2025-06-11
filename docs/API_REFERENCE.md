@@ -2,7 +2,7 @@
 
 ## Overview
 
-StoryHouse.vip provides a RESTful API for creating, managing, and licensing IP assets with PIL (Programmable IP License) support and comprehensive royalty distribution.
+StoryHouse.vip provides a comprehensive RESTful API for creating, managing, and licensing IP assets with PIL (Programmable IP License) support, blockchain derivative registration, AI-powered content analytics, automated notifications, and real-time royalty distribution.
 
 ### Base URLs
 ```
@@ -16,7 +16,459 @@ Session-based authentication with Web3 wallet integration.
 
 ---
 
-## 🆕 **Royalty Distribution API**
+## 🔗 **Story Protocol SDK Derivative Registration API**
+
+### Register Derivative Manually
+
+Register a derivative work on blockchain using Story Protocol SDK.
+
+```http
+POST /api/derivatives/register
+```
+
+**Request Body:**
+```json
+{
+  "derivativeChapterId": "0x1234567890abcdef",
+  "parentIpId": "0xfedcba0987654321",
+  "authorAddress": "0x9876543210fedcba",
+  "metadata": {
+    "title": "Extended Chapter: The Portal's Secret",
+    "description": "A derivative work expanding on the original portal story",
+    "derivativeType": "expansion"
+  },
+  "options": {
+    "skipLicenseCheck": false,
+    "economicProjection": true
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Derivative registered successfully on blockchain",
+  "data": {
+    "derivativeIpId": "0xnewderivative123",
+    "parentIpId": "0xfedcba0987654321",
+    "transactionHash": "0xabc123def456...",
+    "licenseInheritance": {
+      "inheritedFrom": "Premium License",
+      "royaltyRate": 10,
+      "commercialUse": true
+    },
+    "economicProjection": {
+      "projectedRevenue": 250.00,
+      "parentRoyaltyShare": 25.00,
+      "derivativeShare": 225.00
+    },
+    "registeredAt": "YYYY-MM-DDTHH:MM:SS.SSSZ"
+  }
+}
+```
+
+### Auto-Register Derivative with AI Detection
+
+AI-powered detection and automatic derivative registration.
+
+```http
+POST /api/derivatives/auto-register
+```
+
+**Request Body:**
+```json
+{
+  "chapterId": "0x1234567890abcdef",
+  "content": "Detective Sarah Chen discovered another portal, deeper in the forest...",
+  "authorAddress": "0x9876543210fedcba",
+  "options": {
+    "similarityThreshold": 0.7,
+    "autoRegister": true,
+    "requireConfirmation": false
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "AI detected parent content and registered derivative",
+  "data": {
+    "detectedParents": [
+      {
+        "parentIpId": "0xfedcba0987654321",
+        "similarityScore": 0.85,
+        "title": "The Detective's Portal - Chapter 1",
+        "matchingElements": ["character: Detective Sarah Chen", "setting: forest portal"]
+      }
+    ],
+    "derivativeIpId": "0xnewderivative456",
+    "transactionHash": "0xdef456ghi789...",
+    "aiAnalysis": {
+      "originalityScore": 75,
+      "qualityScore": 88,
+      "derivativeType": "sequel",
+      "confidence": 92
+    }
+  }
+}
+```
+
+### Get Family Tree
+
+Retrieve derivative relationship tree with unlimited depth.
+
+```http
+GET /api/derivatives/tree/[ipId]
+```
+
+**Query Parameters:**
+- `depth` (optional): Maximum depth to traverse (default: unlimited)
+- `includeMetadata` (optional): Include full metadata for each node
+- `format` (optional): Response format ("tree" | "flat")
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "rootIpId": "0xoriginal123",
+    "title": "The Detective's Portal",
+    "totalDerivatives": 15,
+    "maxDepth": 4,
+    "familyTree": {
+      "ipId": "0xoriginal123",
+      "title": "The Detective's Portal - Chapter 1",
+      "level": 0,
+      "children": [
+        {
+          "ipId": "0xderivative456",
+          "title": "The Portal's Secret",
+          "similarityScore": 0.85,
+          "level": 1,
+          "children": [
+            {
+              "ipId": "0xsubderivative789",
+              "title": "Portal Mysteries Unveiled",
+              "similarityScore": 0.72,
+              "level": 2,
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    "statistics": {
+      "directDerivatives": 3,
+      "totalRevenue": 1250.00,
+      "averageSimilarity": 0.78
+    }
+  }
+}
+```
+
+### Analyze License Inheritance
+
+Check license compatibility for derivative registration.
+
+```http
+GET /api/derivatives/license-inheritance/[parentIpId]
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "parentIpId": "0xfedcba0987654321",
+    "parentLicense": {
+      "templateId": "premium",
+      "name": "Premium License",
+      "derivativesAllowed": true,
+      "commercialUse": true,
+      "royaltyRate": 10
+    },
+    "inheritance": {
+      "canCreateDerivative": true,
+      "inheritedRoyaltyRate": 10,
+      "inheritedTerms": {
+        "commercialUse": true,
+        "attribution": true,
+        "shareAlike": false
+      }
+    },
+    "economicAnalysis": {
+      "parentRevenueShare": 10,
+      "derivativeRevenueShare": 90,
+      "projectedParentEarnings": {
+        "conservative": 25.00,
+        "optimistic": 75.00
+      }
+    }
+  }
+}
+```
+
+---
+
+## 🔔 **Automated Notification System API**
+
+### Get User Notifications
+
+Retrieve real-time notifications for a user.
+
+```http
+GET /api/notifications/[userAddress]
+```
+
+**Query Parameters:**
+- `type` (optional): Filter by notification type
+- `read` (optional): Filter by read status
+- `limit` (optional): Number of notifications to return
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "notifications": [
+      {
+        "id": "notif_derivative_123",
+        "type": "derivative_detected",
+        "title": "New Derivative Detected",
+        "message": "AI detected a potential derivative of your work 'The Detective's Portal'",
+        "metadata": {
+          "parentIpId": "0xoriginal123",
+          "derivativeIpId": "0xderivative456",
+          "similarityScore": 0.85,
+          "potentialRevenue": 25.00
+        },
+        "createdAt": "YYYY-MM-DDTHH:MM:SS.SSSZ",
+        "read": false,
+        "priority": "high"
+      }
+    ],
+    "summary": {
+      "total": 15,
+      "unread": 8,
+      "byType": {
+        "derivative_detected": 3,
+        "quality_improvement": 2,
+        "collaboration_opportunity": 3
+      }
+    }
+  }
+}
+```
+
+### Mark Notifications as Read
+
+Mark one or more notifications as read.
+
+```http
+POST /api/notifications/mark-read
+```
+
+**Request Body:**
+```json
+{
+  "userAddress": "0x9876543210fedcba",
+  "notificationIds": ["notif_derivative_123", "notif_quality_456"],
+  "markAll": false
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "2 notifications marked as read",
+  "data": {
+    "updatedCount": 2,
+    "remainingUnread": 6
+  }
+}
+```
+
+### Get Notification Preferences
+
+Retrieve user notification preferences.
+
+```http
+GET /api/notifications/preferences/[userAddress]
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "preferences": {
+      "derivative_detected": {
+        "enabled": true,
+        "channels": ["in_app", "email"],
+        "threshold": 0.7
+      },
+      "quality_improvement": {
+        "enabled": true,
+        "channels": ["in_app"],
+        "minScore": 60
+      },
+      "collaboration_opportunity": {
+        "enabled": false,
+        "channels": []
+      }
+    },
+    "globalSettings": {
+      "emailEnabled": true,
+      "pushEnabled": true,
+      "webhookUrl": "https://example.com/webhook"
+    }
+  }
+}
+```
+
+### Update Notification Preferences
+
+Update user notification preferences.
+
+```http
+POST /api/notifications/preferences
+```
+
+**Request Body:**
+```json
+{
+  "userAddress": "0x9876543210fedcba",
+  "preferences": {
+    "derivative_detected": {
+      "enabled": true,
+      "channels": ["in_app", "email", "push"],
+      "threshold": 0.8
+    }
+  },
+  "globalSettings": {
+    "emailEnabled": true,
+    "webhookUrl": "https://mynewwebhook.com/notifications"
+  }
+}
+```
+
+---
+
+## 🤖 **AI Content Analytics API**
+
+### Content Similarity Analysis
+
+Analyze content similarity for derivative detection.
+
+```http
+GET /api/discovery?type=content-similarity
+```
+
+**Query Parameters:**
+- `chapterId` (optional): Specific chapter to analyze
+- `threshold` (optional): Similarity threshold (0.0-1.0)
+- `limit` (optional): Max results to return
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "similarities": [
+      {
+        "sourceChapter": "0x1234567890abcdef",
+        "targetChapter": "0xfedcba0987654321",
+        "similarityScore": 0.85,
+        "matchingElements": ["character names", "plot structure", "setting"],
+        "analysis": {
+          "isDerivative": true,
+          "confidence": 92,
+          "derivativeType": "adaptation"
+        }
+      }
+    ],
+    "summary": {
+      "totalAnalyzed": 50,
+      "potentialDerivatives": 3,
+      "avgSimilarityScore": 0.23
+    }
+  }
+}
+```
+
+### Influence Analysis
+
+Analyze author influence and derivative impact.
+
+```http
+GET /api/discovery?type=influence-analysis
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "authors": [
+      {
+        "authorAddress": "0x9876543210fedcba",
+        "influenceScore": 85,
+        "metrics": {
+          "directDerivatives": 12,
+          "indirectDerivatives": 35,
+          "totalRevenue": 2500.00,
+          "readerEngagement": 78
+        },
+        "trending": {
+          "weeklyGrowth": 15.5,
+          "derivativeVelocity": 3.2
+        }
+      }
+    ]
+  }
+}
+```
+
+### Quality Assessment
+
+AI-powered content quality analysis.
+
+```http
+GET /api/discovery?type=quality-assessment
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "assessments": [
+      {
+        "chapterId": "0x1234567890abcdef",
+        "qualityScore": 88,
+        "breakdown": {
+          "plot": 90,
+          "character": 85,
+          "writing": 87,
+          "engagement": 92
+        },
+        "recommendations": [
+          "Consider developing secondary characters more deeply",
+          "Excellent pacing and tension building"
+        ]
+      }
+    ]
+  }
+}
+```
+
+---
+
+## 💰 **Enhanced Royalty Distribution API**
 
 ### Claim Chapter Royalties
 
@@ -543,6 +995,39 @@ import { apiClient } from '@/lib/api-client'
 const templates = await apiClient.getLicenseTemplates()
 const result = await apiClient.attachLicense(ipAssetId, templateId)
 
+// 🆕 Derivative Registration
+const manualDerivative = await apiClient.registerDerivative({
+  derivativeChapterId: '0x1234567890abcdef',
+  parentIpId: '0xfedcba0987654321',
+  authorAddress: '0x9876543210fedcba'
+})
+
+const autoDerivative = await apiClient.autoRegisterDerivative({
+  chapterId: '0x1234567890abcdef',
+  content: 'Story content...',
+  authorAddress: '0x9876543210fedcba'
+})
+
+const familyTree = await apiClient.getDerivativeTree('0xoriginal123')
+const licenseInheritance = await apiClient.getLicenseInheritance('0xparent456')
+
+// 🆕 Notification Management
+const notifications = await apiClient.getNotifications('0x9876543210fedcba')
+const markRead = await apiClient.markNotificationsRead({
+  userAddress: '0x9876543210fedcba',
+  notificationIds: ['notif_123']
+})
+const preferences = await apiClient.getNotificationPreferences('0x9876543210fedcba')
+const updatePrefs = await apiClient.updateNotificationPreferences({
+  userAddress: '0x9876543210fedcba',
+  preferences: {...}
+})
+
+// 🆕 AI Analytics
+const similarity = await apiClient.getContentSimilarity()
+const influence = await apiClient.getInfluenceAnalysis()
+const quality = await apiClient.getQualityAssessment()
+
 // Royalty Management
 const claimResult = await apiClient.claimRoyalty({
   chapterId: '0x1234567890abcdef',
@@ -552,41 +1037,59 @@ const claimResult = await apiClient.claimRoyalty({
 const claimableAmount = await apiClient.getClaimableRoyalties('0x1234567890abcdef')
 const history = await apiClient.getRoyaltyHistory('0x9876543210fedcba')
 const analytics = await apiClient.getRoyaltyPreview()
-const notifications = await apiClient.getRoyaltyNotifications('0x9876543210fedcba')
+const royaltyNotifications = await apiClient.getRoyaltyNotifications('0x9876543210fedcba')
 ```
 
 ---
 
 ## 🆕 **Rate Limiting & Performance**
 
-### Royalty API Limits
+### Enhanced API Limits
 - **Development**: No limits
 - **Production**: 
-  - Claim operations: 10 per minute per wallet
-  - Read operations: 100 per minute per IP
-  - Analytics: 20 per minute per wallet
+  - **Derivative Registration**: 5 per minute per wallet (blockchain operations)
+  - **Notification Operations**: 50 per minute per user
+  - **AI Analytics**: 20 per minute per wallet
+  - **Royalty Claims**: 10 per minute per wallet
+  - **Read Operations**: 100 per minute per IP
 
 ### Performance Optimization
-- **Response Times**: <2s for all operations
-- **Caching**: Intelligent caching for analytics and history data
-- **Batch Operations**: Concurrent processing for multiple claims
-- **Error Recovery**: Automatic retry logic for blockchain operations
+- **Response Times**: 
+  - AI Analysis: <3s for content similarity
+  - Blockchain Operations: <5s for derivative registration
+  - Notifications: <2s for real-time delivery
+  - Standard APIs: <2s for all operations
+- **Caching**: 
+  - Intelligent caching for analytics and family tree data
+  - AI analysis results cached for 24 hours
+  - Notification preferences cached for performance
+- **Batch Operations**: 
+  - Concurrent processing for multiple derivative registrations
+  - Background notification processing every 6 hours
+- **Error Recovery**: 
+  - Automatic retry logic for blockchain operations
+  - Graceful fallback for AI service interruptions
 
 ---
 
 ## 🔐 **Security Features**
 
-### Royalty System Security
-- **Multi-signature validation** for high-value claims
-- **Rate limiting** to prevent abuse
-- **Input validation** with comprehensive sanitization
-- **Blockchain verification** for all TIP token transfers
-- **Audit trails** for all claiming operations
+### Comprehensive Security Framework
+- **Multi-signature validation** for high-value claims and derivative registrations
+- **Rate limiting** to prevent abuse across all API endpoints
+- **Input validation** with comprehensive sanitization and type checking
+- **Blockchain verification** for all Story Protocol SDK transactions
+- **AI Content Protection** with privacy-preserving analysis
+- **Notification Security** with anti-spam and content filtering
+- **Audit trails** for all blockchain operations and sensitive actions
 
-### Error Categories
+### Enhanced Error Categories
 1. **Validation Errors**: Invalid parameters or missing data
-2. **Blockchain Errors**: Network issues or insufficient gas
-3. **Economic Errors**: Insufficient balance or invalid amounts
-4. **Authorization Errors**: Wallet verification failures
-5. **System Errors**: Infrastructure or configuration issues
-6. **Rate Limit Errors**: Too many requests
+2. **Blockchain Errors**: Network issues, insufficient gas, or SDK failures
+3. **AI Errors**: OpenAI API failures or analysis timeouts
+4. **Economic Errors**: Insufficient balance or invalid amounts
+5. **Authorization Errors**: Wallet verification or permission failures
+6. **System Errors**: Infrastructure or configuration issues
+7. **Rate Limit Errors**: Too many requests across different endpoints
+8. **Notification Errors**: Delivery failures or preference conflicts
+9. **Derivative Errors**: License incompatibility or registration failures

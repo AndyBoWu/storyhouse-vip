@@ -1,6 +1,6 @@
 # 🧪 StoryHouse.vip Testing Strategy
 
-Comprehensive testing approach for reliable Web3 storytelling platform development and deployment.
+Comprehensive testing approach for reliable Web3 storytelling platform with Story Protocol SDK derivative registration, AI-powered content analytics, automated notifications, and blockchain integration.
 
 ## 🎯 Testing Philosophy
 
@@ -26,9 +26,12 @@ npm run test:quick
 npm run test:all
 
 # Specific test categories
-npm run test:local      # Local services health check
-npm run test:integration # API endpoints
-npm run test:contracts  # Smart contract verification
+npm run test:local        # Local services health check
+npm run test:integration  # API endpoints
+npm run test:contracts    # Smart contract verification
+npm run test:blockchain   # 🆕 Story Protocol SDK derivative registration
+npm run test:ai           # 🆕 AI content analysis and OpenAI integration
+npm run test:notifications # 🆕 Real-time notification system
 ```
 
 ### CI/CD Integration
@@ -54,6 +57,15 @@ npm run dev
 # In another terminal, run health checks
 npm run test:local
 
+# 🆕 Test blockchain integration
+npm run test:blockchain
+
+# 🆕 Test AI analysis systems
+npm run test:ai
+
+# 🆕 Test notification systems
+npm run test:notifications
+
 # Before committing
 git add .
 # Pre-commit hook runs automatically
@@ -66,6 +78,9 @@ git commit -m "feature: add new functionality"
 - ✅ Code quality checks (TypeScript, ESLint, Prettier)
 - ✅ Unit tests (smart contracts)
 - ✅ Integration tests (API endpoints)
+- ✅ 🆕 Blockchain integration tests (SDK operations)
+- ✅ 🆕 AI analysis system tests (OpenAI integration)
+- ✅ 🆕 Notification system tests (real-time delivery)
 - ✅ Build verification (frontend & backend)
 - ✅ Security scanning (npm audit, CodeQL)
 
