@@ -86,7 +86,8 @@ function WritePageContent() {
         authorAddress: connectedAddress,
         authorName: connectedAddress.slice(0, 6) + '...' + connectedAddress.slice(-4),
         ipOptions: {
-          registerAsIP: true
+          registerAsIP: true,
+          licenseType: params.licenseType || 'premium' // Add license type from params
         }
       })
       
