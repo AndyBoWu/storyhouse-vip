@@ -443,6 +443,130 @@ export const apiClient = {
     
     return apiRequest(`/api/notifications/quality?${params}`)
   },
+
+  // =============================================================================
+  // STORY PROTOCOL SDK DERIVATIVE REGISTRATION API METHODS
+  // =============================================================================
+
+  /**
+   * Register a derivative work on Story Protocol blockchain
+   */
+  async registerDerivative(data: {
+    parentIpId: string;
+    parentChapterId: string;
+    derivativeContent: any;
+    derivativeType: 'remix' | 'sequel' | 'adaptation' | 'translation' | 'other';
+    inheritParentLicense?: boolean;
+    customLicenseTermsId?: string;
+    attributionText?: string;
+    creatorNotes?: string;
+    walletClient?: any;
+  }) {
+    return apiRequest('/api/derivatives/register', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    })
+  },
+
+  /**
+   * Auto-detect parent content and register derivative using AI
+   */
+  async autoRegisterDerivative(data: {
+    derivativeContent: any;
+    derivativeType: 'remix' | 'sequel' | 'adaptation' | 'translation' | 'other';
+    options?: {
+      minimumSimilarityThreshold?: number;
+      maxParentCandidates?: number;
+      requireManualConfirmation?: boolean;
+    };
+    walletClient?: any;
+  }) {
+    return apiRequest('/api/derivatives/auto-register', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    })
+  },
+
+  /**
+   * Query derivative family tree for an IP asset
+   */
+  async getDerivativeTree(ipId: string, options: {
+    includeAiAnalysis?: boolean;
+    includeLicenseDetails?: boolean;
+    includeRevenueData?: boolean;
+    depth?: number;
+  } = {}) {
+    const params = new URLSearchParams({
+      ...(options.includeAiAnalysis && { includeAiAnalysis: 'true' }),
+      ...(options.includeLicenseDetails && { includeLicenseDetails: 'true' }),
+      ...(options.includeRevenueData && { includeRevenueData: 'true' }),
+      ...(options.depth && { depth: options.depth.toString() })
+    })
+    
+    return apiRequest(`/api/derivatives/tree/${ipId}?${params}`)
+  },
+
+  /**
+   * Query derivative tree with complex filters (POST method)
+   */
+  async queryDerivativeTreeFiltered(ipId: string, query: {
+    includeAiAnalysis?: boolean;
+    includeLicenseDetails?: boolean;
+    includeRevenueData?: boolean;
+    depth?: number;
+    filters?: {
+      licenseTierFilter?: string[];
+      qualityThreshold?: number;
+      similarityThreshold?: number;
+      revenueThreshold?: number;
+      creatorFilter?: string[];
+      dateRange?: { from: string; to: string };
+      derivativeTypeFilter?: string[];
+    };
+  }) {
+    return apiRequest(`/api/derivatives/tree/${ipId}`, {
+      method: 'POST',
+      body: JSON.stringify(query)
+    })
+  },
+
+  /**
+   * Analyze license inheritance options for derivative creation
+   */
+  async analyzeLicenseInheritance(parentIpId: string, derivativeCreator: string) {
+    return apiRequest(`/api/derivatives/license-inheritance/${parentIpId}?derivativeCreator=${derivativeCreator}`)
+  },
+
+  /**
+   * Detailed license inheritance analysis with derivative parameters
+   */
+  async analyzeDetailedLicenseInheritance(parentIpId: string, data: {
+    derivativeCreator: string;
+    derivativeContent: any;
+    derivativeType?: string;
+    intendedUse?: 'commercial' | 'non-commercial' | 'educational';
+    targetAudience?: 'general' | 'adult' | 'children';
+    distributionChannels?: string[];
+  }) {
+    return apiRequest(`/api/derivatives/license-inheritance/${parentIpId}`, {
+      method: 'POST',
+      body: JSON.stringify(data)
+    })
+  },
+
+  /**
+   * Get derivative registration service status and capabilities
+   */
+  async getDerivativeServiceStatus() {
+    return apiRequest('/api/derivatives/register')
+  },
+
+  /**
+   * Get auto-derivative registration service information
+   */
+  async getAutoDerivativeServiceInfo() {
+    return apiRequest('/api/derivatives/auto-register')
+  },
 }
 
 /**
