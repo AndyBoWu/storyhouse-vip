@@ -222,6 +222,183 @@ export interface StoryProtocolConfig {
   }
 }
 
+// License configuration for 3-tier system
+export interface LicenseTermsConfig {
+  tier: 'free' | 'premium' | 'exclusive'
+  displayName: string
+  description: string
+  
+  // Core license terms for Story Protocol
+  transferable: boolean
+  royaltyPolicy: Address
+  defaultMintingFee: bigint
+  expiration: number
+  
+  // Rights configuration
+  commercialUse: boolean
+  commercialAttribution: boolean
+  derivativesAllowed: boolean
+  derivativesAttribution: boolean
+  
+  // Territory and distribution
+  territories: string[]
+  distributionChannels: string[]
+  contentRestrictions: string[]
+  
+  // StoryHouse-specific pricing (in TIP tokens)
+  tipPrice: number
+  royaltyPercentage: number
+  
+  // Additional terms
+  exclusivity: boolean
+  shareAlike: boolean
+  attribution: boolean
+}
+
+// Enhanced Chapter IP Data for registration
+export interface EnhancedChapterIPData {
+  // Basic chapter information
+  storyId: string
+  chapterNumber: number
+  title: string
+  content: string
+  contentUrl: string
+  
+  // Enhanced metadata for Story Protocol v1.3.2
+  metadata: {
+    // Content classification
+    suggestedTags: string[]
+    suggestedGenre: string
+    contentRating: 'G' | 'PG' | 'PG-13' | 'R'
+    language: string
+    
+    // AI quality metrics
+    qualityScore: number      // 0-100
+    originalityScore: number  // 0-100
+    commercialViability: number // 0-100
+    
+    // Reading metrics
+    wordCount: number
+    estimatedReadingTime: number // minutes
+    
+    // User attribution
+    authorAddress: Address
+    authorName?: string
+    
+    // Licensing preferences
+    preferredLicenseTier: 'free' | 'premium' | 'exclusive'
+    allowDerivatives: boolean
+    commercialRights: boolean
+    
+    // Economic parameters
+    unlockPrice: number    // TIP tokens to unlock
+    readReward: number     // TIP tokens earned for reading
+    licensePrice: number   // TIP tokens for licensing
+    royaltyPercentage: number // % for derivatives
+    
+    // Platform tracking
+    createdAt: Date
+    updatedAt: Date
+    ipfsHash?: string
+    r2Url?: string
+    
+    // Story Protocol specific
+    mediaType: 'text/story'
+    rights?: string
+    source?: string
+  }
+  
+  // License configuration
+  licenseConfig?: LicenseTermsConfig
+  
+  // Collection membership
+  collectionId?: string
+  
+  // Derivative information
+  parentIpAssetId?: string
+  isRemix: boolean
+  remixSourceStoryId?: string
+}
+
+// Enhanced IP Registration Result for v1.3.2
+export interface EnhancedIPRegistrationResult {
+  success: boolean
+  
+  // Core registration data
+  ipAssetId?: string
+  transactionHash?: Hash
+  tokenId?: string
+  
+  // License-related results
+  licenseTermsId?: string
+  licenseTokenId?: string
+  
+  // Enhanced tracking
+  operationId?: string
+  gasUsed?: bigint
+  gasPrice?: bigint
+  blockNumber?: number
+  
+  // Timing
+  registrationTime?: Date
+  confirmationTime?: Date
+  
+  // Error handling
+  error?: string
+  errorCode?: string
+  retryable?: boolean
+  
+  // Additional metadata
+  metadata?: {
+    ipMetadataURI?: string
+    nftMetadataURI?: string
+    spgNftContract?: Address
+    registrationMethod: 'mintAndRegisterIp' | 'registerIp'
+  }
+}
+
+// Chapter genealogy for tracking IP relationships
+export interface ChapterGenealogy {
+  chapterId: string
+  ipAssetId?: string
+  
+  // Parent-child relationships
+  parentIpAssetIds: string[]   // Direct parents
+  childIpAssetIds: string[]    // Direct children
+  ancestorIds: string[]        // Full ancestry chain
+  descendantIds: string[]      // Full descendant tree
+  
+  // Relationship metadata
+  relationships: {
+    ipAssetId: string
+    relationship: 'parent' | 'child' | 'sibling' | 'ancestor' | 'descendant'
+    licenseTermsId?: string
+    licenseTokenId?: string
+    createdAt: Date
+    transactionHash?: Hash
+  }[]
+  
+  // Royalty flow tracking
+  royaltyFlow: {
+    fromIpAssetId: string
+    toIpAssetId: string
+    percentage: number
+    totalClaimed: number
+    lastClaimDate?: Date
+  }[]
+  
+  // Generation level (0 = original, 1 = first derivative, etc.)
+  generationLevel: number
+  
+  // Branch information for complex trees
+  branchId?: string
+  branchName?: string
+  
+  // Updated timestamps
+  lastUpdated: Date
+  genealogyVersion: number
+}
+
 // API response types
 export interface RegisterIPAssetResponse {
   success: boolean

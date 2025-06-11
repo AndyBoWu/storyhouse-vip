@@ -4,6 +4,7 @@ import './globals.css'
 import './protection.css'
 import Web3Provider from '@/components/Web3Provider'
 import AntiScrapeHeaders from '@/components/ui/AntiScrapeHeaders'
+import Footer from '@/components/ui/Footer'
 
 // Configure reading-optimized fonts
 const inter = Inter({
@@ -60,9 +61,12 @@ export default function RootLayout({
       <head>
         <AntiScrapeHeaders />
       </head>
-      <body className="min-h-screen font-sans antialiased">
+      <body className="min-h-screen font-sans antialiased flex flex-col">
         <Web3Provider>
-          {children}
+          <div className="flex-1">
+            {children}
+          </div>
+          <Footer />
         </Web3Provider>
       </body>
     </html>
