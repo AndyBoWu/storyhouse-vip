@@ -284,7 +284,7 @@ interface ChapterInheritance {
 ### **Revenue Dashboard (Multi-Author)**
 
 ```typescript
-// Andy's dashboard shows:
+// Andy's dashboard shows (with Phase 2 Royalty System):
 {
   directRevenue: {
     chapterUnlocks: "15.2 $TIP", // From readers
@@ -295,8 +295,27 @@ interface ChapterInheritance {
     remixers: ["Boris", "Daisy"]
   },
   royalties: {
+    claimable: "2.3 $TIP", // Available to claim now
+    claimed: "8.7 $TIP", // Historical claims
     ongoing: "0.5 $TIP/month", // From derivatives' success
-    sources: ["Boris' branch", "Daisy' branch"]
+    sources: ["Boris' branch", "Daisy' branch"],
+    tier: "Premium (10%)", // Revenue sharing tier
+    roi: "25%", // Return on investment analysis
+    optimization: "Consider upgrading to Exclusive tier for 150% ROI boost"
+  },
+  notifications: {
+    enabled: ["in-app", "email", "push"],
+    deliveryRate: "96%",
+    lastAlert: "2 hours ago: New claimable royalty available"
+  },
+  analytics: {
+    breakEven: "Achieved after 3.2 chapters",
+    forecast: "Projected $45 TIP next month (85% confidence)",
+    tierComparison: {
+      free: "$0 TIP",
+      premium: "$12.3 TIP (current)",
+      exclusive: "$30.7 TIP (potential)"
+    }
   }
 }
 ```

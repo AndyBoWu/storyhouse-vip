@@ -2,7 +2,7 @@
 
 ## System Overview
 
-StoryHouse.vip is a Web3 publishing platform built on Story Protocol, enabling chapter-level IP asset management with PIL (Programmable IP License) licensing.
+StoryHouse.vip is a Web3 publishing platform built on Story Protocol, enabling chapter-level IP asset management with PIL (Programmable IP License) licensing and comprehensive real-time royalty distribution.
 
 ## Architecture Diagram
 
@@ -45,9 +45,35 @@ StoryHouse.vip is a Web3 publishing platform built on Story Protocol, enabling c
 
 | Contract | Address | Purpose |
 |----------|---------|---------|
-| TIP Token | `0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E` | Platform token |
-| Rewards Manager | `0xf5ae031ba92295c2ae86a99e88f09989339707e5` | Reward distribution |
+| TIP Token | `0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E` | Platform token & royalty payments |
+| Rewards Manager | `0xf5ae031ba92295c2ae86a99e88f09989339707e5` | Reward distribution & claiming |
 | SPG NFT Contract | `0x26b6aa7e7036fc9e8fa2d8184c2cf07ae2e2412d` | IP asset NFTs |
+
+## 🆕 **Royalty Distribution Architecture**
+
+### Chapter-Level Royalty System
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│  Reader Actions │    │  Revenue Engine │    │  Distribution   │
+│  • Read Chapter │───►│  • Track Usage  │───►│  • Calculate    │
+│  • Buy License  │    │  • License Fees │    │  • TIP Tokens   │
+│  • Tip Creator  │    │  • TIP Rewards  │    │  • Multi-tier   │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+```
+
+### Multi-Tier Revenue Sharing
+- **Free Chapters**: 0% royalty (open access)
+- **Premium Chapters**: 10% royalty (commercial use)
+- **Exclusive Chapters**: 25% royalty (full rights)
+
+### Real-Time Analytics Engine
+```
+Revenue Data ─→ Economic Modeling ─→ Optimization ─→ Recommendations
+     ↓                  ↓                 ↓              ↓
+  Tracking          ROI Analysis     Tier Analysis   Auto-suggest
+  License Fees      Break-even       Performance     Upgrades
+  TIP Earnings      Projections      Metrics         Actions
+```
 
 ## PIL Licensing System
 

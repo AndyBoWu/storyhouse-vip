@@ -1,6 +1,6 @@
 # 🚀 Development Guide
 
-Complete guide for setting up and developing StoryHouse.vip's Web3 storytelling platform.
+Complete guide for setting up and developing StoryHouse.vip's Web3 storytelling platform with PIL licensing and royalty distribution.
 
 ## 🎯 Prerequisites
 
