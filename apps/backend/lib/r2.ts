@@ -121,7 +121,68 @@ function sanitizeMetadata(metadata?: Record<string, string>): Record<string, str
 
 export class R2Service {
   /**
-   * Upload content to R2
+   * Upload enhanced content with license metadata to R2
+   */
+  static async uploadEnhancedContent(
+    key: string,
+    content: string | Buffer,
+    options: UploadOptions = {},
+    licenseMetadata?: Record<string, string>
+  ): Promise<string> {
+    console.log('🚀 R2Service.uploadEnhancedContent called with key:', key)
+    console.log('📊 Content type:', options.contentType || 'text/plain')
+    console.log('📏 Content size:', typeof content === 'string' ? content.length : content.length, 'bytes')
+    console.log('🏷️ License metadata provided:', !!licenseMetadata)
+    
+    try {
+      const client = getR2Client()
+      console.log('✅ R2 client obtained successfully')
+      
+      // Merge license metadata with existing metadata
+      const enhancedMetadata = {
+        ...options.metadata,
+        ...licenseMetadata,
+        // Add enhanced metadata version tracking
+        schemaVersion: '2.0.0',
+        enhancedMetadata: 'true',
+        lastUpdated: new Date().toISOString()
+      }
+      
+      const command = new PutObjectCommand({
+        Bucket: BUCKET_NAME,
+        Key: key,
+        Body: content,
+        ContentType: options.contentType || 'application/json',
+        Metadata: sanitizeMetadata(enhancedMetadata),
+        // R2 doesn't support ACLs - objects are public via bucket settings
+      })
+
+      console.log('📤 Sending enhanced PutObjectCommand to R2...')
+      console.log('🏷️ Bucket:', BUCKET_NAME)
+      console.log('🔑 Key:', key)
+      console.log('📋 Enhanced metadata fields:', Object.keys(enhancedMetadata).length)
+      
+      await client.send(command)
+      console.log('✅ Enhanced R2 upload completed successfully')
+
+      // Return public URL
+      const publicUrl = `${PUBLIC_URL}/${key}`
+      console.log('🌐 Generated public URL:', publicUrl)
+      return publicUrl
+    } catch (error) {
+      console.error('❌ Error uploading enhanced content to R2:', error)
+      console.error('❌ Error details:', {
+        name: error instanceof Error ? error.name : 'Unknown',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        code: (error as any)?.code || 'N/A',
+        statusCode: (error as any)?.$metadata?.httpStatusCode || 'N/A'
+      })
+      throw new Error(`Failed to upload enhanced content to R2: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
+  }
+
+  /**
+   * Upload content to R2 (original method for backward compatibility)
    */
   static async uploadContent(
     key: string,
@@ -241,6 +302,154 @@ export class R2Service {
    */
   static generateStoryKey(storyId: string): string {
     return `stories/${storyId}/metadata.json`
+  }
+
+  /**
+   * Generate content key for enhanced chapter with version
+   */
+  static generateEnhancedChapterKey(storyId: string, chapterNumber: number, version?: number): string {
+    const versionSuffix = version ? `-v${version}` : ''
+    return `stories/${storyId}/chapters/${chapterNumber}${versionSuffix}.json`
+  }
+
+  /**
+   * Generate content key for license metadata
+   */
+  static generateLicenseKey(storyId: string, chapterNumber: number): string {
+    return `stories/${storyId}/chapters/${chapterNumber}/license.json`
+  }
+
+  /**
+   * Convert license terms to R2 storage metadata (HTTP headers)
+   */
+  static convertLicenseToMetadata(licenseTerms: any): Record<string, string> {
+    return {
+      // License Identification
+      licenseTier: licenseTerms.tier || 'free',
+      licenseDisplayName: licenseTerms.displayName || '',
+      licenseTermsId: licenseTerms.licenseTermsId || '',
+      pilType: licenseTerms.pilType || 'LAP',
+      
+      // Economic Terms
+      tipPrice: licenseTerms.tipPrice?.toString() || '0',
+      mintingFee: licenseTerms.mintingFee?.toString() || '0',
+      royaltyPercentage: licenseTerms.royaltyPercentage?.toString() || '0',
+      
+      // Rights & Permissions
+      commercialUse: licenseTerms.commercialUse?.toString() || 'false',
+      commercialAttribution: licenseTerms.commercialAttribution?.toString() || 'true',
+      derivativesAllowed: licenseTerms.derivativesAllowed?.toString() || 'true',
+      derivativesAttribution: licenseTerms.derivativesAttribution?.toString() || 'true',
+      exclusivity: licenseTerms.exclusivity?.toString() || 'false',
+      shareAlike: licenseTerms.shareAlike?.toString() || 'false',
+      attribution: licenseTerms.attribution?.toString() || 'true',
+      transferable: licenseTerms.transferable?.toString() || 'true',
+      
+      // Distribution
+      territories: (licenseTerms.territories || ['Worldwide']).join(','),
+      distributionChannels: (licenseTerms.distributionChannels || ['Digital']).join(','),
+      contentRestrictions: (licenseTerms.contentRestrictions || []).join(','),
+      
+      // Lifecycle
+      expiration: licenseTerms.expiration?.toString() || '0',
+      licenseCreatedAt: licenseTerms.createdAt || new Date().toISOString(),
+      licenseUpdatedAt: licenseTerms.updatedAt || new Date().toISOString(),
+      
+      // Royalty Policy (if exists)
+      royaltyPolicyAddress: licenseTerms.royaltyPolicy?.address || '',
+      royaltyPolicyType: licenseTerms.royaltyPolicy?.policyType || '',
+      stakingReward: licenseTerms.royaltyPolicy?.stakingReward?.toString() || '0',
+      distributionDelay: licenseTerms.royaltyPolicy?.distributionDelay?.toString() || '0',
+    }
+  }
+
+  /**
+   * Get enhanced content with license metadata parsing
+   */
+  static async getEnhancedContent(key: string): Promise<{
+    content: any
+    metadata: Record<string, string>
+    licenseInfo?: any
+  }> {
+    try {
+      const client = getR2Client()
+      const command = new GetObjectCommand({
+        Bucket: BUCKET_NAME,
+        Key: key,
+      })
+
+      const response = await client.send(command)
+      const content = await response.Body?.transformToString()
+
+      if (!content) {
+        throw new Error('Content not found')
+      }
+
+      // Parse content and extract license information
+      const parsedContent = JSON.parse(content)
+      const metadata = response.Metadata || {}
+      
+      // Extract license information from metadata or content
+      const licenseInfo = this.extractLicenseInfo(parsedContent, metadata)
+
+      return {
+        content: parsedContent,
+        metadata,
+        licenseInfo
+      }
+    } catch (error) {
+      console.error('Error fetching enhanced content from R2:', error)
+      throw new Error('Failed to fetch enhanced content')
+    }
+  }
+
+  /**
+   * Extract license information from content and metadata
+   */
+  private static extractLicenseInfo(content: any, metadata: Record<string, string>): any {
+    // Try to get license info from content first (preferred)
+    if (content.licenseTerms) {
+      return content.licenseTerms
+    }
+
+    // Fall back to metadata extraction
+    if (metadata.licenseTier) {
+      return {
+        tier: metadata.licenseTier,
+        displayName: metadata.licenseDisplayName || '',
+        licenseTermsId: metadata.licenseTermsId || '',
+        pilType: metadata.pilType || 'LAP',
+        tipPrice: parseInt(metadata.tipPrice || '0'),
+        royaltyPercentage: parseInt(metadata.royaltyPercentage || '0'),
+        commercialUse: metadata.commercialUse === 'true',
+        derivativesAllowed: metadata.derivativesAllowed === 'true',
+        exclusivity: metadata.exclusivity === 'true',
+        // Add more fields as needed
+      }
+    }
+
+    return null
+  }
+
+  /**
+   * Check if content has enhanced license metadata
+   */
+  static async hasEnhancedMetadata(key: string): Promise<boolean> {
+    try {
+      const client = getR2Client()
+      const command = new GetObjectCommand({
+        Bucket: BUCKET_NAME,
+        Key: key,
+      })
+
+      const response = await client.send(command)
+      const metadata = response.Metadata || {}
+      
+      return metadata.enhancedMetadata === 'true' && !!metadata.schemaVersion
+    } catch (error) {
+      console.warn('Could not check enhanced metadata for key:', key, error)
+      return false
+    }
   }
 
   /**
