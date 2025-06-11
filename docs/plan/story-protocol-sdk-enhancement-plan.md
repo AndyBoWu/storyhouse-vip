@@ -153,8 +153,8 @@ Implement Story Protocol SDK enhancements in **5 strategic phases** with increme
 
 **📋 Detailed Implementation Plan**: See [`phase-2-royalty-distribution-implementation-plan.md`](./phase-2-royalty-distribution-implementation-plan.md) for comprehensive tickets and technical specifications.
 
-#### 2.1 Core Infrastructure (Weeks 1-2)
-- ⏳ **Ticket 2.1.1**: Extend AdvancedStoryProtocolService for royalty operations
+#### 2.1 Core Infrastructure (Weeks 1-2) 🎯 **IN PROGRESS**
+- ✅ **Ticket 2.1.1**: Extend AdvancedStoryProtocolService for royalty operations **COMPLETE**
 - ⏳ **Ticket 2.1.2**: Create RoyaltyService for business logic and TIP integration
 - ⏳ **Ticket 2.1.3**: Create royalty claiming API endpoints
 - **Key Features**: Individual chapter claiming, real blockchain integration, comprehensive error handling
@@ -237,7 +237,7 @@ Implement Story Protocol SDK enhancements in **5 strategic phases** with increme
 
 ## Progress Tracking ✅ PHASE 1 COMPLETE
 
-### Overall Progress: ✅ 35% Complete (Phase 1: 100% Complete)
+### Overall Progress: ✅ 40% Complete (Phase 1: 100% Complete, Phase 2: 11% Complete)
 
 #### Phase 1: Foundation & Licensing ✅ 100% COMPLETE
 - ✅ SDK Upgrade & Migration (100%) ✅
@@ -248,8 +248,8 @@ Implement Story Protocol SDK enhancements in **5 strategic phases** with increme
 - ✅ Enhanced Error Handling (100%) ✅
 - ✅ Production Deployment (100%) ✅
 
-#### Phase 2: Royalty Distribution 🎯 Ready to Start
-- ⏳ Royalty Claiming Infrastructure (0%) - **Ready**
+#### Phase 2: Royalty Distribution 🎯 **IN PROGRESS** 
+- 🎯 Royalty Claiming Infrastructure (33%) - **Ticket 2.1.1 Complete**
 - ⏳ Royalty Dashboard & UI (0%) - **Ready**
 - ⏳ Economic Integration (0%) - **Ready**
 
@@ -324,6 +324,7 @@ Implement Story Protocol SDK enhancements in **5 strategic phases** with increme
 
 ```
 # Core Services (2.1)
+✅ apps/backend/lib/services/advancedStoryProtocolService.ts (ENHANCED - 578 lines added)
 ⏳ apps/backend/lib/services/royaltyService.ts
 ⏳ apps/backend/lib/services/notificationService.ts
 ⏳ apps/backend/lib/utils/royaltyCalculations.ts
@@ -341,6 +342,7 @@ Implement Story Protocol SDK enhancements in **5 strategic phases** with increme
 ⏳ apps/frontend/hooks/useChapterRoyalties.ts
 
 # Enhanced Type Definitions (2.1-2.2)
+✅ apps/backend/lib/types/ip.ts (ENHANCED - Phase 2 royalty types added)
 ⏳ apps/backend/lib/types/royalty.ts
 ⏳ apps/backend/lib/types/economics.ts
 ```
