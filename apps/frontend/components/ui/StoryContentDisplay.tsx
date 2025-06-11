@@ -13,7 +13,8 @@ import ReadingPreferences, {
 import ReadingProgressBar from './ReadingProgressBar'
 import ContentProtection from './ContentProtection'
 import ObfuscatedContent from './ObfuscatedContent'
-import { Clock, Eye, BookOpen, Share2 } from 'lucide-react'
+import { Clock, Eye, BookOpen, Share2, Shield } from 'lucide-react'
+import LicenseDisplay, { LicenseInfo } from './LicenseDisplay'
 
 interface StoryContentDisplayProps {
   title: string
@@ -25,6 +26,8 @@ interface StoryContentDisplayProps {
   showHeader?: boolean
   showToolbar?: boolean
   className?: string
+  licenseInfo?: LicenseInfo
+  showLicense?: boolean
 }
 
 export default function StoryContentDisplay({
@@ -36,7 +39,9 @@ export default function StoryContentDisplay({
   contentRating,
   showHeader = true,
   showToolbar = true,
-  className = ''
+  className = '',
+  licenseInfo,
+  showLicense = true
 }: StoryContentDisplayProps) {
   const [readingPreferences, setReadingPreferences] = useState<ReadingPreferencesType>({
     fontSize: 'medium',
@@ -94,6 +99,13 @@ export default function StoryContentDisplay({
                   ))}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* License Information */}
+          {showLicense && licenseInfo && (
+            <div className="mb-6">
+              <LicenseDisplay license={licenseInfo} showDetails={false} />
             </div>
           )}
 
