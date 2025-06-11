@@ -30,7 +30,11 @@ Complete documentation for the revolutionary Web3 storytelling platform.
 ## 🔧 Specialized Resources
 
 - **[Contracts & Diagrams](./contracts-diagrams/)** - Technical diagrams and contract specs
-- **[Story Protocol Integration](./technical/STORY_PROTOCOL_INTEGRATION.md)** - Blockchain integration details
+- **[Story Protocol Integration](./technical/STORY_PROTOCOL_INTEGRATION.md)** - Current blockchain integration
+
+## 📋 Implementation Plans
+
+- **[Story Protocol SDK Enhancement Plan](./plan/story-protocol-sdk-enhancement-plan.md)** - Comprehensive enhancement strategy
 
 ## 📦 Archive
 
