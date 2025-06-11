@@ -275,11 +275,16 @@ export async function POST(request: NextRequest) {
       try {
         // Add this derivative to parent's derivative list
         const updatedParentDerivatives = [...parentBook.derivativeBooks, newBookId]
+        const { authorAddress: parentAuthor, slug: parentSlug } = BookStorageService.parseBookId(parentBookId)
         
-        await BookStorageService.updateBookMetadata(parentBookId, {
+        // Update parent book with new derivative
+        const updatedParentBook = {
+          ...parentBook,
           derivativeBooks: updatedParentDerivatives,
           updatedAt: new Date().toISOString()
-        })
+        }
+        
+        await BookStorageService.storeBookMetadata(parentAuthor, parentSlug, updatedParentBook)
         
         console.log('✅ Parent book updated with new derivative reference')
       } catch (parentUpdateError) {
@@ -290,6 +295,7 @@ export async function POST(request: NextRequest) {
       
       const response: BookBranchingResponse = {
         success: true,
+        message: 'Book branching completed successfully',
         book: {
           bookId: newBookId,
           parentBookId,

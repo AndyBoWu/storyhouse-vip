@@ -9,34 +9,11 @@ import {
   ChapterMetadata,
   AuthorAddress,
   BookId,
-  ChapterId
+  ChapterId,
+  BookStoragePath,
+  ChapterStoragePath,
+  BOOK_SYSTEM_CONSTANTS
 } from '../types/book'
-
-// Storage path types
-interface BookStoragePath {
-  rootPath: string
-  metadataPath: string
-  chaptersPath: string
-  coverPath: string
-}
-
-interface ChapterStoragePath {
-  chapterPath: string
-  contentPath: string
-}
-
-// Constants
-const BOOK_SYSTEM_CONSTANTS = {
-  FREE_CHAPTERS_COUNT: 3,
-  DEFAULT_UNLOCK_PRICE: 0.5,
-  DEFAULT_READ_REWARD: 0.1,
-  DEFAULT_LICENSE_PRICE: 2.0,
-  BOOKS_ROOT_PATH: 'books',
-  STORIES_ROOT_PATH: 'stories',
-  METADATA_FILENAME: 'metadata.json',
-  COVER_FILENAME: 'cover.jpg',
-  CHAPTERS_FOLDER_NAME: 'chapters'
-}
 
 // Import from backend R2 service
 import { R2Service } from '../r2'
@@ -259,32 +236,65 @@ export class BookStorageService {
     const now = new Date().toISOString()
     
     return {
+      // Basic Information - Primary keys
       bookId,
+      id: bookId,                    // Backward compatibility alias
       title,
       description,
       authorAddress,
+      author: authorAddress,         // Backward compatibility alias  
       authorName: `${authorAddress.slice(-4)}`, // Default to last 4 chars
       slug,
+      coverUrl: undefined,
+      coverImageUrl: undefined,      // Backward compatibility alias
+      
+      // IP Registration
       ipAssetId,
+      licenseTermsId: undefined,
+      tokenId: undefined,            // Backward compatibility
+      transactionHash: undefined,
+      
+      // Branching Information
       parentBook,
+      parentBookId: parentBook,      // Backward compatibility alias
       branchPoint,
       derivativeBooks: [],
+      
+      // Chapter Resolution Map
       chapterMap: {},
+      chapters: 0,                   // Backward compatibility - total count
+      
+      // Revenue Attribution
       originalAuthors: {
         [authorAddress]: {
           chapters: [],
           revenueShare: 100
         }
       },
+      
+      // Discovery & Analytics
       totalChapters: 0,
+      genre: genres[0] || '',        // Primary genre
       genres,
       contentRating,
       isRemixable: true,
+      isPublic: true,
+      tags: [],
+      wordCount: 0,
+      
+      // Engagement Metrics
+      totalReads: 0,
+      totalEarnings: 0,
+      averageRating: 0,
+      rating: 0,                     // Backward compatibility alias
+      totalRevenue: 0,
+      
+      // Timestamps
       createdAt: now,
       updatedAt: now,
-      totalReads: 0,
-      averageRating: 0,
-      totalRevenue: 0
+      
+      // Legacy/compatibility fields
+      status: undefined
     }
   }
   
