@@ -283,6 +283,20 @@ export default function ChapterPage() {
           </div>
         )}
       </article>
+      
+      {/* Fixed Reading Progress Bar */}
+      <div className="fixed bottom-0 left-0 right-0 h-1 bg-gray-900/20 backdrop-blur-sm z-50">
+        <div 
+          className="h-full transition-all duration-300 ease-out"
+          style={{
+            width: `${readingProgress}%`,
+            background: 'linear-gradient(90deg, #8B5CF6 0%, #EC4899 50%, #F59E0B 100%)',
+            boxShadow: '0 0 20px rgba(139, 92, 246, 0.8), 0 0 40px rgba(236, 72, 153, 0.6), 0 0 60px rgba(245, 158, 11, 0.4)',
+          }}
+        >
+          <div className="h-full bg-white opacity-30 animate-pulse"></div>
+        </div>
+      </div>
     </div>
   );
 }
