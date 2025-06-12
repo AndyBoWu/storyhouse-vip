@@ -21,6 +21,8 @@ dist/
 .env.development.local
 .env.test.local
 .env.production.local
+*-env.sh
+*env*.sh
 
 # Vercel
 .vercel
