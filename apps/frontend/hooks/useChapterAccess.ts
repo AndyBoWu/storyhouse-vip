@@ -159,7 +159,7 @@ export function useChapterAccess() {
       isFree,
       unlockPrice: isFree ? 0 : 0.5,
       currency: 'TIP',
-      readReward: isFree ? 0.05 : 0.1 // Higher rewards for paid content
+      readReward: isFree ? 0.05 : 0 // Only free chapters have reading rewards
     }
   }, [])
 

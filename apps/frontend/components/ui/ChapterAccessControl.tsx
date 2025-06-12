@@ -141,9 +141,11 @@ export default function ChapterAccessControl({
           >
             Connect Wallet
           </button>
-          <p className="text-xs text-blue-600 mt-2">
-            You'll earn {pricing.readReward} TIP tokens for completing this chapter
-          </p>
+          {pricing.readReward > 0 && (
+            <p className="text-xs text-blue-600 mt-2">
+              You'll earn {pricing.readReward} TIP tokens for completing this chapter
+            </p>
+          )}
         </div>
       </div>
     )
@@ -234,10 +236,12 @@ export default function ChapterAccessControl({
           {isUnlocking ? 'Processing...' : `Unlock for ${pricing.unlockPrice} TIP`}
         </button>
         
-        <div className="mt-4 text-sm text-orange-600">
-          <p>✨ You'll earn {pricing.readReward} TIP tokens for completing this chapter</p>
-          <p className="mt-1">💡 Reading rewards often exceed unlock costs!</p>
-        </div>
+        {pricing.readReward > 0 && (
+          <div className="mt-4 text-sm text-orange-600">
+            <p>✨ You'll earn {pricing.readReward} TIP tokens for completing this chapter</p>
+            <p className="mt-1">💡 Reading rewards often exceed unlock costs!</p>
+          </div>
+        )}
       </div>
     </div>
   )
