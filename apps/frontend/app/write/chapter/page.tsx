@@ -426,7 +426,7 @@ function ChapterWritingPageContent() {
                       className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg font-semibold hover:from-green-700 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                     >
                       <Rocket className="w-4 h-4" />
-                      Publish to Story Protocol →
+                      Publish
                     </button>
                   </div>
                 )}
@@ -491,7 +491,7 @@ function ChapterWritingPageContent() {
                     }`}
                   >
                     <Eye className="w-4 h-4" />
-                    {isPreviewMode ? 'Edit' : 'Publish'}
+                    {isPreviewMode ? 'Edit' : 'Review'}
                   </button>
                   
                   <button

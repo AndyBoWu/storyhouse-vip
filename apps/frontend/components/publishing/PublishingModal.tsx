@@ -293,7 +293,7 @@ function PublishingModal({
                               Chapter {chapterNumber} will be free for all readers. Build your audience with engaging opening chapters!
                             </p>
                             <div className="space-y-1 text-sm">
-                              <div className="text-green-700">✅ Upload to IPFS (decentralized storage)</div>
+                              <div className="text-green-700">✅ Secure content storage</div>
                               <div className="text-green-700">✅ Register as IP Asset on Story Protocol</div>
                               <div className="text-green-700">✅ Basic IP protection & ownership proof</div>
                               <div className="text-blue-600">🔒 No remix rights (protects your story foundation)</div>
@@ -328,7 +328,7 @@ function PublishingModal({
                                 Start earning immediately! Perfect for getting your content live quickly.
                               </p>
                               <div className="space-y-1 text-sm">
-                                <div className="text-green-700">✅ Content stored on R2 (global CDN)</div>
+                                <div className="text-green-700">✅ Fast global content delivery</div>
                                 <div className="text-green-700">✅ Register as IP Asset on Story Protocol</div>
                                 <div className="text-green-700">✅ Basic IP protection & ownership proof</div>
                                 <div className="text-gray-500">➡️ Add custom licenses later</div>
@@ -360,7 +360,7 @@ function PublishingModal({
                                 Full IP protection with custom licensing and automated royalty distribution.
                               </p>
                               <div className="space-y-1 text-sm">
-                                <div className="text-blue-700">✅ Upload to IPFS + IP Asset registration</div>
+                                <div className="text-blue-700">✅ Secure storage + IP Asset registration</div>
                                 <div className="text-blue-700">✅ Custom license terms with commercial use</div>
                                 <div className="text-blue-700">✅ Derivative work controls</div>
                                 <div className="text-blue-700">✅ Automated royalty sharing (25%)</div>
@@ -742,7 +742,7 @@ function PublishingModal({
                       disabled={!isConnected}
                       className="flex-1 px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg font-medium hover:from-green-700 hover:to-emerald-700 transition-all disabled:opacity-50"
                     >
-                                                Publish
+                      Publish
                     </button>
                   </div>
                 </motion.div>
