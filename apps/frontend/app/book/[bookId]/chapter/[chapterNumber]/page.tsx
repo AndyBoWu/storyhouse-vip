@@ -116,6 +116,15 @@ export default function ChapterPage() {
     }
   };
 
+  const formatAddress = (address: string) => {
+    if (!address) return 'Unknown';
+    // Show alias for specific wallet address
+    if (address.toLowerCase() === '0x3873c0d1bcfa245773b13b694a49dac5b3f03ca2') {
+      return 'andybowu.ip';
+    }
+    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  };
+
   const getThemeClasses = () => {
     switch (theme) {
       case 'dark':
@@ -210,7 +219,7 @@ export default function ChapterPage() {
                 Chapter {chapter.chapterNumber}: {chapter.title}
               </h1>
               <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-                <span>by {chapter.authorAddress.slice(0, 6)}...{chapter.authorAddress.slice(-4)}</span>
+                <span>by {formatAddress(chapter.authorAddress)}</span>
                 {isBookOwner(chapter) && (
                   <>
                     <span>•</span>
