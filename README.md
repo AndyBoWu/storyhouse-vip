@@ -91,7 +91,10 @@ Family Tree UI        Real-time Monitoring     Revenue Distribution
 git clone https://github.com/AndyBoWu/storyhouse-vip.git
 cd storyhouse-vip && npm install
 
-# Start development servers
+# Start development servers (option 1: script)
+./start-local.sh
+
+# Or start manually (option 2)
 cd apps/frontend && npm run dev  # Port 3001
 cd apps/backend && npm run dev   # Port 3002
 ```

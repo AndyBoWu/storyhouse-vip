@@ -8,8 +8,8 @@ import { Settings, X, Type, Minus, Plus } from 'lucide-react';
 import apiClient from '@/lib/api-client';
 import ChapterAccessControl from '@/components/ui/ChapterAccessControl';
 import { useChapterAccess } from '@/hooks/useChapterAccess';
-// import ReadingProgressBar from '@/components/ui/ReadingProgressBar';
-// import ReadingPreferences from '@/components/ui/ReadingPreferences';
+import ReadingProgressBar from '@/components/ui/ReadingProgressBar';
+import ReadingPreferences from '@/components/ui/ReadingPreferences';
 
 
 interface ChapterContent {
@@ -50,6 +50,12 @@ export default function ChapterPage() {
   const [focusMode, setFocusMode] = useState(false);
   
   const { getChapterPricing } = useChapterAccess();
+
+  // Handle reading preferences change
+  const handlePreferencesChange = (preferences: { fontSize: 'small' | 'medium' | 'large' | 'extra-large', fontFamily: 'inter' | 'georgia' | 'merriweather' }) => {
+    setFontSize(preferences.fontSize === 'extra-large' ? 'large' : preferences.fontSize);
+    setFontFamily(preferences.fontFamily === 'inter' ? 'sans' : preferences.fontFamily === 'georgia' ? 'serif' : 'serif');
+  };
 
   // Helper function to check if current user is the book owner
   const isBookOwner = (chapter: ChapterContent | null): boolean => {
@@ -219,7 +225,7 @@ export default function ChapterPage() {
 
   return (
     <div className={`min-h-screen ${getThemeClasses()} transition-colors duration-300`}>
-      {/* <ReadingProgressBar progress={readingProgress} /> */}
+      <ReadingProgressBar />
       
       {/* Header */}
       <header className={`sticky top-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm border-b z-40 transition-all duration-300 ${focusMode ? 'opacity-0 hover:opacity-100' : ''}`}>
@@ -234,12 +240,9 @@ export default function ChapterPage() {
               </Link>
             </div>
             
-            {/* <ReadingPreferences
-              fontSize={fontSize}
-              setFontSize={setFontSize}
-              theme={theme}
-              setTheme={setTheme}
-            /> */}
+            <ReadingPreferences
+              onPreferencesChange={handlePreferencesChange}
+            />
           </div>
         </div>
       </header>

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { derivativeRegistrationService } from '../../../../lib/services/derivativeRegistrationService'
+import { derivativeRegistrationService } from '../../../../../lib/services/derivativeRegistrationService'
 import { Address } from 'viem'
 
 // Enable BigInt serialization

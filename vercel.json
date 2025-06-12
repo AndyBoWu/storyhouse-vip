@@ -1,7 +1,7 @@
 {
-  "buildCommand": "npm run build --workspace=@storyhouse/frontend",
+  "buildCommand": "npm run build:frontend",
   "outputDirectory": "apps/frontend/.next",
-  "devCommand": "npm run dev --workspace=@storyhouse/frontend",
+  "devCommand": "npm run dev:frontend",
   "installCommand": "npm ci",
   "framework": "nextjs",
   "regions": ["iad1"],
