@@ -13,7 +13,24 @@ const nextConfig = {
   experimental: {
     optimizeCss: false,
   },
-  swcMinify: true,
+  compiler: {
+    // Disable styled-jsx for API backend
+    styledComponents: false,
+    emotion: false,
+  },
+  // Disable styled-jsx compilation
+  webpack: (config, { isServer }) => {
+    // Remove styled-jsx loader
+    config.module.rules = config.module.rules.filter(rule => {
+      if (rule.use && Array.isArray(rule.use)) {
+        return !rule.use.some(use => 
+          use && use.loader && use.loader.includes('styled-jsx')
+        );
+      }
+      return true;
+    });
+    return config;
+  },
   // Body parser configuration moved to individual API route files
   // CORS configuration for cross-origin requests from frontend
   async headers() {
