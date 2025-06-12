@@ -70,10 +70,10 @@ jobs:
 
       - name: Install Vercel CLI
         run: |
-          curl -sf https://binaries.vercel.com/cli/linux-x64 -o vercel
-          chmod +x vercel
-          sudo mv vercel /usr/local/bin/vercel
-          vercel --version
+          npm config set fund false
+          npm config set audit false
+          npm install --global vercel@latest --no-fund --no-audit
+        timeout-minutes: 5
 
       - name: Build Frontend (with dependencies)
         run: |
@@ -110,10 +110,10 @@ jobs:
 
       - name: Install Vercel CLI
         run: |
-          curl -sf https://binaries.vercel.com/cli/linux-x64 -o vercel
-          chmod +x vercel
-          sudo mv vercel /usr/local/bin/vercel
-          vercel --version
+          npm config set fund false
+          npm config set audit false
+          npm install --global vercel@latest --no-fund --no-audit
+        timeout-minutes: 5
 
       - name: Build Backend (with dependencies)
         run: |
@@ -146,10 +146,10 @@ jobs:
 
       - name: Install Vercel CLI
         run: |
-          curl -sf https://binaries.vercel.com/cli/linux-x64 -o vercel
-          chmod +x vercel
-          sudo mv vercel /usr/local/bin/vercel
-          vercel --version
+          npm config set fund false
+          npm config set audit false
+          npm install --global vercel@latest --no-fund --no-audit
+        timeout-minutes: 5
 
       - name: Build All Apps
         run: |
