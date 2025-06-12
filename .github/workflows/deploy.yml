@@ -68,32 +68,20 @@ jobs:
           node-version: '18'
           cache: 'npm'
 
-      - name: Cache global npm
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-npm-global-cache
-          
-      - name: Install Vercel CLI
-        run: |
-          npm config set fund false
-          npm config set audit false
-          npm install --global vercel@43.0.0 --no-fund --no-audit --loglevel error
-        timeout-minutes: 3
-
       - name: Build Frontend (with dependencies)
         run: |
           npm install
           npm run build:frontend
-        
-      - name: Deploy Frontend to Vercel (prebuilt)
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
         id: deploy
-        run: |
-          url=$(vercel deploy --prod --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
-          echo "url=$url" >> $GITHUB_OUTPUT
-        working-directory: ./apps/frontend
-        env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_FRONTEND }}
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_FRONTEND }}
+          working-directory: ./apps/frontend
+          vercel-args: '--prod'
 
   # Build and deploy backend
   deploy-backend:
@@ -114,32 +102,20 @@ jobs:
           node-version: '18'
           cache: 'npm'
 
-      - name: Cache global npm
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-npm-global-cache
-          
-      - name: Install Vercel CLI
-        run: |
-          npm config set fund false
-          npm config set audit false
-          npm install --global vercel@43.0.0 --no-fund --no-audit --loglevel error
-        timeout-minutes: 3
-
       - name: Build Backend (with dependencies)
         run: |
           npm install
           npm run build:backend
-        
-      - name: Deploy Backend to Vercel (prebuilt)
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
         id: deploy
-        run: |
-          url=$(vercel deploy --prod --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
-          echo "url=$url" >> $GITHUB_OUTPUT
-        working-directory: ./apps/backend
-        env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_BACKEND }}
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_BACKEND }}
+          working-directory: ./apps/backend
+          vercel-args: '--prod'
 
   # Preview deployments for PRs
   deploy-preview:
@@ -156,19 +132,6 @@ jobs:
           node-version: '18'
           cache: 'npm'
 
-      - name: Cache global npm
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-npm-global-cache
-          
-      - name: Install Vercel CLI
-        run: |
-          npm config set fund false
-          npm config set audit false
-          npm install --global vercel@43.0.0 --no-fund --no-audit --loglevel error
-        timeout-minutes: 3
-
       - name: Build All Apps
         run: |
           npm install
@@ -176,13 +139,17 @@ jobs:
           npm run build:backend
 
       - name: Deploy Frontend Preview
-        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
-        working-directory: ./apps/frontend
-        env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_FRONTEND }}
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_FRONTEND }}
+          working-directory: ./apps/frontend
 
       - name: Deploy Backend Preview
-        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
-        working-directory: ./apps/backend
-        env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_BACKEND }}
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_BACKEND }}
+          working-directory: ./apps/backend
