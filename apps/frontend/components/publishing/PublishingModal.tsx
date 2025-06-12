@@ -266,8 +266,8 @@ function PublishingModal({
                     </div>
                   ) : (
                     <div>
-                      <h3 className="text-xl font-semibold text-gray-900 mb-2">Choose Publishing Option</h3>
-                      <p className="text-gray-600">Select how you want to publish your chapter and start earning.</p>
+                      <h3 className="text-xl font-semibold text-gray-900 mb-2">Publish Premium Chapter {chapterNumber}</h3>
+                      <p className="text-gray-600">Premium chapters automatically include full IP protection and royalty distribution - the complete StoryHouse.vip experience for your monetized content.</p>
                     </div>
                   )}
 
@@ -303,72 +303,33 @@ function PublishingModal({
                         </div>
                       </motion.button>
                     ) : (
-                      /* Chapter 4+: Full licensing options */
-                      <>
-                        {/* Simple Publishing */}
-                        <motion.button
-                          onClick={() => {
-                            setPublishingOption('simple')
-                            setCurrentStep('wallet')
-                          }}
-                          whileHover={{ scale: 1.02 }}
-                          className={`p-6 border-2 rounded-xl text-left transition-all ${
-                            publishingOption === 'simple'
-                              ? 'border-green-500 bg-green-50'
-                              : 'border-gray-200 hover:border-green-300'
-                          }`}
-                        >
-                          <div className="flex items-start gap-4">
-                            <div className="p-3 bg-green-100 rounded-lg">
-                              <Coins className="w-6 h-6 text-green-600" />
-                            </div>
-                            <div className="flex-1">
-                              <h4 className="text-lg font-semibold text-gray-900 mb-2">✨ Simple Publish</h4>
-                              <p className="text-gray-600 mb-3">
-                                Start earning immediately! Perfect for getting your content live quickly.
-                              </p>
-                              <div className="space-y-1 text-sm">
-                                <div className="text-green-700">✅ Fast global content delivery</div>
-                                <div className="text-green-700">✅ Register as IP Asset on Story Protocol</div>
-                                <div className="text-green-700">✅ Basic IP protection & ownership proof</div>
-                                <div className="text-gray-500">➡️ Add custom licenses later</div>
-                              </div>
+                      /* Chapter 4+: Premium chapters get full protection automatically */
+                      <motion.button
+                        onClick={() => {
+                          setPublishingOption('protected')
+                          setCurrentStep('wallet')
+                        }}
+                        whileHover={{ scale: 1.02 }}
+                        className="p-6 border-2 border-blue-500 bg-blue-50 rounded-xl text-left transition-all"
+                      >
+                        <div className="flex items-start gap-4">
+                          <div className="p-3 bg-blue-100 rounded-lg">
+                            <Shield className="w-6 h-6 text-blue-600" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="text-lg font-semibold text-gray-900 mb-2">🛡️ Premium Chapter Publishing</h4>
+                            <p className="text-gray-600 mb-3">
+                              Your premium content gets the full StoryHouse.vip experience with maximum IP protection and earning potential.
+                            </p>
+                            <div className="space-y-1 text-sm">
+                              <div className="text-blue-700">✅ Secure storage + IP Asset registration</div>
+                              <div className="text-blue-700">✅ Custom license terms with commercial use</div>
+                              <div className="text-blue-700">✅ Derivative work controls</div>
+                              <div className="text-blue-700">✅ Automated royalty sharing (25%)</div>
                             </div>
                           </div>
-                        </motion.button>
-
-                        {/* Protected Publishing */}
-                        <motion.button
-                          onClick={() => {
-                            setPublishingOption('protected')
-                            setCurrentStep('wallet')
-                          }}
-                          whileHover={{ scale: 1.02 }}
-                          className={`p-6 border-2 rounded-xl text-left transition-all ${
-                            publishingOption === 'protected'
-                              ? 'border-blue-500 bg-blue-50'
-                              : 'border-gray-200 hover:border-blue-300'
-                          }`}
-                        >
-                          <div className="flex items-start gap-4">
-                            <div className="p-3 bg-blue-100 rounded-lg">
-                              <Shield className="w-6 h-6 text-blue-600" />
-                            </div>
-                            <div className="flex-1">
-                              <h4 className="text-lg font-semibold text-gray-900 mb-2">🛡️ Protected Publish</h4>
-                              <p className="text-gray-600 mb-3">
-                                Full IP protection with custom licensing and automated royalty distribution.
-                              </p>
-                              <div className="space-y-1 text-sm">
-                                <div className="text-blue-700">✅ Secure storage + IP Asset registration</div>
-                                <div className="text-blue-700">✅ Custom license terms with commercial use</div>
-                                <div className="text-blue-700">✅ Derivative work controls</div>
-                                <div className="text-blue-700">✅ Automated royalty sharing (25%)</div>
-                              </div>
-                            </div>
-                          </div>
-                        </motion.button>
-                      </>
+                        </div>
+                      </motion.button>
                     )}
                   </div>
 
@@ -384,18 +345,12 @@ function PublishingModal({
                         <Clock className="w-4 h-4 text-gray-500" />
                         <span>{story.readingTime} min read</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <TrendingUp className="w-4 h-4 text-gray-500" />
-                        <span>
-                          {chapterNumber <= 3
-                            ? "Chapter is FREE - builds audience"
-                            : "Estimated: 0.5-2.0 $TIP/day"}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Upload className="w-4 h-4 text-gray-500" />
-                        <span>IPFS: Decentralized storage</span>
-                      </div>
+                      {chapterNumber <= 3 && (
+                        <div className="flex items-center gap-2">
+                          <TrendingUp className="w-4 h-4 text-gray-500" />
+                          <span>Chapter is FREE - builds audience</span>
+                        </div>
+                      )}
                     </div>
 
                     {/* Chapter 1-3 Special Notice */}
