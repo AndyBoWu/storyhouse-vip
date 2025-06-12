@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, Suspense } from 'react'
+import { useState, useEffect, useRef, useMemo, useCallback, memo, Suspense } from 'react'
 import { ArrowLeft, Save, Eye, Maximize2, Minimize2, Type, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, List, Quote, Rocket, Shield, Sun, Moon } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -59,9 +59,17 @@ function ChapterWritingPageContent() {
   const [fontSize, setFontSize] = useState(16)
   const [fontFamily, setFontFamily] = useState('Inter')
   const contentRef = useRef<HTMLTextAreaElement>(null)
+  const chapterDataRef = useRef(chapterData)
   
-  // Calculate word count without causing re-renders
-  const wordCount = chapterData.content.trim().split(/\s+/).filter(word => word.length > 0).length
+  // Update ref when chapterData changes
+  useEffect(() => {
+    chapterDataRef.current = chapterData
+  }, [chapterData])
+
+  // Calculate word count with useMemo to prevent re-renders
+  const wordCount = useMemo(() => {
+    return chapterData.content.trim().split(/\s+/).filter(word => word.length > 0).length
+  }, [chapterData.content])
   
   // Handle input changes
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -72,9 +80,9 @@ function ChapterWritingPageContent() {
     setChapterData(prev => ({ ...prev, subtitle: e.target.value }))
   }
   
-  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleContentChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setChapterData(prev => ({ ...prev, content: e.target.value }))
-  }
+  }, [])
   
   // Format text functions
   const formatText = (command: string, value?: string) => {
@@ -114,7 +122,7 @@ function ChapterWritingPageContent() {
   }
   
   // Save draft
-  const handleSaveDraft = async () => {
+  const handleSaveDraft = useCallback(async () => {
     setIsSaving(true)
     try {
       // Save to localStorage for now
@@ -131,7 +139,7 @@ function ChapterWritingPageContent() {
       console.error('Error saving draft:', error)
       setIsSaving(false)
     }
-  }
+  }, [chapterData, bookId, chapterNumber])
   
   // Load draft on mount
   useEffect(() => {
@@ -157,13 +165,14 @@ function ChapterWritingPageContent() {
   // Auto-save every 30 seconds
   useEffect(() => {
     const interval = setInterval(() => {
-      if (chapterData.content.length > 0 || chapterData.title.length > 0) {
+      const currentData = chapterDataRef.current
+      if (currentData.content.length > 0 || currentData.title.length > 0) {
         handleSaveDraft()
       }
     }, 30000)
     
     return () => clearInterval(interval)
-  }, [chapterData])
+  }, [handleSaveDraft])
   
   // Handle Esc key to exit Focus mode
   useEffect(() => {
@@ -211,75 +220,30 @@ function ChapterWritingPageContent() {
     contentUrl: `chapter-${bookId}-${chapterNumber}` // Generate a temporary identifier
   })
   
-  // Focus mode component
-  const FocusMode = () => {
-    const focusTextareaRef = useRef<HTMLTextAreaElement>(null)
-    
-    // Auto-focus when entering focus mode
-    useEffect(() => {
-      if (focusTextareaRef.current) {
-        focusTextareaRef.current.focus()
-      }
-    }, [])
-    
-    return (
-      <div className={`fixed inset-0 z-50 flex flex-col ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
-        {/* Focus mode header */}
-        <div className={`flex items-center justify-between p-4 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => setIsFocusMode(false)}
-              className={`flex items-center gap-2 ${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-800'}`}
-            >
-              <Minimize2 className="w-4 h-4" />
-              Exit Focus
-            </button>
-            <div className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-              Chapter {chapterNumber}: {chapterData.title || 'Untitled'}
-            </div>
-            <div className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
-              Press Esc to exit
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => setIsDarkMode(!isDarkMode)}
-              className={`p-2 rounded-lg transition-colors ${isDarkMode ? 'hover:bg-gray-800 text-gray-400 hover:text-gray-200' : 'hover:bg-gray-100 text-gray-600 hover:text-gray-800'}`}
-              title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-            >
-              {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </button>
-            <div className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-              {wordCount} words
-            </div>
-            <div className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
-              Auto-save enabled
-            </div>
-          </div>
-        </div>
-        
-        {/* Focus mode content */}
-        <div className="flex-1 p-8 max-w-4xl mx-auto w-full">
-          <textarea
-            ref={focusTextareaRef}
-            value={chapterData.content}
-            onChange={handleContentChange}
-            placeholder="Start writing your chapter..."
-            className={`w-full h-full resize-none border-none outline-none text-lg leading-relaxed ${isDarkMode ? 'bg-gray-900 text-white placeholder-gray-500' : 'bg-white text-gray-900 placeholder-gray-400'}`}
-            style={{ 
-              fontSize: `${fontSize}px`,
-              fontFamily: fontFamily,
-              lineHeight: 1.7
-            }}
-            autoFocus
-          />
-        </div>
-      </div>
-    )
-  }
+  // Memoized style object to prevent re-creation
+  const textareaStyle = useMemo(() => ({
+    fontSize: `${fontSize}px`,
+    fontFamily: fontFamily,
+    lineHeight: 1.7
+  }), [fontSize, fontFamily])
+
+  // Memoized callback functions for FocusMode
+  const handleExitFocus = useCallback(() => setIsFocusMode(false), [])
+  const handleToggleDarkMode = useCallback(() => setIsDarkMode(!isDarkMode), [isDarkMode])
   
   if (isFocusMode) {
-    return <FocusMode />
+    return (
+      <FocusMode
+        content={chapterData.content}
+        onContentChange={handleContentChange}
+        onExitFocus={handleExitFocus}
+        onToggleDarkMode={handleToggleDarkMode}
+        isDarkMode={isDarkMode}
+        chapterNumber={chapterNumber}
+        chapterTitle={chapterData.title}
+        textareaStyle={textareaStyle}
+      />
+    )
   }
   
   return (
@@ -629,6 +593,84 @@ function ChapterWritingPageContent() {
     </div>
   )
 }
+
+// Memoized Focus Mode Component
+const FocusMode = memo(({ 
+  content, 
+  onContentChange, 
+  onExitFocus,
+  onToggleDarkMode,
+  isDarkMode,
+  chapterNumber,
+  chapterTitle,
+  textareaStyle
+}: {
+  content: string
+  onContentChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void
+  onExitFocus: () => void
+  onToggleDarkMode: () => void
+  isDarkMode: boolean
+  chapterNumber: number
+  chapterTitle: string
+  textareaStyle: React.CSSProperties
+}) => {
+  const focusTextareaRef = useRef<HTMLTextAreaElement>(null)
+  
+  // Auto-focus when entering focus mode
+  useEffect(() => {
+    if (focusTextareaRef.current) {
+      focusTextareaRef.current.focus()
+    }
+  }, [])
+  
+  return (
+    <div className={`fixed inset-0 z-50 flex flex-col ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
+      {/* Focus mode header */}
+      <div className={`flex items-center justify-between p-4 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={onExitFocus}
+            className={`flex items-center gap-2 ${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-800'}`}
+          >
+            <Minimize2 className="w-4 h-4" />
+            Exit Focus
+          </button>
+          <div className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+            Chapter {chapterNumber}: {chapterTitle || 'Untitled'}
+          </div>
+          <div className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+            Press Esc to exit
+          </div>
+        </div>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={onToggleDarkMode}
+            className={`p-2 rounded-lg transition-colors ${isDarkMode ? 'hover:bg-gray-800 text-gray-400 hover:text-gray-200' : 'hover:bg-gray-100 text-gray-600 hover:text-gray-800'}`}
+            title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
+          <div className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+            Auto-save enabled
+          </div>
+        </div>
+      </div>
+      
+      {/* Focus mode content */}
+      <div className="flex-1 p-8 max-w-4xl mx-auto w-full">
+        <textarea
+          ref={focusTextareaRef}
+          value={content}
+          onChange={onContentChange}
+          placeholder="Start writing your chapter..."
+          className={`w-full h-full resize-none border-none outline-none text-lg leading-relaxed ${isDarkMode ? 'bg-gray-900 text-white placeholder-gray-500' : 'bg-white text-gray-900 placeholder-gray-400'}`}
+          style={textareaStyle}
+          autoFocus
+        />
+      </div>
+    </div>
+  )
+})
 
 export default function ChapterWritingPage() {
   return (
