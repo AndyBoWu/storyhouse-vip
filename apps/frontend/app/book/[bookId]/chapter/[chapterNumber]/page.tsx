@@ -74,21 +74,30 @@ export default function ChapterPage() {
       setLoading(true);
       setError(null);
       
+      console.log(`🔍 Loading chapter info for: ${bookId}/chapter/${chapterNumber}`);
+      
       // Always fetch basic info first to get author address
       const chapterInfo = await apiClient.get(`/books/${bookId}/chapter/${chapterNumber}/info`);
+      
+      console.log('📋 Chapter info loaded:', chapterInfo);
       
       if (chapterInfo) {
         const pricing = getChapterPricing(chapterNumber);
         const userIsOwner = address && address.toLowerCase() === chapterInfo.authorAddress.toLowerCase();
         
+        console.log('💰 Chapter pricing:', { pricing, userIsOwner, address, authorAddress: chapterInfo.authorAddress });
+        
         // Determine if user should have access
         if (pricing.isFree || userIsOwner) {
           // Fetch full content
+          console.log('🔓 User has access, fetching full content...');
           const fullChapter = await apiClient.get(`/books/${bookId}/chapter/${chapterNumber}`);
+          console.log('📖 Full chapter loaded:', { title: fullChapter.title, hasContent: !!fullChapter.content });
           setChapter(fullChapter);
           setHasAccess(true);
         } else {
           // Set info-only chapter (no content)
+          console.log('🔒 User needs to unlock, showing info only');
           setChapter({
             ...chapterInfo,
             content: '' // No content for non-owners of paid chapters
@@ -97,8 +106,9 @@ export default function ChapterPage() {
         }
       }
     } catch (err) {
-      console.error('Failed to load chapter:', err);
-      setError('Failed to load chapter');
+      console.error('❌ Failed to load chapter:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load chapter';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
