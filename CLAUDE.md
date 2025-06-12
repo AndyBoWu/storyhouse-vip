@@ -26,6 +26,13 @@ Tech Stack: Next.js 15.3.3, TypeScript, Story Protocol SDK, OpenAI GPT-4, Smart 
 
 **Current Status: Phase 5.3 Complete** - Full SPA optimization with story routing and UI polish
 
+## Development Practices
+
+### Git Commits
+- **DO NOT include Claude as a co-author** in commit messages
+- **DO NOT add "Generated with Claude Code" or similar attributions** to commits
+- Keep commit messages clean and professional without AI/Claude references
+
 ## Memories
 
 - Remember that our mainnet is not integrated yet
