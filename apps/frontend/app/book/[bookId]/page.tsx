@@ -41,6 +41,7 @@ interface Chapter {
   wordCount: number;
   status: 'published' | 'draft' | 'locked';
   createdAt: string;
+  unlocked?: boolean; // Whether the current user has unlocked this chapter
 }
 
 export default function BookPage() {
@@ -315,7 +316,18 @@ export default function BookPage() {
             {chapters.map((chapter) => {
               const isFree = chapter.number <= 3;
               const isPaid = chapter.number >= 4;
-              const unlockPrice = 10; // TIP tokens required to unlock
+              const isUnlocked = chapter.unlocked || false; // Assuming we have this data
+              const unlockPrice = isPaid ? 0.5 : 0; // Updated to match our pricing
+              
+              // Determine styling based on chapter state
+              let chapterStyle = '';
+              if (isFree) {
+                chapterStyle = 'border-green-200 bg-green-50 border-l-4 border-l-green-400';
+              } else if (isPaid && !isUnlocked) {
+                chapterStyle = 'border-gray-200 bg-gray-50 border-l-4 border-l-gray-400';
+              } else if (isPaid && isUnlocked) {
+                chapterStyle = 'border-purple-200 bg-purple-50 border-l-4 border-l-purple-400';
+              }
               
               return (
                 <Link
@@ -323,26 +335,25 @@ export default function BookPage() {
                   href={`/book/${bookId}/chapter/${chapter.number}`}
                   className="block"
                 >
-                  <div className={`border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer ${
-                    isFree 
-                      ? 'border-green-200 bg-green-50 border-l-4 border-l-green-400' 
-                      : 'border-gray-200'
-                  }`}>
+                  <div className={`border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer ${chapterStyle}`}>
                     <div className="flex justify-between items-start mb-2">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          {isPaid && <Lock className="w-4 h-4 text-gray-400" />}
-                          <h3 className="text-lg font-semibold">
+                          {isPaid && !isUnlocked && <Lock className="w-4 h-4 text-gray-400" />}
+                          {isPaid && isUnlocked && <span className="text-purple-600">🔓</span>}
+                          <h3 className={`text-lg font-semibold ${
+                            isPaid && isUnlocked ? 'text-purple-900' : ''
+                          }`}>
                             Chapter {chapter.number}: {chapter.title}
                           </h3>
                         </div>
                         <p className={`text-sm mt-1 line-clamp-2 ${
-                          isPaid ? 'text-gray-400' : 'text-gray-600'
+                          isPaid && !isUnlocked ? 'text-gray-500' : 'text-gray-600'
                         }`}>
                           {chapter.preview}
                         </p>
-                        {isPaid && (
-                          <p className="text-purple-600 text-sm font-medium mt-2">
+                        {isPaid && !isUnlocked && (
+                          <p className="text-gray-600 text-sm font-medium mt-2">
                             Unlock for {unlockPrice} TIP
                           </p>
                         )}
@@ -353,9 +364,14 @@ export default function BookPage() {
                             FREE
                           </span>
                         )}
-                        {chapter.status === 'locked' && !isFree && (
-                          <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-sm">
-                            🔒 Locked
+                        {isPaid && !isUnlocked && (
+                          <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs font-medium">
+                            LOCKED
+                          </span>
+                        )}
+                        {isPaid && isUnlocked && (
+                          <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium">
+                            PREMIUM
                           </span>
                         )}
                       </div>
