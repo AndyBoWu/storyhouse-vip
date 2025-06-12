@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useAccount } from 'wagmi';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, Lock } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import apiClient from '@/lib/api-client';
+import ShareButton from '@/components/ui/ShareButton';
 
 // Dynamically import WalletConnect to avoid hydration issues
 const WalletConnect = dynamic(() => import('@/components/WalletConnect'), {
@@ -45,6 +47,7 @@ export default function BookPage() {
   const params = useParams();
   const router = useRouter();
   const bookId = params.bookId as string;
+  const { address } = useAccount();
   
   const [book, setBook] = useState<BookDetails | null>(null);
   const [chapters, setChapters] = useState<Chapter[]>([]);
@@ -273,15 +276,21 @@ export default function BookPage() {
 
             {/* Action Buttons */}
             <div className="flex gap-4">
-              <button
-                onClick={() => router.push(`/write/chapter?bookId=${bookId}&chapterNumber=${nextChapterNumber}`)}
-                className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-              >
-                ✍️ Write Chapter {nextChapterNumber}
-              </button>
-              <button className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                Share
-              </button>
+              {/* Only show Write Chapter button if current user is the author */}
+              {address && book.authorAddress && address.toLowerCase() === book.authorAddress.toLowerCase() && (
+                <button
+                  onClick={() => router.push(`/write/chapter?bookId=${bookId}&chapterNumber=${nextChapterNumber}`)}
+                  className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                >
+                  ✍️ Write Chapter {nextChapterNumber}
+                </button>
+              )}
+              <ShareButton
+                title={book.title}
+                description={book.description}
+                url={`${typeof window !== 'undefined' ? window.location.origin : ''}/book/${bookId}`}
+                imageUrl={book.coverUrl}
+              />
             </div>
           </div>
         </div>
