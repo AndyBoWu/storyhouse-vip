@@ -36,7 +36,8 @@ Complete licensing infrastructure with Story Protocol SDK v1.3.2:
 
 ### Read-to-Earn Economics
 - Readers earn $TIP tokens while reading
-- Free chapters 1-3, monetized content thereafter
+- Free chapters 1-3, paid chapters 4+ (0.5 TIP each)
+- **Revenue Split**: 80% to authors, 20% platform fee
 - Dynamic pricing based on engagement
 
 ### 🆕 **Real-Time Royalty Distribution**

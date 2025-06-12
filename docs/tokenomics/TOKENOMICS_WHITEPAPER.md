@@ -157,7 +157,7 @@ StoryHouse.vip introduces the first **Read-to-Earn storytelling ecosystem** powe
                     ┌─────────────────┐
                     │   PLATFORM      │
                     │                 │
-                    │ • 5% tx fees    │
+                    │ • 20% tx fees   │
                     │ • Premium subs  │
                     │ • AI credits    │
                     └─────────┬───────┘
@@ -240,7 +240,7 @@ StoryHouse.vip introduces the first **Read-to-Earn storytelling ecosystem** powe
 
 **Revenue Streams:**
 
-- **Transaction Fees**: 5% of all chapter unlocks and remix licenses
+- **Transaction Fees**: 20% of all chapter unlocks and remix licenses
 - **Premium Subscriptions**: $19.99/month for advanced AI features
 - **Enterprise Licensing**: $99-999/month for branded platforms
 - **Token Services**: Trading fees, staking services

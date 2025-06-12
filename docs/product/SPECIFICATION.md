@@ -136,7 +136,7 @@ StoryHouse.vip revolutionizes Web3 publishing by combining **chapter-level IP as
 ### **5. Enhanced Licensing Marketplace**
 
 **Feature**: Chapter licensing with transparent economics
-**Business Model**: Platform takes 5% of licensing fees
+**Business Model**: Platform takes 20% of licensing fees
 **User Benefit**: Revenue from adaptations and remixes
 
 **License Tiers**:
@@ -441,7 +441,7 @@ src/
 
 - Reading rewards: 0.05-0.1 TIP per chapter
 - Chapter costs: 0.1-0.5 TIP per unlock
-- Platform sustainability: 5% transaction fees
+- Platform sustainability: 20% transaction fees
 - Creator incentives: Direct sales + licensing royalties
 
 ### **Pricing Strategy**
