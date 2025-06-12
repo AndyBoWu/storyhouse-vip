@@ -472,11 +472,10 @@ function ChapterWritingPageContent() {
                         <span className="font-semibold text-blue-600">Premium Chapter</span>
                       </div>
                       <p className="text-sm text-blue-700">
-                        This chapter requires TIP tokens to unlock and offers higher reading rewards.
+                        This chapter requires TIP tokens to unlock.
                       </p>
                       <div className="text-xs text-gray-500 space-y-1">
                         <div>• Unlock price: 0.5 TIP</div>
-                        <div>• Read reward: 0.1 TIP</div>
                       </div>
                     </div>
                   )}
