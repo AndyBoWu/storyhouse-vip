@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { chapterUnlockStorage } from '@/lib/storage/chapterUnlockStorage'
 
 interface UnlockChapterRequest {
   userAddress: string
@@ -70,8 +71,14 @@ export async function POST(
 
     // For free chapters, grant immediate access
     if (isFree) {
-      // TODO: Store unlock status in database/storage
-      // For now, we'll just return success
+      // Record the free unlock
+      chapterUnlockStorage.recordUnlock({
+        userAddress: body.userAddress,
+        bookId,
+        chapterNumber: chapterNum,
+        isFree: true,
+        transactionHash: undefined
+      })
       
       return NextResponse.json({
         success: true,
@@ -97,9 +104,8 @@ export async function POST(
 
     // TODO: Validate blockchain transaction
     // - Check if transaction exists and is confirmed
-    // - Verify transaction calls ChapterAccessController.unlockChapter
+    // - Verify transaction calls TIP token transfer
     // - Confirm user paid the correct amount (0.5 TIP)
-    // - Update unlock status in storage
 
     console.log('🔗 Blockchain transaction validation needed:', {
       transactionHash: body.transactionHash,
@@ -107,7 +113,15 @@ export async function POST(
       userAddress: body.userAddress
     })
 
-    // For now, return success (blockchain validation will be implemented separately)
+    // Record the paid unlock (validation will be implemented later)
+    chapterUnlockStorage.recordUnlock({
+      userAddress: body.userAddress,
+      bookId,
+      chapterNumber: chapterNum,
+      isFree: false,
+      transactionHash: body.transactionHash
+    })
+
     return NextResponse.json({
       success: true,
       data: {
@@ -116,7 +130,7 @@ export async function POST(
         unlockPrice,
         isFree: false,
         canAccess: true,
-        alreadyUnlocked: false,
+        alreadyUnlocked: true, // Now properly marked as unlocked
         transactionHash: body.transactionHash
       }
     } as UnlockChapterResponse)
@@ -156,9 +170,24 @@ export async function GET(
     const isFree = chapterNum <= 3
     const unlockPrice = isFree ? 0 : 0.5
     
-    // TODO: Check if user has already unlocked this chapter
-    // For now, assume not unlocked
-    const alreadyUnlocked = false
+    // Check if user has already unlocked this chapter
+    let alreadyUnlocked = false
+    if (userAddress) {
+      alreadyUnlocked = chapterUnlockStorage.hasUnlocked(userAddress, bookId, chapterNum)
+    }
+    
+    // For free chapters, always allow access
+    // For paid chapters, only allow if unlocked or if it's actually free
+    const canAccess = isFree || alreadyUnlocked
+    
+    console.log('🔍 Chapter access check:', {
+      bookId,
+      chapterNumber: chapterNum,
+      userAddress: userAddress || 'none',
+      isFree,
+      alreadyUnlocked,
+      canAccess
+    })
     
     return NextResponse.json({
       success: true,
@@ -167,7 +196,7 @@ export async function GET(
         chapterNumber: chapterNum,
         unlockPrice,
         isFree,
-        canAccess: true,
+        canAccess,
         alreadyUnlocked
       }
     } as UnlockChapterResponse)

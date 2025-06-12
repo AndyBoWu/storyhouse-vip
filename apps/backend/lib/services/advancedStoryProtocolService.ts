@@ -80,7 +80,7 @@ export const ROYALTY_POLICIES: Record<string, RoyaltyPolicyConfig> = {
   }
 }
 
-// 3-Tier License Configuration with integrated royalty policies
+// 4-Tier License Configuration with integrated royalty policies
 export const LICENSE_TIERS: Record<string, LicenseTermsConfig> = {
   free: {
     tier: 'free',
@@ -102,6 +102,27 @@ export const LICENSE_TIERS: Record<string, LicenseTermsConfig> = {
     exclusivity: false,
     shareAlike: true,
     attribution: true,
+  },
+  reading: {
+    tier: 'reading',
+    displayName: 'Reading License',
+    description: 'Personal reading access - non-transferable',
+    transferable: false, // 🔒 LOCKED TO WALLET
+    royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address, // Will be updated by configureRoyaltyPoliciesFromEnvironment()
+    defaultMintingFee: BigInt(0.5 * 10**18), // 0.5 TIP tokens
+    expiration: 0, // Never expires
+    commercialUse: false, // Just for reading
+    commercialAttribution: false,
+    derivativesAllowed: false, // Can't create derivatives from reading
+    derivativesAttribution: false,
+    territories: ['Worldwide'],
+    distributionChannels: ['Digital'],
+    contentRestrictions: ['Personal reading only'],
+    tipPrice: 0.5,
+    royaltyPercentage: 5, // 5% to platform, 95% to creator
+    exclusivity: false,
+    shareAlike: false,
+    attribution: false,
   },
   premium: {
     tier: 'premium',
@@ -179,7 +200,7 @@ export class AdvancedStoryProtocolService {
    * Phase 1 implementation - creates PIL (Programmable IP License) terms
    */
   async createChapterLicenseTerms(
-    tier: 'free' | 'premium' | 'exclusive',
+    tier: 'free' | 'reading' | 'premium' | 'exclusive',
     customConfig?: Partial<LicenseTermsConfig>
   ): Promise<{ success: boolean; licenseTermsId?: string; transactionHash?: Hash; error?: string }> {
     try {

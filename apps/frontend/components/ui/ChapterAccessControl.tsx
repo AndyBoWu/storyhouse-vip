@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { useAccount, useConnect } from 'wagmi'
 import { useChapterAccess } from '@/hooks/useChapterAccess'
 import { useChapterUnlock } from '@/hooks/useChapterUnlock'
+import { useReadingLicense } from '@/hooks/useReadingLicense'
+import { apiClient } from '@/lib/api-client'
 
 interface ChapterAccessControlProps {
   bookId: string
@@ -36,17 +38,25 @@ export default function ChapterAccessControl({
     error: web3Error
   } = useChapterUnlock()
 
+  const {
+    mintReadingLicense,
+    getReadingLicensePricing,
+    hasReadingLicense,
+    error: licenseError
+  } = useReadingLicense()
+
   const [accessInfo, setAccessInfo] = useState<any>(null)
   const [isUnlocking, setIsUnlocking] = useState(false)
+  const [hasSuccessfulUnlock, setHasSuccessfulUnlock] = useState(false)
 
   const pricing = getChapterPricing(chapterNumber)
 
-  // Check access when component mounts or wallet connects
+  // Check access when component mounts or wallet connects (but don't override successful unlocks)
   useEffect(() => {
-    if (bookId && chapterNumber) {
+    if (bookId && chapterNumber && !hasSuccessfulUnlock) {
       checkChapterAccess(bookId, chapterNumber).then(setAccessInfo)
     }
-  }, [bookId, chapterNumber, address, checkChapterAccess])
+  }, [bookId, chapterNumber, address, checkChapterAccess, hasSuccessfulUnlock])
 
   const handleUnlock = async () => {
     setIsUnlocking(true)
@@ -66,23 +76,45 @@ export default function ChapterAccessControl({
           }
         })
       } else {
-        // Paid chapters use Web3 unlock
-        await unlockPaidChapter({
+        // Paid chapters use Reading License minting
+        const chapterIpAssetId = `0x${bookId.slice(2).padStart(40, '0')}` // Convert bookId to IP asset format
+        
+        await mintReadingLicense({
           bookId,
           chapterNumber,
-          onSuccess: (txHash) => {
-            console.log('✅ Chapter unlocked via blockchain:', txHash)
-            setAccessInfo({
-              canAccess: true,
-              alreadyUnlocked: true,
-              unlockPrice: pricing.unlockPrice,
-              isFree: false,
-              transactionHash: txHash
-            })
-            onAccessGranted()
+          chapterIpAssetId,
+          onSuccess: async (licenseData) => {
+            console.log('✅ Reading license minted successfully:', licenseData)
+            
+            try {
+              // Update access info with license token data
+              setAccessInfo({
+                canAccess: true,
+                alreadyUnlocked: true,
+                unlockPrice: pricing.unlockPrice,
+                isFree: false,
+                licenseTokenId: licenseData.licenseTokenId,
+                transactionHash: licenseData.transactionHash
+              })
+              setHasSuccessfulUnlock(true) // Prevent useEffect from overriding
+              onAccessGranted()
+              
+            } catch (error) {
+              console.error('Failed to process license minting result:', error)
+              // Still show as unlocked since license was minted
+              setAccessInfo({
+                canAccess: true,
+                alreadyUnlocked: true,
+                unlockPrice: pricing.unlockPrice,
+                isFree: false,
+                licenseTokenId: licenseData.licenseTokenId
+              })
+              setHasSuccessfulUnlock(true)
+              onAccessGranted()
+            }
           },
           onError: (error) => {
-            console.error('Paid chapter unlock failed:', error)
+            console.error('Reading license minting failed:', error)
           }
         })
       }
@@ -198,9 +230,9 @@ export default function ChapterAccessControl({
           Unlock this chapter for <span className="font-semibold">{pricing.unlockPrice} TIP tokens</span>
         </p>
         
-        {(error || web3Error) && (
+        {(error || web3Error || licenseError) && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-sm text-red-700">{error || web3Error}</p>
+            <p className="text-sm text-red-700">{error || web3Error || licenseError}</p>
           </div>
         )}
         
@@ -233,7 +265,7 @@ export default function ChapterAccessControl({
           disabled={isUnlocking || isLoading}
           className="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50 transition-colors"
         >
-          {isUnlocking ? 'Processing...' : `Unlock for ${pricing.unlockPrice} TIP`}
+          {isUnlocking ? 'Minting License...' : `Get Reading License for ${pricing.unlockPrice} TIP`}
         </button>
         
         {pricing.readReward > 0 && (
