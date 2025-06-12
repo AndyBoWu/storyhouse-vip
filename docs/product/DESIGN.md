@@ -40,6 +40,8 @@ Date: June 1, 2025
 - "Pay licensing fees, earn from your unique content"
 - "Tap into established audiences with your fresh perspective"
 
+> **📚 Full System Details**: See [COLLABORATIVE_STORYTELLING.md](./COLLABORATIVE_STORYTELLING.md) for complete specification of our chapter-level branching system, Story Protocol integration, and royalty distribution model.
+
 Based on blockchain landing page best practices, this section should use **clean, professional design with plenty of white space**[9](https://www.brightscout.com/insight/15-examples-sleek-blockchain-websites).
 
 ## **Product Demo Section**

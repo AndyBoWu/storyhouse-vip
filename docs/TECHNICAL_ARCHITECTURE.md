@@ -4,6 +4,8 @@
 
 StoryHouse.vip is a revolutionary Web3 publishing platform built on Story Protocol, enabling chapter-level IP asset management with PIL (Programmable IP License) licensing, blockchain derivative registration, AI-powered content analytics, and comprehensive real-time royalty distribution with automated notifications.
 
+**🌳 Collaborative Storytelling System**: Our core innovation enables readers to branch stories from any chapter using Story Protocol licensing, creating infinite story multiverse with automatic royalty distribution through genealogy chains. See [COLLABORATIVE_STORYTELLING.md](./product/COLLABORATIVE_STORYTELLING.md) for complete system specification.
+
 **🆕 Phase 5.3 Architecture Enhancements:**
 - **Enhanced UI/UX Layer**: Zero commission messaging, color-coded chapter states, improved publishing flow
 - **Optimized Frontend**: SPA optimization with enhanced routing and component performance  

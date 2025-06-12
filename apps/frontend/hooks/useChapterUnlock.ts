@@ -1,68 +1,13 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
 import { parseEther } from 'viem'
+import { STORYHOUSE_CONTRACTS, TIP_TOKEN_ABI, READ_REWARDS_CONTROLLER_ABI } from '../lib/contracts/storyhouse'
 
-// Contract addresses - these would be loaded from environment or config
-const CHAPTER_ACCESS_CONTROLLER_ADDRESS = process.env.NEXT_PUBLIC_CHAPTER_ACCESS_CONTROLLER_ADDRESS as `0x${string}`
-const TIP_TOKEN_ADDRESS = process.env.NEXT_PUBLIC_TIP_TOKEN_ADDRESS as `0x${string}`
+// Use existing contract addresses from configuration
+const CHAPTER_ACCESS_CONTROLLER_ADDRESS = STORYHOUSE_CONTRACTS.READ_REWARDS_CONTROLLER
+const TIP_TOKEN_ADDRESS = STORYHOUSE_CONTRACTS.TIP_TOKEN
 
-// Contract ABIs (simplified for this example)
-const CHAPTER_ACCESS_ABI = [
-  {
-    name: 'unlockChapter',
-    type: 'function',
-    stateMutability: 'nonpayable',
-    inputs: [
-      { name: 'bookId', type: 'bytes32' },
-      { name: 'chapterNumber', type: 'uint256' }
-    ],
-    outputs: []
-  },
-  {
-    name: 'canAccessChapter',
-    type: 'function',
-    stateMutability: 'view',
-    inputs: [
-      { name: 'user', type: 'address' },
-      { name: 'bookId', type: 'bytes32' },
-      { name: 'chapterNumber', type: 'uint256' }
-    ],
-    outputs: [
-      { name: 'canAccess', type: 'bool' },
-      { name: 'price', type: 'uint256' }
-    ]
-  }
-] as const
-
-const TIP_TOKEN_ABI = [
-  {
-    name: 'approve',
-    type: 'function',
-    stateMutability: 'nonpayable',
-    inputs: [
-      { name: 'spender', type: 'address' },
-      { name: 'amount', type: 'uint256' }
-    ],
-    outputs: [{ name: '', type: 'bool' }]
-  },
-  {
-    name: 'balanceOf',
-    type: 'function',
-    stateMutability: 'view',
-    inputs: [{ name: 'account', type: 'address' }],
-    outputs: [{ name: '', type: 'uint256' }]
-  },
-  {
-    name: 'allowance',
-    type: 'function',
-    stateMutability: 'view',
-    inputs: [
-      { name: 'owner', type: 'address' },
-      { name: 'spender', type: 'address' }
-    ],
-    outputs: [{ name: '', type: 'uint256' }]
-  }
-] as const
+// Use READ_REWARDS_CONTROLLER_ABI from contracts/storyhouse
 
 interface UnlockChapterParams {
   bookId: string
@@ -76,6 +21,7 @@ export function useChapterUnlock() {
   const [isApproving, setIsApproving] = useState(false)
   const [isUnlocking, setIsUnlocking] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [pendingUnlock, setPendingUnlock] = useState<{onSuccess?: (txHash: string) => void, onError?: (error: string) => void} | null>(null)
 
   const { writeContract: writeApprove, data: approveHash } = useWriteContract()
   const { writeContract: writeUnlock, data: unlockHash } = useWriteContract()
@@ -84,9 +30,31 @@ export function useChapterUnlock() {
     hash: approveHash,
   })
 
-  const { isLoading: isUnlockPending } = useWaitForTransactionReceipt({
+  const { isLoading: isUnlockPending, isSuccess: isUnlockSuccess, isError: isUnlockError } = useWaitForTransactionReceipt({
     hash: unlockHash,
   })
+
+  // Handle transaction completion
+  useEffect(() => {
+    if (isUnlockSuccess && unlockHash && pendingUnlock?.onSuccess) {
+      console.log('🎉 Transaction completed successfully:', unlockHash)
+      pendingUnlock.onSuccess(unlockHash)
+      setPendingUnlock(null)
+      setIsUnlocking(false)
+      setIsApproving(false)
+    }
+  }, [isUnlockSuccess, unlockHash, pendingUnlock])
+
+  // Handle transaction failure
+  useEffect(() => {
+    if (isUnlockError && pendingUnlock?.onError) {
+      console.error('❌ Transaction failed')
+      pendingUnlock.onError('Transaction failed or was rejected')
+      setPendingUnlock(null)
+      setIsUnlocking(false)
+      setIsApproving(false)
+    }
+  }, [isUnlockError, pendingUnlock])
 
   /**
    * Convert book ID string to bytes32 format
@@ -170,7 +138,7 @@ export function useChapterUnlock() {
     setError(null)
 
     try {
-      const unlockPrice = parseEther('0.5') // 0.5 TIP tokens
+      const unlockPrice = parseEther('0.5') // 0.5 TIP tokens (matches UI pricing)
       const bookIdBytes32 = stringToBytes32(bookId)
 
       // Check if approval is needed
@@ -186,25 +154,26 @@ export function useChapterUnlock() {
         await new Promise(resolve => setTimeout(resolve, 2000))
       }
 
-      console.log('🔓 Unlocking chapter via smart contract...')
+      console.log('🔓 Paying for chapter access via TIP token transfer...')
       console.log('Book ID (bytes32):', bookIdBytes32)
       console.log('Chapter Number:', chapterNumber)
       console.log('Unlock Price:', unlockPrice.toString())
 
+      // Store callbacks for transaction completion
+      setPendingUnlock({ onSuccess, onError })
+
+      // For paid chapters, transfer TIP tokens to the platform
+      // This is a simpler approach than complex smart contract logic
+      const platformAddress = CHAPTER_ACCESS_CONTROLLER_ADDRESS // Use as treasury address
+      
       writeUnlock({
-        address: CHAPTER_ACCESS_CONTROLLER_ADDRESS,
-        abi: CHAPTER_ACCESS_ABI,
-        functionName: 'unlockChapter',
-        args: [bookIdBytes32, BigInt(chapterNumber)],
+        address: TIP_TOKEN_ADDRESS,
+        abi: TIP_TOKEN_ABI,
+        functionName: 'transfer',
+        args: [platformAddress, unlockPrice],
       })
 
-      // In a real implementation, you'd wait for the transaction to be mined
-      // and then call onSuccess with the transaction hash
-      setTimeout(() => {
-        if (unlockHash) {
-          onSuccess?.(unlockHash)
-        }
-      }, 3000)
+      // Transaction completion will be handled by useEffect when isUnlockSuccess becomes true
 
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Chapter unlock failed'
