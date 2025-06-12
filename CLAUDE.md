@@ -33,6 +33,23 @@ Tech Stack: Next.js 15.3.3, TypeScript, Story Protocol SDK, OpenAI GPT-4, Smart 
 - **DO NOT add "Generated with Claude Code" or similar attributions** to commits
 - Keep commit messages clean and professional without AI/Claude references
 
+### GitHub Actions Workflow Naming
+- **Always use emoji prefixes** for workflow names to enable quick visual identification
+- **Include trigger context in parentheses** after the main action
+- **Follow this naming pattern**: `[Emoji] [Action] ([Trigger/Context])`
+- **Standard emoji categories**:
+  - 🚀 = Deployment workflows
+  - 🧪 = Testing workflows
+  - 🔍 = Code quality/linting workflows
+  - 🛡️ = Security scanning workflows
+  - 📦 = Build/release workflows
+  - 🔧 = Maintenance/utility workflows
+- **Examples**:
+  - `🚀 Deploy to Vercel (Manual/PR)`
+  - `🚀 Deploy to Production (Auto on Main)`
+  - `🧪 Test Suite (All Tests)`
+  - `🔍 Code Quality (Lint, Type Check)`
+
 ## Memories
 
 - Remember that our mainnet is not integrated yet
