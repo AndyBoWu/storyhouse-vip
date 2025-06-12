@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAccount } from 'wagmi';
 import Link from 'next/link';
+import { Settings, X, Type, Minus, Plus } from 'lucide-react';
 import apiClient from '@/lib/api-client';
 import ChapterAccessControl from '@/components/ui/ChapterAccessControl';
 import { useChapterAccess } from '@/hooks/useChapterAccess';
@@ -41,6 +42,12 @@ export default function ChapterPage() {
   const [fontSize, setFontSize] = useState<'small' | 'medium' | 'large'>('medium');
   const [theme, setTheme] = useState<'light' | 'dark' | 'sepia'>('light');
   const [readingProgress, setReadingProgress] = useState(0);
+  
+  // Reading settings state
+  const [showSettings, setShowSettings] = useState(false);
+  const [fontFamily, setFontFamily] = useState<'sans' | 'serif' | 'mono'>('serif');
+  const [lineHeight, setLineHeight] = useState<'normal' | 'relaxed' | 'loose'>('relaxed');
+  const [focusMode, setFocusMode] = useState(false);
   
   const { getChapterPricing } = useChapterAccess();
 
@@ -104,6 +111,25 @@ export default function ChapterPage() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Load reading preferences from localStorage
+  useEffect(() => {
+    const savedPrefs = localStorage.getItem('readingPreferences');
+    if (savedPrefs) {
+      const prefs = JSON.parse(savedPrefs);
+      if (prefs.fontSize) setFontSize(prefs.fontSize);
+      if (prefs.theme) setTheme(prefs.theme);
+      if (prefs.fontFamily) setFontFamily(prefs.fontFamily);
+      if (prefs.lineHeight) setLineHeight(prefs.lineHeight);
+      if (prefs.focusMode !== undefined) setFocusMode(prefs.focusMode);
+    }
+  }, []);
+
+  // Save reading preferences to localStorage
+  useEffect(() => {
+    const prefs = { fontSize, theme, fontFamily, lineHeight, focusMode };
+    localStorage.setItem('readingPreferences', JSON.stringify(prefs));
+  }, [fontSize, theme, fontFamily, lineHeight, focusMode]);
+
   const handleAccessGranted = async () => {
     try {
       // When access is granted (e.g., after payment), fetch full content
@@ -139,11 +165,33 @@ export default function ChapterPage() {
   const getFontSizeClass = () => {
     switch (fontSize) {
       case 'small':
-        return 'text-sm leading-relaxed';
+        return 'text-sm md:text-base';
       case 'large':
-        return 'text-xl leading-loose';
+        return 'text-lg md:text-xl lg:text-2xl';
       default:
-        return 'text-base leading-relaxed';
+        return 'text-base md:text-lg';
+    }
+  };
+
+  const getFontFamilyClass = () => {
+    switch (fontFamily) {
+      case 'sans':
+        return 'font-sans';
+      case 'mono':
+        return 'font-mono';
+      default:
+        return 'font-serif';
+    }
+  };
+
+  const getLineHeightClass = () => {
+    switch (lineHeight) {
+      case 'normal':
+        return 'leading-normal';
+      case 'loose':
+        return 'leading-loose';
+      default:
+        return 'leading-relaxed';
     }
   };
 
@@ -174,7 +222,7 @@ export default function ChapterPage() {
       {/* <ReadingProgressBar progress={readingProgress} /> */}
       
       {/* Header */}
-      <header className="sticky top-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm border-b z-40">
+      <header className={`sticky top-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm border-b z-40 transition-all duration-300 ${focusMode ? 'opacity-0 hover:opacity-100' : ''}`}>
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -197,7 +245,7 @@ export default function ChapterPage() {
       </header>
 
       {/* Chapter Content */}
-      <article className="container mx-auto px-4 py-8 max-w-4xl">
+      <article className={`container mx-auto px-4 py-8 ${focusMode ? 'max-w-2xl' : 'max-w-4xl'} transition-all duration-300`}>
         {/* Show access control if user doesn't have access */}
         {!hasAccess && chapter && (
           <div className="mb-8">
@@ -233,7 +281,7 @@ export default function ChapterPage() {
               </div>
             </div>
 
-            <div className={`prose prose-gray dark:prose-invert max-w-none ${getFontSizeClass()}`}>
+            <div className={`prose prose-gray dark:prose-invert max-w-none ${getFontSizeClass()} ${getFontFamilyClass()} ${getLineHeightClass()}`}>
               <div 
                 className="whitespace-pre-wrap"
                 dangerouslySetInnerHTML={{ __html: chapter.content }}
@@ -283,6 +331,161 @@ export default function ChapterPage() {
           </div>
         )}
       </article>
+
+      {/* Floating Settings Button */}
+      <button
+        onClick={() => {
+          console.log('Settings button clicked, current state:', showSettings);
+          setShowSettings(!showSettings);
+        }}
+        className={`fixed ${showSettings ? 'right-80' : 'right-6'} bottom-20 p-3 bg-purple-600 hover:bg-purple-700 text-white rounded-full shadow-lg transition-all duration-300 z-40`}
+        aria-label="Reading Settings"
+      >
+        <Settings className="h-5 w-5" />
+      </button>
+
+      {/* Settings Panel */}
+      <div 
+        className={`fixed right-0 top-0 h-full w-80 bg-white dark:bg-gray-900 shadow-xl transform transition-transform duration-300 z-50 ${showSettings ? 'translate-x-0' : 'translate-x-full'}`}
+        style={{
+          // Debug: Force visibility to test if panel is working
+          // transform: showSettings ? 'translateX(0)' : 'translateX(100%)'
+        }}
+      >
+        <div className="p-6 h-full overflow-y-auto">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-xl font-bold">Reading Settings</h3>
+            <button
+              onClick={() => setShowSettings(false)}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+
+          {/* Theme Selection */}
+          <div className="mb-6">
+            <label className="text-sm font-medium mb-3 block">Theme</label>
+            <div className="grid grid-cols-3 gap-2">
+              {(['light', 'dark', 'sepia'] as const).map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setTheme(t)}
+                  className={`px-3 py-2 rounded-lg border-2 transition-all capitalize ${
+                    theme === t 
+                      ? 'border-purple-600 bg-purple-50 dark:bg-purple-900/20 text-purple-600' 
+                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Font Size */}
+          <div className="mb-6">
+            <label className="text-sm font-medium mb-3 block flex items-center gap-2">
+              <Type className="h-4 w-4" />
+              Font Size
+            </label>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => {
+                  if (fontSize === 'medium') setFontSize('small');
+                  else if (fontSize === 'large') setFontSize('medium');
+                }}
+                disabled={fontSize === 'small'}
+                className={`p-2 rounded-lg transition-all ${fontSize === 'small' ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`}
+              >
+                <Minus className="h-4 w-4" />
+              </button>
+              <div className="flex-1 text-center font-medium">
+                {fontSize === 'small' ? 'Small' : fontSize === 'large' ? 'Large' : 'Medium'}
+              </div>
+              <button
+                onClick={() => {
+                  if (fontSize === 'small') setFontSize('medium');
+                  else if (fontSize === 'medium') setFontSize('large');
+                }}
+                disabled={fontSize === 'large'}
+                className={`p-2 rounded-lg transition-all ${fontSize === 'large' ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`}
+              >
+                <Plus className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Font Family */}
+          <div className="mb-6">
+            <label className="text-sm font-medium mb-3 block">Font Family</label>
+            <div className="space-y-2">
+              {[
+                { value: 'serif' as const, label: 'Serif', sample: 'Aa' },
+                { value: 'sans' as const, label: 'Sans-serif', sample: 'Aa' },
+                { value: 'mono' as const, label: 'Monospace', sample: 'Aa' }
+              ].map((font) => (
+                <button
+                  key={font.value}
+                  onClick={() => setFontFamily(font.value)}
+                  className={`w-full px-4 py-3 rounded-lg border-2 transition-all flex justify-between items-center ${
+                    fontFamily === font.value
+                      ? 'border-purple-600 bg-purple-50 dark:bg-purple-900/20'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  <span>{font.label}</span>
+                  <span className={`text-lg ${font.value === 'serif' ? 'font-serif' : font.value === 'sans' ? 'font-sans' : 'font-mono'}`}>
+                    {font.sample}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Line Height */}
+          <div className="mb-6">
+            <label className="text-sm font-medium mb-3 block">Line Height</label>
+            <div className="space-y-2">
+              {[
+                { value: 'normal' as const, label: 'Compact' },
+                { value: 'relaxed' as const, label: 'Default' },
+                { value: 'loose' as const, label: 'Spacious' }
+              ].map((height) => (
+                <button
+                  key={height.value}
+                  onClick={() => setLineHeight(height.value)}
+                  className={`w-full px-4 py-2 rounded-lg border-2 transition-all ${
+                    lineHeight === height.value
+                      ? 'border-purple-600 bg-purple-50 dark:bg-purple-900/20'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  {height.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Focus Mode */}
+          <div className="mb-6">
+            <label className="text-sm font-medium mb-3 block">Focus Mode</label>
+            <button
+              onClick={() => setFocusMode(!focusMode)}
+              className={`w-full px-4 py-3 rounded-lg border-2 transition-all ${
+                focusMode
+                  ? 'border-purple-600 bg-purple-600 text-white'
+                  : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+              }`}
+            >
+              {focusMode ? 'Enabled' : 'Disabled'}
+            </button>
+            <p className="text-xs text-gray-500 mt-2">
+              Narrows content width for easier reading
+            </p>
+          </div>
+        </div>
+      </div>
       
       {/* Fixed Reading Progress Bar */}
       <div className="fixed bottom-0 left-0 right-0 h-1 bg-gray-900/20 backdrop-blur-sm z-50">
