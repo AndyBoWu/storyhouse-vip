@@ -14,7 +14,7 @@ export interface BookMetadata {
   title: string;               // "The Detective's Portal: Sci-Fi Adventure"
   description: string;         // Book description
   authorAddress: string;       // "0x5678..."
-  authorName: string;          // "Boris" or last 4 chars of address
+  authorName: string;          // "Bob" or last 4 chars of address
   slug: string;               // "detective-sf" (URL-safe)
   coverUrl?: string;          // R2 URL to book cover image
   
