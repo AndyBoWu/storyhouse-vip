@@ -31,7 +31,7 @@ Democratize intellectual property for the digital age. Every chapter becomes an 
 | Backend | Next.js API | Server endpoints |
 | Blockchain | Story Protocol | IP asset management |
 | AI | OpenAI GPT-4 | Content generation |
-| Storage | Cloudflare R2 | Content storage |
+| Storage | Cloud Storage | Content storage |
 | Hosting | Vercel | Application hosting |
 
 ## 📊 Market Opportunity

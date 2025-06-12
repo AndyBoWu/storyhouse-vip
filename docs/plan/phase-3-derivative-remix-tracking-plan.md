@@ -250,14 +250,14 @@ Building on this strong foundation, Phase 3 will add:
 ### Existing Systems
 1. **Royalty System**: Integrate derivative tracking with royalty distribution
 2. **IP Registration**: Connect derivative detection to Story Protocol IP assets
-3. **Content Storage**: Enhance R2 metadata with derivative relationship data
+3. **Content Storage**: Enhance cloud storage metadata with derivative relationship data
 4. **Analytics Platform**: Extend existing analytics with derivative-specific metrics
 
 ### External Services
 1. **OpenAI API**: Enhanced content analysis and similarity detection
 2. **Story Protocol**: IP asset relationship tracking and management
 3. **Blockchain**: Derivative registration and attribution on-chain
-4. **R2 Storage**: Enhanced metadata for derivative content relationships
+4. **Cloud Storage**: Enhanced metadata for derivative content relationships
 
 ## Success Validation
 

@@ -106,7 +106,7 @@ StoryHouse.vip revolutionizes Web3 publishing by combining **chapter-level IP as
 **Technical Requirements**:
 
 - Story Protocol SDK integration
-- Metadata IPFS storage with chapter-specific schemas
+- Metadata storage with chapter-specific schemas
 - Gas fee estimation and transaction monitoring
 - Chapter dependency tracking (sequential validation)
 

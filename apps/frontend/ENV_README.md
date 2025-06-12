@@ -31,7 +31,7 @@ npm run dev:mainnet
 - `NEXT_PUBLIC_ENABLE_TESTNET=false` - Toggle between mock and real blockchain operations
 - `STORY_PRIVATE_KEY` - Your private key for Story Protocol transactions
 - `STORY_RPC_URL` - Story Protocol RPC endpoint
-- `R2_*` - Cloudflare R2 storage configuration
+- `R2_*` - Cloud storage configuration
 
 #### Network-Specific Settings
 

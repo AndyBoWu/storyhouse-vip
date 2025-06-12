@@ -95,7 +95,7 @@
      - ✅ **Free License**: Open access with attribution (0 TIP)
      - ✅ **Premium License**: Commercial use with 10% revenue sharing (100 TIP)
      - ✅ **Exclusive License**: Full commercial rights with 25% revenue sharing (1000 TIP)
-   - ✅ Added template storage and retrieval with R2 integration
+   - ✅ Added template storage and retrieval with cloud storage integration
    - ✅ Custom license terms support
 
 2. **License Attachment System** ✅

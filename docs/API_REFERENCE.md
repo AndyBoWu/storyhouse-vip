@@ -756,7 +756,7 @@ POST /api/ip/license/attach
 
 ### Get All Stories
 
-Fetch published stories from R2 storage.
+Fetch published stories from cloud storage.
 
 ```http
 GET /api/stories

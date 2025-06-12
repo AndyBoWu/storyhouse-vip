@@ -22,7 +22,7 @@ StoryHouse.vip is a revolutionary Web3 storytelling platform built on Story Prot
 - **Complete user attribution** with wallet integration
 - **Advanced caching** and performance optimization
 
-Tech Stack: Next.js 15.3.3, TypeScript, Story Protocol SDK, OpenAI GPT-4, Cloudflare R2, Smart Contracts (Solidity)
+Tech Stack: Next.js 15.3.3, TypeScript, Story Protocol SDK, OpenAI GPT-4, Smart Contracts (Solidity)
 
 **Current Status: Phase 5.3 Complete** - Full SPA optimization with story routing and UI polish
 

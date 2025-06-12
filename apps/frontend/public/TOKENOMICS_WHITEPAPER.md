@@ -1,6 +1,6 @@
 # 📄 StoryHouse.vip Tokenomics Whitepaper
 
-**Version 1.0** | **Published: December 2024**
+**Version 1.0**
 
 ---
 
@@ -468,7 +468,7 @@ Realistic capture: 0.01% = $150M
 **Blockchain Risk:**
 
 - **Mitigation**: Multi-chain deployment (Ethereum, Polygon, Arbitrum)
-- **Fallbacks**: IPFS content storage, decentralized infrastructure
+- **Fallbacks**: Decentralized content storage, distributed infrastructure
 - **Scalability**: Layer 2 solutions reducing costs 90%+
 
 **AI Dependency Risk:**
@@ -684,7 +684,7 @@ Realistic capture: 0.01% = $150M
 ┌─────────────────────────────────┐
 │    Infrastructure Layer        │
 │  • Story Protocol              │
-│  • IPFS Storage                │
+│  • Content Storage             │
 │  • Cross-chain Bridges         │
 └─────────────────────────────────┘
 ```
@@ -715,7 +715,7 @@ contract ChapterIPRegistry {
     struct ChapterIP {
         address creator;
         uint256 timestamp;
-        string ipfsHash;
+        string contentHash;
         uint256 storyProtocolId;
         LicenseTerms licenseTerms;
     }
@@ -762,11 +762,11 @@ contract TIPBridge {
 - **Optimistic rollups** for high-throughput operations
 - **State channels** for frequent micro-transactions
 
-**IPFS Integration:**
+**Content Storage:**
 
-- **Content addressing** for immutable storage
-- **Pin services** ensuring availability
+- **Distributed storage** for content availability
 - **CDN caching** for performance optimization
+- **Redundant backups** ensuring data persistence
 
 ---
 
@@ -849,8 +849,8 @@ The transition from Web2 to Web3 content platforms is inevitable. The question i
 ---
 
 **Document Version**: 1.0  
-**Last Updated**: December 2024  
-**Next Review**: March 2025
+**Last Updated**: [Current Date]  
+**Next Review**: [Quarterly Review]
 
 **Disclaimer**: This whitepaper contains forward-looking statements and projections. Actual results may vary significantly. This is not investment advice. Please conduct your own research before making any financial decisions.
 

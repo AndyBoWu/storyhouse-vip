@@ -318,7 +318,7 @@ Story Protocol operations return transaction details:
     "ipAssetId": "0x...",
     "tokenId": "123",
     "licenseTermsId": "456",
-    "contentUrl": "ipfs://...",
+    "contentUrl": "https://...",
     "explorerUrl": "https://aeneid.storyscan.xyz/tx/0x...",
     "gasUsed": "245000",
     "gasPrice": "20000000000"

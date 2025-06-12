@@ -310,7 +310,7 @@
 1. **Complete Story Creation Flow**
 
    - Create story with AI assistance
-   - Publish to IPFS
+   - Publish content
    - Register IP asset (if implemented)
    - Claim creation reward
 

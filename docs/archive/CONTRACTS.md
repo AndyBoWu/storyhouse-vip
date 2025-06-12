@@ -605,7 +605,7 @@ contract HybridRevenueController is Ownable, Pausable, ReentrancyGuard {
         bytes32 parentBookId;
         uint256 totalChapters;
         bool isActive;
-        string ipfsMetadataHash;
+        string metadataHash;
     }
 
     struct ChapterAttribution {

@@ -82,7 +82,7 @@ Family Tree UI        Real-time Monitoring     Revenue Distribution
 - **Backend**: Story Protocol SDK integration, AI analysis engine, derivative registration
 - **Blockchain**: Real derivative registration, license inheritance, economic modeling
 - **AI**: OpenAI embeddings, similarity detection, automated quality assessment
-- **Storage**: Cloudflare R2 for global content delivery with enhanced metadata
+- **Storage**: Global content delivery with enhanced metadata
 
 ## 🚀 Quick Start
 
@@ -104,7 +104,7 @@ cd apps/backend && npm run dev   # Port 3002
 | Backend | Next.js API | 15.3.3 |
 | Blockchain | Story Protocol SDK | 1.3.2 |
 | AI | OpenAI GPT-4 | Latest |
-| Storage | Cloudflare R2 | - |
+| Storage | Cloud Storage | - |
 | Hosting | Vercel | - |
 
 ## 🔗 Smart Contracts (Testnet)
