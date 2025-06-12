@@ -1,6 +1,6 @@
 {
   "framework": "nextjs",
-  "buildCommand": "npm run build:shared && npm run build --workspace=@storyhouse/frontend",
+  "buildCommand": "cd ../../packages/shared && npm run build && cd ../../apps/frontend && npm run build",
   "installCommand": "npm install",
   "regions": ["iad1"],
   "headers": [
