@@ -73,6 +73,7 @@ function PublishingModal({
       setCurrentStep('options')
       setPublishingOption(null)
       // Auto-set license tier based on chapter number
+      // Chapters 1-3: free, Chapters 4+: premium (no free option for premium chapters)
       setLicenseTier(chapterNumber <= 3 ? 'free' : 'premium')
       // Set chapter price to 0 for chapters 1-3, default 0.1 for others
       setChapterPrice(chapterNumber <= 3 ? 0 : 0.1)
@@ -461,46 +462,11 @@ function PublishingModal({
                   <div>
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">🏷️ Choose License Tier</h3>
                     <p className="text-gray-600">
-                      Select how others can use your chapter. Higher tiers earn more revenue but allow more usage rights.
+                      Choose your licensing tier for premium content. Both options include commercial rights and revenue sharing.
                     </p>
                   </div>
 
                   <div className="space-y-4">
-                    {/* FREE License Tier */}
-                    <motion.button
-                      onClick={() => setLicenseTier('free')}
-                      whileHover={{ scale: 1.02 }}
-                      className={`w-full p-6 border-2 rounded-xl text-left transition-all ${
-                        licenseTier === 'free'
-                          ? 'border-green-500 bg-green-50'
-                          : 'border-gray-200 hover:border-green-300'
-                      }`}
-                    >
-                      <div className="flex items-start gap-4">
-                        <div className="p-3 bg-green-100 rounded-lg">
-                          <span className="text-green-600 font-bold text-lg">FREE</span>
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="text-lg font-semibold text-gray-900 mb-2">🆓 Free License</h4>
-                          <p className="text-gray-600 mb-3">
-                            Open access with attribution required. Perfect for building audience.
-                          </p>
-                          <div className="grid grid-cols-2 gap-4 text-sm">
-                            <div className="space-y-1">
-                              <div className="text-green-700">✅ Attribution required</div>
-                              <div className="text-green-700">✅ Non-commercial use</div>
-                              <div className="text-green-700">✅ Derivatives allowed</div>
-                            </div>
-                            <div className="space-y-1">
-                              <div className="text-gray-600"><strong>0 TIP</strong> license fee</div>
-                              <div className="text-gray-600"><strong>0%</strong> royalty</div>
-                              <div className="text-red-600">❌ No commercial use</div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </motion.button>
-
                     {/* PREMIUM License Tier */}
                     <motion.button
                       onClick={() => setLicenseTier('premium')}
