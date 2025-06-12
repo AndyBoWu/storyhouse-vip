@@ -128,6 +128,10 @@ export default function BookPage() {
 
   const formatAddress = (address: string) => {
     if (!address) return 'Address not available';
+    // Show alias for specific wallet address
+    if (address.toLowerCase() === '0x3873c0d1bcfa245773b13b694a49dac5b3f03ca2') {
+      return 'andybowu.ip';
+    }
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
