@@ -1,8 +1,8 @@
-# 🌐 Cloudflare R2 Storage Integration
+# 🌐 Cloud Storage Integration
 
 ## 🎯 **Overview**
 
-StoryHouse.vip integrates Cloudflare R2 Object Storage to provide global CDN capabilities crucial for the read-to-earn user experience. Fast chapter loading is essential - slow loading kills engagement and token earning potential.
+StoryHouse.vip integrates cloud object storage to provide global CDN capabilities crucial for the read-to-earn user experience. Fast chapter loading is essential - slow loading kills engagement and token earning potential.
 
 ## 🏗️ **Architecture**
 

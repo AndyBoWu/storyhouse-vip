@@ -4,18 +4,18 @@ This is the backend API for StoryHouse.vip, providing all server-side functional
 
 ## Features
 
-- **Story Management**: Create, read, update stories with R2 storage
+- **Story Management**: Create, read, update stories with cloud storage
 - **AI Generation**: GPT-4 powered story generation with metadata
 - **IP Registration**: Story Protocol integration for IP asset management
 - **Collections**: Story collection management and collaboration
-- **R2 Storage**: Cloudflare R2 integration for content storage
+- **Cloud Storage**: Content storage integration
 - **Security**: Anti-scraping and bot protection
 
 ## API Endpoints
 
 ### Stories
 - `GET /api/stories` - List all published stories
-- `POST /api/upload` - Upload story content to R2
+- `POST /api/upload` - Upload story content to cloud storage
 - `GET|PUT|DELETE /api/chapters/[storyId]/[chapterNumber]` - Chapter operations
 
 ### AI Generation
@@ -61,10 +61,10 @@ vercel --prod
 ## Architecture
 
 - **Runtime**: Node.js with Next.js API routes
-- **Storage**: Cloudflare R2 for content storage
+- **Storage**: Cloud storage for content delivery
 - **AI**: OpenAI GPT-4 for story generation
 - **Blockchain**: Story Protocol for IP management
-- **Database**: Currently using R2 as primary storage (can be extended with traditional DB)
+- **Database**: Currently using cloud storage as primary storage (can be extended with traditional DB)
 
 ## Development
 

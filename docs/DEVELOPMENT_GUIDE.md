@@ -430,7 +430,7 @@ time npm run build
 - Use Next.js built-in analytics
 - Monitor API response times (target: <2s for standard, <5s for blockchain)
 - Track blockchain transaction times and gas usage
-- Monitor R2 storage performance and caching efficiency
+- Monitor cloud storage performance and caching efficiency
 - 🆕 **AI Analysis Performance**: Content similarity analysis <3s
 - 🆕 **Notification Latency**: Real-time delivery <2s
 - 🆕 **Family Tree Queries**: Unlimited depth traversal performance

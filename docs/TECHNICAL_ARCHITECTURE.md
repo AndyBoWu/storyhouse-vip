@@ -35,7 +35,7 @@ StoryHouse.vip is a revolutionary Web3 publishing platform built on Story Protoc
 | AI | OpenAI GPT-4 | Latest | Content generation & analysis |
 | Analytics | React/D3 | Latest | Derivative tracking dashboard |
 | Notifications | Real-time | - | AI-powered alerts & monitoring |
-| Storage | Cloudflare R2 | - | Global content delivery |
+| Storage | Cloud Storage | - | Global content delivery |
 | Hosting | Vercel | - | Serverless deployment |
 
 ## Core Components
@@ -51,7 +51,7 @@ StoryHouse.vip is a revolutionary Web3 publishing platform built on Story Protoc
 ### Backend (`apps/backend/`)
 - **API Routes**: Next.js API endpoints (15+ endpoints)
 - **Services**: Story Protocol SDK v1.3.2 integration with derivative registration
-- **Storage**: R2 content management with enhanced metadata
+- **Storage**: Cloud storage content management with enhanced metadata
 - **AI Integration**: OpenAI GPT-4 story generation & content similarity analysis
 - **Derivative Registration**: Complete blockchain registration service
 - **Notification Engine**: Real-time alert system with background monitoring
@@ -185,7 +185,7 @@ Revenue Data ─→ Economic Modeling ─→ Optimization ─→ Recommendations
 ### Chapter Publishing
 1. User creates content with AI assistance and quality assessment
 2. Selects PIL license template via UI
-3. Content stored in R2 with enhanced metadata (25+ fields)
+3. Content stored in cloud storage with enhanced metadata (25+ fields)
 4. Chapter registered as IP asset on Story Protocol
 5. License attached to IP asset via PIL
 6. 🆕 AI analysis for similarity detection and derivative potential
@@ -229,7 +229,7 @@ Revenue Data ─→ Economic Modeling ─→ Optimization ─→ Recommendations
 
 ### Performance
 - Static site generation for frontend with SPA optimization
-- Cloudflare R2 global CDN with enhanced metadata caching
+- Global CDN with enhanced metadata caching
 - Serverless API deployment with optimized cold starts
 - Optimized component lazy loading with analytics dashboard
 - 🆕 Intelligent caching for AI analysis results
@@ -248,7 +248,7 @@ cd apps/backend && npm run dev   # Port 3002
 ### Deployment
 - **Frontend**: Vercel with static export
 - **Backend**: Vercel serverless functions
-- **Database**: No traditional database - blockchain + R2 storage
+- **Database**: No traditional database - blockchain + cloud storage
 
 ## Monitoring & Analytics
 
@@ -260,13 +260,13 @@ cd apps/backend && npm run dev   # Port 3002
 ### Performance Monitoring
 - Vercel analytics for deployment metrics
 - Story Protocol transaction monitoring
-- R2 storage usage tracking
+- Cloud storage usage tracking
 
 ## Scalability Considerations
 
 ### Current Capacity
 - Vercel serverless functions auto-scale
-- R2 storage globally distributed
+- Cloud storage globally distributed
 - Story Protocol handles blockchain scaling
 
 ### Future Enhancements

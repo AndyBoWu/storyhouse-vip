@@ -8,7 +8,7 @@ Build the world's first Web3 storytelling platform with **chapter-level IP asset
 
 ### **Phase 1: Core Infrastructure** ✅ (COMPLETE)
 
-- [x] Book metadata schema and R2 storage system  
+- [x] Book metadata schema and cloud storage system  
 - [x] Book registration API with on-chain IP registration
 - [x] Hybrid reading logic with chapter resolution across multiple folders
 - [x] Enhanced metadata system with 25+ tracked fields per chapter
@@ -103,16 +103,16 @@ Build the world's first Web3 storytelling platform with **chapter-level IP asset
 **5.0.2: User Attribution System** ✅
 
 - ✅ Complete author tracking with wallet address integration
-- ✅ Authorship metadata stored in both R2 and chapter content
+- ✅ Authorship metadata stored in both cloud storage and chapter content
 - ✅ User-specific story filtering capabilities
 - ✅ Rich story cards with author information display
 - ✅ Ownership verification for content management
 
 **5.0.3: Enhanced Storage Architecture** ✅
 
-- ✅ Advanced R2 caching with manual refresh capabilities
+- ✅ Advanced cloud storage caching with manual refresh capabilities
 - ✅ Cache busting for immediate story updates
-- ✅ Structured metadata in both R2 headers and content
+- ✅ Structured metadata in both cloud storage headers and content
 - ✅ Performance optimization with 60-second default cache
 - ✅ Background refresh every 10 seconds for real-time updates
 
@@ -316,7 +316,7 @@ interface MultiLanguageBookMetadata {
 
 ### Phase 8.0: Database Integration & User Management
 
-**🎯 Vision:** Transition from R2-only to comprehensive data layer with advanced user management
+**🎯 Vision:** Transition from cloud storage-only to comprehensive data layer with advanced user management
 
 #### Planned Implementation:
 

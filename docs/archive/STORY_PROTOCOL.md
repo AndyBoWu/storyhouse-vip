@@ -61,8 +61,8 @@ async function registerChapterAsIPAsset(
   nftContract: Address,
   account: Address
 ): Promise<RegisterIPAssetResponse> {
-  // Upload metadata to IPFS
-  const metadataURI = await uploadToIPFS({
+  // Upload metadata to storage
+  const metadataURI = await uploadMetadata({
     title: chapterData.title,
     description: chapterData.content.substring(0, 200),
     mediaType: "text/story",
