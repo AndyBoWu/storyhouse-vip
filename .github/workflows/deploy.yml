@@ -68,12 +68,18 @@ jobs:
           node-version: '18'
           cache: 'npm'
 
+      - name: Cache global npm
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-global-cache
+          
       - name: Install Vercel CLI
         run: |
           npm config set fund false
           npm config set audit false
-          npm install --global vercel@latest --no-fund --no-audit
-        timeout-minutes: 5
+          npm install --global vercel@43.0.0 --no-fund --no-audit --loglevel error
+        timeout-minutes: 3
 
       - name: Build Frontend (with dependencies)
         run: |
@@ -108,12 +114,18 @@ jobs:
           node-version: '18'
           cache: 'npm'
 
+      - name: Cache global npm
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-global-cache
+          
       - name: Install Vercel CLI
         run: |
           npm config set fund false
           npm config set audit false
-          npm install --global vercel@latest --no-fund --no-audit
-        timeout-minutes: 5
+          npm install --global vercel@43.0.0 --no-fund --no-audit --loglevel error
+        timeout-minutes: 3
 
       - name: Build Backend (with dependencies)
         run: |
@@ -144,12 +156,18 @@ jobs:
           node-version: '18'
           cache: 'npm'
 
+      - name: Cache global npm
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-global-cache
+          
       - name: Install Vercel CLI
         run: |
           npm config set fund false
           npm config set audit false
-          npm install --global vercel@latest --no-fund --no-audit
-        timeout-minutes: 5
+          npm install --global vercel@43.0.0 --no-fund --no-audit --loglevel error
+        timeout-minutes: 3
 
       - name: Build All Apps
         run: |
