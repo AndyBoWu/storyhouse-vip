@@ -42,7 +42,8 @@ function PublishingModal({
   const [currentStep, setCurrentStep] = useState<PublishingStep>('options')
   const [publishingOption, setPublishingOption] = useState<'simple' | 'protected' | null>(null)
   const [licenseTier, setLicenseTier] = useState<'free' | 'premium' | 'exclusive'>('premium')
-  const [chapterPrice, setChapterPrice] = useState(0.1)
+  const [chapterPrice, setChapterPrice] = useState(0.5)
+  const [priceInput, setPriceInput] = useState('0.5')
   const [ipRegistration, setIpRegistration] = useState(false)
   const [isClient, setIsClient] = useState(false)
 
@@ -75,8 +76,10 @@ function PublishingModal({
       // Auto-set license tier based on chapter number
       // Chapters 1-3: free, Chapters 4+: premium (no free option for premium chapters)
       setLicenseTier(chapterNumber <= 3 ? 'free' : 'premium')
-      // Set chapter price to 0 for chapters 1-3, default 0.1 for others
-      setChapterPrice(chapterNumber <= 3 ? 0 : 0.1)
+      // Set chapter price to 0 for chapters 1-3, default 0.5 for premium chapters
+      const price = chapterNumber <= 3 ? 0 : 0.5
+      setChapterPrice(price)
+      setPriceInput(price.toString())
       resetPublishing()
     }
   }, [isOpen, chapterNumber])
@@ -593,7 +596,7 @@ function PublishingModal({
                   <div>
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">💰 Set Chapter Price</h3>
                     <p className="text-gray-600">
-                      Choose how much readers pay to unlock this chapter. They earn tokens back while reading!
+                      Choose how much readers pay to unlock this chapter. <span className="font-medium text-green-600">You keep 100% - zero platform fees!</span>
                     </p>
                   </div>
 
@@ -608,20 +611,26 @@ function PublishingModal({
                           step="0.01"
                           min="0.01"
                           max="1.0"
-                          value={chapterPrice}
-                          onChange={(e) => setChapterPrice(parseFloat(e.target.value))}
+                          value={priceInput}
+                          onChange={(e) => {
+                            setPriceInput(e.target.value)
+                            setChapterPrice(parseFloat(e.target.value) || 0)
+                          }}
                           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          placeholder="0.10"
+                          placeholder="0.50"
                         />
                         <span className="absolute right-3 top-3 text-gray-500">$TIP</span>
                       </div>
                     </div>
 
                     <div className="grid grid-cols-3 gap-3">
-                      {[0.05, 0.1, 0.2].map((price) => (
+                      {[0.3, 0.5, 0.8].map((price) => (
                         <button
                           key={price}
-                          onClick={() => setChapterPrice(price)}
+                          onClick={() => {
+                            setChapterPrice(price)
+                            setPriceInput(price.toString())
+                          }}
                           className={`p-3 rounded-lg border text-center transition-all ${
                             chapterPrice === price
                               ? 'border-blue-500 bg-blue-50 text-blue-700'
@@ -630,7 +639,7 @@ function PublishingModal({
                         >
                           <div className="font-medium">{price} $TIP</div>
                           <div className="text-xs text-gray-500">
-                            {price === 0.05 ? 'Budget' : price === 0.1 ? 'Standard' : 'Premium'}
+                            {price === 0.3 ? 'Budget' : price === 0.5 ? 'Standard' : 'Premium'}
                           </div>
                         </button>
                       ))}
@@ -639,14 +648,17 @@ function PublishingModal({
 
                   <div className="p-4 bg-green-50 rounded-lg border border-green-200">
                     <h4 className="font-medium text-green-800 mb-2">📈 Revenue Projection</h4>
+                    <div className="mb-3 p-2 bg-green-100 rounded-lg">
+                      <div className="text-green-800 font-medium text-sm">✅ Zero commission fees - You keep 100% of chapter revenue!</div>
+                    </div>
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
                         <div className="text-green-700">Reader pays: {chapterPrice} $TIP</div>
-                        <div className="text-green-700">Reader earns back: ~0.05 $TIP</div>
+                        <div className="text-gray-600">No reading rewards for premium chapters</div>
                       </div>
                       <div>
-                        <div className="font-medium text-green-800">Your net: {(chapterPrice - 0.05).toFixed(2)} $TIP</div>
-                        <div className="text-green-600">Per reader</div>
+                        <div className="font-medium text-green-800">Your net: {chapterPrice.toFixed(2)} $TIP</div>
+                        <div className="text-green-600">Per reader (100% yours!)</div>
                       </div>
                     </div>
                   </div>
@@ -660,7 +672,7 @@ function PublishingModal({
                     </button>
                     <button
                       onClick={handlePublish}
-                      disabled={!isConnected}
+                      disabled={!isConnected || (chapterNumber > 3 && chapterPrice <= 0)}
                       className="flex-1 px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg font-medium hover:from-green-700 hover:to-emerald-700 transition-all disabled:opacity-50"
                     >
                       Publish
@@ -734,7 +746,7 @@ function PublishingModal({
                     </button>
                     <button
                       onClick={handlePublish}
-                      disabled={!isConnected}
+                      disabled={!isConnected || (chapterNumber > 3 && chapterPrice <= 0)}
                       className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all disabled:opacity-50"
                     >
                       Publish with IP Protection 🛡️
