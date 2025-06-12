@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import { useAccount } from 'wagmi'
+import { apiClient } from '@/lib/api-client'
 
 interface ChapterAccessInfo {
   bookId: string
@@ -35,17 +36,7 @@ export function useChapterAccess() {
         params.append('userAddress', address)
       }
 
-      const response = await fetch(
-        `/api/books/${bookId}/chapter/${chapterNumber}/unlock?${params}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      )
-
-      const data = await response.json()
+      const data = await apiClient.get(`/books/${bookId}/chapter/${chapterNumber}/unlock?${params}`)
       
       if (!data.success) {
         throw new Error(data.error || 'Failed to check chapter access')
@@ -87,21 +78,10 @@ export function useChapterAccess() {
 
       // For free chapters, unlock immediately
       if (accessInfo.isFree) {
-        const response = await fetch(
-          `/api/books/${bookId}/chapter/${chapterNumber}/unlock`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              userAddress: address,
-              readingSessionId: `session-${Date.now()}`
-            })
-          }
-        )
-
-        const data = await response.json()
+        const data = await apiClient.post(`/books/${bookId}/chapter/${chapterNumber}/unlock`, {
+          userAddress: address,
+          readingSessionId: `session-${Date.now()}`
+        })
         
         if (!data.success) {
           throw new Error(data.error || 'Failed to unlock free chapter')
