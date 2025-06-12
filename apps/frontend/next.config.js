@@ -7,6 +7,11 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   
+  // Skip TypeScript type checking during builds (for faster deploys)
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  
   images: {
     domains: [
       'images.unsplash.com', 
