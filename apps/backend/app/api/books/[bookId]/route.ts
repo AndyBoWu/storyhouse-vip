@@ -17,6 +17,8 @@ export async function GET(
       console.log('📚 Book metadata:', { 
         id: book.id, 
         title: book.title, 
+        authorAddress: book.authorAddress,
+        author: book.author,
         coverUrl: book.coverUrl, 
         coverImageUrl: book.coverImageUrl 
       });
@@ -33,8 +35,8 @@ export async function GET(
     const bookDetails = {
       id: book.id,
       title: book.title,
-      author: book.author,
-      authorAddress: book.author,
+      author: book.authorAddress || book.author,
+      authorAddress: book.authorAddress || book.author,
       authorName: book.authorName || 'Anonymous',
       description: book.description,
       coverUrl: `${process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api-testnet.storyhouse.vip'}/api/books/${bookId}/cover`, // Use absolute URL for cover
