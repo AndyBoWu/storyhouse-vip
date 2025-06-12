@@ -9,6 +9,11 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  // Optimize for API-only backend
+  experimental: {
+    optimizeCss: false,
+  },
+  swcMinify: true,
   // Body parser configuration moved to individual API route files
   // CORS configuration for cross-origin requests from frontend
   async headers() {
