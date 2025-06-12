@@ -69,7 +69,11 @@ jobs:
           cache: 'npm'
 
       - name: Install Vercel CLI
-        run: npm install --global vercel@latest
+        run: |
+          curl -sf https://binaries.vercel.com/cli/linux-x64 -o vercel
+          chmod +x vercel
+          sudo mv vercel /usr/local/bin/vercel
+          vercel --version
 
       - name: Build Frontend (with dependencies)
         run: |
@@ -105,7 +109,11 @@ jobs:
           cache: 'npm'
 
       - name: Install Vercel CLI
-        run: npm install --global vercel@latest
+        run: |
+          curl -sf https://binaries.vercel.com/cli/linux-x64 -o vercel
+          chmod +x vercel
+          sudo mv vercel /usr/local/bin/vercel
+          vercel --version
 
       - name: Build Backend (with dependencies)
         run: |
@@ -137,7 +145,11 @@ jobs:
           cache: 'npm'
 
       - name: Install Vercel CLI
-        run: npm install --global vercel@latest
+        run: |
+          curl -sf https://binaries.vercel.com/cli/linux-x64 -o vercel
+          chmod +x vercel
+          sudo mv vercel /usr/local/bin/vercel
+          vercel --version
 
       - name: Build All Apps
         run: |
