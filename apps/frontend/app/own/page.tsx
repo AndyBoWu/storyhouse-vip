@@ -274,7 +274,8 @@ export default function MyStoriesPage() {
                       registeredBooks.map((book) => (
                         <div
                           key={book.id}
-                          className="bg-white rounded-xl shadow-lg p-6 border border-gray-200 hover:shadow-xl transition-all"
+                          className="bg-white rounded-xl shadow-lg p-6 border border-gray-200 hover:shadow-xl transition-all cursor-pointer"
+                          onClick={() => handleViewBook(book)}
                         >
                           {/* Book Cover */}
                           {book.coverUrl && (
@@ -313,13 +314,19 @@ export default function MyStoriesPage() {
 
                           <div className="flex gap-2">
                             <button 
-                              onClick={() => handleStartWriting(book)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleStartWriting(book);
+                              }}
                               className="flex-1 px-4 py-2 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg font-semibold hover:from-green-700 hover:to-blue-700 transition-all flex items-center justify-center gap-2"
                             >
                               ✍️ Start Writing
                             </button>
                             <button 
-                              onClick={() => handleViewBook(book)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleViewBook(book);
+                              }}
                               className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all flex items-center gap-2"
                             >
                               <Book className="w-4 h-4" />
