@@ -27,7 +27,7 @@
     "test:contracts": "node ./tests/scripts/test-contracts.js",
     "test:quick": "npm run test:local && npm run test:integration",
     "test:watch": "vitest --watch",
-    "prepare": "husky install",
+    "prepare": "husky install || true",
     "lint": "npm run lint --workspace=@storyhouse/frontend && npm run lint --workspace=@storyhouse/backend",
     "lint:frontend": "npm run lint --workspace=@storyhouse/frontend",
     "lint:backend": "npm run lint --workspace=@storyhouse/backend",
