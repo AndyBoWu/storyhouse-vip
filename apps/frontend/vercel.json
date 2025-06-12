@@ -1,7 +1,7 @@
 {
   "framework": "nextjs",
-  "buildCommand": "cd ../../packages/shared && npm install && npm run build && cd ../../apps/frontend && npm install && npm run build",
-  "installCommand": "npm install || true",
+  "buildCommand": "cd ../.. && npm run build:frontend",
+  "installCommand": "cd ../.. && npm install",
   "regions": ["iad1"],
   "headers": [
     {
