@@ -71,10 +71,15 @@ jobs:
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
-      - name: Deploy Frontend to Vercel
+      - name: Build Frontend (with dependencies)
+        run: |
+          npm install
+          npm run build:frontend
+        
+      - name: Deploy Frontend to Vercel (prebuilt)
         id: deploy
         run: |
-          url=$(vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }})
+          url=$(vercel deploy --prod --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
           echo "url=$url" >> $GITHUB_OUTPUT
         working-directory: ./apps/frontend
         env:
@@ -102,10 +107,15 @@ jobs:
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
-      - name: Deploy Backend to Vercel
+      - name: Build Backend (with dependencies)
+        run: |
+          npm install
+          npm run build:backend
+        
+      - name: Deploy Backend to Vercel (prebuilt)
         id: deploy
         run: |
-          url=$(vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }})
+          url=$(vercel deploy --prod --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
           echo "url=$url" >> $GITHUB_OUTPUT
         working-directory: ./apps/backend
         env:
@@ -129,14 +139,20 @@ jobs:
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
+      - name: Build All Apps
+        run: |
+          npm install
+          npm run build:frontend
+          npm run build:backend
+
       - name: Deploy Frontend Preview
-        run: vercel deploy --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
         working-directory: ./apps/frontend
         env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_FRONTEND }}
 
       - name: Deploy Backend Preview
-        run: vercel deploy --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
         working-directory: ./apps/backend
         env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_BACKEND }}
