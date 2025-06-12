@@ -57,12 +57,12 @@ export default function HomePage() {
               <p className="mb-8 text-xl text-gray-700 lg:text-2xl">
                 Discover stories that transport you to new dimensions.
                 <br />
-                Build worlds that live forever on the Internet.
+                Build worlds that live forever in the Universe.
               </p>
 
               <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
                 <button className="rounded-full bg-red-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all hover:shadow-xl hover:bg-red-700">
-                  Start Reading Free
+                  Read & Earn Rewards
                 </button>
 
                 <Link href="/write">
