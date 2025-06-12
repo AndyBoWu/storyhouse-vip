@@ -1,8 +1,9 @@
 {
   "framework": "nextjs",
-  "buildCommand": "cd ../.. && npm run build:frontend",
-  "outputDirectory": ".next",
-  "installCommand": "cd ../.. && npm install --frozen-lockfile",
+  "buildCommand": "npm run build:frontend",
+  "outputDirectory": "apps/frontend/.next",
+  "installCommand": "npm install --frozen-lockfile",
+  "rootDirectory": "../../",
   "regions": ["iad1"],
   "headers": [
     {

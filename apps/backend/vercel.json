@@ -1,9 +1,10 @@
 {
   "version": 2,
   "framework": "nextjs",
-  "buildCommand": "cd ../.. && npm run build:backend",
-  "installCommand": "cd ../.. && npm install --frozen-lockfile",
-  "outputDirectory": ".next",
+  "buildCommand": "npm run build:backend",
+  "installCommand": "npm install --frozen-lockfile",
+  "outputDirectory": "apps/backend/.next",
+  "rootDirectory": "../../",
   "env": {
     "NODE_ENV": "production"
   },
