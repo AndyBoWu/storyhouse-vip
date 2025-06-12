@@ -15,6 +15,11 @@ Revolutionary Web3 storytelling platform built on Story Protocol enabling chapte
 - Backend: https://api.storyhouse.vip/
 - **Blockchain Integration**: Full SDK derivative registration infrastructure deployed
 
+**Latest Deployments (Vercel):**
+- Frontend: https://frontend-3pf89c73v-andy-wus-projects.vercel.app
+- Backend: https://backend-dxtj0y3su-andy-wus-projects.vercel.app
+- **Phase 5.3 Complete**: SPA optimization with enhanced UI/UX and color-coded chapter states
+
 ## 🎯 Core Features
 
 ### Chapter-Level IP Management
@@ -165,6 +170,16 @@ cd apps/backend && npm run dev   # Port 3002
 7. **Monetize**: Earn from licenses, derivatives, and reader engagement with automated royalty distribution
 
 ## ✅ Current Status
+
+**🎉 Phase 5.3 Complete** - Full SPA Optimization with Enhanced UI/UX:
+
+**Latest UI Enhancements:**
+- ✅ **Zero Commission Emphasis**: Platform messaging highlights 100% creator revenue
+- ✅ **Color-Coded Chapter States**: Visual hierarchy for free (green), locked premium (gray), and unlocked premium (purple) chapters  
+- ✅ **Improved Publishing Flow**: Clear "Review" → "Publish" workflow with simplified UI
+- ✅ **Enhanced Pricing**: Updated default chapter pricing to 0.5 TIP with optimized tiers (0.3, 0.5, 0.8)
+- ✅ **Streamlined Input UX**: Fixed price input fields with proper state management
+- ✅ **Vercel Deployment**: Latest frontend and backend deployed with performance optimizations
 
 **🎉 Story Protocol SDK Integration Complete** - Full Blockchain Derivative Registration:
 - ✅ **Real Blockchain Registration**: Story Protocol SDK v1.3.2 `registerDerivative()` operations

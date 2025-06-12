@@ -4,10 +4,18 @@
 
 StoryHouse.vip provides a comprehensive RESTful API for creating, managing, and licensing IP assets with PIL (Programmable IP License) support, blockchain derivative registration, AI-powered content analytics, automated notifications, and real-time royalty distribution.
 
+**🆕 Phase 5.3 Updates:**
+- Enhanced UI/UX with zero commission messaging
+- Color-coded chapter states for better visual hierarchy
+- Improved publishing workflow with clear review process
+- Optimized pricing tiers and input handling
+- Latest Vercel deployments with performance improvements
+
 ### Base URLs
 ```
 Production: https://api.storyhouse.vip/api
 Testnet: https://api-testnet.storyhouse.vip/api  
+Latest Vercel: https://backend-dxtj0y3su-andy-wus-projects.vercel.app/api
 Development: http://localhost:3002/api
 ```
 
