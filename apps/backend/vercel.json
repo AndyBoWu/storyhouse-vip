@@ -2,8 +2,13 @@
   "version": 2,
   "framework": "nextjs",
   "buildCommand": "cd ../.. && npm run build:backend",
-  "installCommand": "cd ../.. && npm ci",
+  "installCommand": "cd ../.. && npm install --frozen-lockfile",
   "outputDirectory": ".next",
+  "functions": {
+    "app/**/*.{js,ts,tsx}": {
+      "runtime": "nodejs18.x"
+    }
+  },
   "env": {
     "NODE_ENV": "production"
   },

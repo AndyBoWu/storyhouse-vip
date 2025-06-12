@@ -2,8 +2,13 @@
   "framework": "nextjs",
   "buildCommand": "cd ../.. && npm run build:frontend",
   "outputDirectory": ".next",
-  "installCommand": "cd ../.. && npm ci",
+  "installCommand": "cd ../.. && npm install --frozen-lockfile",
   "regions": ["iad1"],
+  "functions": {
+    "app/**/*.{js,ts,tsx}": {
+      "runtime": "nodejs18.x"
+    }
+  },
   "headers": [
     {
       "source": "/(.*)",
