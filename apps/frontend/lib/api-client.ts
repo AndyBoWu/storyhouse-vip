@@ -12,14 +12,15 @@ import type {
 } from './types/shared'
 
 const getApiBaseUrl = (): string => {
+  // FORCE localhost for development debugging
+  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+    console.log('🔧 FORCING localhost:3002 for development');
+    return 'http://localhost:3002'
+  }
+  
   // Use environment variable if set (for hybrid deployment)
   if (process.env.NEXT_PUBLIC_API_BASE_URL) {
     return process.env.NEXT_PUBLIC_API_BASE_URL
-  }
-  
-  // Check if we're in development by looking at the current URL
-  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-    return 'http://localhost:3002'
   }
   
   // In production without explicit API URL, assume same-domain

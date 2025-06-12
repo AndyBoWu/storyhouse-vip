@@ -64,7 +64,7 @@ export default function BookPage() {
       
       // Fetch book details and chapters
       const [bookResponse, chaptersResponse] = await Promise.all([
-        apiClient.get(`/books/${bookId}`),
+        apiClient.getBookById(bookId),
         apiClient.getBookChapters(bookId)
       ]);
 
@@ -127,7 +127,7 @@ export default function BookPage() {
   };
 
   const formatAddress = (address: string) => {
-    if (!address) return 'Unknown';
+    if (!address) return 'Address not available';
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
@@ -214,7 +214,7 @@ export default function BookPage() {
             <div className="flex items-center text-gray-600 mb-4">
               <span>by</span>
               <span className="ml-2 font-mono text-sm bg-gray-100 px-2 py-1 rounded">
-                {formatAddress(book.authorAddress)}
+{formatAddress(book.authorAddress || book.author)}
               </span>
             </div>
 
