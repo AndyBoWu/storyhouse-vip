@@ -23,6 +23,7 @@ interface ChapterData {
   title: string
   subtitle?: string
   content: string
+  wordCount?: number
 }
 
 function ChapterWritingPageContent() {

@@ -29,6 +29,12 @@
       ],
       "@shared/*": [
         "../../packages/shared/src/*"
+      ],
+      "@storyhouse/shared": [
+        "../../packages/shared/src"
+      ],
+      "@storyhouse/shared/*": [
+        "../../packages/shared/src/*"
       ]
     }
   },

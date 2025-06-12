@@ -2,7 +2,7 @@ import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, List
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
 // Initialize R2 client with proper configuration for Cloudflare R2
-let r2Client: S3Client
+let r2ClientInstance: S3Client
 
 function initializeR2Client(): S3Client {
   // Validate environment variables
@@ -74,10 +74,44 @@ function initializeR2Client(): S3Client {
 
 // Lazy initialization of R2 client
 function getR2Client(): S3Client {
-  if (!r2Client) {
-    r2Client = initializeR2Client()
+  if (!r2ClientInstance) {
+    r2ClientInstance = initializeR2Client()
   }
-  return r2Client
+  return r2ClientInstance
+}
+
+// Export the client getter and convenience methods
+export const r2Client = {
+  get: async (key: string) => {
+    try {
+      const client = getR2Client()
+      const command = new GetObjectCommand({
+        Bucket: BUCKET_NAME,
+        Key: key,
+      })
+      const response = await client.send(command)
+      const content = await response.Body?.transformToString()
+      if (!content) throw new Error('Content not found')
+      return { text: () => Promise.resolve(content) }
+    } catch (error) {
+      throw new Error('Failed to fetch content')
+    }
+  },
+  put: async (key: string, content: string | Buffer) => {
+    try {
+      const client = getR2Client()
+      const command = new PutObjectCommand({
+        Bucket: BUCKET_NAME,
+        Key: key,
+        Body: content,
+        ContentType: 'application/json'
+      })
+      await client.send(command)
+      return `${PUBLIC_URL}/${key}`
+    } catch (error) {
+      throw new Error('Failed to upload content')
+    }
+  }
 }
 
 // Clean environment variables for bucket configuration

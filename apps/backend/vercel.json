@@ -1,6 +1,8 @@
 {
   "version": 2,
   "framework": "nextjs",
+  "buildCommand": "cd ../.. && npm run build:backend",
+  "installCommand": "cd ../.. && npm ci",
   "env": {
     "NODE_ENV": "production"
   },
