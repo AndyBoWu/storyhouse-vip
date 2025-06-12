@@ -23,7 +23,6 @@ interface ChapterData {
   title: string
   subtitle?: string
   content: string
-  wordCount: number
 }
 
 function ChapterWritingPageContent() {
@@ -42,8 +41,7 @@ function ChapterWritingPageContent() {
   const [chapterData, setChapterData] = useState<ChapterData>({
     title: '',
     subtitle: '',
-    content: '',
-    wordCount: 0
+    content: ''
   })
   
   // UI state
@@ -61,11 +59,8 @@ function ChapterWritingPageContent() {
   const [fontFamily, setFontFamily] = useState('Inter')
   const contentRef = useRef<HTMLTextAreaElement>(null)
   
-  // Calculate word count
-  useEffect(() => {
-    const words = chapterData.content.trim().split(/\s+/).filter(word => word.length > 0)
-    setChapterData(prev => ({ ...prev, wordCount: words.length }))
-  }, [chapterData.content])
+  // Calculate word count without causing re-renders
+  const wordCount = chapterData.content.trim().split(/\s+/).filter(word => word.length > 0).length
   
   // Handle input changes
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -209,65 +204,78 @@ function ChapterWritingPageContent() {
   const getStoryForPublishing = () => ({
     title: chapterData.title,
     content: chapterData.content,
-    wordCount: chapterData.wordCount,
-    readingTime: Math.ceil(chapterData.wordCount / 200),
+    wordCount: wordCount,
+    readingTime: Math.ceil(wordCount / 200),
     themes: genre ? [decodeURIComponent(genre)] : [], // Use genre from URL
     contentUrl: `chapter-${bookId}-${chapterNumber}` // Generate a temporary identifier
   })
   
   // Focus mode component
-  const FocusMode = () => (
-    <div className={`fixed inset-0 z-50 flex flex-col ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
-      {/* Focus mode header */}
-      <div className={`flex items-center justify-between p-4 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => setIsFocusMode(false)}
-            className={`flex items-center gap-2 ${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-800'}`}
-          >
-            <Minimize2 className="w-4 h-4" />
-            Exit Focus
-          </button>
-          <div className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-            Chapter {chapterNumber}: {chapterData.title || 'Untitled'}
+  const FocusMode = () => {
+    const focusTextareaRef = useRef<HTMLTextAreaElement>(null)
+    
+    // Auto-focus when entering focus mode
+    useEffect(() => {
+      if (focusTextareaRef.current) {
+        focusTextareaRef.current.focus()
+      }
+    }, [])
+    
+    return (
+      <div className={`fixed inset-0 z-50 flex flex-col ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
+        {/* Focus mode header */}
+        <div className={`flex items-center justify-between p-4 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setIsFocusMode(false)}
+              className={`flex items-center gap-2 ${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-800'}`}
+            >
+              <Minimize2 className="w-4 h-4" />
+              Exit Focus
+            </button>
+            <div className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+              Chapter {chapterNumber}: {chapterData.title || 'Untitled'}
+            </div>
+            <div className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+              Press Esc to exit
+            </div>
           </div>
-          <div className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
-            Press Esc to exit
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              className={`p-2 rounded-lg transition-colors ${isDarkMode ? 'hover:bg-gray-800 text-gray-400 hover:text-gray-200' : 'hover:bg-gray-100 text-gray-600 hover:text-gray-800'}`}
+              title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
+            <div className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+              {wordCount} words
+            </div>
+            <div className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+              Auto-save enabled
+            </div>
           </div>
         </div>
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => setIsDarkMode(!isDarkMode)}
-            className={`p-2 rounded-lg transition-colors ${isDarkMode ? 'hover:bg-gray-800 text-gray-400 hover:text-gray-200' : 'hover:bg-gray-100 text-gray-600 hover:text-gray-800'}`}
-            title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-          >
-            {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-          </button>
-          <div className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-            {chapterData.wordCount} words
-          </div>
-          <div className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
-            Auto-save enabled
-          </div>
+        
+        {/* Focus mode content */}
+        <div className="flex-1 p-8 max-w-4xl mx-auto w-full">
+          <textarea
+            ref={focusTextareaRef}
+            value={chapterData.content}
+            onChange={handleContentChange}
+            placeholder="Start writing your chapter..."
+            className={`w-full h-full resize-none border-none outline-none text-lg leading-relaxed ${isDarkMode ? 'bg-gray-900 text-white placeholder-gray-500' : 'bg-white text-gray-900 placeholder-gray-400'}`}
+            style={{ 
+              fontSize: `${fontSize}px`,
+              fontFamily: fontFamily,
+              lineHeight: 1.7
+            }}
+            autoFocus
+          />
         </div>
       </div>
-      
-      {/* Focus mode content */}
-      <div className="flex-1 p-8 max-w-4xl mx-auto w-full">
-        <textarea
-          value={chapterData.content}
-          onChange={handleContentChange}
-          placeholder="Start writing your chapter..."
-          className={`w-full h-full resize-none border-none outline-none text-lg leading-relaxed ${isDarkMode ? 'bg-gray-900 text-white placeholder-gray-500' : 'bg-white text-gray-900 placeholder-gray-400'}`}
-          style={{ 
-            fontSize: `${fontSize}px`,
-            fontFamily: fontFamily,
-            lineHeight: 1.7
-          }}
-        />
-      </div>
-    </div>
-  )
+    )
+  }
   
   if (isFocusMode) {
     return <FocusMode />
@@ -463,7 +471,7 @@ function ChapterWritingPageContent() {
                 <div className="space-y-3 mb-6">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Words:</span>
-                    <span className="font-medium">{chapterData.wordCount}</span>
+                    <span className="font-medium">{wordCount}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Characters:</span>
@@ -471,7 +479,7 @@ function ChapterWritingPageContent() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Reading time:</span>
-                    <span className="font-medium">{Math.ceil(chapterData.wordCount / 200)} min</span>
+                    <span className="font-medium">{Math.ceil(wordCount / 200)} min</span>
                   </div>
                 </div>
 
