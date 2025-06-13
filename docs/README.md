@@ -93,10 +93,16 @@
 
 ## 🏗️ **Project Essentials**
 
-**Tech Stack:** Next.js 15.3.3, TypeScript, Story Protocol SDK, OpenAI GPT-4, Smart Contracts (Solidity)  
+**Tech Stack:** 
+- **Frontend:** Next.js 15.3.3 (App Router), TypeScript 5.0, React 18.2, Tailwind CSS
+- **Backend:** Next.js 15.3.3 (API Routes), TypeScript 5.0, Story Protocol SDK 1.3.2
+- **Blockchain:** Story Protocol, viem 2.30.6, wagmi 2.12.17, Smart Contracts (Solidity)
+- **AI:** OpenAI GPT-4 (content generation), AI-powered similarity detection
+- **Storage:** Cloudflare R2, IPFS integration, metadata management
+
 **Deployment:** Dual Vercel architecture (frontend + backend)  
 **Status:** Phase 5.3 Complete - Production Ready  
-**Last Updated:** January 2025
+**Last Updated:** June 13, 2025
 
 ---
 
