@@ -13,8 +13,9 @@ Comprehensive guide for Story Protocol integration in StoryHouse.vip, covering e
 7. [Royalty Distribution](#royalty-distribution)
 8. [Dispute Resolution](#dispute-resolution)
 9. [StoryHouse.vip Integration](#storyhouse-vip-integration)
-10. [Testing & Examples](#testing--examples)
-11. [Best Practices](#best-practices)
+10. [Advanced Derivative System](#advanced-derivative-system)
+11. [Testing & Examples](#testing--examples)
+12. [Best Practices](#best-practices)
 
 ---
 
@@ -742,6 +743,850 @@ async function reportContentViolation(
     bondAmount: Number(bondAmount) / 10**18,
     severity,
     estimatedResolution: new Date(Date.now() + STORYHOUSE_DISPUTE_CONFIG.RESOLUTION_PERIODS.community * 1000)
+  }
+}
+```
+
+---
+
+## Advanced Derivative System
+
+### 🤖 AI-Blockchain Bridge Architecture
+
+StoryHouse.vip implements a revolutionary AI-blockchain bridge that seamlessly connects OpenAI-powered content analysis with Story Protocol's derivative registration capabilities, enabling automated detection and blockchain registration of derivative intellectual property relationships.
+
+#### System Components
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│  AI Detection   │    │  SDK Integration│    │  Blockchain     │
+│  • OpenAI       │───▶│  • registerDerivative()│───▶│  • Story Protocol│
+│  • Similarity   │    │  • License Check│    │  • IP Network   │
+│  • Quality      │    │  • Economic Calc│    │  • Inheritance  │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+```
+
+#### Core Services
+
+1. **DerivativeRegistrationService** (`/lib/services/derivativeRegistrationService.ts`)
+   - 800+ lines of core SDK integration
+   - Complete `registerDerivative()` method implementation
+   - License inheritance and compatibility analysis
+   - Economic projections and revenue calculations
+
+2. **ContentAnalysisService** (`/lib/services/contentAnalysisService.ts`)
+   - OpenAI embeddings for semantic similarity
+   - Parent content detection algorithms
+   - Quality assessment and scoring
+
+3. **NotificationService** (`/lib/services/notificationService.ts`)
+   - Real-time derivative event notifications
+   - Multi-channel delivery system
+   - Background monitoring every 6 hours
+
+### Advanced Derivative Registration
+
+```typescript
+// Complete derivative registration with AI detection
+class DerivativeRegistrationService {
+  
+  // Register derivative with full blockchain integration
+  async registerDerivative(
+    derivativeChapterId: string,
+    parentIpId: string,
+    authorAddress: string,
+    options: {
+      skipLicenseCheck?: boolean;
+      economicProjection?: boolean;
+      notifyStakeholders?: boolean;
+    } = {}
+  ): Promise<DerivativeRegistrationResult> {
+    
+    // 1. Validate derivative eligibility
+    const validation = await this.validateDerivativeEligibility({
+      derivativeChapterId,
+      parentIpId,
+      authorAddress
+    })
+    
+    if (!validation.eligible) {
+      throw new DerivativeRegistrationError(
+        validation.reason || 'Derivative registration not eligible',
+        'ELIGIBILITY_CHECK_FAILED',
+        { derivativeChapterId, parentIpId, validation }
+      )
+    }
+
+    // 2. Check license compatibility
+    if (!options.skipLicenseCheck) {
+      const licenseCheck = await this.checkLicenseCompatibility(parentIpId)
+      
+      if (!licenseCheck.compatible) {
+        throw new DerivativeRegistrationError(
+          `License incompatibility: ${licenseCheck.reason}`,
+          'LICENSE_INCOMPATIBLE',
+          { parentIpId, licenseCheck }
+        )
+      }
+    }
+
+    // 3. Calculate economic projections
+    let economicProjection: EconomicProjection | undefined
+    if (options.economicProjection) {
+      economicProjection = await this.calculateEconomicProjection({
+        derivativeChapterId,
+        parentIpId,
+        projectionPeriod: 12 // months
+      })
+    }
+
+    // 4. Execute blockchain registration
+    const registrationResult = await this.executeBlockchainRegistration({
+      derivativeChapterId,
+      parentIpId,
+      authorAddress,
+      economicProjection
+    })
+
+    // 5. Send notifications to stakeholders
+    if (options.notifyStakeholders) {
+      await this.notificationService.notifyDerivativeRegistration({
+        derivativeIpId: registrationResult.derivativeIpId,
+        parentIpId,
+        authorAddress,
+        economicProjection
+      })
+    }
+
+    return {
+      success: true,
+      derivativeIpId: registrationResult.derivativeIpId,
+      transactionHash: registrationResult.transactionHash,
+      licenseInheritance: registrationResult.licenseInheritance,
+      economicProjection,
+      registeredAt: new Date(),
+      gasUsed: registrationResult.gasUsed
+    }
+  }
+  
+  // Execute the actual blockchain registration
+  private async executeBlockchainRegistration({
+    derivativeChapterId,
+    parentIpId,
+    authorAddress,
+    economicProjection
+  }: {
+    derivativeChapterId: string;
+    parentIpId: string;
+    authorAddress: string;
+    economicProjection?: EconomicProjection;
+  }) {
+    
+    // Get chapter metadata
+    const derivativeChapter = await this.getChapterMetadata(derivativeChapterId)
+    const parentChapter = await this.getChapterMetadata(parentIpId)
+    
+    // Prepare derivative metadata
+    const derivativeMetadata = {
+      title: derivativeChapter.title,
+      description: `Derivative work based on "${parentChapter.title}"`,
+      mediaType: 'text/story',
+      author: authorAddress,
+      derivativeType: 'remix',
+      parentIpId,
+      similarity: economicProjection?.similarity || 0,
+      qualityScore: derivativeChapter.qualityScore || 0
+    }
+
+    // Register derivative on Story Protocol
+    const registrationResponse = await this.storyClient.ipAsset.registerDerivative({
+      childIpId: derivativeChapterId,
+      parentIpIds: [parentIpId],
+      licenseTermsIds: [], // Inherit from parent
+      royaltyContext: economicProjection?.royaltyContext || '0x',
+      txOptions: {
+        waitForTransaction: true
+      }
+    })
+
+    // Get license inheritance details
+    const licenseInheritance = await this.analyzeLicenseInheritance(
+      parentIpId,
+      registrationResponse.childIpId
+    )
+
+    return {
+      derivativeIpId: registrationResponse.childIpId,
+      transactionHash: registrationResponse.txHash,
+      licenseInheritance,
+      gasUsed: registrationResponse.gasUsed
+    }
+  }
+}
+```
+
+### AI-Powered Auto-Registration
+
+```typescript
+// Automated derivative detection and registration
+class AutoDerivativeService {
+  
+  async autoRegisterDerivativeWithAI(
+    chapterContent: string,
+    chapterId: string,
+    authorAddress: string,
+    options: {
+      similarityThreshold?: number;
+      autoRegister?: boolean;
+      requireConfirmation?: boolean;
+    } = {}
+  ): Promise<AutoRegistrationResult> {
+    
+    const { 
+      similarityThreshold = 0.7,
+      autoRegister = true,
+      requireConfirmation = false 
+    } = options
+
+    // 1. AI-powered parent content detection
+    const similarityAnalysis = await this.contentAnalysisService.analyzeSimilarity({
+      content: chapterContent,
+      excludeAuthor: authorAddress,
+      threshold: similarityThreshold,
+      includeMetadata: true
+    })
+
+    if (similarityAnalysis.matches.length === 0) {
+      return {
+        success: true,
+        isOriginal: true,
+        message: 'No similar content detected - this appears to be original work',
+        confidence: similarityAnalysis.confidence
+      }
+    }
+
+    // 2. Find the best parent candidate
+    const bestMatch = similarityAnalysis.matches[0] // Highest similarity
+    
+    if (bestMatch.similarity < similarityThreshold) {
+      return {
+        success: true,
+        isOriginal: true,
+        message: `Similarity below threshold (${bestMatch.similarity} < ${similarityThreshold})`,
+        detectedSimilarities: similarityAnalysis.matches
+      }
+    }
+
+    // 3. Analyze derivative potential
+    const derivativeAnalysis = await this.analyzeDerivativePotential({
+      newContent: chapterContent,
+      parentContent: bestMatch.content,
+      similarity: bestMatch.similarity
+    })
+
+    // 4. Check if auto-registration should proceed
+    if (!autoRegister || (requireConfirmation && !derivativeAnalysis.highConfidence)) {
+      return {
+        success: true,
+        requiresConfirmation: true,
+        detectedParent: {
+          ipId: bestMatch.ipId,
+          title: bestMatch.title,
+          similarity: bestMatch.similarity,
+          author: bestMatch.author
+        },
+        derivativeAnalysis,
+        recommendedAction: derivativeAnalysis.highConfidence ? 'auto_register' : 'manual_review'
+      }
+    }
+
+    // 5. Execute automatic registration
+    try {
+      const registrationResult = await this.derivativeRegistrationService.registerDerivative(
+        chapterId,
+        bestMatch.ipId,
+        authorAddress,
+        {
+          economicProjection: true,
+          notifyStakeholders: true
+        }
+      )
+
+      return {
+        success: true,
+        autoRegistered: true,
+        derivativeIpId: registrationResult.derivativeIpId,
+        parentIpId: bestMatch.ipId,
+        similarity: bestMatch.similarity,
+        transactionHash: registrationResult.transactionHash,
+        economicProjection: registrationResult.economicProjection,
+        aiAnalysis: derivativeAnalysis
+      }
+      
+    } catch (error) {
+      return {
+        success: false,
+        error: `Auto-registration failed: ${error.message}`,
+        detectedParent: {
+          ipId: bestMatch.ipId,
+          title: bestMatch.title,
+          similarity: bestMatch.similarity,
+          author: bestMatch.author
+        },
+        recommendedAction: 'manual_registration'
+      }
+    }
+  }
+}
+```
+
+### Content Analysis Service
+
+```typescript
+// AI-powered content analysis for derivative detection
+class ContentAnalysisService {
+  
+  async analyzeSimilarity(request: {
+    content: string;
+    excludeAuthor?: string;
+    threshold?: number;
+    includeMetadata?: boolean;
+  }): Promise<SimilarityAnalysisResult> {
+    
+    // 1. Generate content embeddings using OpenAI
+    const contentEmbedding = await this.generateContentEmbedding(request.content)
+    
+    // 2. Query existing content database for similarities
+    const similarContent = await this.searchSimilarContent({
+      embedding: contentEmbedding,
+      threshold: request.threshold || 0.5,
+      excludeAuthor: request.excludeAuthor,
+      limit: 10
+    })
+
+    // 3. Perform detailed similarity analysis
+    const detailedMatches = await Promise.all(
+      similarContent.map(async (match) => {
+        const detailedAnalysis = await this.performDetailedSimilarityAnalysis({
+          newContent: request.content,
+          existingContent: match.content,
+          cosineSimilarity: match.similarity
+        })
+        
+        return {
+          ipId: match.ipId,
+          title: match.title,
+          author: match.author,
+          similarity: match.similarity,
+          content: match.content,
+          matchingElements: detailedAnalysis.matchingElements,
+          derivativeType: detailedAnalysis.derivativeType,
+          confidence: detailedAnalysis.confidence
+        }
+      })
+    )
+
+    // 4. Calculate overall confidence
+    const confidence = this.calculateOverallConfidence(detailedMatches)
+    
+    return {
+      matches: detailedMatches.sort((a, b) => b.similarity - a.similarity),
+      confidence,
+      analysisMetadata: {
+        totalAnalyzed: similarContent.length,
+        threshold: request.threshold || 0.5,
+        analyzedAt: new Date(),
+        model: 'text-embedding-ada-002'
+      }
+    }
+  }
+
+  private async generateContentEmbedding(content: string): Promise<number[]> {
+    const response = await this.openaiClient.embeddings.create({
+      model: 'text-embedding-ada-002',
+      input: this.preprocessContent(content)
+    })
+    
+    return response.data[0].embedding
+  }
+
+  private async performDetailedSimilarityAnalysis({
+    newContent,
+    existingContent,
+    cosineSimilarity
+  }: {
+    newContent: string;
+    existingContent: string;
+    cosineSimilarity: number;
+  }): Promise<DetailedSimilarityAnalysis> {
+    
+    // Use GPT-4 for detailed analysis
+    const prompt = `
+    Analyze the similarity between these two story contents and determine if the first is a derivative of the second:
+
+    Original Content:
+    ${existingContent.substring(0, 2000)}
+
+    New Content:
+    ${newContent.substring(0, 2000)}
+
+    Cosine Similarity: ${cosineSimilarity}
+
+    Provide analysis in JSON format:
+    {
+      "matchingElements": ["list of specific matching elements"],
+      "derivativeType": "adaptation|sequel|prequel|remix|parody|translation|none",
+      "confidence": 0.85,
+      "reasoning": "explanation of the analysis"
+    }
+    `
+
+    const response = await this.openaiClient.chat.completions.create({
+      model: 'gpt-4',
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.1
+    })
+
+    try {
+      return JSON.parse(response.choices[0].message.content || '{}')
+    } catch {
+      return {
+        matchingElements: [],
+        derivativeType: 'none',
+        confidence: 0,
+        reasoning: 'Analysis parsing failed'
+      }
+    }
+  }
+}
+```
+
+### Family Tree Visualization with Unlimited Depth
+
+```typescript
+// Advanced family tree queries and visualization
+class FamilyTreeService {
+  
+  async getUnlimitedDepthFamilyTree(
+    rootIpId: string,
+    options: {
+      includeMetadata?: boolean;
+      maxDepth?: number;
+      format?: 'tree' | 'flat' | 'graph';
+    } = {}
+  ): Promise<FamilyTreeResult> {
+    
+    const { 
+      includeMetadata = true, 
+      maxDepth = Infinity,
+      format = 'tree' 
+    } = options
+
+    // 1. Build complete family tree
+    const familyTree = await this.buildFamilyTree(rootIpId, 0, maxDepth, new Set())
+    
+    // 2. Calculate tree statistics
+    const statistics = this.calculateTreeStatistics(familyTree)
+    
+    // 3. Format response based on requested format
+    switch (format) {
+      case 'flat':
+        return {
+          format: 'flat',
+          nodes: this.flattenFamilyTree(familyTree),
+          statistics
+        }
+      case 'graph':
+        return {
+          format: 'graph',
+          nodes: this.extractNodes(familyTree),
+          edges: this.extractEdges(familyTree),
+          statistics
+        }
+      default:
+        return {
+          format: 'tree',
+          tree: familyTree,
+          statistics
+        }
+    }
+  }
+
+  private async buildFamilyTree(
+    ipId: string,
+    currentDepth: number,
+    maxDepth: number,
+    visited: Set<string>
+  ): Promise<FamilyTreeNode> {
+    
+    // Prevent infinite loops
+    if (visited.has(ipId) || currentDepth >= maxDepth) {
+      return { ipId, depth: currentDepth, children: [] }
+    }
+    
+    visited.add(ipId)
+    
+    // Get IP metadata
+    const metadata = await this.getIpMetadata(ipId)
+    
+    // Find all derivatives of this IP
+    const derivatives = await this.storyClient.ipAsset.getDerivatives({
+      parentIpId: ipId
+    })
+
+    // Recursively build child nodes
+    const children = await Promise.all(
+      derivatives.map(derivative => 
+        this.buildFamilyTree(derivative.ipId, currentDepth + 1, maxDepth, visited)
+      )
+    )
+
+    return {
+      ipId,
+      title: metadata.title,
+      author: metadata.author,
+      createdAt: metadata.createdAt,
+      depth: currentDepth,
+      similarity: metadata.similarity,
+      licenseType: metadata.licenseType,
+      revenueGenerated: metadata.revenueGenerated,
+      children: children.filter(child => child.children.length > 0 || child.depth < maxDepth)
+    }
+  }
+
+  private calculateTreeStatistics(tree: FamilyTreeNode): FamilyTreeStatistics {
+    const stats = {
+      totalNodes: 0,
+      maxDepth: 0,
+      totalRevenue: 0,
+      nodesByDepth: new Map<number, number>(),
+      averageSimilarity: 0,
+      licenseDistribution: new Map<string, number>()
+    }
+
+    this.traverseTree(tree, (node) => {
+      stats.totalNodes++
+      stats.maxDepth = Math.max(stats.maxDepth, node.depth)
+      stats.totalRevenue += node.revenueGenerated || 0
+      
+      const depthCount = stats.nodesByDepth.get(node.depth) || 0
+      stats.nodesByDepth.set(node.depth, depthCount + 1)
+      
+      if (node.licenseType) {
+        const licenseCount = stats.licenseDistribution.get(node.licenseType) || 0
+        stats.licenseDistribution.set(node.licenseType, licenseCount + 1)
+      }
+    })
+
+    return stats
+  }
+}
+```
+
+### Economic Intelligence & Projections
+
+```typescript
+// Advanced economic analysis for derivative relationships
+class EconomicIntelligenceService {
+  
+  async calculateDerivativeEconomicProjection({
+    derivativeChapterId,
+    parentIpId,
+    projectionPeriod = 12
+  }: {
+    derivativeChapterId: string;
+    parentIpId: string;
+    projectionPeriod?: number; // months
+  }): Promise<EconomicProjection> {
+    
+    // 1. Analyze parent performance
+    const parentAnalysis = await this.analyzeParentPerformance(parentIpId)
+    
+    // 2. Assess derivative potential
+    const derivativePotential = await this.assessDerivativePotential({
+      derivativeChapterId,
+      parentAnalysis
+    })
+    
+    // 3. Calculate revenue projections
+    const revenueProjection = await this.calculateRevenueProjection({
+      parentAnalysis,
+      derivativePotential,
+      projectionPeriod
+    })
+    
+    // 4. Analyze royalty distribution
+    const royaltyAnalysis = await this.analyzeRoyaltyDistribution({
+      parentIpId,
+      derivativeChapterId,
+      revenueProjection
+    })
+
+    return {
+      projectionPeriod,
+      parentPerformance: parentAnalysis,
+      derivativePotential,
+      revenueProjection,
+      royaltyDistribution: royaltyAnalysis,
+      confidence: this.calculateProjectionConfidence({
+        parentAnalysis,
+        derivativePotential,
+        historicalAccuracy: 0.85
+      }),
+      generatedAt: new Date()
+    }
+  }
+
+  private async analyzeParentPerformance(parentIpId: string): Promise<ParentPerformanceAnalysis> {
+    // Get historical performance data
+    const performance = await this.getHistoricalPerformance(parentIpId)
+    
+    // Calculate key metrics
+    const metrics = {
+      totalRevenue: performance.totalRevenue,
+      monthlyGrowthRate: performance.monthlyGrowthRate,
+      readerEngagement: performance.readerEngagement,
+      derivativeCount: performance.derivativeCount,
+      averageRating: performance.averageRating,
+      marketPosition: this.calculateMarketPosition(performance)
+    }
+
+    // Analyze trends
+    const trends = {
+      revenueGrowth: this.analyzeTrend(performance.revenueHistory),
+      engagementTrend: this.analyzeTrend(performance.engagementHistory),
+      derivativeVelocity: this.calculateDerivativeVelocity(performance)
+    }
+
+    return {
+      ipId: parentIpId,
+      metrics,
+      trends,
+      seasonality: performance.seasonality,
+      competitivePosition: performance.competitivePosition
+    }
+  }
+
+  private async calculateRevenueProjection({
+    parentAnalysis,
+    derivativePotential,
+    projectionPeriod
+  }: {
+    parentAnalysis: ParentPerformanceAnalysis;
+    derivativePotential: DerivativePotential;
+    projectionPeriod: number;
+  }): Promise<RevenueProjection> {
+    
+    const baseRevenue = parentAnalysis.metrics.totalRevenue / 12 // Monthly average
+    const growthMultiplier = derivativePotential.marketAppeal
+    const competitionFactor = 1 - (derivativePotential.competitionLevel * 0.3)
+    
+    const monthlyProjections = []
+    let cumulativeRevenue = 0
+    
+    for (let month = 1; month <= projectionPeriod; month++) {
+      // Apply growth curve (typically fastest in first 3 months)
+      const timeFactor = Math.exp(-month / 6) * 2 + 0.5
+      const monthlyRevenue = baseRevenue * growthMultiplier * competitionFactor * timeFactor
+      
+      cumulativeRevenue += monthlyRevenue
+      monthlyProjections.push({
+        month,
+        revenue: monthlyRevenue,
+        cumulative: cumulativeRevenue,
+        confidence: Math.max(0.95 - (month * 0.05), 0.3) // Decreasing confidence over time
+      })
+    }
+
+    return {
+      totalProjectedRevenue: cumulativeRevenue,
+      monthlyProjections,
+      conservativeEstimate: cumulativeRevenue * 0.7,
+      optimisticEstimate: cumulativeRevenue * 1.5,
+      factors: {
+        baseRevenue,
+        growthMultiplier,
+        competitionFactor,
+        marketConditions: derivativePotential.marketConditions
+      }
+    }
+  }
+}
+```
+
+### Real-time Notification System
+
+```typescript
+// Comprehensive notification system for derivative events
+class DerivativeNotificationService {
+  
+  async notifyDerivativeRegistration({
+    derivativeIpId,
+    parentIpId,
+    authorAddress,
+    economicProjection
+  }: {
+    derivativeIpId: string;
+    parentIpId: string;
+    authorAddress: string;
+    economicProjection?: EconomicProjection;
+  }): Promise<NotificationResult> {
+    
+    // 1. Get stakeholder information
+    const stakeholders = await this.getStakeholders(parentIpId)
+    
+    // 2. Create notifications for different stakeholder types
+    const notifications = await Promise.all([
+      
+      // Notify original author
+      this.createAuthorNotification({
+        type: 'derivative_created',
+        recipientAddress: stakeholders.originalAuthor,
+        derivativeIpId,
+        parentIpId,
+        economicProjection,
+        priority: 'high'
+      }),
+      
+      // Notify derivative author
+      this.createAuthorNotification({
+        type: 'derivative_registered',
+        recipientAddress: authorAddress,
+        derivativeIpId,
+        parentIpId,
+        economicProjection,
+        priority: 'medium'
+      }),
+      
+      // Notify other derivative authors in the family tree
+      ...stakeholders.derivativeAuthors.map(author => 
+        this.createAuthorNotification({
+          type: 'family_tree_expanded',
+          recipientAddress: author,
+          derivativeIpId,
+          parentIpId,
+          priority: 'low'
+        })
+      )
+    ])
+
+    // 3. Send notifications via multiple channels
+    const deliveryResults = await Promise.all([
+      this.sendInAppNotifications(notifications),
+      this.sendEmailNotifications(notifications),
+      this.sendWebhookNotifications(notifications)
+    ])
+
+    // 4. Schedule follow-up notifications
+    await this.scheduleFollowUpNotifications({
+      derivativeIpId,
+      parentIpId,
+      economicProjection
+    })
+
+    return {
+      notificationsSent: notifications.length,
+      deliveryResults,
+      stakeholdersNotified: stakeholders,
+      scheduledFollowUps: true
+    }
+  }
+
+  async monitorDerivativeEvents(): Promise<void> {
+    // Background service that runs every 6 hours
+    setInterval(async () => {
+      try {
+        await this.processRecentDerivativeEvents()
+        await this.updateEconomicProjections()
+        await this.sendPeriodicUpdates()
+      } catch (error) {
+        console.error('Derivative monitoring error:', error)
+      }
+    }, 6 * 60 * 60 * 1000) // 6 hours
+  }
+
+  private async processRecentDerivativeEvents(): Promise<void> {
+    const cutoffTime = new Date(Date.now() - 6 * 60 * 60 * 1000) // Last 6 hours
+    
+    // Query recent derivative registrations
+    const recentDerivatives = await this.queryRecentDerivatives(cutoffTime)
+    
+    for (const derivative of recentDerivatives) {
+      // Update economic projections
+      const updatedProjection = await this.economicIntelligenceService
+        .calculateDerivativeEconomicProjection({
+          derivativeChapterId: derivative.derivativeIpId,
+          parentIpId: derivative.parentIpId
+        })
+      
+      // Send updates to stakeholders
+      await this.sendEconomicUpdateNotifications({
+        derivativeIpId: derivative.derivativeIpId,
+        parentIpId: derivative.parentIpId,
+        updatedProjection
+      })
+    }
+  }
+}
+```
+
+### Error Handling & Security
+
+```typescript
+// Comprehensive error management for derivative operations
+class DerivativeRegistrationError extends Error {
+  constructor(
+    message: string,
+    public code: string,
+    public context?: any
+  ) {
+    super(message)
+    this.name = 'DerivativeRegistrationError'
+  }
+}
+
+// Error categories
+export const ERROR_CODES = {
+  INVALID_PARENT_IP: 'INVALID_PARENT_IP',
+  LICENSE_INCOMPATIBLE: 'LICENSE_INCOMPATIBLE',
+  INSUFFICIENT_FUNDS: 'INSUFFICIENT_FUNDS',
+  SDK_CONNECTION_FAILED: 'SDK_CONNECTION_FAILED',
+  AI_ANALYSIS_FAILED: 'AI_ANALYSIS_FAILED',
+  BLOCKCHAIN_REGISTRATION_FAILED: 'BLOCKCHAIN_REGISTRATION_FAILED',
+  NOTIFICATION_DELIVERY_FAILED: 'NOTIFICATION_DELIVERY_FAILED',
+  ECONOMIC_CALCULATION_FAILED: 'ECONOMIC_CALCULATION_FAILED'
+} as const
+
+// Security measures
+class SecurityService {
+  
+  async validateDerivativeRequest(request: DerivativeRegistrationRequest): Promise<ValidationResult> {
+    const validations = await Promise.all([
+      this.validateIPOwnership(request.derivativeChapterId, request.authorAddress),
+      this.validateParentIPExists(request.parentIpId),
+      this.validateLicensePermissions(request.parentIpId),
+      this.validateAuthorReputation(request.authorAddress),
+      this.validateContentOriginality(request.derivativeChapterId)
+    ])
+
+    const failures = validations.filter(v => !v.valid)
+    
+    return {
+      valid: failures.length === 0,
+      failures,
+      securityScore: this.calculateSecurityScore(validations)
+    }
+  }
+
+  private async validateContentOriginality(chapterId: string): Promise<ValidationCheck> {
+    const content = await this.getChapterContent(chapterId)
+    const similarityCheck = await this.contentAnalysisService.checkForPlagiarism(content)
+    
+    return {
+      valid: similarityCheck.plagiarismScore < 0.8,
+      reason: similarityCheck.plagiarismScore >= 0.8 ? 'Content appears to be plagiarized' : 'Content originality verified',
+      details: similarityCheck
+    }
   }
 }
 ```

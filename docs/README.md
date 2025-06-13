@@ -41,7 +41,7 @@
 |-------|---------------|-------------|
 | **IP & Licensing** | [Licensing System](./technical/LICENSING_SYSTEM.md) | PIL implementation details |
 | **UI Components** | [License Components](./technical/LICENSE_COMPONENTS.md) | Frontend component docs |
-| **SDK Integration** | [Story Protocol SDK](./technical/STORY_PROTOCOL_SDK_INTEGRATION.md) | Blockchain integration |
+| **Advanced Features** | [Story Protocol Guide](./STORY_PROTOCOL_GUIDE.md#advanced-derivative-system) | AI-blockchain derivative system |
 
 ---
 
