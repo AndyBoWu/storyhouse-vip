@@ -19,6 +19,13 @@ Complete guide for setting up and developing StoryHouse.vip's revolutionary Web3
 - ✅ Enhanced pricing tiers and UX improvements
 - ✅ Latest Vercel deployments operational
 
+### 🆕 Unified Registration Feature
+**Gas-Optimized IP Registration:** Single-transaction flow implemented
+- ✅ 40% gas cost reduction via `mintAndRegisterIpAssetWithPilTerms`
+- ✅ Automatic R2 metadata generation and SHA-256 verification
+- ✅ Feature flag controlled gradual rollout
+- ✅ Backward compatible with legacy multi-transaction flow
+
 ### Blockchain Requirements
 
 - **MetaMask** wallet or similar
@@ -69,6 +76,9 @@ R2_SECRET_ACCESS_KEY=your_secret_key
 R2_BUCKET_NAME=storyhouse-content
 R2_ENDPOINT=your_account_id.r2.cloudflarestorage.com
 R2_PUBLIC_URL=https://your_account_id.r2.cloudflarestorage.com/storyhouse-content
+
+# Feature Flags
+UNIFIED_REGISTRATION_ENABLED=false  # Set to true to enable gas optimization
 ```
 
 **Backend (.env.local in apps/backend/):**
