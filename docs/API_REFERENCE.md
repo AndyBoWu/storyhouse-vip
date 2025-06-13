@@ -30,6 +30,121 @@ Session-based authentication with Web3 wallet integration.
 
 ---
 
+## 🆕 **Unified IP Registration API**
+
+Gas-optimized single-transaction IP registration using `mintAndRegisterIpAssetWithPilTerms`.
+
+### Register IP Asset with PIL Terms (Unified)
+
+Register an IP asset with license terms in a single optimized transaction.
+
+```http
+POST /api/ip/register-unified
+```
+
+**Request Body:**
+```json
+{
+  "story": {
+    "id": "story-123",
+    "title": "The Epic Journey",
+    "content": "Once upon a time in a digital realm...",
+    "author": "0x1234567890123456789012345678901234567890",
+    "genre": "Fantasy",
+    "mood": "Adventure",
+    "createdAt": "2024-01-01T00:00:00.000Z"
+  },
+  "nftContract": "0x26b6aa7e7036fc9e8fa2d8184c2cf07ae2e2412d",
+  "account": "0x1234567890123456789012345678901234567890",
+  "licenseTier": "premium",
+  "includeMetadata": true
+}
+```
+
+**License Tiers:**
+- `free` - No commercial use, attribution required
+- `reading` - Personal reading only (0.5 TIP)
+- `premium` - Commercial use allowed (100 TIP, 10% royalty)
+- `exclusive` - Full commercial rights (1000 TIP, 25% royalty)
+
+**Response (Success):**
+```json
+{
+  "success": true,
+  "data": {
+    "ipAsset": {
+      "id": "0xabcdef123456789012345678901234567890abcd",
+      "address": "0x26b6aa7e7036fc9e8fa2d8184c2cf07ae2e2412d",
+      "tokenId": "123",
+      "metadata": {
+        "mediaType": "text/story",
+        "title": "The Epic Journey",
+        "description": "Once upon a time in a digital realm...",
+        "genre": "Fantasy",
+        "author": "0x1234567890123456789012345678901234567890"
+      }
+    },
+    "transactionHash": "0x123456789abcdef123456789abcdef123456789abcdef123456789abcdef123456",
+    "licenseTermsId": "456",
+    "metadataUri": "https://r2-bucket.../ip-metadata.json",
+    "metadataHash": "0xabcdef123456789",
+    "method": "unified",
+    "gasOptimized": true
+  }
+}
+```
+
+**Response (Error):**
+```json
+{
+  "success": false,
+  "error": "Invalid input data",
+  "details": [
+    {
+      "field": "nftContract",
+      "message": "Must be a valid Ethereum address"
+    }
+  ]
+}
+```
+
+### Check Unified Registration Status
+
+Check if unified registration is available and get service capabilities.
+
+```http
+GET /api/ip/register-unified
+```
+
+**Response:**
+```json
+{
+  "enabled": true,
+  "available": true,
+  "features": {
+    "singleTransaction": true,
+    "gasOptimized": true,
+    "metadata": true,
+    "pilTerms": ["free", "reading", "premium", "exclusive"]
+  },
+  "benefits": {
+    "reducedGasCost": "~40%",
+    "fasterExecution": "~66%",
+    "atomicOperation": true
+  }
+}
+```
+
+**Error Response (Service Disabled):**
+```json
+{
+  "success": false,
+  "error": "Unified registration is not enabled. Use /api/ip/register instead."
+}
+```
+
+---
+
 ## 🔗 **Story Protocol SDK Derivative Registration API**
 
 ### Register Derivative Manually
