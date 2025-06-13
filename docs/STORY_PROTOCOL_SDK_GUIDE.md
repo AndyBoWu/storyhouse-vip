@@ -7,10 +7,12 @@ This guide provides a comprehensive reference for integrating Story Protocol SDK
 1. [Core Concepts](#core-concepts)
 2. [SDK Setup](#sdk-setup)
 3. [IP Asset Registration](#ip-asset-registration)
-4. [License Management](#license-management)
-5. [Derivative Creation](#derivative-creation)
-6. [Royalty Distribution](#royalty-distribution)
-7. [Implementation Examples](#implementation-examples)
+4. [Batch Operations](#batch-operations)
+5. [License Management](#license-management)
+6. [Derivative Creation](#derivative-creation)
+7. [Royalty Distribution](#royalty-distribution)
+8. [Optimization Strategies](#optimization-strategies)
+9. [Implementation Examples](#implementation-examples)
 
 ## Core Concepts
 
@@ -128,6 +130,129 @@ async function registerChapter(
 }
 ```
 
+### Method 3: Register NFT and Attach PIL Terms (Comprehensive)
+```typescript
+async function registerIpAndAttachPilTerms(
+  nftContract: string,
+  tokenId: string,
+  pilTermsData: any[],
+  metadata?: {
+    ipMetadataURI?: string;
+    ipMetadataHash?: string;
+    nftMetadataURI?: string;
+    nftMetadataHash?: string;
+  }
+) {
+  const response = await client.ipAsset.registerIpAndAttachPilTerms({
+    nftContract,
+    tokenId,
+    terms: pilTermsData,
+    ipMetadata: metadata,
+    txOptions: { waitForTransaction: true }
+  });
+  
+  return {
+    ipId: response.ipId,
+    licenseTermsIds: response.licenseTermsIds
+  };
+}
+```
+
+### Method 4: Mint NFT and Register IP (Simple)
+```typescript
+async function mintAndRegisterIp(
+  spgNftContract: string,
+  metadata?: {
+    nftMetadataURI?: string;
+    nftMetadataHash?: string;
+    ipMetadataURI?: string;
+    ipMetadataHash?: string;
+  }
+) {
+  const response = await client.ipAsset.mintAndRegisterIp({
+    spgNftContract,
+    ipMetadata: metadata,
+    txOptions: { waitForTransaction: true }
+  });
+  
+  return {
+    ipId: response.ipId,
+    tokenId: response.tokenId
+  };
+}
+```
+
+## Batch Operations
+
+### Batch Register Multiple Chapters
+```typescript
+async function batchRegisterChapters(
+  registrations: Array<{
+    nftContract: string;
+    tokenId: string;
+    metadata: any;
+  }>
+) {
+  const response = await client.ipAsset.batchRegister({
+    ipRegistrations: registrations.map(reg => ({
+      nftContract: reg.nftContract,
+      tokenId: reg.tokenId,
+      ipMetadata: {
+        metadataURI: reg.metadata.metadataURI,
+        metadataHash: reg.metadata.metadataHash,
+        nftMetadataHash: reg.metadata.nftMetadataHash
+      }
+    })),
+    txOptions: { waitForTransaction: true }
+  });
+  
+  return response.results; // Array of IP IDs
+}
+```
+
+### Optimized Batch Registration with Workflows
+```typescript
+async function batchRegisterWithOptimizedWorkflows(
+  chapters: Array<{
+    title: string;
+    content: string;
+    author: string;
+    chapterNumber: number;
+  }>
+) {
+  // Prepare metadata for all chapters
+  const preparations = await Promise.all(
+    chapters.map(async (chapter) => {
+      const ipMetadataUri = await uploadToIPFS(chapter);
+      const nftMetadataUri = await uploadToIPFS({
+        name: chapter.title,
+        description: `Chapter ${chapter.chapterNumber}`,
+        image: await generateChapterCover(chapter)
+      });
+      
+      return {
+        spgNftContract: STORYHOUSE_NFT_CONTRACT,
+        licenseTermsData: [{ terms: preparePilTermsData('reading') }],
+        ipMetadata: {
+          ipMetadataURI: ipMetadataUri,
+          ipMetadataHash: toHex(JSON.stringify(chapter), { size: 32 }),
+          nftMetadataURI: nftMetadataUri,
+          nftMetadataHash: toHex(JSON.stringify({ name: chapter.title }), { size: 32 })
+        }
+      };
+    })
+  );
+  
+  // Execute optimized batch registration
+  const response = await client.ipAsset.batchRegisterIpAssetsWithOptimizedWorkflows({
+    registrations: preparations,
+    txOptions: { waitForTransaction: true }
+  });
+  
+  return response.results;
+}
+```
+
 ## License Management
 
 ### Attach License Terms to IP Asset
@@ -192,7 +317,56 @@ async function mintLicenseForRemix(
 
 ## Derivative Creation
 
-### Register a Remix as Derivative
+### Method 1: Register Derivative (Standard)
+```typescript
+async function registerDerivative(
+  childIpId: string,
+  parentIpIds: string[],
+  royaltyContext?: {
+    royaltyPolicy?: string;
+    royaltyShare?: number;
+    parentRoyalties?: Array<{
+      parentIpId: string;
+      royaltyShare: number;
+    }>;
+  }
+) {
+  const response = await client.ipAsset.registerDerivative({
+    childIpId,
+    parentIpIds,
+    royaltyContext,
+    txOptions: { waitForTransaction: true }
+  });
+  
+  return response;
+}
+```
+
+### Method 2: Register Derivative with License Tokens
+```typescript
+async function registerDerivativeWithLicenseTokens(
+  childIpId: string,
+  licenseTokenIds: string[],
+  options?: {
+    royaltyContext?: any;
+    burnLicenseTokens?: boolean;
+  }
+) {
+  const response = await client.ipAsset.registerDerivativeWithLicenseTokens({
+    childIpId,
+    licenseTokenIds,
+    royaltyContext: options?.royaltyContext,
+    burnLicenseTokens: options?.burnLicenseTokens || false,
+    txOptions: { waitForTransaction: true }
+  });
+  
+  return response;
+}
+```
+
+### Legacy: Register a Remix as Derivative
+
+### Complete Remix Creation with License Tokens
 ```typescript
 async function createRemix(
   parentLicenseTokenId: string,
@@ -222,8 +396,9 @@ async function createRemix(
 }
 ```
 
-### Query Derivative Chain
+### Query Derivative Chain and IP Information
 ```typescript
+// Get derivative chain information
 async function getRemixChain(ipId: string) {
   // Get parent IPs
   const parents = await client.ipAsset.getParentIps(ipId);
@@ -232,6 +407,104 @@ async function getRemixChain(ipId: string) {
   const children = await client.ipAsset.getDerivativeIps(ipId);
   
   return { parents, children };
+}
+
+// Get detailed IP Asset information
+async function getIpAssetDetails(ipId: string) {
+  const details = await client.ipAsset.getIpAsset(ipId);
+  return details;
+}
+
+// Check if IP Asset exists
+async function checkIpAssetExists(ipId: string): Promise<boolean> {
+  try {
+    await client.ipAsset.getIpAsset(ipId);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+```
+
+## Optimization Strategies
+
+### Gas Optimization Techniques
+
+#### 1. Use Single-Transaction Methods
+```typescript
+// ✅ GOOD: Single transaction
+const result = await client.ipAsset.mintAndRegisterIpAssetWithPilTerms({
+  spgNftContract,
+  licenseTermsData,
+  ipMetadata
+});
+
+// ❌ AVOID: Multiple transactions
+// const mintResult = await mintNFT();
+// const registerResult = await client.ipAsset.register();
+// const licenseResult = await client.license.attachLicenseTerms();
+```
+
+#### 2. Batch Operations for Multiple Items
+```typescript
+// ✅ GOOD: Batch registration
+const results = await client.ipAsset.batchRegister({
+  ipRegistrations: multipleRegistrations
+});
+
+// ❌ AVOID: Individual registrations in loop
+// for (const registration of registrations) {
+//   await client.ipAsset.register(registration);
+// }
+```
+
+#### 3. Prepare Data Off-Chain
+```typescript
+// ✅ GOOD: Pre-calculate hashes and upload metadata
+const ipMetadataHash = toHex(JSON.stringify(metadata), { size: 32 });
+const ipMetadataUri = await uploadToIPFS(metadata);
+
+// Then use in registration
+const result = await client.ipAsset.register({
+  nftContract,
+  tokenId,
+  metadata: {
+    metadataURI: ipMetadataUri,
+    metadataHash: ipMetadataHash
+  }
+});
+```
+
+### Caching and Performance
+
+#### 1. Cache License Terms
+```typescript
+class StoryHouseLicenseCache {
+  private static licenseTermsCache = new Map<string, string>();
+  
+  static async getCachedLicenseTerms(tier: string): Promise<string> {
+    if (this.licenseTermsCache.has(tier)) {
+      return this.licenseTermsCache.get(tier)!;
+    }
+    
+    const licenseTermsId = await createLicenseTermsForTier(tier);
+    this.licenseTermsCache.set(tier, licenseTermsId);
+    return licenseTermsId;
+  }
+}
+```
+
+#### 2. Batch Metadata Uploads
+```typescript
+async function batchUploadMetadata(chapters: Chapter[]): Promise<Map<string, string>> {
+  const uploads = await Promise.all(
+    chapters.map(async (chapter) => {
+      const uri = await uploadToIPFS(chapter);
+      return [chapter.id, uri] as [string, string];
+    })
+  );
+  
+  return new Map(uploads);
 }
 ```
 
@@ -447,11 +720,16 @@ async function getCompleteRemixTree(rootIpId: string) {
 ## Testing Considerations
 
 ### Test Scenarios
-1. **Single-level remix**: Original → Remix
-2. **Multi-level remix**: Original → Remix 1 → Remix 2
-3. **Multiple remixes**: One original spawning multiple remixes
-4. **License term variations**: Different fee structures and permissions
-5. **Royalty flow**: Verify payments flow correctly up the chain
+1. **Single chapter registration**: Test mintAndRegisterIpAssetWithPilTerms
+2. **Batch chapter registration**: Test batchRegister for multiple chapters
+3. **Single-level remix**: Original → Remix using license tokens
+4. **Multi-level remix**: Original → Remix 1 → Remix 2 with proper attribution
+5. **Multiple remixes**: One original spawning multiple remixes simultaneously
+6. **License term variations**: Different fee structures and permissions across tiers
+7. **Royalty flow**: Verify payments flow correctly up the chain
+8. **Gas optimization**: Compare single-transaction vs multi-transaction costs
+9. **Metadata integrity**: Verify IPFS uploads and hash consistency
+10. **Error recovery**: Test transaction failure and retry scenarios
 
 ### Test Data
 ```typescript
@@ -478,19 +756,40 @@ const testChapterData = {
   chapterNumber: 1,
   storyId: "test-story-1"
 };
+
+// Test batch operations
+const testBatchData = [
+  { title: "Chapter 1", content: "...", chapterNumber: 1 },
+  { title: "Chapter 2", content: "...", chapterNumber: 2 },
+  { title: "Chapter 3", content: "...", chapterNumber: 3 }
+];
 ```
 
 ## Best Practices
 
-1. **Use mintAndRegisterIpAssetWithPilTerms** for new chapters - single transaction is more gas efficient
-2. **Always verify license terms** before minting license tokens
-3. **Track remix lineage** in your database for faster queries
-4. **Cache frequently accessed IP data** to reduce RPC calls
-5. **Implement retry logic** for blockchain transactions
-6. **Monitor gas costs** and optimize batch operations
-7. **Validate metadata** before registration to avoid failed transactions
-8. **Upload to IPFS first** before calling blockchain functions
-9. **Use atomic operations** when possible to prevent partial state
+### Transaction Optimization
+1. **Use mintAndRegisterIpAssetWithPilTerms** for new chapters - single transaction saves ~40% gas
+2. **Use batch operations** for multiple registrations to reduce overall gas costs
+3. **Pre-upload metadata to IPFS** before blockchain calls to avoid timeouts
+4. **Use registerIpAndAttachPilTerms** when you need both IP registration and license attachment
+
+### Data Management
+5. **Cache license terms IDs** to avoid recreating identical terms
+6. **Track remix lineage** in your database for faster queries
+7. **Cache frequently accessed IP data** to reduce RPC calls
+8. **Validate metadata** before registration to avoid failed transactions
+
+### Error Handling & Reliability
+9. **Implement retry logic** for blockchain transactions
+10. **Monitor gas costs** and set appropriate gas limits
+11. **Use atomic operations** when possible to prevent partial state
+12. **Always verify license terms** before minting license tokens
+
+### StoryHouse-Specific
+13. **Use chapter-level IP registration** for granular monetization
+14. **Enable derivatives** in license terms to support remixing
+15. **Set appropriate royalty percentages** based on license tiers
+16. **Maintain parent-child relationships** for proper attribution
 
 ## Error Handling
 

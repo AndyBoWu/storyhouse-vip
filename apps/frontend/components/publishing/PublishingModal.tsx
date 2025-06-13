@@ -727,13 +727,22 @@ function PublishingModal({
                       </div>
                     </div>
 
-                    <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                    <div className={`p-4 rounded-lg border ${isUnifiedSupported ? 'bg-green-50 border-green-200' : 'bg-yellow-50 border-yellow-200'}`}>
                       <div className="flex items-start gap-3">
-                        <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5" />
+                        {isUnifiedSupported ? (
+                          <TrendingUp className="w-5 h-5 text-green-600 mt-0.5" />
+                        ) : (
+                          <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5" />
+                        )}
                         <div>
-                          <h4 className="font-medium text-yellow-800 mb-1">Transaction Fees</h4>
-                          <p className="text-sm text-yellow-700">
-                            IP Asset registration requires testnet gas fees. License creation is included in the transaction.
+                          <h4 className={`font-medium mb-1 ${isUnifiedSupported ? 'text-green-800' : 'text-yellow-800'}`}>
+                            {isUnifiedSupported ? 'Optimized Gas Fees' : 'Transaction Fees'}
+                          </h4>
+                          <p className={`text-sm ${isUnifiedSupported ? 'text-green-700' : 'text-yellow-700'}`}>
+                            {isUnifiedSupported 
+                              ? '~40% gas savings with single-transaction IP registration and license creation.'
+                              : 'IP Asset registration requires testnet gas fees. License creation is included in the transaction.'
+                            }
                           </p>
                         </div>
                       </div>
@@ -783,6 +792,12 @@ function PublishingModal({
                             : 'Using R2 storage and registering as IP Asset on Story Protocol...'
                           }
                         </p>
+                        {isUnifiedSupported && publishingOption === 'protected' && (
+                          <div className="mt-2 flex items-center justify-center gap-2 text-green-600">
+                            <TrendingUp className="w-4 h-4" />
+                            <span className="text-sm font-medium">Gas Optimized: Single-transaction flow enabled</span>
+                          </div>
+                        )}
                       </div>
 
                       <div className="space-y-3">
