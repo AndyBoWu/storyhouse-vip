@@ -101,7 +101,7 @@ export async function POST(
     
     const licenseTokenId = `license_${Date.now()}_${Math.random().toString(36).slice(2)}`
     const transactionHash = `0x${Math.random().toString(16).slice(2).padStart(64, '0')}`
-    const mintingFee = (0.5 * 10**18).toString() // 0.5 TIP in wei
+    const mintingFee = (10 * 10**18).toString() // 10 TIP in wei
 
     console.log('✅ Reading license minted successfully:', {
       licenseTokenId,
@@ -153,7 +153,7 @@ export async function GET(
 
     // Check if this is a paid chapter
     const isFree = chapterNum <= 3
-    const mintingFee = isFree ? '0' : (0.5 * 10**18).toString()
+    const mintingFee = isFree ? '0' : (10 * 10**18).toString()
     
     return NextResponse.json({
       success: true,

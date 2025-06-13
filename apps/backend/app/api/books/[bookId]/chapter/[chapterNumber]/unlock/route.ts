@@ -61,7 +61,7 @@ export async function POST(
 
     // Determine if chapter is free (chapters 1-3)
     const isFree = chapterNum <= 3
-    const unlockPrice = isFree ? 0 : 0.5 // 0.5 TIP for chapters 4+
+    const unlockPrice = isFree ? 0 : 10 // 10 TIP for chapters 4+
     
     console.log('💰 Chapter pricing:', {
       chapterNumber: chapterNum,
