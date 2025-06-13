@@ -44,8 +44,8 @@ To purchase a remix license for a chapter, the user must:
 ### Story Paths Example
 
 ```mermaid
-flowchart TD
-    %% Main Andy storyline - perfectly horizontal
+flowchart LR
+    %% Main Andy storyline - perfectly horizontal left to right
     Ch1["Ch1<br/>Andy<br/>📚 FREE"] --> Ch2["Ch2<br/>Andy<br/>📚 FREE"]
     Ch2 --> Ch3["Ch3<br/>Andy<br/>📚 FREE"]
     Ch3 --> Ch4["Ch4<br/>Andy<br/>💰 0.5 TIP"]
