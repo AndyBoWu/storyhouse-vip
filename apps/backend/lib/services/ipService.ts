@@ -292,7 +292,7 @@ export class IPService {
           derivativesAllowed: tier.terms.derivativesAllowed,
           derivativesAttribution: tier.terms.attribution,
           derivativesApproval: false,
-          derivativesReciprocal: tier.terms.shareAlike,
+          derivativesReciprocal: tier.terms.derivativesAllowed, // 🔗 CRITICAL: Enable derivative chains
           derivativeRevCeiling: 0n,
           currency: '0x1514000000000000000000000000000000000000' as Address, // WIP token
           uri: '',

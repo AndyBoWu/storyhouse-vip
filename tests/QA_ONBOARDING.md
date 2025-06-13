@@ -183,13 +183,36 @@ Walk through every possible user path from different user perspectives:
 5. Readers purchase licenses to continue
 6. Creator claims accumulated royalties
 
-### **Scenario C: Derivative Chain Testing**
-1. Creator A publishes original story
-2. Creator B creates derivative (remix)
-3. Creator C creates derivative of B's remix
-4. Test 3-level royalty distribution
-5. Verify attribution chain remains intact
-6. Validate license inheritance rules
+### **Scenario C: Derivative Chain Testing** 🔗 **CRITICAL TEST**
+**⚠️ Priority: HIGHEST - Tests critical derivativesReciprocal functionality**
+
+1. **Creator A publishes original story** (Premium license)
+   - [ ] Verify `derivativesAllowed: true` and `derivativesReciprocal: true`
+   - [ ] Confirm story is available for remixing
+
+2. **Creator B creates derivative (remix)**
+   - [ ] Register derivative relationship to Story A
+   - [ ] Verify derivative has own license terms  
+   - [ ] Test that Remix B can itself be remixed (`derivativesReciprocal: true`)
+
+3. **Creator C creates derivative of B's remix** 🎯 **CRITICAL**
+   - [ ] **This MUST work** - if it fails, `derivativesReciprocal` is broken
+   - [ ] Register Remix C as derivative of Remix B
+   - [ ] Verify 3-level chain: Story A → Remix B → Remix C
+
+4. **Test 3-level royalty distribution**
+   - [ ] Generate revenue from Remix C
+   - [ ] Verify Creator A gets royalty (from Remix B)
+   - [ ] Verify Creator B gets royalty (from Remix C) 
+   - [ ] Verify Creator C gets primary revenue
+
+5. **Verify attribution chain remains intact**
+   - [ ] Check attribution shows: Original by A, Remixed by B, Re-remixed by C
+   - [ ] Verify license inheritance is correct
+
+6. **Validate unlimited chain depth** 
+   - [ ] Create Creator D derivative of Remix C (4th level)
+   - [ ] Ensure chain continues working infinitely
 
 ### **Scenario D: Error Handling & Edge Cases**
 1. Wallet disconnection during publishing
@@ -353,6 +376,7 @@ node tests/regression/api-compatibility.test.js
 
 ### Week 2: Advanced User Scenarios
 **Focus**: Complex workflows and multi-user interactions  
+- [ ] 🔗 **CRITICAL PRIORITY**: Test Derivative Chain Testing (Scenario C) - MUST WORK
 - [ ] Test Experienced Creator journey (multi-chapter, royalty claiming)
 - [ ] Test Remixer/Derivative Creator journey (find → remix → register)
 - [ ] Execute Critical Cross-User Scenarios (A, B, C, D)
