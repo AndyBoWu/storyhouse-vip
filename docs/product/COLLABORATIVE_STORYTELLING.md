@@ -44,41 +44,39 @@ To purchase a remix license for a chapter, the user must:
 ### Story Paths Example
 
 ```mermaid
-flowchart LR
-    %% Main timeline - FREE chapters
-    Ch1["Ch1<br/>Andy<br/>🆓 FREE"] --> Ch2["Ch2<br/>Andy<br/>🆓 FREE"]
-    Ch2 --> Ch3["Ch3<br/>Andy<br/>🆓 FREE"]
+flowchart TD
+    %% Main Andy storyline - perfectly horizontal
+    Ch1["Ch1<br/>Andy<br/>📚 FREE"] --> Ch2["Ch2<br/>Andy<br/>📚 FREE"]
+    Ch2 --> Ch3["Ch3<br/>Andy<br/>📚 FREE"]
+    Ch3 --> Ch4["Ch4<br/>Andy<br/>💰 0.5 TIP"]
+    Ch4 --> Ch5["Ch5<br/>Andy<br/>💰 0.5 TIP"]
+    Ch5 --> Ch6["Ch6<br/>Andy<br/>💰 0.5 TIP"]
     
-    %% Main timeline continuation - PAID chapters
-    Ch3 --> Ch4A["Ch4<br/>Andy<br/>💰 0.5 TIP"]
-    Ch4A --> Ch5A["Ch5<br/>Andy<br/>💰 0.5 TIP"]
-    Ch5A --> Ch6A["Ch6<br/>Andy<br/>💰 0.5 TIP"]
-    
-    %% Branch from Ch1 - Bob's timeline
+    %% Branch from Ch1 - Bob takes over at Ch2
     Ch1 --> Ch2B["Ch2<br/>Bob<br/>💰 0.5 TIP<br/>🎨 2.0 TIP license"]
     Ch2B --> Ch3B["Ch3<br/>Bob<br/>💰 0.5 TIP"]
-    Ch3B --> Ch4B["Ch4<br/>Cecilia<br/>💰 0.5 TIP<br/>🎨 2.0 TIP license"]
+    Ch3B --> Ch4C["Ch4<br/>Cecilia<br/>💰 0.5 TIP<br/>🎨 2.0 TIP license"]
     
-    %% Branch from Ch2 - Daisy's timeline  
+    %% Branch from Ch2 - Daisy takes over at Ch3
     Ch2 --> Ch3D["Ch3<br/>Daisy<br/>💰 0.5 TIP<br/>🎨 2.0 TIP license"]
     Ch3D --> Ch4D["Ch4<br/>Andy<br/>💰 0.5 TIP"]
     
-    %% Branch from Ch3 - Bob's alternate
-    Ch3 --> Ch4C["Ch4<br/>Bob<br/>💰 0.5 TIP<br/>🎨 2.0 TIP license"]
+    %% Branch from Ch3 - Bob's alternative Ch4
+    Ch3 --> Ch4B["Ch4<br/>Bob<br/>💰 0.5 TIP<br/>🎨 2.0 TIP license"]
     
     %% Styling to match the visual reference
     style Ch1 fill:#c8e6c9
     style Ch2 fill:#c8e6c9  
     style Ch3 fill:#c8e6c9
-    style Ch4A fill:#e0e0e0
-    style Ch5A fill:#e0e0e0
-    style Ch6A fill:#e0e0e0
+    style Ch4 fill:#e0e0e0
+    style Ch5 fill:#e0e0e0
+    style Ch6 fill:#e0e0e0
     style Ch2B fill:#81d4fa
     style Ch3B fill:#81d4fa
-    style Ch4B fill:#a5d6a7
+    style Ch4C fill:#a5d6a7
     style Ch3D fill:#ffb74d
     style Ch4D fill:#e0e0e0
-    style Ch4C fill:#81d4fa
+    style Ch4B fill:#81d4fa
 ```
 
 ## Story Genealogy System
