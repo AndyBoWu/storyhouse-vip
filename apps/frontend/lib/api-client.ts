@@ -134,6 +134,19 @@ export const apiClient = {
       body: JSON.stringify(data),
     })
   },
+
+  // Unified IP registration (single transaction)
+  async registerUnifiedIP(data: any) {
+    return apiRequest('/api/ip/register-unified', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  },
+
+  // Check if unified registration is available
+  async checkUnifiedRegistration() {
+    return apiRequest('/api/ip/register-unified')
+  },
   
   async licenseIP(data: any) {
     return apiRequest('/api/ip/license', {

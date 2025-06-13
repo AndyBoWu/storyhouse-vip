@@ -325,6 +325,13 @@ export class R2Service {
   }
 
   /**
+   * Generate a public URL for a given key (for publicly accessible objects)
+   */
+  static getPublicUrl(key: string): string {
+    return `${PUBLIC_URL}/${key}`
+  }
+
+  /**
    * Generate content key for chapters
    */
   static generateChapterKey(storyId: string, chapterNumber: number): string {

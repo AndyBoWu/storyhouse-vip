@@ -378,6 +378,125 @@ export class BookStorageService {
       return []
     }
   }
+
+  // ===== IP METADATA OPERATIONS =====
+
+  /**
+   * Generate and store IP metadata for Story Protocol registration
+   * Returns the public URL that can be used as metadata URI
+   */
+  static async storeIpMetadata(
+    authorAddress: AuthorAddress,
+    slug: string,
+    ipMetadata: {
+      title: string
+      description: string
+      type: 'book' | 'chapter'
+      chapterNumber?: number
+      content?: string
+      genre?: string
+      mood?: string
+      tags?: string[]
+      parentIpId?: string
+      licenseType?: string
+    }
+  ): Promise<{ metadataUri: string; metadataHash: string }> {
+    const bookPaths = this.generateBookPaths(authorAddress, slug)
+    
+    // Create path for IP metadata
+    const ipMetadataPath = ipMetadata.type === 'chapter' && ipMetadata.chapterNumber
+      ? `${bookPaths.chaptersFolder}/ch${ipMetadata.chapterNumber}/ip-metadata.json`
+      : `${bookPaths.bookFolder}/ip-metadata.json`
+    
+    // Prepare comprehensive metadata for Story Protocol
+    const metadata = {
+      name: ipMetadata.title,
+      description: ipMetadata.description,
+      image: '', // Could add cover URL here if available
+      external_url: `https://storyhouse.vip/read/${authorAddress.toLowerCase()}-${slug}`,
+      attributes: [
+        { trait_type: 'Type', value: ipMetadata.type },
+        { trait_type: 'Author', value: authorAddress },
+        { trait_type: 'Genre', value: ipMetadata.genre || 'Fiction' },
+        { trait_type: 'Mood', value: ipMetadata.mood || 'Neutral' },
+        { trait_type: 'License Type', value: ipMetadata.licenseType || 'Standard' },
+        ...(ipMetadata.chapterNumber ? [{ trait_type: 'Chapter', value: ipMetadata.chapterNumber.toString() }] : []),
+        ...(ipMetadata.parentIpId ? [{ trait_type: 'Parent IP', value: ipMetadata.parentIpId }] : []),
+        ...(ipMetadata.tags?.map(tag => ({ trait_type: 'Tag', value: tag })) || [])
+      ],
+      properties: {
+        mediaType: 'text/story',
+        contentLength: ipMetadata.content?.length || 0,
+        createdAt: new Date().toISOString(),
+        platform: 'StoryHouse.vip'
+      }
+    }
+    
+    const metadataJson = JSON.stringify(metadata, null, 2)
+    
+    // Calculate hash of metadata for verification
+    const encoder = new TextEncoder()
+    const data = encoder.encode(metadataJson)
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+    const hashArray = Array.from(new Uint8Array(hashBuffer))
+    const metadataHash = '0x' + hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+    
+    try {
+      const metadataUri = await R2Service.uploadContent(
+        ipMetadataPath,
+        metadataJson,
+        {
+          contentType: 'application/json',
+          metadata: {
+            type: 'ip-metadata',
+            authorAddress,
+            bookSlug: slug,
+            ipType: ipMetadata.type,
+            hash: metadataHash
+          }
+        }
+      )
+      
+      console.log('✅ IP metadata stored:', { path: ipMetadataPath, uri: metadataUri, hash: metadataHash })
+      
+      return {
+        metadataUri,
+        metadataHash
+      }
+    } catch (error) {
+      console.error('❌ Error storing IP metadata:', error)
+      throw new Error('Failed to store IP metadata')
+    }
+  }
+
+  /**
+   * Retrieve IP metadata URI for an existing book or chapter
+   */
+  static async getIpMetadataUri(
+    authorAddress: AuthorAddress,
+    slug: string,
+    type: 'book' | 'chapter',
+    chapterNumber?: number
+  ): Promise<string | null> {
+    const bookPaths = this.generateBookPaths(authorAddress, slug)
+    
+    const ipMetadataPath = type === 'chapter' && chapterNumber
+      ? `${bookPaths.chaptersFolder}/ch${chapterNumber}/ip-metadata.json`
+      : `${bookPaths.bookFolder}/ip-metadata.json`
+    
+    try {
+      // Get the public URL for the metadata
+      const publicUrl = R2Service.getPublicUrl(ipMetadataPath)
+      
+      // Verify it exists by trying to fetch it
+      await R2Service.getContent(ipMetadataPath)
+      
+      return publicUrl
+    } catch (error) {
+      console.log('IP metadata not found:', ipMetadataPath)
+      return null
+    }
+  }
 }
 
 /**
