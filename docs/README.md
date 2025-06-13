@@ -1,62 +1,103 @@
-# StoryHouse.vip Documentation
+# 📚 StoryHouse.vip Documentation
 
-## Quick Navigation
+**Quick-start navigation for developers, product teams, and stakeholders**
 
-### Core Documentation
+> Revolutionary Web3 storytelling platform with chapter-level IP monetization, read-to-earn mechanics, and AI-powered content creation on Story Protocol.
+
+---
+
+## 🚀 **Getting Started** *(Start Here)*
+
+| Document | What's Inside | For Who |
+|----------|---------------|---------|
+| [**Development Guide**](./DEVELOPMENT_GUIDE.md) | Setup, installation, testing | **Developers** |
+| [**API Reference**](./API_REFERENCE.md) | Complete API documentation | **Frontend/Backend Devs** |
+| [**Story Protocol Guide**](./STORY_PROTOCOL_GUIDE.md) | IP assets, licensing, royalties | **Blockchain Devs** |
+
+---
+
+## 📋 **Core Documentation**
+
+### For Developers
 - [**Technical Architecture**](./TECHNICAL_ARCHITECTURE.md) - System design and technology stack
-- [**API Reference**](./API_REFERENCE.md) - Complete API documentation including royalty endpoints
-- [**Development Guide**](./DEVELOPMENT_GUIDE.md) - Setup and development workflow
-- [**Testing Strategy**](./TESTING_STRATEGY.md) - Testing approach and tools
-
-### Implementation Plans  
-- [**🆕 Phase 2 Royalty Distribution Plan**](./plan/phase-2-royalty-distribution-implementation-plan.md) - Complete royalty system implementation
-- [**Story Protocol SDK Enhancement Plan**](./plan/story-protocol-sdk-enhancement-plan.md) - 16-week roadmap for advanced features
-- [**SDK v1.3.2 Breaking Changes**](./plan/sdk-v1.3.2-breaking-changes-summary.md) - Migration guide and fixes
-- [**PIL Implementation Plan**](./plan/sdk-upgrade-and-pil-implementation-plan.md) - Complete licensing system implementation
-
-### Technical Deep Dives
-- [**Story Protocol Complete Guide**](./STORY_PROTOCOL_GUIDE.md) - Comprehensive IP asset management, licensing, royalties, and dispute resolution
-- [**Licensing System**](./technical/LICENSING_SYSTEM.md) - PIL licensing architecture
-- [**License Components**](./technical/LICENSE_COMPONENTS.md) - UI component documentation
-
-### Product & Design
-- [**Product Specification**](./product/SPECIFICATION.md) - Detailed feature specifications
-- [**Design System**](./product/DESIGN.md) - UI/UX design guidelines
-- [**User Journey Analysis**](./product/USER_SCENARIO_BRANCHING_MODEL.md) - User experience flows
-
-### Project Management
+- [**Testing Strategy**](./TESTING_STRATEGY.md) - Testing approach and quality assurance
 - [**Deployment Guide**](./project/DEPLOYMENT.md) - Production deployment on Vercel
-- [**Project Overview**](./project/OVERVIEW.md) - High-level project structure
 
-## Current Status
+### For Product Teams  
+- [**Product Specification**](./product/SPECIFICATION.md) - Feature requirements and user flows
+- [**Design Guidelines**](./product/DESIGN.md) - UI/UX design system
+- [**Pitch Deck**](./PITCH_DECK.md) - Business presentation and vision
 
-**🎉 Phase 5.3 Complete** - Full SPA optimization with enhanced UI/UX:
+### For Business Stakeholders
+- [**Project Overview**](./project/OVERVIEW.md) - High-level project summary
+- [**Tokenomics Guide**](./tokenomics/) - Economic model and $TIP token mechanics
+- [**Roadmap**](./project/ROADMAP.md) - Development timeline and milestones
 
-**Latest UI Enhancements:**
-- ✅ **Zero Commission Emphasis**: Platform messaging highlights 100% creator revenue
-- ✅ **Color-Coded Chapter States**: Visual hierarchy for free (green), locked premium (gray), and unlocked premium (purple) chapters  
-- ✅ **Improved Publishing Flow**: Clear "Review" → "Publish" workflow with simplified UI
-- ✅ **Enhanced Pricing**: Updated default chapter pricing to 0.5 TIP with optimized tiers (0.3, 0.5, 0.8)
-- ✅ **Streamlined Input UX**: Fixed price input fields with proper state management
-- ✅ **Vercel Deployment**: Latest frontend and backend deployed with performance optimizations
+---
 
-**Previous Major Completions:**
-- ✅ **Story Protocol SDK Integration**: Full blockchain derivative registration system
-- ✅ **AI Analytics Dashboard**: Complete derivative tracking and notification system  
-- ✅ **Royalty Distribution**: Real-time chapter-level claiming and analytics
-- ✅ **Production Infrastructure**: 15+ API endpoints with comprehensive error handling
+## 🔧 **Technical Deep Dives**
 
-## 🆕 New Features
+| Topic | Documentation | Description |
+|-------|---------------|-------------|
+| **IP & Licensing** | [Licensing System](./technical/LICENSING_SYSTEM.md) | PIL implementation details |
+| **UI Components** | [License Components](./technical/LICENSE_COMPONENTS.md) | Frontend component docs |
+| **SDK Integration** | [Story Protocol SDK](./technical/STORY_PROTOCOL_SDK_INTEGRATION.md) | Blockchain integration |
 
-### Royalty Distribution System
-- **Real-time claiming** per chapter with TIP token integration
-- **Advanced economic modeling** with break-even analysis and forecasting
-- **Multi-tier revenue sharing**: Free (0%), Premium (10%), Exclusive (25%)
-- **Performance optimized**: <2s response times with intelligent caching
+---
 
-## Next Steps
+## 📅 **Implementation Plans** *(Active Development)*
 
-Refer to the [Story Protocol SDK Enhancement Plan](./plan/story-protocol-sdk-enhancement-plan.md) for upcoming phases:
-- **Phase 3**: Derivative & remix tracking system
-- **Phase 4**: Group IP collections and collaborative features
-- **Phase 5**: Advanced analytics and business intelligence
+### Current Phase
+- [**Phase 3 Derivative Tracking**](./plan/phase-3-derivative-remix-tracking-plan.md) - AI-powered remix system
+- [**Phase 3.2 Analytics Dashboard**](./plan/phase-3.2-analytics-dashboard-completion.md) - Advanced analytics
+- [**Phase 3.3 Advanced Features**](./plan/phase-3.3-advanced-features-implementation-plan.md) - Enterprise features
+
+### Long-term Roadmap
+- [**Story Protocol SDK Enhancement**](./plan/story-protocol-sdk-enhancement-plan.md) - 16-week enhancement plan
+- [**Implementation Tickets**](./plan/phase-3-implementation-tickets.md) - Detailed development tasks
+
+### Completed *(Archive)*
+- [**Completed Plans**](./plan/completed/) - Phase 2 royalty system, SDK migrations
+
+---
+
+## 📊 **Current Status**
+
+**🎉 Phase 5.3 Complete** - Full SPA optimization with enhanced UI/UX
+
+**✅ Latest Features:**
+- Zero commission messaging (100% creator revenue)
+- Gas-optimized IP registration (40% cost reduction)
+- Comprehensive royalty distribution system
+- AI-powered derivative tracking
+- Community-driven content governance
+
+**🚀 Production Ready:**
+- 15+ API endpoints with comprehensive error handling
+- Dual Vercel deployment (frontend + backend)
+- Story Protocol integration with licensing
+- Real-time chapter-level claiming and analytics
+
+---
+
+## 🎯 **Quick Find** *(What You're Probably Looking For)*
+
+**Setting up development?** → [Development Guide](./DEVELOPMENT_GUIDE.md)  
+**API integration?** → [API Reference](./API_REFERENCE.md)  
+**Story Protocol help?** → [Story Protocol Guide](./STORY_PROTOCOL_GUIDE.md)  
+**Understanding the product?** → [Product Specification](./product/SPECIFICATION.md)  
+**Deployment issues?** → [Deployment Guide](./project/DEPLOYMENT.md)  
+**Business overview?** → [Pitch Deck](./PITCH_DECK.md)  
+
+---
+
+## 🏗️ **Project Essentials**
+
+**Tech Stack:** Next.js 15.3.3, TypeScript, Story Protocol SDK, OpenAI GPT-4, Smart Contracts (Solidity)  
+**Deployment:** Dual Vercel architecture (frontend + backend)  
+**Status:** Phase 5.3 Complete - Production Ready  
+**Last Updated:** January 2025
+
+---
+
+*💡 **New to the project?** Start with [Development Guide](./DEVELOPMENT_GUIDE.md) → [API Reference](./API_REFERENCE.md) → [Story Protocol Guide](./STORY_PROTOCOL_GUIDE.md)*
