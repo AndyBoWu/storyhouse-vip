@@ -630,34 +630,228 @@ async function batchUploadMetadata(chapters: Chapter[]): Promise<Map<string, str
 
 ## Royalty Distribution
 
-### Set Royalty Distribution
+### StoryHouse Royalty System Integration
+
+StoryHouse implements a sophisticated 4-tier royalty system with TIP token economics:
+
 ```typescript
-async function setupRoyaltyDistribution(ipId: string) {
-  // Configure how royalties flow up the remix chain
+// StoryHouse Royalty Configuration
+const STORYHOUSE_ROYALTY_CONFIG = {
+  TIP_TOKEN_ADDRESS: '0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E',
+  ROYALTY_POLICIES: {
+    free: { policyType: 'LAP', stakingReward: 0, distributionDelay: 0 },
+    reading: { policyType: 'LAP', stakingReward: 2, distributionDelay: 3600 }, // 1 hour
+    premium: { policyType: 'LRP', stakingReward: 5, distributionDelay: 86400 }, // 24 hours
+    exclusive: { policyType: 'LRP', stakingReward: 10, distributionDelay: 604800 } // 7 days
+  },
+  ECONOMIC_CONSTANTS: {
+    PLATFORM_FEE_RATE: 5, // 5% platform fee
+    ROYALTY_RATES: {
+      free: 0,     // 0% - attribution only
+      reading: 5,  // 5% - reading license
+      premium: 10, // 10% - commercial use
+      exclusive: 25 // 25% - exclusive rights
+    },
+    READER_REWARD_RATES: {
+      free: 2,     // 2% of revenue to readers
+      reading: 2,  // 2% of revenue to readers
+      premium: 3,  // 3% of revenue to readers
+      exclusive: 5 // 5% of revenue to readers
+    }
+  }
+};
+```
+
+### Pay Royalties on Behalf (Derivative to Parent)
+```typescript
+// Pay royalties from derivative work to original chapter
+async function payRoyaltyToParent(
+  derivativeIpId: string,
+  parentIpId: string,
+  amount: bigint,
+  licenseTier: 'free' | 'reading' | 'premium' | 'exclusive'
+) {
+  const royaltyRate = STORYHOUSE_ROYALTY_CONFIG.ECONOMIC_CONSTANTS.ROYALTY_RATES[licenseTier];
+  const royaltyAmount = (amount * BigInt(royaltyRate)) / BigInt(100);
+  
   const response = await client.royalty.payRoyaltyOnBehalf({
-    receiverIpId: ipId,
+    receiverIpId: parentIpId,
     payerIpId: derivativeIpId,
-    token: TIP_TOKEN_ADDRESS,
+    token: STORYHOUSE_ROYALTY_CONFIG.TIP_TOKEN_ADDRESS,
     amount: royaltyAmount,
     txOptions: { waitForTransaction: true }
   });
   
-  return response;
+  return {
+    transactionHash: response.txHash,
+    royaltyAmount,
+    royaltyRate,
+    parentIpId,
+    derivativeIpId
+  };
 }
 ```
 
-### Claim Royalties
+### Check Claimable Revenue
 ```typescript
-async function claimRoyalties(ipId: string, claimer: string) {
-  const response = await client.royalty.claimRevenue({
-    snapshotIds: [snapshotId],
-    token: TIP_TOKEN_ADDRESS,
-    ipId,
-    claimer,
+// Check how much revenue an author can claim from their chapters
+async function getClaimableRevenue(
+  authorAddress: string,
+  chapterIpIds: string[]
+): Promise<{
+  totalClaimable: bigint;
+  claimableByChapter: Record<string, bigint>;
+  estimatedGasFee: bigint;
+}> {
+  const claimableByChapter: Record<string, bigint> = {};
+  let totalClaimable = BigInt(0);
+  
+  // Check claimable revenue for each chapter
+  for (const ipId of chapterIpIds) {
+    const claimable = await client.royalty.claimableRevenue({
+      ipId,
+      account: authorAddress,
+      token: STORYHOUSE_ROYALTY_CONFIG.TIP_TOKEN_ADDRESS
+    });
+    
+    claimableByChapter[ipId] = claimable.amount;
+    totalClaimable += claimable.amount;
+  }
+  
+  // Estimate gas fee for claiming
+  const estimatedGasFee = BigInt(150000) * BigInt(20000000000); // 150k gas * 20 gwei
+  
+  return {
+    totalClaimable,
+    claimableByChapter,
+    estimatedGasFee
+  };
+}
+```
+
+### Claim All Revenue (Batch Claiming)
+```typescript
+// Claim revenue from multiple chapters in a single transaction
+async function claimAllChapterRevenue(
+  authorAddress: string,
+  chapterIpIds: string[],
+  options?: {
+    unwrapToNative?: boolean;
+    autoTransfer?: boolean;
+  }
+) {
+  // Get snapshots for revenue claiming
+  const snapshots = await Promise.all(
+    chapterIpIds.map(async (ipId) => {
+      const snapshot = await client.royalty.getSnapshot({
+        ipId,
+        token: STORYHOUSE_ROYALTY_CONFIG.TIP_TOKEN_ADDRESS
+      });
+      return snapshot.id;
+    })
+  );
+  
+  const response = await client.royalty.claimAllRevenue({
+    account: authorAddress,
+    snapshotIds: snapshots,
+    token: STORYHOUSE_ROYALTY_CONFIG.TIP_TOKEN_ADDRESS,
+    unwrapToNative: options?.unwrapToNative ?? false,
+    autoTransfer: options?.autoTransfer ?? true,
     txOptions: { waitForTransaction: true }
   });
   
-  return response;
+  return {
+    transactionHash: response.txHash,
+    totalClaimed: response.claimedAmount,
+    chapterCount: chapterIpIds.length,
+    snapshotIds: snapshots
+  };
+}
+```
+
+### Revenue Distribution for Reading Licenses
+```typescript
+// Distribute revenue when readers purchase reading licenses
+async function distributeReadingLicenseRevenue(
+  chapterIpId: string,
+  readerPayment: bigint, // 10 TIP for reading license
+  authorAddress: string
+) {
+  const config = STORYHOUSE_ROYALTY_CONFIG.ECONOMIC_CONSTANTS;
+  
+  // Calculate distribution
+  const platformFee = (readerPayment * BigInt(config.PLATFORM_FEE_RATE)) / BigInt(100);
+  const readerReward = (readerPayment * BigInt(config.READER_REWARD_RATES.reading)) / BigInt(100);
+  const authorRevenue = readerPayment - platformFee - readerReward;
+  
+  // Distribute to IP asset royalty vault
+  const response = await client.royalty.distributeRevenue({
+    ipId: chapterIpId,
+    token: STORYHOUSE_ROYALTY_CONFIG.TIP_TOKEN_ADDRESS,
+    amount: authorRevenue,
+    txOptions: { waitForTransaction: true }
+  });
+  
+  return {
+    transactionHash: response.txHash,
+    authorRevenue,
+    platformFee,
+    readerReward,
+    distribution: {
+      author: Number(authorRevenue) / 10**18,
+      platform: Number(platformFee) / 10**18,
+      readers: Number(readerReward) / 10**18
+    }
+  };
+}
+```
+
+### Royalty Analytics and Tracking
+```typescript
+// Get comprehensive royalty analytics for a story
+async function getStoryRoyaltyAnalytics(
+  chapterIpIds: string[],
+  authorAddress: string,
+  timeRange: { from: Date; to: Date }
+) {
+  const analytics = {
+    totalEarned: BigInt(0),
+    earningsByChapter: new Map<string, bigint>(),
+    earningsBySource: {
+      readingLicenses: BigInt(0),
+      derivatives: BigInt(0),
+      commercial: BigInt(0)
+    },
+    readerRewardsDistributed: BigInt(0),
+    platformFeesCollected: BigInt(0)
+  };
+  
+  for (const ipId of chapterIpIds) {
+    // Get revenue history for this chapter
+    const revenue = await client.royalty.getRevenueHistory({
+      ipId,
+      account: authorAddress,
+      token: STORYHOUSE_ROYALTY_CONFIG.TIP_TOKEN_ADDRESS,
+      fromTimestamp: Math.floor(timeRange.from.getTime() / 1000),
+      toTimestamp: Math.floor(timeRange.to.getTime() / 1000)
+    });
+    
+    analytics.earningsByChapter.set(ipId, revenue.totalEarned);
+    analytics.totalEarned += revenue.totalEarned;
+    
+    // Categorize earnings by source
+    revenue.transactions.forEach(tx => {
+      if (tx.source === 'reading_license') {
+        analytics.earningsBySource.readingLicenses += tx.amount;
+      } else if (tx.source === 'derivative') {
+        analytics.earningsBySource.derivatives += tx.amount;
+      } else if (tx.source === 'commercial') {
+        analytics.earningsBySource.commercial += tx.amount;
+      }
+    });
+  }
+  
+  return analytics;
 }
 ```
 
@@ -937,6 +1131,10 @@ const testBatchData = [
 18. **Maintain chapter lineage** for proper attribution and royalty flow
 19. **Cache license terms by tier** to avoid redundant PIL registrations
 20. **Implement reading license validation** before chapter access
+21. **Distribute reader rewards** (2-5%) to incentivize engagement
+22. **Use LAP policy for free/reading** and LRP for premium/exclusive tiers
+23. **Implement batch royalty claiming** to reduce gas costs for authors
+24. **Track derivative royalty flows** up the remix chain automatically
 
 ## Error Handling
 
