@@ -42,13 +42,43 @@ To purchase a remix license for a chapter, the user must:
 - **No reading prerequisites required** - writers can jump in at any chapter
 
 ### Story Paths Example
-**Andy's Original Story:**
-Chapter 1 (Andy) → Chapter 2 (Andy) → Chapter 3 (Andy) → Chapter 4 (Andy)
 
-**Possible Branches:**
-- **Branch from Chapter 1:** Ch1 (Andy) → Ch2 (Bob) → Ch3 (Bob) → Ch4 (Cecilia)
-- **Branch from Chapter 2:** Ch1 (Andy) → Ch2 (Andy) → Ch3 (Daisy) → Ch4 (Andy)
-- **Branch from Chapter 3:** Ch1 (Andy) → Ch2 (Andy) → Ch3 (Andy) → Ch4 (Bob)
+```mermaid
+flowchart LR
+    subgraph "📚 Main Timeline"
+        A1["Ch1<br/>📝 Andy"] --> A2["Ch2<br/>📝 Andy"] 
+        A2 --> A3["Ch3<br/>📝 Andy"]
+        A3 --> A4["Ch4<br/>📝 Andy"]
+    end
+    
+    subgraph "🌿 Branch from Ch1"
+        B1["Ch1<br/>📝 Andy"] --> B2["Ch2<br/>📝 Bob"]
+        B2 --> B3["Ch3<br/>📝 Bob"] 
+        B3 --> B4["Ch4<br/>📝 Cecilia"]
+    end
+    
+    subgraph "🌸 Branch from Ch2"
+        C1["Ch1<br/>📝 Andy"] --> C2["Ch2<br/>📝 Andy"]
+        C2 --> C3["Ch3<br/>📝 Daisy"]
+        C3 --> C4["Ch4<br/>📝 Andy"]
+    end
+    
+    subgraph "🌼 Branch from Ch3"
+        D1["Ch1<br/>📝 Andy"] --> D2["Ch2<br/>📝 Andy"]
+        D2 --> D3["Ch3<br/>📝 Andy"] 
+        D3 --> D4["Ch4<br/>📝 Bob"]
+    end
+    
+    style A1 fill:#e8f5e8
+    style A2 fill:#e8f5e8
+    style A3 fill:#e8f5e8
+    style A4 fill:#e8f5e8
+    style B2 fill:#fff3e0
+    style B3 fill:#fff3e0
+    style B4 fill:#f3e5f5
+    style C3 fill:#ffe0b2
+    style D4 fill:#fff3e0
+```
 
 ## Story Genealogy System
 
