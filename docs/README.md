@@ -15,7 +15,7 @@
 - [**PIL Implementation Plan**](./plan/sdk-upgrade-and-pil-implementation-plan.md) - Complete licensing system implementation
 
 ### Technical Deep Dives
-- [**Story Protocol Integration**](./technical/STORY_PROTOCOL_INTEGRATION.md) - Blockchain IP asset management
+- [**Story Protocol Complete Guide**](./STORY_PROTOCOL_GUIDE.md) - Comprehensive IP asset management, licensing, royalties, and dispute resolution
 - [**Licensing System**](./technical/LICENSING_SYSTEM.md) - PIL licensing architecture
 - [**License Components**](./technical/LICENSE_COMPONENTS.md) - UI component documentation
 
