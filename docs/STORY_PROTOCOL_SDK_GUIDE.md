@@ -1136,6 +1136,405 @@ const testBatchData = [
 23. **Implement batch royalty claiming** to reduce gas costs for authors
 24. **Track derivative royalty flows** up the remix chain automatically
 
+## Group Module Integration
+
+### StoryHouse.vip Group Management for Collections
+
+The Group module enables powerful collaborative IP management for story collections, multi-author projects, and derivative work ecosystems.
+
+```typescript
+// Story Protocol Group Configuration for StoryHouse
+const STORYHOUSE_GROUP_CONFIG = {
+  GROUP_TYPES: {
+    STORY_SERIES: 'story_series',     // Multi-chapter books
+    COLLABORATIVE: 'collaborative',   // Multi-author stories
+    DERIVATIVE_COLLECTION: 'derivative_collection', // Related derivatives
+    UNIVERSE: 'universe'              // Shared story universe
+  },
+  REVENUE_SHARING: {
+    EQUAL_SPLIT: 'equal',             // Equal distribution among members
+    WEIGHTED: 'weighted',             // Based on contribution percentage
+    TIERED: 'tiered',                 // Based on chapter importance
+    CUSTOM: 'custom'                  // Custom distribution logic
+  }
+};
+```
+
+### Register Story Series as Group
+```typescript
+// Create a group for a multi-chapter story with shared licensing
+async function createStorySeriesGroup(
+  bookTitle: string,
+  authorAddress: string,
+  chapterIpIds: string[],
+  groupConfig: {
+    licenseTermsId: bigint;
+    rewardSharePercentage: number;
+    distributionStrategy: 'equal' | 'weighted';
+  }
+) {
+  // Register the group for story series
+  const groupResponse = await client.group.registerGroup({
+    groupPool: authorAddress,
+    licenseTermsId: groupConfig.licenseTermsId,
+    rewardSharePercentage: groupConfig.rewardSharePercentage,
+    txOptions: { waitForTransaction: true }
+  });
+
+  const groupId = groupResponse.groupId;
+
+  // Add all chapters to the group
+  const addIpsResponse = await client.group.addIpsToGroup({
+    groupId,
+    ipIds: chapterIpIds,
+    txOptions: { waitForTransaction: true }
+  });
+
+  return {
+    groupId,
+    transactionHash: addIpsResponse.txHash,
+    memberCount: chapterIpIds.length,
+    bookTitle,
+    groupType: 'story_series'
+  };
+}
+```
+
+### Collaborative Story Group Management
+```typescript
+// Create group for multi-author collaborative stories
+async function createCollaborativeStoryGroup(
+  storyTitle: string,
+  authors: { address: string; contributionWeight: number }[],
+  sharedLicenseTermsId: bigint
+) {
+  // Calculate weighted reward distribution
+  const totalWeight = authors.reduce((sum, author) => sum + author.contributionWeight, 0);
+  const rewardSharePercentage = 90; // 90% to authors, 10% to platform
+
+  // Register group with primary author as pool
+  const primaryAuthor = authors.find(a => a.contributionWeight === Math.max(...authors.map(a => a.contributionWeight)));
+  
+  const groupResponse = await client.group.registerGroup({
+    groupPool: primaryAuthor!.address,
+    licenseTermsId: sharedLicenseTermsId,
+    rewardSharePercentage,
+    txOptions: { waitForTransaction: true }
+  });
+
+  return {
+    groupId: groupResponse.groupId,
+    storyTitle,
+    authors,
+    totalWeight,
+    distributionStrategy: 'weighted'
+  };
+}
+```
+
+### Derivative Collection Groups
+```typescript
+// Group related derivative works for shared licensing and royalties
+async function createDerivativeCollectionGroup(
+  originalIpId: string,
+  derivativeIpIds: string[],
+  collectionName: string,
+  originalAuthorAddress: string
+) {
+  // Create shared license terms for derivative collection
+  const collectionLicenseTermsId = await createCollectionLicenseTerms({
+    originalAuthorRoyalty: 15, // 15% to original author
+    derivativeAuthorRoyalty: 10, // 10% to derivative authors
+    commercialUse: true,
+    derivativesAllowed: true
+  });
+
+  // Register group for derivative collection
+  const groupResponse = await client.group.registerGroupAndAttachLicense({
+    groupPool: originalAuthorAddress,
+    licenseTermsId: collectionLicenseTermsId,
+    rewardSharePercentage: 85, // 85% to group members, 15% to platform
+    ipIds: [originalIpId, ...derivativeIpIds],
+    txOptions: { waitForTransaction: true }
+  });
+
+  return {
+    groupId: groupResponse.groupId,
+    collectionName,
+    originalIpId,
+    derivativeCount: derivativeIpIds.length,
+    licenseTermsId: collectionLicenseTermsId
+  };
+}
+```
+
+### Group Royalty Collection and Distribution
+```typescript
+// Collect and distribute royalties for a story group
+async function distributeGroupRoyalties(
+  groupId: string,
+  distributionStrategy: 'equal' | 'weighted' | 'custom',
+  memberWeights?: Record<string, number>
+) {
+  // Collect group royalties first
+  const collectResponse = await client.group.collectGroupRoyalties({
+    groupId,
+    token: STORYHOUSE_ROYALTY_CONFIG.TIP_TOKEN_ADDRESS,
+    txOptions: { waitForTransaction: true }
+  });
+
+  const totalCollected = collectResponse.collectedAmount;
+
+  // Distribute based on strategy
+  const distributeResponse = await client.group.distributeGroupRoyalties({
+    groupId,
+    token: STORYHOUSE_ROYALTY_CONFIG.TIP_TOKEN_ADDRESS,
+    distributionStrategy,
+    memberWeights: memberWeights || {},
+    txOptions: { waitForTransaction: true }
+  });
+
+  return {
+    collectionHash: collectResponse.txHash,
+    distributionHash: distributeResponse.txHash,
+    totalCollected,
+    totalDistributed: distributeResponse.distributedAmount,
+    strategy: distributionStrategy
+  };
+}
+```
+
+### Story Universe Group Management
+```typescript
+// Create shared universe for interconnected stories
+async function createStoryUniverseGroup(
+  universeName: string,
+  creatorAddress: string,
+  universeConfig: {
+    openCollaboration: boolean;
+    maxMembers?: number;
+    entryFee?: bigint;
+    sharedRoyaltyPool: number;
+  }
+) {
+  // Create universe-specific license terms
+  const universeLicenseTermsId = await createUniverseLicenseTerms({
+    universeCreatorRoyalty: 5, // 5% to universe creator
+    storyAuthorRoyalty: 15, // 15% to individual story authors
+    commercialUse: true,
+    crossoverAllowed: true, // Stories can reference each other
+    merchandisingRights: true
+  });
+
+  const groupResponse = await client.group.registerGroup({
+    groupPool: creatorAddress,
+    licenseTermsId: universeLicenseTermsId,
+    rewardSharePercentage: universeConfig.sharedRoyaltyPool,
+    txOptions: { waitForTransaction: true }
+  });
+
+  return {
+    groupId: groupResponse.groupId,
+    universeName,
+    creatorAddress,
+    licenseTermsId: universeLicenseTermsId,
+    openCollaboration: universeConfig.openCollaboration,
+    maxMembers: universeConfig.maxMembers || 100
+  };
+}
+```
+
+### Add New Chapter to Existing Group
+```typescript
+// Add new chapter to existing story series group
+async function addChapterToStoryGroup(
+  groupId: string,
+  newChapterIpId: string,
+  chapterMetadata: {
+    chapterNumber: number;
+    title: string;
+    authorContribution: number;
+  }
+) {
+  // Add the new chapter IP to the group
+  const response = await client.group.addIpsToGroup({
+    groupId,
+    ipIds: [newChapterIpId],
+    txOptions: { waitForTransaction: true }
+  });
+
+  // Update group metadata with new chapter info
+  const updatedGroup = await updateGroupMetadata(groupId, {
+    lastChapterAdded: new Date(),
+    totalChapters: chapterMetadata.chapterNumber,
+    latestChapterTitle: chapterMetadata.title
+  });
+
+  return {
+    transactionHash: response.txHash,
+    groupId,
+    newChapterIpId,
+    chapterNumber: chapterMetadata.chapterNumber,
+    updatedGroup
+  };
+}
+```
+
+### Group Analytics and Management
+```typescript
+// Get comprehensive group analytics
+async function getGroupAnalytics(groupId: string) {
+  // Get group details
+  const groupInfo = await client.group.getGroupDetails({
+    groupId
+  });
+
+  // Get all group members
+  const members = await client.group.getGroupMembers({
+    groupId
+  });
+
+  // Calculate revenue analytics
+  const revenueAnalytics = await client.group.getGroupRevenueAnalytics({
+    groupId,
+    token: STORYHOUSE_ROYALTY_CONFIG.TIP_TOKEN_ADDRESS,
+    timeRange: {
+      from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // Last 30 days
+      to: new Date()
+    }
+  });
+
+  return {
+    groupInfo,
+    memberCount: members.length,
+    totalRevenue: revenueAnalytics.totalRevenue,
+    averageRevenuePerMember: revenueAnalytics.totalRevenue / BigInt(members.length),
+    topPerformingMember: revenueAnalytics.topPerformer,
+    distributionHistory: revenueAnalytics.distributionHistory,
+    growthMetrics: {
+      revenueGrowth: revenueAnalytics.monthOverMonthGrowth,
+      memberGrowth: members.filter(m => m.joinedAt > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).length
+    }
+  };
+}
+```
+
+### StoryHouse Group Integration Patterns
+
+#### 1. Automatic Group Creation for New Books
+```typescript
+// Automatically create group when first chapter is published
+async function createBookGroupOnFirstChapter(
+  bookId: string,
+  firstChapterIpId: string,
+  authorAddress: string,
+  licenseTemplateId: bigint
+) {
+  const groupId = await createStorySeriesGroup(
+    bookId,
+    authorAddress,
+    [firstChapterIpId],
+    {
+      licenseTermsId: licenseTemplateId,
+      rewardSharePercentage: 95, // 95% to author, 5% to platform
+      distributionStrategy: 'equal'
+    }
+  );
+
+  // Store group ID with book metadata
+  await updateBookMetadata(bookId, {
+    groupId,
+    groupType: 'story_series',
+    createdAt: new Date()
+  });
+
+  return groupId;
+}
+```
+
+#### 2. Collaborative Story Creation UI
+```typescript
+// Support multi-author story creation
+async function createCollaborativeStoryFlow(
+  storyTitle: string,
+  collaborators: { address: string; role: string; percentage: number }[],
+  licensePreferences: {
+    commercialUse: boolean;
+    derivativesAllowed: boolean;
+    crossReferenceAllowed: boolean;
+  }
+) {
+  // Create collaborative license terms
+  const licenseTermsId = await createCollaborativeLicenseTerms(licensePreferences);
+
+  // Create group with weighted distribution
+  const groupId = await createCollaborativeStoryGroup(
+    storyTitle,
+    collaborators,
+    licenseTermsId
+  );
+
+  // Setup collaborative editing permissions
+  await setupCollaborativePermissions(groupId, collaborators);
+
+  return {
+    groupId,
+    storyTitle,
+    collaborators,
+    licenseTermsId,
+    editingUrl: `/collaborative/${groupId}/edit`
+  };
+}
+```
+
+#### 3. Derivative Collection Management
+```typescript
+// Automatically group derivatives of popular stories
+async function manageDerivativeCollections(
+  originalStoryId: string,
+  derivativeThreshold: number = 5 // Create collection after 5 derivatives
+) {
+  const derivatives = await getStoryDerivatives(originalStoryId);
+  
+  if (derivatives.length >= derivativeThreshold) {
+    const originalStory = await getStory(originalStoryId);
+    
+    const collectionGroupId = await createDerivativeCollectionGroup(
+      originalStory.ipId,
+      derivatives.map(d => d.ipId),
+      `${originalStory.title} - Derivative Collection`,
+      originalStory.authorAddress
+    );
+
+    // Notify original author and derivative creators
+    await notifyCollectionCreation(collectionGroupId, [
+      originalStory.authorAddress,
+      ...derivatives.map(d => d.authorAddress)
+    ]);
+
+    return collectionGroupId;
+  }
+
+  return null;
+}
+```
+
+### Group Module Benefits for StoryHouse.vip
+
+1. **Simplified Multi-Chapter Management**: Automatic grouping of story chapters with consistent licensing
+2. **Collaborative Storytelling**: Easy setup for multi-author projects with transparent revenue sharing
+3. **Derivative Work Collections**: Organized management of remixes and adaptations
+4. **Scalable Royalty Distribution**: Automated revenue sharing based on contribution weights
+5. **Story Universe Building**: Support for interconnected narrative worlds
+6. **Analytics and Insights**: Group-level performance metrics and revenue tracking
+
+### Implementation Priority for StoryHouse.vip
+
+1. **Phase 1**: Story Series Groups (auto-group chapters of same book)
+2. **Phase 2**: Derivative Collections (group related remixes)
+3. **Phase 3**: Collaborative Stories (multi-author support)
+4. **Phase 4**: Story Universes (shared narrative worlds)
+
 ## Error Handling
 
 ```typescript
