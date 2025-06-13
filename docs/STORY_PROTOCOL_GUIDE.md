@@ -215,6 +215,7 @@ const STORYHOUSE_LICENSE_CONFIG = {
       currency: 'TIP',
       commercialUse: false,
       derivativesAllowed: true,
+      derivativesReciprocal: true, // 🔗 CRITICAL: Enables derivative chains
       royaltyPercentage: 0,
       description: 'Attribution only, non-commercial use'
     },
@@ -223,6 +224,7 @@ const STORYHOUSE_LICENSE_CONFIG = {
       currency: 'TIP',
       commercialUse: false,
       derivativesAllowed: false,
+      derivativesReciprocal: false, // No derivatives allowed for reading license
       royaltyPercentage: 5,
       description: 'Personal reading license, wallet-locked'
     },
@@ -231,6 +233,7 @@ const STORYHOUSE_LICENSE_CONFIG = {
       currency: 'TIP',
       commercialUse: true,
       derivativesAllowed: true,
+      derivativesReciprocal: true, // 🔗 CRITICAL: Enables multi-level remixes
       royaltyPercentage: 10,
       description: 'Commercial use with derivatives'
     },
@@ -239,10 +242,70 @@ const STORYHOUSE_LICENSE_CONFIG = {
       currency: 'TIP',
       commercialUse: true,
       derivativesAllowed: true,
+      derivativesReciprocal: true, // 🔗 CRITICAL: Full derivative ecosystem
       royaltyPercentage: 25,
       exclusivity: true,
       description: 'Full commercial rights with high royalties'
     }
+  }
+}
+```
+
+## 🔗 **Critical: `derivativesReciprocal` Field**
+
+**⚠️ IMPORTANT LICENSING REQUIREMENT**
+
+The `derivativesReciprocal` field in PIL terms is **critical** for enabling derivative chains:
+
+- **`derivativesReciprocal: true`** → Derivatives can have their own derivatives (enables chains)
+- **`derivativesReciprocal: false`** → Derivatives CANNOT have derivatives (chain stops)
+
+### Impact on StoryHouse Ecosystem
+
+```typescript
+// Example Derivative Chain Impact:
+// Original Story → Remix A → Remix B → Remix C...
+
+// ✅ With derivativesReciprocal: true
+Story A (Premium License) 
+  → Remix B (can be remixed further)
+    → Remix C (can be remixed further)
+      → Remix D (infinite chain possible)
+
+// ❌ With derivativesReciprocal: false  
+Story A (Premium License)
+  → Remix B (CANNOT be remixed)
+    → ❌ Chain stops here
+```
+
+### Business Impact
+
+| Setting | Result | Business Impact |
+|---------|--------|-----------------|
+| `true` | **Multi-level remix chains** | ✅ Vibrant creative ecosystem<br/>✅ Multi-level royalty distribution<br/>✅ Exponential content growth |
+| `false` | **Single-level derivatives only** | ❌ Limited creative ecosystem<br/>❌ Reduced platform engagement<br/>❌ Lost revenue opportunities |
+
+### Recommended Configuration
+
+For **maximum ecosystem growth**, set `derivativesReciprocal: true` for all tiers that allow derivatives:
+
+```typescript
+const OPTIMAL_DERIVATIVE_SETTINGS = {
+  free: {
+    derivativesAllowed: true,
+    derivativesReciprocal: true,    // Enable free remix chains
+  },
+  reading: {
+    derivativesAllowed: false,
+    derivativesReciprocal: false,   // No derivatives for reading-only
+  },
+  premium: {
+    derivativesAllowed: true,
+    derivativesReciprocal: true,    // Enable commercial remix chains
+  },
+  exclusive: {
+    derivativesAllowed: true,
+    derivativesReciprocal: true,    // Enable premium remix chains
   }
 }
 ```
@@ -1738,26 +1801,36 @@ console.log("Connection test:", connectionTest)
 
 ### 🎯 StoryHouse.vip Optimization Guidelines
 
+## ⚠️ **CRITICAL LICENSE CONFIGURATION**
+
+**🔗 derivativesReciprocal Setting**
+- **ALWAYS set `derivativesReciprocal: true`** for tiers that allow derivatives (free, premium, exclusive)
+- **NEVER set `derivativesReciprocal: false`** if you want multi-level remix chains
+- **Verify this setting** before deploying PIL terms to production
+- **Test derivative chains** to ensure remixes can be remixed
+
 1. **Use unified registration** for new chapters to save 40% on gas costs
-2. **Implement automatic group creation** for multi-chapter books
+2. **Implement automatic group creation** for multi-chapter books  
 3. **Enable smart flow detection** to automatically use best available method
 4. **Cache license terms by tier** to avoid redundant PIL registrations
 5. **Use 4-tier licensing system** (free, reading, premium, exclusive) for diverse monetization
-6. **Implement wallet-locked reading licenses** for chapters 4+ to prevent piracy
-7. **Enable derivatives on free chapters** to encourage community engagement
-8. **Set tiered royalty percentages** (0%, 5%, 10%, 25%) based on license value
-9. **Use TIP token economics** for all minting fees and royalty distributions
-10. **Maintain chapter lineage** for proper attribution and royalty flow
-11. **Implement reading license validation** before chapter access
-12. **Distribute reader rewards** (2-5%) to incentivize engagement
-13. **Use LAP policy for free/reading** and LRP for premium/exclusive tiers
-14. **Implement batch royalty claiming** to reduce gas costs for authors
-15. **Track derivative royalty flows** up the remix chain automatically
-16. **Enable proactive plagiarism detection** during content creation
-17. **Implement community moderation** with token-staked moderators
-18. **Use automated dispute resolution** for clear-cut violations
-19. **Support appeal processes** for complex content decisions
-20. **Monitor license compliance** for derivative works automatically
+6. **⚠️ CRITICAL: Set derivativesReciprocal: true** for all derivative-enabled tiers
+7. **Implement wallet-locked reading licenses** for chapters 4+ to prevent piracy
+8. **Enable derivatives on free chapters** to encourage community engagement
+9. **Set tiered royalty percentages** (0%, 5%, 10%, 25%) based on license value
+10. **Use TIP token economics** for all minting fees and royalty distributions
+11. **Maintain chapter lineage** for proper attribution and royalty flow
+12. **Implement reading license validation** before chapter access
+13. **Distribute reader rewards** (2-5%) to incentivize engagement
+14. **Use LAP policy for free/reading** and LRP for premium/exclusive tiers
+15. **Implement batch royalty claiming** to reduce gas costs for authors
+16. **Track derivative royalty flows** up the remix chain automatically
+17. **Enable proactive plagiarism detection** during content creation
+18. **Implement community moderation** with token-staked moderators
+19. **Use automated dispute resolution** for clear-cut violations
+20. **Support appeal processes** for complex content decisions
+21. **Monitor license compliance** for derivative works automatically
+22. **Test multi-level derivative chains** before production deployment
 
 ### Common Issues & Solutions
 
