@@ -65,40 +65,51 @@ Each chapter contains:
 **"The Magic Kingdom" Story Tree:**
 
 ```mermaid
-graph TD
-    A[Ch1: Andy - Original Author] --> B[Ch2: Andy - Original Path]
-    A --> C[Ch2: Bob - Bob's Timeline]
-    A --> D[Ch2: Daisy - Daisy's Branch]
+gitgraph
+    commit id: "Ch1: Andy"
+    commit id: "Ch2: Andy"
+    commit id: "Ch3: Andy"
     
-    B --> E[Ch3: Andy - Continues Original]
-    B --> F[Ch3: Cecilia - Branches from Andy's Ch2]
+    branch bob-timeline
+    checkout main
+    commit id: "Ch2: Bob"
+    commit id: "Ch3: Bob"
+    commit id: "Ch4: Bob"
     
-    C --> G[Ch3: Bob - Bob's Path]
-    C --> H[Ch3: Andy - Merges Back]
+    branch daisy-branch
+    checkout main
+    commit id: "Ch2: Daisy"
+    commit id: "Ch3: Daisy"
+    commit id: "Ch4: Daisy"
     
-    D --> I[Ch3: Daisy - Daisy's Path]
-    D --> J[Ch3: Bob - Cross-Branch]
+    branch cecilia-branch
+    checkout main
+    commit id: "Ch3: Cecilia"
+    commit id: "Ch4: Cecilia"
     
-    E --> K[Ch4: Andy - Original Ending]
-    F --> L[Ch4: Cecilia - Cecilia's Ending]
-    G --> M[Ch4: Bob - Bob's Ending]
-    I --> N[Ch4: Daisy - Daisy's Ending]
+    checkout main
+    commit id: "Ch4: Andy"
 ```
 
 ## UI/UX Flows
 
 ```mermaid
-graph TD
-    A[Story Discovery] --> B{Chapter Free?}
-    B -->|Yes| C[Read Chapter]
-    B -->|No| D[Purchase Reading License]
+flowchart LR
+    A["📚 Story Discovery"] --> B{"💰 Chapter Free?"}
+    B -->|"✅ Yes"| C["📖 Read Chapter"]
+    B -->|"❌ No"| D["💳 Purchase Reading License<br/>💰 0.5 TIP"]
     D --> C
-    C --> E{Want to Continue Story?}
-    E -->|Yes| F[Purchase Remix License]
-    E -->|No| G[Browse Other Stories]
-    F --> H[Write Next Chapter]
-    H --> I[Publish Chapter]
-    I --> J[Earn Royalties]
+    C --> E{"✍️ Want to Continue Story?"}
+    E -->|"✅ Yes"| F["🎨 Purchase Remix License<br/>💰 10+ TIP"]
+    E -->|"❌ No"| G["🔄 Browse Other Stories"]
+    F --> H["📝 Write Next Chapter"]
+    H --> I["🚀 Publish Chapter"]
+    I --> J["💵 Earn Royalties"]
+    
+    style A fill:#e1f5fe
+    style C fill:#e8f5e8
+    style F fill:#fff3e0
+    style J fill:#f3e5f5
 ```
 
 ### Reader Experience
@@ -154,13 +165,21 @@ graph TD
 ## Royalty Distribution
 
 ```mermaid
-graph TD
-    A[Reader Purchases Chapter Access: 0.5 TIP] --> B{Generation Level}
-    B -->|Single Gen| C[Author: 85%<br/>Parent: 10%<br/>Platform: 5%]
-    B -->|Multi Gen| D[Author: 70%<br/>Parent: 15%<br/>Grandparent: 10%<br/>Great-GP: 3%<br/>Platform: 2%]
-    C --> E[Automatic Distribution]
+flowchart LR
+    A["💰 Reader Pays 0.5 TIP"] --> B{"🌳 Generation Level"}
+    
+    B -->|"1️⃣ Single Gen"| C["📊 Revenue Split<br/>👤 Author: 85% (0.425 TIP)<br/>👨‍👩‍👧 Parent: 10% (0.05 TIP)<br/>🏢 Platform: 5% (0.025 TIP)"]
+    
+    B -->|"2️⃣+ Multi Gen"| D["📊 Revenue Split<br/>👤 Author: 70% (0.35 TIP)<br/>👨‍👩‍👧 Parent: 15% (0.075 TIP)<br/>👴 Grandparent: 10% (0.05 TIP)<br/>👵 Great-GP: 3% (0.015 TIP)<br/>🏢 Platform: 2% (0.01 TIP)"]
+    
+    C --> E["⚡ Automatic Distribution"]
     D --> E
-    E --> F[Royalties Sent to Wallets]
+    E --> F["💸 Royalties Sent to Wallets"]
+    
+    style A fill:#e3f2fd
+    style C fill:#e8f5e8
+    style D fill:#fff3e0
+    style F fill:#f3e5f5
 ```
 
 ### Revenue Sharing Model
@@ -198,30 +217,33 @@ When a reader pays 0.5 TIP for access:
 ## Technical Implementation
 
 ```mermaid
-sequenceDiagram
-    participant W as Writer
-    participant P as Platform
-    participant SP as Story Protocol
-    participant B as Blockchain
+flowchart TD
+    subgraph "📝 Writing Phase"
+        W1["👤 Writer Purchases<br/>🎨 Remix License"] --> P1["🔗 Platform Validates<br/>💰 Payment"]
+        P1 --> SP1["📜 Story Protocol<br/>🏷️ Mints License Token"]
+        SP1 --> B1["⛓️ Blockchain Records<br/>🎫 License Ownership"]
+    end
     
-    W->>P: Purchase Remix License
-    P->>SP: Mint License Token
-    SP->>B: Record License Ownership
-    B-->>W: License NFT
+    subgraph "🚀 Publishing Phase"
+        W2["✍️ Writer Submits<br/>📄 Chapter Content"] --> P2["🔍 Platform Processes<br/>📋 Metadata"]
+        P2 --> SP2["🆔 Story Protocol<br/>📝 Registers IP Asset"]
+        SP2 --> B2["⛓️ Blockchain Creates<br/>🏆 IP Asset NFT"]
+        B2 --> SP3["🔗 Link Parent<br/>👨‍👩‍👧 Relationship"]
+    end
     
-    W->>P: Write & Submit Chapter
-    P->>SP: Register as IP Asset
-    SP->>B: Create IP Asset
-    P->>SP: Attach License Terms
-    SP->>B: Link Parent Relationship
-    B-->>W: IP Asset NFT
+    subgraph "💰 Revenue Phase"
+        R1["👥 Reader Purchases<br/>📖 Chapter Access"] --> P3["✅ Platform Validates<br/>🎫 License Ownership"]
+        P3 --> SP4["💸 Story Protocol<br/>📊 Distributes Royalties"]
+        SP4 --> B3["⚡ Blockchain Sends<br/>💵 Payments to Wallets"]
+    end
     
-    Note over W,B: Reader purchases access
-    P->>SP: Validate License Ownership
-    SP->>B: Check Blockchain State
-    B-->>P: Access Granted
-    P->>SP: Distribute Royalties
-    SP->>B: Send Payments
+    B1 --> W2
+    SP3 --> R1
+    
+    style W1 fill:#e3f2fd
+    style W2 fill:#e8f5e8
+    style R1 fill:#fff3e0
+    style B3 fill:#f3e5f5
 ```
 
 ### Story Protocol Integration
