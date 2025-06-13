@@ -125,7 +125,7 @@ export function useChapterAccess() {
       freeChapterCount: 3,
       freeChapterNumbers: [1, 2, 3],
       paidChapterStartsAt: 4,
-      paidChapterPrice: 0.5 // TIP tokens
+      paidChapterPrice: 10 // TIP tokens
     }
   }, [])
 
@@ -137,7 +137,7 @@ export function useChapterAccess() {
     return {
       chapterNumber,
       isFree,
-      unlockPrice: isFree ? 0 : 0.5,
+      unlockPrice: isFree ? 0 : 10,
       currency: 'TIP',
       readReward: isFree ? 0.05 : 0 // Only free chapters have reading rewards
     }
