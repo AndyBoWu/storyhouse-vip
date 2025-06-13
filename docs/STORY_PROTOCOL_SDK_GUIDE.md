@@ -255,12 +255,98 @@ async function batchRegisterWithOptimizedWorkflows(
 
 ## License Management
 
+### StoryHouse License Tier System
+
+StoryHouse implements a 4-tier licensing system optimized for chapter-based storytelling:
+
+```typescript
+// StoryHouse License Tiers
+const STORYHOUSE_LICENSE_TIERS = {
+  free: {
+    displayName: 'Free License',
+    transferable: true,
+    defaultMintingFee: 0n,
+    commercialUse: false,
+    derivativesAllowed: true,
+    tipPrice: 0,
+    royaltyPercentage: 0
+  },
+  reading: {
+    displayName: 'Reading License',
+    transferable: false, // 🔒 Wallet-locked for anti-piracy
+    defaultMintingFee: BigInt(10 * 10**18), // 10 TIP (updated from 0.5)
+    commercialUse: false,
+    derivativesAllowed: false,
+    tipPrice: 10,
+    royaltyPercentage: 5
+  },
+  premium: {
+    displayName: 'Premium License',
+    transferable: true,
+    defaultMintingFee: BigInt(100 * 10**18), // 100 TIP
+    commercialUse: true,
+    derivativesAllowed: true,
+    tipPrice: 100,
+    royaltyPercentage: 10
+  },
+  exclusive: {
+    displayName: 'Exclusive License',
+    transferable: false,
+    defaultMintingFee: BigInt(1000 * 10**18), // 1000 TIP
+    commercialUse: true,
+    derivativesAllowed: true,
+    tipPrice: 1000,
+    royaltyPercentage: 25,
+    exclusivity: true
+  }
+};
+```
+
+### Register PIL Terms (Comprehensive)
+```typescript
+// StoryHouse-optimized PIL terms registration
+async function registerStoryHousePilTerms(
+  tier: 'free' | 'reading' | 'premium' | 'exclusive',
+  customConfig?: Partial<LicenseTermsConfig>
+) {
+  const licenseConfig = { ...STORYHOUSE_LICENSE_TIERS[tier], ...customConfig };
+  
+  const pilTerms = {
+    transferable: licenseConfig.transferable,
+    royaltyPolicy: 'LAP', // Liquid Absolute Percentage
+    defaultMintingFee: licenseConfig.defaultMintingFee,
+    expiration: BigInt(0), // No expiration
+    commercialUse: licenseConfig.commercialUse,
+    commercialAttribution: true,
+    commercializerChecker: '0x0000000000000000000000000000000000000000',
+    commercializerCheckerData: '0x',
+    commercialRevShare: licenseConfig.royaltyPercentage, // % to original creator
+    commercialRevCeiling: BigInt(1000000 * 10**18), // 1M TIP ceiling
+    derivativesAllowed: licenseConfig.derivativesAllowed,
+    derivativesAttribution: true,
+    derivativesApproval: false, // No approval needed for remixes
+    derivativesReciprocal: true, // Same license for derivatives
+    derivativeRevCeiling: BigInt(1000000 * 10**18),
+    currency: '0x1514000000000000000000000000000000000000', // TIP token
+    uri: '' // Optional metadata URI
+  };
+  
+  const response = await client.license.registerPILTerms(pilTerms);
+  return response.licenseTermsId;
+}
+```
+
 ### Attach License Terms to IP Asset
 ```typescript
-async function attachLicenseTerms(ipId: string, licenseTermsId: string) {
+async function attachLicenseTerms(
+  ipId: string, 
+  licenseTermsId: string,
+  licenseTemplate?: string
+) {
   const response = await client.license.attachLicenseTerms({
     ipId,
     licenseTermsId,
+    licenseTemplate, // Optional: specify template
     txOptions: { waitForTransaction: true }
   });
   
@@ -268,50 +354,84 @@ async function attachLicenseTerms(ipId: string, licenseTermsId: string) {
 }
 ```
 
-### Create Custom License Terms (for remix permissions)
+### Mint License Tokens (Advanced)
 ```typescript
-async function createRemixLicense() {
-  const licenseTerms = {
-    transferable: true,
-    royaltyPolicy: "LAP", // or custom policy
-    defaultMintingFee: BigInt(10 * 10**18), // 10 TIP tokens
-    expiration: 0, // No expiration
-    commercialUse: true,
-    commercialAttribution: true,
-    commercializerChecker: "0x0000...", // Zero address = no restrictions
-    commercializerCheckerData: "0x",
-    commercialRevShare: 10, // 10% to original creator
-    commercialRevCeiling: BigInt(1000000 * 10**18), // Revenue ceiling
-    derivativesAllowed: true, // KEY: Allow further remixes
-    derivativesAttribution: true,
-    derivativesApproval: false, // No approval needed
-    derivativesReciprocal: true,
-    derivativeRevCeiling: BigInt(1000000 * 10**18),
-    currency: "0x..." // TIP token address
-  };
-  
-  return await client.license.registerPILTerms(licenseTerms);
-}
-```
-
-### Mint License Tokens
-```typescript
+// Standard license token minting
 async function mintLicenseForRemix(
   ipId: string,
   licenseTermsId: string,
-  receiver: string
+  receiver: string,
+  options?: {
+    amount?: number;
+    maxMintingFee?: bigint;
+    maxRevenueShare?: number;
+    royaltyContext?: any;
+  }
 ) {
   const response = await client.license.mintLicenseTokens({
     licenseTermsId,
     licensorIpId: ipId,
-    receiver, // User who wants to create remix
-    amount: 1,
-    maxMintingFee: BigInt(0),
-    maxRevenueShare: 100,
+    receiver,
+    amount: options?.amount || 1,
+    maxMintingFee: options?.maxMintingFee || BigInt(0),
+    maxRevenueShare: options?.maxRevenueShare || 100,
+    royaltyContext: options?.royaltyContext,
     txOptions: { waitForTransaction: true }
   });
   
   return response.licenseTokenIds[0];
+}
+
+// Reading license minting (StoryHouse-specific)
+async function mintReadingLicense(
+  chapterIpId: string,
+  reader: string,
+  chapterNumber: number
+) {
+  // Only required for chapters 4+
+  if (chapterNumber <= 3) {
+    throw new Error('Reading license not required for free chapters 1-3');
+  }
+  
+  const readingLicenseTermsId = await registerStoryHousePilTerms('reading');
+  
+  const response = await client.license.mintLicenseTokens({
+    licenseTermsId: readingLicenseTermsId,
+    licensorIpId: chapterIpId,
+    receiver: reader,
+    amount: 1,
+    maxMintingFee: BigInt(10 * 10**18), // 10 TIP fee
+    maxRevenueShare: 5, // 5% to author
+    txOptions: { waitForTransaction: true }
+  });
+  
+  return {
+    licenseTokenId: response.licenseTokenIds[0],
+    walletLocked: true, // Non-transferable
+    chapterAccess: chapterNumber
+  };
+}
+```
+
+### License Template Management
+```typescript
+// Get predefined license templates
+async function getLicenseTemplates() {
+  const templates = await client.license.getLicenseTemplates();
+  return templates;
+}
+
+// Use template for registration
+async function registerWithTemplate(
+  templateId: string,
+  customTerms?: any
+) {
+  const response = await client.license.registerPILTerms({
+    template: templateId,
+    terms: customTerms
+  });
+  
+  return response.licenseTermsId;
 }
 ```
 
@@ -543,68 +663,91 @@ async function claimRoyalties(ipId: string, claimer: string) {
 
 ## Implementation Examples
 
-### Complete Chapter Registration Flow (Optimized)
+### Complete Chapter Registration Flow (StoryHouse Optimized)
 ```typescript
-// Using the single-transaction approach
-async function registerChapterWithLicense(chapterData: {
+// StoryHouse chapter registration with tiered licensing
+async function registerStoryHouseChapter(chapterData: {
   title: string;
   author: string;
   content: string;
   chapterNumber: number;
   storyId: string;
+  genre?: string;
+  mood?: string;
 }) {
   try {
-    // 1. Prepare license terms for remixing
-    const remixLicenseTerms = {
-      transferable: true,
-      royaltyPolicy: "LAP",
-      defaultMintingFee: BigInt(10 * 10**18), // 10 TIP tokens
-      expiration: 0,
-      commercialUse: true,
-      commercialAttribution: true,
-      commercializerChecker: "0x0000000000000000000000000000000000000000",
-      commercializerCheckerData: "0x",
-      commercialRevShare: 10, // 10% to original creator
-      commercialRevCeiling: BigInt(1000000 * 10**18),
-      derivativesAllowed: true, // Enable remixes
-      derivativesAttribution: true,
-      derivativesApproval: false,
-      derivativesReciprocal: true,
-      derivativeRevCeiling: BigInt(1000000 * 10**18),
-      currency: TIP_TOKEN_ADDRESS
-    };
+    // 1. Determine license tier based on chapter number
+    const licenseTier = chapterData.chapterNumber <= 3 ? 'free' : 'reading';
+    
+    // 2. Prepare StoryHouse-specific PIL terms
+    const pilTermsData = await registerStoryHousePilTerms(licenseTier, {
+      // Custom config for this chapter
+      ...(chapterData.chapterNumber === 1 && { 
+        derivativesAllowed: true // Enable remixes on chapter 1
+      })
+    });
 
-    // 2. Upload metadata to IPFS
-    const ipMetadataUri = await uploadToIPFS(chapterData);
+    // 3. Upload comprehensive metadata to R2/IPFS
+    const ipMetadata = {
+      name: chapterData.title,
+      description: `Chapter ${chapterData.chapterNumber} of ${chapterData.storyId}`,
+      type: 'chapter',
+      chapterNumber: chapterData.chapterNumber,
+      content: chapterData.content,
+      genre: chapterData.genre || 'Fiction',
+      mood: chapterData.mood || 'Neutral',
+      author: chapterData.author,
+      storyId: chapterData.storyId,
+      licenseTier,
+      platform: 'StoryHouse.vip',
+      createdAt: new Date().toISOString()
+    };
+    
+    const ipMetadataUri = await uploadToIPFS(ipMetadata);
     const nftMetadataUri = await uploadToIPFS({
       name: chapterData.title,
       description: `Chapter ${chapterData.chapterNumber} of ${chapterData.storyId}`,
       image: await generateChapterCover(chapterData),
+      external_url: `https://storyhouse.vip/read/${chapterData.author.toLowerCase()}-${chapterData.storyId}`,
       attributes: [
         { trait_type: 'Author', value: chapterData.author },
         { trait_type: 'Chapter Number', value: chapterData.chapterNumber },
-        { trait_type: 'Story ID', value: chapterData.storyId }
+        { trait_type: 'Story ID', value: chapterData.storyId },
+        { trait_type: 'Genre', value: chapterData.genre || 'Fiction' },
+        { trait_type: 'License Tier', value: licenseTier },
+        { trait_type: 'Platform', value: 'StoryHouse.vip' }
       ]
     });
 
-    // 3. Mint NFT + Register IP + Attach License in single transaction
+    // 4. Execute unified registration with StoryHouse license terms
     const result = await mintAndRegisterChapterWithLicense(
       STORYHOUSE_NFT_CONTRACT,
       chapterData,
-      [{ terms: remixLicenseTerms }]
+      [{ terms: pilTermsData }]
     );
     
-    // 4. Store in database
+    // 5. Store comprehensive chapter info in database
     await updateChapterWithIpInfo(chapterData.storyId, chapterData.chapterNumber, {
       ipId: result.ipId,
       tokenId: result.tokenId,
       licenseTermsIds: result.licenseTermsIds,
-      registeredAt: new Date()
+      licenseTier,
+      registeredAt: new Date(),
+      metadata: {
+        ipMetadataUri,
+        nftMetadataUri,
+        genre: chapterData.genre,
+        mood: chapterData.mood
+      }
     });
     
-    return result;
+    return {
+      ...result,
+      licenseTier,
+      requiresReadingLicense: chapterData.chapterNumber > 3
+    };
   } catch (error) {
-    console.error('Chapter registration failed:', error);
+    console.error('StoryHouse chapter registration failed:', error);
     throw error;
   }
 }
@@ -786,10 +929,14 @@ const testBatchData = [
 12. **Always verify license terms** before minting license tokens
 
 ### StoryHouse-Specific
-13. **Use chapter-level IP registration** for granular monetization
-14. **Enable derivatives** in license terms to support remixing
-15. **Set appropriate royalty percentages** based on license tiers
-16. **Maintain parent-child relationships** for proper attribution
+13. **Use 4-tier licensing system** (free, reading, premium, exclusive) for diverse monetization
+14. **Implement wallet-locked reading licenses** for chapters 4+ to prevent piracy
+15. **Enable derivatives on free chapters** to encourage community engagement
+16. **Set tiered royalty percentages** (0%, 5%, 10%, 25%) based on license value
+17. **Use TIP token economics** for all minting fees and royalty distributions
+18. **Maintain chapter lineage** for proper attribution and royalty flow
+19. **Cache license terms by tier** to avoid redundant PIL registrations
+20. **Implement reading license validation** before chapter access
 
 ## Error Handling
 
