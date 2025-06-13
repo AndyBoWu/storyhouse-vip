@@ -45,39 +45,40 @@ To purchase a remix license for a chapter, the user must:
 
 ```mermaid
 flowchart LR
-    subgraph "📚 Main Timeline"
-        A1["Ch1<br/>📝 Andy"] --> A2["Ch2<br/>📝 Andy"] 
-        A2 --> A3["Ch3<br/>📝 Andy"]
-        A3 --> A4["Ch4<br/>📝 Andy"]
-    end
+    %% Main timeline - FREE chapters
+    Ch1["Ch1<br/>Andy<br/>🆓 FREE"] --> Ch2["Ch2<br/>Andy<br/>🆓 FREE"]
+    Ch2 --> Ch3["Ch3<br/>Andy<br/>🆓 FREE"]
     
-    subgraph "🌿 Branch from Ch1"
-        B1["Ch1<br/>📝 Andy"] --> B2["Ch2<br/>📝 Bob"]
-        B2 --> B3["Ch3<br/>📝 Bob"] 
-        B3 --> B4["Ch4<br/>📝 Cecilia"]
-    end
+    %% Main timeline continuation - PAID chapters
+    Ch3 --> Ch4A["Ch4<br/>Andy<br/>💰 0.5 TIP"]
+    Ch4A --> Ch5A["Ch5<br/>Andy<br/>💰 0.5 TIP"]
+    Ch5A --> Ch6A["Ch6<br/>Andy<br/>💰 0.5 TIP"]
     
-    subgraph "🌸 Branch from Ch2"
-        C1["Ch1<br/>📝 Andy"] --> C2["Ch2<br/>📝 Andy"]
-        C2 --> C3["Ch3<br/>📝 Daisy"]
-        C3 --> C4["Ch4<br/>📝 Andy"]
-    end
+    %% Branch from Ch1 - Bob's timeline
+    Ch1 --> Ch2B["Ch2<br/>Bob<br/>💰 0.5 TIP<br/>🎨 2.0 TIP license"]
+    Ch2B --> Ch3B["Ch3<br/>Bob<br/>💰 0.5 TIP"]
+    Ch3B --> Ch4B["Ch4<br/>Cecilia<br/>💰 0.5 TIP<br/>🎨 2.0 TIP license"]
     
-    subgraph "🌼 Branch from Ch3"
-        D1["Ch1<br/>📝 Andy"] --> D2["Ch2<br/>📝 Andy"]
-        D2 --> D3["Ch3<br/>📝 Andy"] 
-        D3 --> D4["Ch4<br/>📝 Bob"]
-    end
+    %% Branch from Ch2 - Daisy's timeline  
+    Ch2 --> Ch3D["Ch3<br/>Daisy<br/>💰 0.5 TIP<br/>🎨 2.0 TIP license"]
+    Ch3D --> Ch4D["Ch4<br/>Andy<br/>💰 0.5 TIP"]
     
-    style A1 fill:#e8f5e8
-    style A2 fill:#e8f5e8
-    style A3 fill:#e8f5e8
-    style A4 fill:#e8f5e8
-    style B2 fill:#fff3e0
-    style B3 fill:#fff3e0
-    style B4 fill:#f3e5f5
-    style C3 fill:#ffe0b2
-    style D4 fill:#fff3e0
+    %% Branch from Ch3 - Bob's alternate
+    Ch3 --> Ch4C["Ch4<br/>Bob<br/>💰 0.5 TIP<br/>🎨 2.0 TIP license"]
+    
+    %% Styling to match the visual reference
+    style Ch1 fill:#c8e6c9
+    style Ch2 fill:#c8e6c9  
+    style Ch3 fill:#c8e6c9
+    style Ch4A fill:#e0e0e0
+    style Ch5A fill:#e0e0e0
+    style Ch6A fill:#e0e0e0
+    style Ch2B fill:#81d4fa
+    style Ch3B fill:#81d4fa
+    style Ch4B fill:#a5d6a7
+    style Ch3D fill:#ffb74d
+    style Ch4D fill:#e0e0e0
+    style Ch4C fill:#81d4fa
 ```
 
 ## Story Genealogy System
