@@ -196,6 +196,62 @@ export class AdvancedStoryProtocolService {
   }
 
   /**
+   * Prepare PIL terms data structure for a specific tier
+   * Returns the data structure without executing the transaction
+   */
+  static preparePilTermsData(
+    tier: 'free' | 'reading' | 'premium' | 'exclusive',
+    customConfig?: Partial<LicenseTermsConfig>
+  ) {
+    // Get base configuration for the tier
+    const baseConfig = LICENSE_TIERS[tier]
+    if (!baseConfig) {
+      throw new Error(`Invalid license tier: ${tier}`)
+    }
+
+    // Merge with custom configuration if provided
+    const licenseConfig = { ...baseConfig, ...customConfig }
+
+    return {
+      transferable: licenseConfig.transferable,
+      royaltyPolicy: licenseConfig.royaltyPolicy,
+      defaultMintingFee: licenseConfig.defaultMintingFee,
+      expiration: BigInt(licenseConfig.expiration),
+      commercialUse: licenseConfig.commercialUse,
+      commercialAttribution: licenseConfig.commercialAttribution,
+      commercializerChecker: '0x0000000000000000000000000000000000000000' as Address,
+      commercializerCheckerData: '0x' as `0x${string}`,
+      commercialRevShare: licenseConfig.royaltyPercentage,
+      commercialRevCeiling: BigInt(0),
+      derivativesAllowed: licenseConfig.derivativesAllowed,
+      derivativesAttribution: licenseConfig.derivativesAttribution,
+      derivativesApproval: false,
+      derivativesReciprocal: licenseConfig.shareAlike || false,
+      derivativeRevCeiling: BigInt(0),
+      currency: '0x1514000000000000000000000000000000000000' as Address, // TIP token
+      uri: ''
+    }
+  }
+
+  /**
+   * Get license tier configuration
+   */
+  static getLicenseTier(tier: 'free' | 'reading' | 'premium' | 'exclusive'): LicenseTermsConfig {
+    const config = LICENSE_TIERS[tier]
+    if (!config) {
+      throw new Error(`Invalid license tier: ${tier}`)
+    }
+    return config
+  }
+
+  /**
+   * Get all available license tiers
+   */
+  static getAllLicenseTiers(): Record<string, LicenseTermsConfig> {
+    return LICENSE_TIERS
+  }
+
+  /**
    * Create license terms for a specific tier
    * Phase 1 implementation - creates PIL (Programmable IP License) terms
    */

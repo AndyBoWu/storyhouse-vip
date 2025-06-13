@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { X, Wallet, Shield, Coins, Clock, BookOpen, TrendingUp, CheckCircle, AlertCircle, Upload, Link } from 'lucide-react'
 import { useAccount, useConnect, useDisconnect } from 'wagmi'
 import { injected } from 'wagmi/connectors'
-import { usePublishStory } from '@/hooks/usePublishStory'
+import { useUnifiedPublishStory } from '@/hooks/useUnifiedPublishStory'
 import { useEnhancedStoryProtocol } from '@/hooks/useEnhancedStoryProtocol'
 import { getExplorerUrl, getIPAssetUrl } from '@/lib/contracts/storyProtocol'
 
@@ -57,16 +57,15 @@ function PublishingModal({
   const { connect } = useConnect()
   const { disconnect } = useDisconnect()
 
-  // Publishing hook
+  // Unified publishing hook
   const {
     publishStory,
     reset: resetPublishing,
     isPublishing,
     currentStep: publishStep,
     publishResult,
-    ipfsHash,
-    contractError
-  } = usePublishStory()
+    isUnifiedSupported
+  } = useUnifiedPublishStory()
 
   // Reset state when modal opens
   useEffect(() => {
@@ -137,15 +136,8 @@ function PublishingModal({
       const options = {
         publishingOption: publishingOption!,
         chapterPrice,
-        licenseTier,
-        ...(publishingOption === 'protected' && {
-          ipRegistration,
-          licenseTerms: {
-            commercialUse: licenseTier !== 'free',
-            derivativesAllowed: true,
-            commercialRevShare: licenseTier === 'exclusive' ? 25 : (licenseTier === 'premium' ? 10 : 0),
-          }
-        })
+        ipRegistration,
+        licenseTier: licenseTier as 'free' | 'reading' | 'premium' | 'exclusive'
       }
 
       const result = await publishStory({
@@ -190,6 +182,15 @@ function PublishingModal({
 
   const getPublishingStepDisplay = () => {
     switch (publishStep) {
+      case 'checking-unified-support':
+        return { text: 'Optimizing transaction flow...', icon: <TrendingUp className="w-5 h-5" /> }
+      case 'unified-registration':
+        return { 
+          text: isUnifiedSupported 
+            ? '⚡ Single-transaction registration (Gas Optimized)' 
+            : 'Unified IP registration...', 
+          icon: <Shield className="w-5 h-5" /> 
+        }
       case 'minting-nft':
         return { text: 'Minting NFT...', icon: <Coins className="w-5 h-5" /> }
       case 'registering-ip':
@@ -198,6 +199,8 @@ function PublishingModal({
         return { text: 'Creating license terms...', icon: <BookOpen className="w-5 h-5" /> }
       case 'attaching-license':
         return { text: 'Attaching license terms...', icon: <Link className="w-5 h-5" /> }
+      case 'saving-to-storage':
+        return { text: 'Saving to storage...', icon: <Upload className="w-5 h-5" /> }
       default:
         return { text: 'Processing...', icon: <CheckCircle className="w-5 h-5" /> }
     }
