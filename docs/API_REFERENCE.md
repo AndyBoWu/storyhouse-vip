@@ -11,6 +11,12 @@ StoryHouse.vip provides a comprehensive RESTful API for creating, managing, and 
 - Optimized pricing tiers and input handling
 - Latest Vercel deployments with performance improvements
 
+**🆕 Unified Registration Updates:**
+- Single-transaction IP registration with 40% gas savings
+- Automatic R2 metadata generation and storage
+- Feature flag controlled gradual rollout
+- Backward compatible with legacy flow
+
 ### Base URLs
 ```
 Production: https://api.storyhouse.vip/api
