@@ -53,43 +53,6 @@ Each chapter contains:
 - **Genealogy Tracking:** Story root, parent chapter, branches, generation level
 - **Access Control:** Reading price (0.5 TIP for ch4+), remix price (author-set), remix permissions
 
-### Family Tree Visualization
-**"The Magic Kingdom" Story Tree:**
-
-```mermaid
-flowchart LR
-    subgraph "📖 FREE Chapters"
-        Ch1["Ch1<br/>📚 Andy<br/>🆓 FREE"]
-        Ch2["Ch2<br/>📚 Andy<br/>🆓 FREE"] 
-        Ch3["Ch3<br/>📚 Andy<br/>🆓 FREE"]
-    end
-    
-    subgraph "💰 Paid Chapters"
-        Ch4A["Ch4<br/>📚 Andy<br/>💰 0.5 TIP"]
-        Ch4B["Ch4<br/>📚 Bob<br/>💰 0.5 TIP<br/>🎨 2.0 TIP license"]
-        Ch4C["Ch4<br/>📚 Cecilia<br/>💰 0.5 TIP<br/>🎨 2.0 TIP license"]
-        Ch4D["Ch4<br/>📚 Daisy<br/>💰 0.5 TIP<br/>🎨 2.0 TIP license"]
-    end
-    
-    Ch1 --> Ch2
-    Ch2 --> Ch3
-    
-    %% Main timeline continuation
-    Ch3 --> Ch4A
-    
-    %% Branch from Ch3 to different Ch4 authors
-    Ch3 --> Ch4B
-    Ch3 --> Ch4C  
-    Ch3 --> Ch4D
-    
-    style Ch1 fill:#c8e6c9
-    style Ch2 fill:#c8e6c9
-    style Ch3 fill:#c8e6c9
-    style Ch4A fill:#e1f5fe
-    style Ch4B fill:#fff3e0
-    style Ch4C fill:#f3e5f5
-    style Ch4D fill:#ffe0b2
-```
 
 ## UI/UX Flows
 
