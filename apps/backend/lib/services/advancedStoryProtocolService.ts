@@ -226,7 +226,7 @@ export class AdvancedStoryProtocolService {
       derivativesAllowed: licenseConfig.derivativesAllowed,
       derivativesAttribution: licenseConfig.derivativesAttribution,
       derivativesApproval: false,
-      derivativesReciprocal: licenseConfig.shareAlike || false,
+      derivativesReciprocal: licenseConfig.derivativesAllowed, // 🔗 CRITICAL: Enable derivative chains for all tiers that allow derivatives
       derivativeRevCeiling: BigInt(0),
       currency: '0x1514000000000000000000000000000000000000' as Address, // TIP token
       uri: ''
