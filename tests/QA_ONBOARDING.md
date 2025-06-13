@@ -203,16 +203,19 @@ Walk through every possible user path from different user perspectives:
 
 ### Prerequisites
 ```bash
-# 1. Install dependencies
+# 1. Install dependencies (if needed)
 npm install
 
 # 2. Set up environment
 cp apps/frontend/.env.testnet apps/frontend/.env.local
 cp apps/backend/.env.testnet apps/backend/.env.local
 
-# 3. Start local services
-npm run dev:frontend  # Port 3001
-npm run dev:backend   # Port 3002
+# 3. Start both local services with one command
+./start-local.sh
+# This starts:
+# - Backend API on http://localhost:3002
+# - Frontend on http://localhost:3001
+# - Automatically handles dependencies and cleanup
 ```
 
 ### Run Existing Tests
@@ -342,7 +345,7 @@ node tests/regression/api-compatibility.test.js
 
 ### Week 1: Core User Journey Validation
 **Focus**: Manual testing of all primary user flows
-- [ ] Set up local testing environment (frontend:3001, backend:3002)
+- [ ] Set up local testing environment (`./start-local.sh` → frontend:3001, backend:3002)
 - [ ] Test Anonymous Browser journey (browse, discover, paywall)
 - [ ] Test New Creator journey (wallet → create → publish → IP registration)
 - [ ] Test Reader/Consumer journey (browse → purchase → read → rewards)
