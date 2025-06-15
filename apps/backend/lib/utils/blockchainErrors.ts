@@ -220,3 +220,85 @@ export function extractTxHashFromError(error: unknown): string | undefined {
 
   return undefined
 }
+
+// Categorize blockchain errors for better handling
+export function categorizeBlockchainError(error: unknown): {
+  category: 'network' | 'contract' | 'user' | 'unknown'
+  severity: 'low' | 'medium' | 'high' | 'critical'
+  canRetry: boolean
+} {
+  const parsed = parseBlockchainError(error)
+  
+  // Network errors
+  if ([ERROR_CODES.NETWORK_ERROR, ERROR_CODES.RPC_ERROR, ERROR_CODES.TIMEOUT].includes(parsed.code as any)) {
+    return { category: 'network', severity: 'medium', canRetry: true }
+  }
+  
+  // Contract errors
+  if ([ERROR_CODES.CONTRACT_REVERT, ERROR_CODES.IP_ALREADY_REGISTERED].includes(parsed.code as any)) {
+    return { category: 'contract', severity: 'high', canRetry: false }
+  }
+  
+  // User errors
+  if ([ERROR_CODES.INSUFFICIENT_FUNDS, ERROR_CODES.UNAUTHORIZED].includes(parsed.code as any)) {
+    return { category: 'user', severity: 'low', canRetry: false }
+  }
+  
+  return { category: 'unknown', severity: 'medium', canRetry: parsed.canRetry }
+}
+
+// Format error for logging
+export function formatErrorForLogging(error: unknown, context?: string): string {
+  const parsed = parseBlockchainError(error)
+  const category = categorizeBlockchainError(error)
+  const txHash = extractTxHashFromError(error)
+  
+  let logMessage = `[${category.severity.toUpperCase()}] ${category.category.toUpperCase()}_ERROR: ${parsed.message}`
+  
+  if (context) {
+    logMessage = `${context} - ${logMessage}`
+  }
+  
+  if (parsed.details) {
+    logMessage += ` | Details: ${parsed.details}`
+  }
+  
+  if (txHash) {
+    logMessage += ` | TxHash: ${txHash}`
+  }
+  
+  return logMessage
+}
+
+// Check if error is critical
+export function isCriticalError(error: unknown): boolean {
+  const category = categorizeBlockchainError(error)
+  return category.severity === 'critical'
+}
+
+// Get retry strategy based on error type
+export function getRetryStrategy(error: unknown): {
+  shouldRetry: boolean
+  maxRetries: number
+  baseDelay: number
+} {
+  const category = categorizeBlockchainError(error)
+  
+  if (!category.canRetry) {
+    return { shouldRetry: false, maxRetries: 0, baseDelay: 0 }
+  }
+  
+  switch (category.category) {
+    case 'network':
+      return { shouldRetry: true, maxRetries: 5, baseDelay: 1000 }
+    case 'contract':
+      return { shouldRetry: true, maxRetries: 2, baseDelay: 3000 }
+    default:
+      return { shouldRetry: true, maxRetries: 3, baseDelay: 2000 }
+  }
+}
+
+// Calculate retry delay with exponential backoff
+export function calculateRetryDelay(attempt: number, baseDelay: number): number {
+  return Math.min(baseDelay * Math.pow(2, attempt), 30000) // Max 30 seconds
+}

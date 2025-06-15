@@ -111,3 +111,88 @@ export const TX_RETRY_CONFIG = {
   retryDelay: 2000, // ms
   gasIncreasePercentage: 10, // 10% increase per retry
 } as const
+
+// Get comprehensive blockchain configuration
+export function getBlockchainConfig(chainId?: number) {
+  const activeChainId = chainId || DEFAULT_CHAIN.id
+  const chain = getChainConfig(activeChainId)
+  const contracts = getContractAddresses(activeChainId)
+  
+  return {
+    chain,
+    contracts,
+    gasLimits: GAS_LIMITS,
+    retryConfig: TX_RETRY_CONFIG,
+    rpcUrl: chain.rpcUrls.default.http[0],
+    explorer: chain.blockExplorers.default.url,
+  }
+}
+
+// Get Story Protocol specific configuration
+export function getStoryProtocolConfig(chainId?: number) {
+  const config = getBlockchainConfig(chainId)
+  
+  return {
+    chainId: config.chain.id,
+    rpcUrl: config.rpcUrl,
+    contracts: {
+      ipAssetRegistry: config.contracts.ipAssetRegistry,
+      licensingModule: config.contracts.licensingModule,
+      pilTemplate: config.contracts.pilTemplate,
+      royaltyModule: config.contracts.royaltyModule,
+      spgNftContract: config.contracts.spgNftContract,
+    },
+    gasLimits: config.gasLimits,
+  }
+}
+
+// Validate blockchain configuration
+export function validateBlockchainConfig(chainId?: number): boolean {
+  try {
+    const config = getBlockchainConfig(chainId)
+    
+    // Check if chain is defined
+    if (!config.chain || !config.chain.id) {
+      console.error('Invalid chain configuration')
+      return false
+    }
+    
+    // Check if RPC URL is available
+    if (!config.rpcUrl) {
+      console.error('RPC URL not configured')
+      return false
+    }
+    
+    // Check if core contracts are configured
+    const requiredContracts = ['ipAssetRegistry', 'licensingModule', 'spgNftContract']
+    for (const contract of requiredContracts) {
+      if (!config.contracts[contract as keyof typeof config.contracts] || 
+          config.contracts[contract as keyof typeof config.contracts] === '0x0000000000000000000000000000000000000000') {
+        console.error(`Contract ${contract} not properly configured`)
+        return false
+      }
+    }
+    
+    return true
+  } catch (error) {
+    console.error('Error validating blockchain configuration:', error)
+    return false
+  }
+}
+
+// Log blockchain operations for debugging
+export function logBlockchainOperation(
+  operation: string,
+  details: Record<string, any>,
+  chainId?: number
+) {
+  const config = getBlockchainConfig(chainId)
+  const timestamp = new Date().toISOString()
+  
+  console.log(`[${timestamp}] BLOCKCHAIN_OP: ${operation}`, {
+    chain: config.chain.name,
+    chainId: config.chain.id,
+    explorer: config.explorer,
+    ...details
+  })
+}
