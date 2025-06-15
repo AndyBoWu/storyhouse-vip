@@ -104,18 +104,14 @@ jobs:
           which bash || echo "bash not found"
           echo "Default shell: $SHELL"
 
-      - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=${{ (github.event_name == 'workflow_dispatch' && inputs.production) && 'production' || 'preview' }} --token=${{ secrets.STORYHOUSE_GHA_VERCEL }}
+      - name: Build Frontend with Next.js
+        run: npm run build
         working-directory: apps/frontend
 
-      - name: Build Project Artifacts
-        run: bash -c "vercel build ${{ (github.event_name == 'workflow_dispatch' && inputs.production) && '--prod' || '' }}"
-        working-directory: apps/frontend
-
-      - name: Deploy Project Artifacts to Vercel
+      - name: Deploy to Vercel
         id: deploy
         run: |
-          url=$(vercel deploy --prebuilt ${{ (github.event_name == 'workflow_dispatch' && inputs.production) && '--prod' || '' }} --token=${{ secrets.STORYHOUSE_GHA_VERCEL }})
+          url=$(vercel deploy ${{ (github.event_name == 'workflow_dispatch' && inputs.production) && '--prod' || '' }} --token=${{ secrets.STORYHOUSE_GHA_VERCEL }})
           echo "preview-url=$url" >> $GITHUB_OUTPUT
         working-directory: apps/frontend
 
@@ -165,18 +161,14 @@ jobs:
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
-      - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=${{ (github.event_name == 'workflow_dispatch' && inputs.production) && 'production' || 'preview' }} --token=${{ secrets.STORYHOUSE_GHA_VERCEL }}
+      - name: Build Backend with Next.js
+        run: npm run build
         working-directory: apps/backend
 
-      - name: Build Project Artifacts
-        run: bash -c "vercel build ${{ (github.event_name == 'workflow_dispatch' && inputs.production) && '--prod' || '' }}"
-        working-directory: apps/backend
-
-      - name: Deploy Project Artifacts to Vercel
+      - name: Deploy to Vercel
         id: deploy
         run: |
-          url=$(vercel deploy --prebuilt ${{ (github.event_name == 'workflow_dispatch' && inputs.production) && '--prod' || '' }} --token=${{ secrets.STORYHOUSE_GHA_VERCEL }})
+          url=$(vercel deploy ${{ (github.event_name == 'workflow_dispatch' && inputs.production) && '--prod' || '' }} --token=${{ secrets.STORYHOUSE_GHA_VERCEL }})
           echo "preview-url=$url" >> $GITHUB_OUTPUT
         working-directory: apps/backend
 
