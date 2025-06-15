@@ -98,12 +98,18 @@ jobs:
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
+      - name: Check shell environment
+        run: |
+          which sh || echo "sh not found"
+          which bash || echo "bash not found"
+          echo "Default shell: $SHELL"
+
       - name: Pull Vercel Environment Information
         run: vercel pull --yes --environment=${{ (github.event_name == 'workflow_dispatch' && inputs.production) && 'production' || 'preview' }} --token=${{ secrets.STORYHOUSE_GHA_VERCEL }}
         working-directory: apps/frontend
 
       - name: Build Project Artifacts
-        run: vercel build ${{ (github.event_name == 'workflow_dispatch' && inputs.production) && '--prod' || '' }}
+        run: bash -c "vercel build ${{ (github.event_name == 'workflow_dispatch' && inputs.production) && '--prod' || '' }}"
         working-directory: apps/frontend
 
       - name: Deploy Project Artifacts to Vercel
@@ -164,7 +170,7 @@ jobs:
         working-directory: apps/backend
 
       - name: Build Project Artifacts
-        run: vercel build ${{ (github.event_name == 'workflow_dispatch' && inputs.production) && '--prod' || '' }}
+        run: bash -c "vercel build ${{ (github.event_name == 'workflow_dispatch' && inputs.production) && '--prod' || '' }}"
         working-directory: apps/backend
 
       - name: Deploy Project Artifacts to Vercel
