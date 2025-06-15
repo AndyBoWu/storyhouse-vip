@@ -108,9 +108,16 @@ jobs:
         run: npm run build
         working-directory: apps/frontend
 
+      - name: Clean and setup Vercel project
+        run: |
+          rm -rf .vercel
+          echo "Setting up fresh Vercel project link..."
+        working-directory: apps/frontend
+
       - name: Deploy to Vercel
         id: deploy
         run: |
+          # Deploy from app directory, treating it as project root
           url=$(vercel deploy ${{ (github.event_name == 'workflow_dispatch' && inputs.production) && '--prod' || '' }} --yes --token=${{ secrets.STORYHOUSE_GHA_VERCEL }})
           echo "preview-url=$url" >> $GITHUB_OUTPUT
         working-directory: apps/frontend
@@ -165,9 +172,16 @@ jobs:
         run: npm run build
         working-directory: apps/backend
 
+      - name: Clean and setup Vercel project
+        run: |
+          rm -rf .vercel
+          echo "Setting up fresh Vercel project link..."
+        working-directory: apps/backend
+
       - name: Deploy to Vercel
         id: deploy
         run: |
+          # Deploy from app directory, treating it as project root  
           url=$(vercel deploy ${{ (github.event_name == 'workflow_dispatch' && inputs.production) && '--prod' || '' }} --yes --token=${{ secrets.STORYHOUSE_GHA_VERCEL }})
           echo "preview-url=$url" >> $GITHUB_OUTPUT
         working-directory: apps/backend
