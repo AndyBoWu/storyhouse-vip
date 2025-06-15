@@ -112,6 +112,8 @@ jobs:
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_FRONTEND }}
           working-directory: ./apps/frontend
           vercel-args: '--prod'
+          github-comment: false
+          github-deployment: false
 
   # Build and deploy backend
   deploy-backend:
@@ -178,4 +180,6 @@ jobs:
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_BACKEND }}
           working-directory: ./apps/backend
           vercel-args: '--prod'
+          github-comment: false
+          github-deployment: false
 
