@@ -3,12 +3,6 @@
   "framework": "nextjs",
   "buildCommand": "cd ../../packages/shared && npm install && npm run build && cd ../../apps/backend && npm install && npm run build",
   "installCommand": "npm install || true",
-  "buildCaching": {
-    "enabled": true,
-    "cacheKey": "package-lock.json"
-  },
-  "outputDirectory": ".next",
-  "cacheDirectory": ".next/cache",
   "env": {
     "NODE_ENV": "production"
   },
