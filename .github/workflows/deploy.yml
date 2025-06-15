@@ -164,6 +164,15 @@ jobs:
       - name: Build shared packages
         run: npm run build:shared
 
+      - name: Bundle shared package with backend
+        run: |
+          echo "Copying built shared package to backend..."
+          mkdir -p apps/backend/shared-bundle
+          cp -r packages/shared/dist/* apps/backend/shared-bundle/
+          cp packages/shared/package.json apps/backend/shared-bundle/
+          echo "Shared package bundled successfully"
+          ls -la apps/backend/shared-bundle/
+
       - name: Install backend dependencies
         run: npm install
         working-directory: apps/backend
