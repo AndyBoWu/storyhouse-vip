@@ -55,6 +55,8 @@ jobs:
     environment: 
       name: frontend-production
       url: ${{ steps.deploy.outputs.url }}
+    env:
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_FRONTEND }}
     
     steps:
       - name: Checkout
@@ -95,6 +97,8 @@ jobs:
     environment: 
       name: backend-production
       url: ${{ steps.deploy.outputs.url }}
+    env:
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_BACKEND }}
     
     steps:
       - name: Checkout
