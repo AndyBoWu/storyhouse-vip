@@ -2,7 +2,7 @@
   "version": 2,
   "framework": "nextjs",
   "buildCommand": "npm run build",
-  "installCommand": "echo 'Dependencies already installed'",
+  "installCommand": "npm install",
   "env": {
     "NODE_ENV": "production"
   },
