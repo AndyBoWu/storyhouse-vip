@@ -1,4 +1,4 @@
-name: 🚀 Deploy to Vercel (Manual)
+name: 🚀 Deploy to Vercel (Manual/PR)
 
 on:
   workflow_dispatch:
@@ -13,9 +13,16 @@ on:
         required: false
         default: true
         type: boolean
-
-env:
-  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      production:
+        description: 'Deploy to production (unchecked = preview)'
+        required: false
+        default: true
+        type: boolean
+  pull_request:
+    paths:
+      - 'apps/frontend/**'
+      - 'apps/backend/**'
+      - 'packages/shared/**'
 
 jobs:
   # Job to detect which apps have changes
@@ -45,14 +52,16 @@ jobs:
             shared:
               - 'packages/shared/**'
 
-  # Build and deploy frontend
+  # Deploy frontend
   deploy-frontend:
     runs-on: ubuntu-latest
     needs: detect-changes
-    if: github.event_name == 'workflow_dispatch' && inputs.deploy_frontend
+    if: |
+      (github.event_name == 'workflow_dispatch' && inputs.deploy_frontend) ||
+      (github.event_name == 'pull_request' && needs.detect-changes.outputs.frontend-changed == 'true')
     environment: 
-      name: frontend-production
-      url: ${{ steps.deploy.outputs.url }}
+      name: ${{ github.event_name == 'workflow_dispatch' && inputs.production && 'frontend-production' || 'frontend-preview' }}
+      url: ${{ steps.deploy.outputs.preview-url }}
     
     steps:
       - name: Checkout
@@ -76,48 +85,40 @@ jobs:
           restore-keys: |
             build-frontend-${{ runner.os }}-
 
-      - name: Build Frontend (with dependencies)
-        run: |
-          npm install
-          npm run build:frontend
+      - name: Install dependencies
+        run: npm install
 
-      - name: Debug Environment Variables
-        run: |
-          echo "=== DEBUGGING VERCEL CONFIGURATION ==="
-          echo "VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}"
-          echo "Working directory: $(pwd)"
-          
-      - name: Create Fresh Vercel Project (Frontend)
-        run: |
-          cd apps/frontend
-          
-          # Remove existing .vercel directory completely
-          rm -rf .vercel
-          
-          # Create a completely new project - don't link to existing corrupted one
-          echo "Creating NEW frontend project (ignoring existing corrupted one)..."
-          npx vercel --token ${{ secrets.STORYHOUSE_GHA_VERCEL }} --scope ${{ secrets.VERCEL_ORG_ID }} --confirm || echo "Project creation will happen during deploy"
+      - name: Build shared packages
+        run: npm run build:shared
 
-      - name: Deploy to Vercel
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=${{ (github.event_name == 'workflow_dispatch' && inputs.production) && 'production' || 'preview' }} --token=${{ secrets.VERCEL_TOKEN }}
+        working-directory: apps/frontend
+
+      - name: Build Project Artifacts
+        run: vercel build ${{ (github.event_name == 'workflow_dispatch' && inputs.production) && '--prod' || '' }}
+        working-directory: apps/frontend
+
+      - name: Deploy Project Artifacts to Vercel
         id: deploy
         run: |
-          cd apps/frontend
-          echo "=== DEPLOYING FRONTEND ==="
-          echo "Current working directory: $(pwd)"
-          
-          # Deploy to production (will create new project if needed)
-          npx vercel deploy --prod --token ${{ secrets.STORYHOUSE_GHA_VERCEL }} --yes
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          url=$(vercel deploy --prebuilt ${{ (github.event_name == 'workflow_dispatch' && inputs.production) && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }})
+          echo "preview-url=$url" >> $GITHUB_OUTPUT
+        working-directory: apps/frontend
 
-  # Build and deploy backend
+  # Deploy backend
   deploy-backend:
     runs-on: ubuntu-latest
     needs: detect-changes
-    if: github.event_name == 'workflow_dispatch' && inputs.deploy_backend
+    if: |
+      (github.event_name == 'workflow_dispatch' && inputs.deploy_backend) ||
+      (github.event_name == 'pull_request' && needs.detect-changes.outputs.backend-changed == 'true')
     environment: 
-      name: backend-production
-      url: ${{ steps.deploy.outputs.url }}
+      name: ${{ github.event_name == 'workflow_dispatch' && inputs.production && 'backend-production' || 'backend-preview' }}
+      url: ${{ steps.deploy.outputs.preview-url }}
     
     steps:
       - name: Checkout
@@ -141,37 +142,27 @@ jobs:
           restore-keys: |
             build-backend-${{ runner.os }}-
 
-      - name: Build Backend (with dependencies)
-        run: |
-          npm install
-          npm run build:backend
+      - name: Install dependencies
+        run: npm install
 
-      - name: Debug Environment Variables
-        run: |
-          echo "=== DEBUGGING BACKEND VERCEL CONFIGURATION ==="
-          echo "VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}"
-          echo "Working directory: $(pwd)"
-          
-      - name: Create Fresh Vercel Project (Backend)
-        run: |
-          cd apps/backend
-          
-          # Remove existing .vercel directory completely
-          rm -rf .vercel
-          
-          # Create a completely new project - don't link to existing corrupted one
-          echo "Creating NEW backend project (ignoring existing corrupted one)..."
-          npx vercel --token ${{ secrets.STORYHOUSE_GHA_VERCEL }} --scope ${{ secrets.VERCEL_ORG_ID }} --confirm || echo "Project creation will happen during deploy"
+      - name: Build shared packages
+        run: npm run build:shared
 
-      - name: Deploy to Vercel
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=${{ (github.event_name == 'workflow_dispatch' && inputs.production) && 'production' || 'preview' }} --token=${{ secrets.VERCEL_TOKEN }}
+        working-directory: apps/backend
+
+      - name: Build Project Artifacts
+        run: vercel build ${{ (github.event_name == 'workflow_dispatch' && inputs.production) && '--prod' || '' }}
+        working-directory: apps/backend
+
+      - name: Deploy Project Artifacts to Vercel
         id: deploy
         run: |
-          cd apps/backend
-          echo "=== DEPLOYING BACKEND ==="
-          echo "Current working directory: $(pwd)"
-          
-          # Deploy to production (will create new project if needed)
-          npx vercel deploy --prod --token ${{ secrets.STORYHOUSE_GHA_VERCEL }} --yes
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          url=$(vercel deploy --prebuilt ${{ (github.event_name == 'workflow_dispatch' && inputs.production) && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }})
+          echo "preview-url=$url" >> $GITHUB_OUTPUT
+        working-directory: apps/backend
 
