@@ -111,7 +111,7 @@ jobs:
       - name: Deploy to Vercel
         id: deploy
         run: |
-          url=$(vercel deploy ${{ (github.event_name == 'workflow_dispatch' && inputs.production) && '--prod' || '' }} --token=${{ secrets.STORYHOUSE_GHA_VERCEL }})
+          url=$(vercel deploy ${{ (github.event_name == 'workflow_dispatch' && inputs.production) && '--prod' || '' }} --yes --token=${{ secrets.STORYHOUSE_GHA_VERCEL }})
           echo "preview-url=$url" >> $GITHUB_OUTPUT
         working-directory: apps/frontend
 
@@ -168,7 +168,7 @@ jobs:
       - name: Deploy to Vercel
         id: deploy
         run: |
-          url=$(vercel deploy ${{ (github.event_name == 'workflow_dispatch' && inputs.production) && '--prod' || '' }} --token=${{ secrets.STORYHOUSE_GHA_VERCEL }})
+          url=$(vercel deploy ${{ (github.event_name == 'workflow_dispatch' && inputs.production) && '--prod' || '' }} --yes --token=${{ secrets.STORYHOUSE_GHA_VERCEL }})
           echo "preview-url=$url" >> $GITHUB_OUTPUT
         working-directory: apps/backend
 
