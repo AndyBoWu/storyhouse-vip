@@ -3,6 +3,12 @@
   "buildCommand": "npm run build",
   "installCommand": "npm install",
   "regions": ["iad1"],
+  "buildCaching": {
+    "enabled": true,
+    "cacheKey": "package-lock.json"
+  },
+  "outputDirectory": ".next",
+  "cacheDirectory": ".next/cache",
   "headers": [
     {
       "source": "/(.*)",

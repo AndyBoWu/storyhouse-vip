@@ -68,6 +68,18 @@ jobs:
           node-version: '18'
           cache: 'npm'
 
+      - name: Cache builds
+        uses: actions/cache@v4
+        with:
+          path: |
+            apps/frontend/.next/cache
+            apps/frontend/.next/standalone
+            packages/shared/dist
+            packages/shared/tsconfig.tsbuildinfo
+          key: build-frontend-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            build-frontend-${{ runner.os }}-
+
       - name: Build Frontend (with dependencies)
         run: |
           npm install
@@ -109,6 +121,18 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
+
+      - name: Cache builds
+        uses: actions/cache@v4
+        with:
+          path: |
+            apps/backend/.next/cache
+            apps/backend/.next/standalone
+            packages/shared/dist
+            packages/shared/tsconfig.tsbuildinfo
+          key: build-backend-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            build-backend-${{ runner.os }}-
 
       - name: Build Backend (with dependencies)
         run: |
