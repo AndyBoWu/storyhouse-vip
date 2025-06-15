@@ -85,11 +85,15 @@ jobs:
           restore-keys: |
             build-frontend-${{ runner.os }}-
 
-      - name: Install dependencies
+      - name: Install root dependencies
         run: npm install
 
       - name: Build shared packages
         run: npm run build:shared
+
+      - name: Install frontend dependencies
+        run: npm install
+        working-directory: apps/frontend
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
@@ -142,11 +146,15 @@ jobs:
           restore-keys: |
             build-backend-${{ runner.os }}-
 
-      - name: Install dependencies
+      - name: Install root dependencies
         run: npm install
 
       - name: Build shared packages
         run: npm run build:shared
+
+      - name: Install backend dependencies
+        run: npm install
+        working-directory: apps/backend
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
