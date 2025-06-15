@@ -71,6 +71,12 @@ jobs:
           npm install
           npm run build:frontend
 
+      - name: Link Vercel Project
+        run: |
+          cd apps/frontend
+          mkdir -p .vercel
+          echo '{"projectId":"${{ secrets.VERCEL_PROJECT_ID_FRONTEND }}","orgId":"${{ secrets.VERCEL_ORG_ID }}"}' > .vercel/project.json
+
       - name: Deploy to Vercel
         uses: amondnet/vercel-action@v25
         id: deploy
@@ -104,6 +110,12 @@ jobs:
         run: |
           npm install
           npm run build:backend
+
+      - name: Link Vercel Project
+        run: |
+          cd apps/backend
+          mkdir -p .vercel
+          echo '{"projectId":"${{ secrets.VERCEL_PROJECT_ID_BACKEND }}","orgId":"${{ secrets.VERCEL_ORG_ID }}"}' > .vercel/project.json
 
       - name: Deploy to Vercel
         uses: amondnet/vercel-action@v25
