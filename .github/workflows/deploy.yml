@@ -93,19 +93,16 @@ jobs:
           echo "Working directory: $(pwd)"
           echo "Environment VERCEL_PROJECT_ID: $VERCEL_PROJECT_ID"
           
-      - name: Create New Vercel Project (Frontend)
+      - name: Create Fresh Vercel Project (Frontend)
         run: |
           cd apps/frontend
           
-          # Remove existing .vercel directory to force recreation
+          # Remove existing .vercel directory completely
           rm -rf .vercel
           
-          # Link to existing project or create new one
-          echo "Linking to frontend project..."
-          npx vercel link --yes --token ${{ secrets.STORYHOUSE_GHA_VERCEL }} --scope ${{ secrets.VERCEL_ORG_ID }} || echo "Link failed, will create new project during deploy"
-          
-          echo "=== Current .vercel/project.json ==="
-          cat .vercel/project.json || echo "No project.json found"
+          # Create a completely new project - don't link to existing corrupted one
+          echo "Creating NEW frontend project (ignoring existing corrupted one)..."
+          npx vercel --token ${{ secrets.STORYHOUSE_GHA_VERCEL }} --scope ${{ secrets.VERCEL_ORG_ID }} --confirm || echo "Project creation will happen during deploy"
 
       - name: Deploy to Vercel
         id: deploy
@@ -114,11 +111,10 @@ jobs:
           echo "=== DEPLOYING FRONTEND ==="
           echo "Current working directory: $(pwd)"
           
-          # Deploy directly from the frontend directory
-          npx vercel deploy --prod --token ${{ secrets.STORYHOUSE_GHA_VERCEL }}
+          # Deploy to production (will create new project if needed)
+          npx vercel deploy --prod --token ${{ secrets.STORYHOUSE_GHA_VERCEL }} --yes
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_FRONTEND }}
 
   # Build and deploy backend
   deploy-backend:
@@ -166,19 +162,16 @@ jobs:
           echo "Working directory: $(pwd)"
           echo "Environment VERCEL_PROJECT_ID: $VERCEL_PROJECT_ID"
           
-      - name: Create New Vercel Project (Backend)
+      - name: Create Fresh Vercel Project (Backend)
         run: |
           cd apps/backend
           
-          # Remove existing .vercel directory to force recreation
+          # Remove existing .vercel directory completely
           rm -rf .vercel
           
-          # Link to existing project or create new one
-          echo "Linking to backend project..."
-          npx vercel link --yes --token ${{ secrets.STORYHOUSE_GHA_VERCEL }} --scope ${{ secrets.VERCEL_ORG_ID }} || echo "Link failed, will create new project during deploy"
-          
-          echo "=== Current .vercel/project.json ==="
-          cat .vercel/project.json || echo "No project.json found"
+          # Create a completely new project - don't link to existing corrupted one
+          echo "Creating NEW backend project (ignoring existing corrupted one)..."
+          npx vercel --token ${{ secrets.STORYHOUSE_GHA_VERCEL }} --scope ${{ secrets.VERCEL_ORG_ID }} --confirm || echo "Project creation will happen during deploy"
 
       - name: Deploy to Vercel
         id: deploy
@@ -187,9 +180,8 @@ jobs:
           echo "=== DEPLOYING BACKEND ==="
           echo "Current working directory: $(pwd)"
           
-          # Deploy directly from the backend directory
-          npx vercel deploy --prod --token ${{ secrets.STORYHOUSE_GHA_VERCEL }}
+          # Deploy to production (will create new project if needed)
+          npx vercel deploy --prod --token ${{ secrets.STORYHOUSE_GHA_VERCEL }} --yes
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_BACKEND }}
 
