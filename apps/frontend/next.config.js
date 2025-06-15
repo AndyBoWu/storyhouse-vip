@@ -2,6 +2,20 @@
 const nextConfig = {
   // Standard Next.js configuration for Vercel deployment
   
+  // Enable build caching for faster deployments
+  experimental: {
+    // Enable build cache
+    turbotrace: {
+      logLevel: 'info',
+    },
+  },
+  
+  // Compiler optimizations
+  compiler: {
+    // Remove console logs in production
+    removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error'] } : false,
+  },
+  
   // Skip ESLint during build to prevent deployment failures
   eslint: {
     ignoreDuringBuilds: true,

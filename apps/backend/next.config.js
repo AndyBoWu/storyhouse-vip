@@ -12,6 +12,10 @@ const nextConfig = {
   // Optimize for API-only backend
   experimental: {
     optimizeCss: false,
+    // Enable build cache
+    turbotrace: {
+      logLevel: 'info',
+    },
   },
   compiler: {
     // Disable styled-jsx for API backend
