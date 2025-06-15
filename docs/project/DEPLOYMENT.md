@@ -15,9 +15,39 @@ Complete guide for deploying StoryHouse.vip to production with dual Vercel archi
 
 **Current Status:** Phase 5.3 Complete - Dual Vercel deployment with comprehensive license management
 
-## 🚀 Deployment Steps
+## 🚀 Deployment Methods
 
-### Prerequisites
+### Option 1: GitHub Actions (Recommended)
+
+StoryHouse uses GitHub Actions for controlled deployments to Vercel.
+
+#### Prerequisites
+
+1. **GitHub Repository Secrets**: Configure these in Settings → Secrets → Actions:
+   - `STORYHOUSE_GHA_VERCEL`: Your Vercel authentication token
+   - `VERCEL_ORG_ID`: Your Vercel organization ID
+   - `VERCEL_PROJECT_ID_FRONTEND`: Frontend project ID
+   - `VERCEL_PROJECT_ID_BACKEND`: Backend project ID
+
+2. **Manual Deployment Workflow**:
+   - Navigate to Actions tab in GitHub
+   - Select "🚀 Deploy to Vercel (Manual)"
+   - Click "Run workflow"
+   - Choose which apps to deploy (frontend, backend, or both)
+   - Click "Run workflow" to start deployment
+
+#### GitHub Actions Features
+
+- **Selective Deployment**: Choose specific apps to deploy
+- **Automatic Project Linking**: Handles Vercel project configuration
+- **Build Verification**: Ensures successful builds before deployment
+- **Production Deployment**: Uses `--prod` flag for optimized deployments
+
+### Option 2: Manual CLI Deployment
+
+If you prefer manual control or need to deploy outside of GitHub Actions:
+
+#### Prerequisites
 
 1. **Vercel CLI:** Install and authenticate
    ```bash
@@ -34,7 +64,7 @@ Complete guide for deploying StoryHouse.vip to production with dual Vercel archi
    └── docs/           # Documentation
    ```
 
-### Frontend Deployment
+#### Frontend Deployment
 
 ```bash
 # Navigate to frontend directory
@@ -46,12 +76,12 @@ npm run build
 # Deploy to Vercel
 vercel --prod
 
-# Configure domains
+# Configure domains (first time only)
 vercel domains add storyhouse.vip
 vercel domains add testnet.storyhouse.vip
 ```
 
-### Backend Deployment
+#### Backend Deployment
 
 ```bash
 # Navigate to backend directory
@@ -63,7 +93,7 @@ npm run build
 # Deploy to Vercel
 vercel --prod
 
-# Configure API domains
+# Configure API domains (first time only)
 vercel domains add api.storyhouse.vip
 vercel domains add api-testnet.storyhouse.vip
 ```
@@ -277,6 +307,30 @@ curl https://api-testnet.storyhouse.vip/api/test
 - **Weekly:** Check Vercel deployment logs
 - **Monthly:** Review environment variable security
 - **Quarterly:** Update dependencies and redeploy
+
+## 🔧 GitHub Actions Troubleshooting
+
+### Common Issues and Solutions
+
+1. **"Project not found" Error**
+   - Verify all 4 GitHub secrets are correctly set
+   - Check that project IDs match your Vercel projects
+   - The workflow automatically creates `.vercel/project.json` files
+
+2. **Build Failures**
+   - Check the workflow logs for specific errors
+   - Ensure all dependencies are properly installed
+   - Verify that shared packages build before apps
+
+3. **Authentication Errors**
+   - Regenerate your Vercel token if needed
+   - Ensure the token has full deployment permissions
+   - Check that the token name matches `STORYHOUSE_GHA_VERCEL`
+
+4. **Deployment Not Triggering**
+   - Verify you're on the Actions tab
+   - Select the correct workflow: "🚀 Deploy to Vercel (Manual)"
+   - Ensure you have permissions to run workflows
 
 ## 🎯 Post-Deployment Configuration
 

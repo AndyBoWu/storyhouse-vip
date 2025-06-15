@@ -153,12 +153,23 @@ cd apps/backend && npm run dev   # Port 3002
 - `GET /api/discovery?type=quality-assessment` - Content quality scoring
 - `GET /api/discovery?type=derivative-analytics` - Comprehensive analytics
 
+## 🚀 Deployment
+
+The project uses GitHub Actions for deployment to Vercel:
+
+- **Manual Deployment**: Trigger deployments via GitHub Actions workflow
+- **Selective Deployment**: Choose to deploy frontend, backend, or both
+- **Production Ready**: Automatic project linking and environment configuration
+
+See [Deployment Guide](./docs/project/DEPLOYMENT.md) for detailed instructions.
+
 ## 📚 Documentation
 
 - [Technical Architecture](./docs/TECHNICAL_ARCHITECTURE.md)
 - [API Reference](./docs/API_REFERENCE.md) 
 - [Development Guide](./docs/DEVELOPMENT_GUIDE.md)
 - [Testing Strategy](./docs/TESTING_STRATEGY.md)
+- [Deployment Guide](./docs/project/DEPLOYMENT.md)
 
 ## 🎮 User Flow
 
@@ -180,7 +191,8 @@ cd apps/backend && npm run dev   # Port 3002
 - ✅ **Improved Publishing Flow**: Clear "Review" → "Publish" workflow with simplified UI
 - ✅ **Enhanced Pricing**: Updated default chapter pricing to 0.5 TIP with optimized tiers (0.3, 0.5, 0.8)
 - ✅ **Streamlined Input UX**: Fixed price input fields with proper state management
-- ✅ **Vercel Deployment**: Latest frontend and backend deployed with performance optimizations
+- ✅ **GitHub Actions Deployment**: Manual trigger deployment workflow for controlled releases
+- ✅ **Vercel Integration**: Frontend and backend deployed with performance optimizations
 
 **🎉 Story Protocol SDK Integration Complete** - Full Blockchain Derivative Registration:
 - ✅ **Real Blockchain Registration**: Story Protocol SDK v1.3.2 `registerDerivative()` operations
