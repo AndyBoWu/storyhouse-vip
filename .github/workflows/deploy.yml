@@ -16,8 +16,6 @@ on:
 
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-  VERCEL_PROJECT_ID_FRONTEND: ${{ secrets.VERCEL_PROJECT_ID_FRONTEND }}
-  VERCEL_PROJECT_ID_BACKEND: ${{ secrets.VERCEL_PROJECT_ID_BACKEND }}
 
 jobs:
   # Job to detect which apps have changes
@@ -55,8 +53,6 @@ jobs:
     environment: 
       name: frontend-production
       url: ${{ steps.deploy.outputs.url }}
-    env:
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_FRONTEND }}
     
     steps:
       - name: Checkout
@@ -89,9 +85,7 @@ jobs:
         run: |
           echo "=== DEBUGGING VERCEL CONFIGURATION ==="
           echo "VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}"
-          echo "VERCEL_PROJECT_ID_FRONTEND: ${{ secrets.VERCEL_PROJECT_ID_FRONTEND }}"
           echo "Working directory: $(pwd)"
-          echo "Environment VERCEL_PROJECT_ID: $VERCEL_PROJECT_ID"
           
       - name: Create Fresh Vercel Project (Frontend)
         run: |
@@ -124,8 +118,6 @@ jobs:
     environment: 
       name: backend-production
       url: ${{ steps.deploy.outputs.url }}
-    env:
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_BACKEND }}
     
     steps:
       - name: Checkout
@@ -158,9 +150,7 @@ jobs:
         run: |
           echo "=== DEBUGGING BACKEND VERCEL CONFIGURATION ==="
           echo "VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}"
-          echo "VERCEL_PROJECT_ID_BACKEND: ${{ secrets.VERCEL_PROJECT_ID_BACKEND }}"
           echo "Working directory: $(pwd)"
-          echo "Environment VERCEL_PROJECT_ID: $VERCEL_PROJECT_ID"
           
       - name: Create Fresh Vercel Project (Backend)
         run: |
