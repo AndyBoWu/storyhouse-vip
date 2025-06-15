@@ -5,21 +5,27 @@ This repository uses GitHub Actions for automated deployment to Vercel with prop
 ## Workflow Overview
 
 The `deploy.yml` workflow provides:
-- **Change Detection**: Only deploys apps that have changes
+- **Manual Trigger**: Deploy on-demand via GitHub Actions interface
+- **Selective Deployment**: Choose to deploy frontend, backend, or both
 - **Dependency Building**: Automatically builds shared packages before app deployment
-- **Production Deployments**: Deploys to production on main branch pushes
-- **Preview Deployments**: Creates preview deployments for pull requests
+- **Production Deployments**: Deploys with `--prod` flag for optimized builds
+- **Automatic Project Linking**: Creates Vercel project configuration files
 
 ## Required Secrets
 
 Set these secrets in your GitHub repository settings:
 
 ```
-VERCEL_TOKEN=your_vercel_token
+STORYHOUSE_GHA_VERCEL=your_vercel_token
 VERCEL_ORG_ID=your_org_id
 VERCEL_PROJECT_ID_FRONTEND=frontend_project_id
 VERCEL_PROJECT_ID_BACKEND=backend_project_id
 ```
+
+**Current Values for StoryHouse:**
+- `VERCEL_ORG_ID`: `team_BsORABKeULvzhE8sYWJSopdD`
+- `VERCEL_PROJECT_ID_FRONTEND`: `prj_djEWUWp8D8QGXdWLtD1TOp6BvngC`
+- `VERCEL_PROJECT_ID_BACKEND`: `prj_zH9Rv7bvMkhtydELqoGIrgFaa8bx`
 
 ## How to Get Vercel Secrets
 

@@ -492,37 +492,39 @@ curl -X GET http://localhost:3002/api/debug-env
 
 ## 🚀 Deployment
 
-### Frontend Deployment (Vercel)
+### Recommended: GitHub Actions (Manual Trigger)
+
+1. Navigate to GitHub repository → Actions tab
+2. Select "🚀 Deploy to Vercel (Manual)" workflow
+3. Click "Run workflow"
+4. Choose which apps to deploy (frontend, backend, or both)
+5. Monitor deployment progress in Actions tab
+
+**Prerequisites**: Ensure GitHub repository secrets are configured (see [Deployment Guide](./docs/project/DEPLOYMENT.md))
+
+### Alternative: Manual CLI Deployment
+
+If you need to deploy directly:
 
 ```bash
+# Frontend
 cd apps/frontend
 vercel --prod
-```
 
-### Backend Deployment (Vercel)
-
-```bash
+# Backend
 cd apps/backend  
 vercel --prod
 ```
 
-### Environment Variables for Production
+### Environment Variables
 
-Set these in Vercel dashboard for each project:
+For GitHub Actions deployment, configure these as repository secrets:
+- `STORYHOUSE_GHA_VERCEL`: Vercel authentication token
+- `VERCEL_ORG_ID`: Your Vercel organization ID
+- `VERCEL_PROJECT_ID_FRONTEND`: Frontend project ID
+- `VERCEL_PROJECT_ID_BACKEND`: Backend project ID
 
-**Frontend:**
-- `OPENAI_API_KEY`
-- `NEXT_PUBLIC_ENABLE_TESTNET`
-- `STORY_RPC_URL`
-- `STORY_SPG_NFT_CONTRACT`
-
-**Backend:**
-- `OPENAI_API_KEY`
-- `STORY_RPC_URL`
-- `R2_ACCOUNT_ID`
-- `R2_ACCESS_KEY_ID`
-- `R2_SECRET_ACCESS_KEY`
-- `R2_BUCKET_NAME`
+Environment variables are managed through Vercel dashboard. See [Deployment Guide](./project/DEPLOYMENT.md) for complete list.
 
 ---
 
