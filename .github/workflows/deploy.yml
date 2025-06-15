@@ -106,7 +106,20 @@ jobs:
       - name: Deploy to Vercel
         id: deploy
         run: |
+          echo "=== DEBUGGING PATHS IN GITHUB ACTIONS ==="
+          echo "Current working directory: $(pwd)"
+          echo "Directory contents:"
+          ls -la
+          echo "Apps directory contents:"
+          ls -la apps/ || echo "apps/ not found"
+          echo "Frontend directory contents:"
+          ls -la apps/frontend/ || echo "apps/frontend/ not found"
+          
           cd apps/frontend
+          echo "Now in: $(pwd)"
+          echo "Contents of current directory:"
+          ls -la
+          
           npx vercel deploy --prod --token ${{ secrets.STORYHOUSE_GHA_VERCEL }}
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -171,7 +184,20 @@ jobs:
       - name: Deploy to Vercel
         id: deploy
         run: |
+          echo "=== DEBUGGING BACKEND PATHS IN GITHUB ACTIONS ==="
+          echo "Current working directory: $(pwd)"
+          echo "Directory contents:"
+          ls -la
+          echo "Apps directory contents:"
+          ls -la apps/ || echo "apps/ not found"
+          echo "Backend directory contents:"
+          ls -la apps/backend/ || echo "apps/backend/ not found"
+          
           cd apps/backend
+          echo "Now in: $(pwd)"
+          echo "Contents of current directory:"
+          ls -la
+          
           npx vercel deploy --prod --token ${{ secrets.STORYHOUSE_GHA_VERCEL }}
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
