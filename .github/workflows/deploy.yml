@@ -111,14 +111,17 @@ jobs:
       - name: Clean and setup Vercel project
         run: |
           rm -rf .vercel
-          echo "Setting up fresh Vercel project link..."
+          echo "Setting up fresh Vercel project for CLI deployment..."
+          echo "Working directory: $(pwd)"
+          echo "Contents: $(ls -la)"
         working-directory: apps/frontend
 
       - name: Deploy to Vercel
         id: deploy
         run: |
           # Deploy from app directory, treating it as project root
-          url=$(vercel deploy ${{ (github.event_name == 'workflow_dispatch' && inputs.production) && '--prod' || '' }} --yes --token=${{ secrets.STORYHOUSE_GHA_VERCEL }})
+          # Using explicit project ID to avoid path confusion
+          url=$(vercel deploy ${{ (github.event_name == 'workflow_dispatch' && inputs.production) && '--prod' || '' }} --yes --token=${{ secrets.STORYHOUSE_GHA_VERCEL }} --scope team_BsORABKeULvzhE8sYWJSopdD)
           echo "preview-url=$url" >> $GITHUB_OUTPUT
         working-directory: apps/frontend
 
@@ -175,14 +178,17 @@ jobs:
       - name: Clean and setup Vercel project
         run: |
           rm -rf .vercel
-          echo "Setting up fresh Vercel project link..."
+          echo "Setting up fresh Vercel project for CLI deployment..."
+          echo "Working directory: $(pwd)"
+          echo "Contents: $(ls -la)"
         working-directory: apps/backend
 
       - name: Deploy to Vercel
         id: deploy
         run: |
           # Deploy from app directory, treating it as project root  
-          url=$(vercel deploy ${{ (github.event_name == 'workflow_dispatch' && inputs.production) && '--prod' || '' }} --yes --token=${{ secrets.STORYHOUSE_GHA_VERCEL }})
+          # Using explicit project ID to avoid path confusion
+          url=$(vercel deploy ${{ (github.event_name == 'workflow_dispatch' && inputs.production) && '--prod' || '' }} --yes --token=${{ secrets.STORYHOUSE_GHA_VERCEL }} --scope team_BsORABKeULvzhE8sYWJSopdD)
           echo "preview-url=$url" >> $GITHUB_OUTPUT
         working-directory: apps/backend
 
