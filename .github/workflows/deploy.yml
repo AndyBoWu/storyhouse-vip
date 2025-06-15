@@ -170,6 +170,8 @@ jobs:
           mkdir -p apps/backend/shared-bundle
           cp -r packages/shared/dist/* apps/backend/shared-bundle/
           cp packages/shared/package.json apps/backend/shared-bundle/
+          echo "Fixing package.json paths for bundled package..."
+          sed -i 's|"./dist/|"./|g' apps/backend/shared-bundle/package.json
           echo "Shared package bundled successfully"
           ls -la apps/backend/shared-bundle/
 
