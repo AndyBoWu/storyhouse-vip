@@ -85,11 +85,23 @@ jobs:
           npm install
           npm run build:frontend
 
+      - name: Debug Environment Variables
+        run: |
+          echo "=== DEBUGGING VERCEL CONFIGURATION ==="
+          echo "VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}"
+          echo "VERCEL_PROJECT_ID_FRONTEND: ${{ secrets.VERCEL_PROJECT_ID_FRONTEND }}"
+          echo "Working directory: $(pwd)"
+          echo "Environment VERCEL_PROJECT_ID: $VERCEL_PROJECT_ID"
+          
       - name: Link Vercel Project
         run: |
           cd apps/frontend
           mkdir -p .vercel
           echo '{"projectId":"${{ secrets.VERCEL_PROJECT_ID_FRONTEND }}","orgId":"${{ secrets.VERCEL_ORG_ID }}"}' > .vercel/project.json
+          echo "=== Created .vercel/project.json ==="
+          cat .vercel/project.json
+          echo "=== Verifying project with Vercel CLI ==="
+          npx vercel ls --token ${{ secrets.STORYHOUSE_GHA_VERCEL }} --scope ${{ secrets.VERCEL_ORG_ID }} | head -10 || echo "Failed to list projects"
 
       - name: Deploy to Vercel
         uses: amondnet/vercel-action@v25
@@ -139,11 +151,23 @@ jobs:
           npm install
           npm run build:backend
 
+      - name: Debug Environment Variables
+        run: |
+          echo "=== DEBUGGING BACKEND VERCEL CONFIGURATION ==="
+          echo "VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}"
+          echo "VERCEL_PROJECT_ID_BACKEND: ${{ secrets.VERCEL_PROJECT_ID_BACKEND }}"
+          echo "Working directory: $(pwd)"
+          echo "Environment VERCEL_PROJECT_ID: $VERCEL_PROJECT_ID"
+          
       - name: Link Vercel Project
         run: |
           cd apps/backend
           mkdir -p .vercel
           echo '{"projectId":"${{ secrets.VERCEL_PROJECT_ID_BACKEND }}","orgId":"${{ secrets.VERCEL_ORG_ID }}"}' > .vercel/project.json
+          echo "=== Created .vercel/project.json ==="
+          cat .vercel/project.json
+          echo "=== Verifying project with Vercel CLI ==="
+          npx vercel ls --token ${{ secrets.STORYHOUSE_GHA_VERCEL }} --scope ${{ secrets.VERCEL_ORG_ID }} | head -10 || echo "Failed to list projects"
 
       - name: Deploy to Vercel
         uses: amondnet/vercel-action@v25
