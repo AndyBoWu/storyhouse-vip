@@ -438,14 +438,15 @@ contract ChapterAccessControllerTest is Test {
         vm.prank(user1);
         chapterAccess.unlockChapter(BOOK_ID, 1);
         
-        vm.prank(user1);
-        chapterAccess.completeChapter(BOOK_ID, 1, 120); // 120 seconds reading time
+        // completeChapter function removed with read-to-earn
+        // vm.prank(user1);
+        // chapterAccess.completeChapter(BOOK_ID, 1, 120); // 120 seconds reading time
         
         vm.prank(user1);
         chapterAccess.unlockChapter(BOOK_ID, 2);
         
-        vm.prank(user1);
-        chapterAccess.completeChapter(BOOK_ID, 2, 240); // 240 seconds reading time
+        // vm.prank(user1);
+        // chapterAccess.completeChapter(BOOK_ID, 2, 240); // 240 seconds reading time
         
         // Rewards are distributed through RewardsManager, so we can't easily compare them here
         // This test demonstrates that chapters with different word counts can be completed
@@ -459,22 +460,23 @@ contract ChapterAccessControllerTest is Test {
         vm.prank(user1);
         chapterAccess.unlockChapter(BOOK_ID, 1);
         
+        // completeChapter function removed with read-to-earn
         // Test insufficient reading time
-        vm.prank(user1);
-        vm.expectRevert("ChapterAccess: insufficient reading time");
-        chapterAccess.completeChapter(BOOK_ID, 1, 29); // Less than minimum time
+        // vm.prank(user1);
+        // vm.expectRevert("ChapterAccess: insufficient reading time");
+        // chapterAccess.completeChapter(BOOK_ID, 1, 29); // Less than minimum time
         
         // Test appropriate reading time
-        vm.prank(user1);
-        chapterAccess.completeChapter(BOOK_ID, 1, 120); // Appropriate time
+        // vm.prank(user1);
+        // chapterAccess.completeChapter(BOOK_ID, 1, 120); // Appropriate time
         // Reward is distributed through RewardsManager
         
         // Test excessive reading time (should be capped)
         vm.prank(user2);
         chapterAccess.unlockChapter(BOOK_ID, 1);
         
-        vm.prank(user2);
-        chapterAccess.completeChapter(BOOK_ID, 1, 3600); // 1 hour
+        // vm.prank(user2);
+        // chapterAccess.completeChapter(BOOK_ID, 1, 3600); // 1 hour
         
         // Excessive reading time handling is done internally
     }

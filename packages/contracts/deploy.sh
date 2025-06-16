@@ -82,7 +82,7 @@ echo ""
 
 # Run the deployment script
 echo -e "${BLUE}🔨 Running deployment script...${NC}"
-DEPLOY_OUTPUT=$(PRIVATE_KEY=$PRIVATE_KEY forge script script/Deploy5ContractArchitecture.s.sol \
+DEPLOY_OUTPUT=$(PRIVATE_KEY=$PRIVATE_KEY forge script script/Deploy.s.sol \
     --rpc-url $NETWORK \
     --broadcast \
     --gas-price $GAS_PRICE \
@@ -105,7 +105,7 @@ echo ""
 echo -e "${BLUE}📋 Parsing deployment results...${NC}"
 
 # Try to extract addresses from broadcast file
-BROADCAST_FILE="broadcast/Deploy5ContractArchitecture.s.sol/$CHAIN_ID/run-latest.json"
+BROADCAST_FILE="broadcast/Deploy.s.sol/$CHAIN_ID/run-latest.json"
 
 if [ -f "$BROADCAST_FILE" ]; then
     # Extract contract addresses from the broadcast file
