@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Pausable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "./RewardsManager.sol";
@@ -21,7 +21,10 @@ import "./TIPToken.sol";
  *
  * Phase 3 Implementation: Revenue Sharing for Collaborative Storytelling
  */
-contract HybridRevenueController is Ownable, Pausable, ReentrancyGuard {
+contract HybridRevenueController is AccessControl, Pausable, ReentrancyGuard {
+    // Role definitions
+    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+    bytes32 public constant STORY_MANAGER_ROLE = keccak256("STORY_MANAGER_ROLE");
     // Events
     event ChapterUnlocked(
         address indexed reader,
@@ -117,10 +120,13 @@ contract HybridRevenueController is Ownable, Pausable, ReentrancyGuard {
     }
 
     constructor(
-        address initialOwner,
+        address initialAdmin,
         address _rewardsManager,
         address _tipToken
-    ) Ownable(initialOwner) {
+    ) {
+        _grantRole(DEFAULT_ADMIN_ROLE, initialAdmin);
+        _grantRole(ADMIN_ROLE, initialAdmin);
+        
         rewardsManager = RewardsManager(_rewardsManager);
         tipToken = TIPToken(_tipToken);
     }
@@ -141,7 +147,7 @@ contract HybridRevenueController is Ownable, Pausable, ReentrancyGuard {
         bytes32 parentBookId,
         uint256 totalChapters,
         string memory ipfsMetadataHash
-    ) external onlyOwner {
+    ) external onlyRole(STORY_MANAGER_ROLE) {
         require(curator != address(0), "HybridRevenue: zero curator address");
         require(!books[bookId].isActive, "HybridRevenue: book already registered");
         
@@ -320,7 +326,7 @@ contract HybridRevenueController is Ownable, Pausable, ReentrancyGuard {
         uint256 _authorShare,
         uint256 _curatorShare,
         uint256 _platformShare
-    ) external onlyOwner {
+    ) external onlyRole(ADMIN_ROLE) {
         require(_authorShare + _curatorShare + _platformShare == 100, "HybridRevenue: shares must sum to 100");
         require(_authorShare >= 50, "HybridRevenue: author share too low"); // Authors must get at least 50%
         
@@ -332,7 +338,7 @@ contract HybridRevenueController is Ownable, Pausable, ReentrancyGuard {
     /**
      * @dev Withdraw platform earnings (only owner)
      */
-    function withdrawPlatformEarnings(address to, uint256 amount) external onlyOwner {
+    function withdrawPlatformEarnings(address to, uint256 amount) external onlyRole(ADMIN_ROLE) {
         require(to != address(0), "HybridRevenue: zero address");
         require(amount <= platformTotalEarnings, "HybridRevenue: insufficient platform earnings");
         
@@ -343,7 +349,7 @@ contract HybridRevenueController is Ownable, Pausable, ReentrancyGuard {
     /**
      * @dev Deactivate a book (emergency only)
      */
-    function deactivateBook(bytes32 bookId) external onlyOwner {
+    function deactivateBook(bytes32 bookId) external onlyRole(ADMIN_ROLE) {
         books[bookId].isActive = false;
     }
 
@@ -448,14 +454,14 @@ contract HybridRevenueController is Ownable, Pausable, ReentrancyGuard {
     /**
      * @dev Pause the contract (emergency)
      */
-    function pause() external onlyOwner {
+    function pause() external onlyRole(ADMIN_ROLE) {
         _pause();
     }
 
     /**
      * @dev Unpause the contract
      */
-    function unpause() external onlyOwner {
+    function unpause() external onlyRole(ADMIN_ROLE) {
         _unpause();
     }
 }
