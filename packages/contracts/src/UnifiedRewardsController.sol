@@ -9,12 +9,14 @@ import "./TIPToken.sol";
 
 /**
  * @title Unified Rewards Controller
- * @dev Consolidated controller handling all reward types: reading, creation, and remix licensing
+ * @dev Consolidated controller handling remix licensing and quality-based rewards only
  * 
  * This contract combines functionality from:
- * - ReadRewardsController: Chapter-based reading rewards with anti-gaming mechanisms
- * - CreatorRewardsController: Story/chapter creation rewards and engagement bonuses
  * - RemixLicensingController: Remix fees, royalties, and derivative licensing
+ * - Quality-based rewards: Human-reviewed quality bonuses and curated content
+ * 
+ * NOTE: Automatic creation rewards have been removed to prevent AI farming attacks.
+ * Authors earn through actual reader purchases and remix licensing only.
  */
 contract UnifiedRewardsController is AccessControl, Pausable, ReentrancyGuard {
     // Role definitions
@@ -22,23 +24,10 @@ contract UnifiedRewardsController is AccessControl, Pausable, ReentrancyGuard {
     bytes32 public constant STORY_MANAGER_ROLE = keccak256("STORY_MANAGER_ROLE");
     bytes32 public constant QUALITY_ASSESSOR_ROLE = keccak256("QUALITY_ASSESSOR_ROLE");
 
-    // Events - Reading
-    event ChapterRewardClaimed(
-        address indexed reader, 
-        bytes32 indexed storyId, 
-        uint256 chapterNumber, 
-        uint256 rewardAmount, 
-        uint256 timestamp
-    );
-    event ReadingStreakBonus(address indexed reader, uint256 streakDays, uint256 bonusAmount);
+    // Events - Reading (Removed)
 
     // Events - Creation
-    event StoryCreationReward(
-        address indexed creator, 
-        bytes32 indexed storyId, 
-        uint256 rewardAmount, 
-        uint256 timestamp
-    );
+    // StoryCreationReward event removed with automatic rewards
     event EngagementReward(
         address indexed creator, 
         bytes32 indexed storyId, 
@@ -53,6 +42,7 @@ contract UnifiedRewardsController is AccessControl, Pausable, ReentrancyGuard {
         uint256 bonusAmount
     );
     event MilestoneReward(address indexed creator, string milestone, uint256 rewardAmount);
+    // Note: "first_story" and "ten_stories" milestones have been removed
 
     // Events - Remix
     event RemixLicensePurchased(
@@ -73,29 +63,15 @@ contract UnifiedRewardsController is AccessControl, Pausable, ReentrancyGuard {
     RewardsManager public rewardsManager;
     TIPToken public tipToken;
 
-    // ========== READING REWARDS CONFIGURATION ==========
-    uint256 public baseRewardPerChapter = 10 * 10**18; // 10 TIP per chapter
-    uint256 public minReadTimePerChapter = 60; // 60 seconds minimum
-    uint256 public minWordsPerChapter = 500; // 500 words minimum
-    uint256 public maxDailyChapters = 20; // Anti-farming limit
-    uint256 public streakBonusPercentage = 10; // 10% bonus per streak day
-    uint256 public maxStreakBonus = 100; // Max 100% bonus
-
-    // Reading tracking
-    mapping(address => mapping(bytes32 => mapping(uint256 => bool))) public hasClaimedChapter;
-    mapping(address => mapping(bytes32 => uint256)) public userChaptersRead;
-    mapping(address => mapping(uint256 => uint256)) public dailyChaptersRead; // user => day => count
-    mapping(address => uint256) public lastReadDay;
-    mapping(address => uint256) public readingStreak;
-    mapping(bytes32 => mapping(uint256 => uint256)) public chapterWordCount;
-    mapping(bytes32 => mapping(uint256 => uint256)) public chapterMinReadTime;
-    mapping(address => mapping(bytes32 => mapping(uint256 => uint256))) public readStartTime;
+    // ========== READING REWARDS REMOVED ==========
+    // Read-to-earn functionality has been removed to prevent farming attacks
 
     // ========== CREATION REWARDS CONFIGURATION ==========
-    uint256 public storyCreationReward = 50 * 10**18; // 50 TIP per story
-    uint256 public chapterCreationReward = 20 * 10**18; // 20 TIP per chapter
-    uint256 public readEngagementRate = 1 * 10**15; // 0.001 TIP per read
-    uint256 public qualityBonusMultiplier = 2; // 2x bonus for high quality
+    // Automatic creation rewards removed to prevent AI farming
+    // uint256 public storyCreationReward = 0; // REMOVED - was 50 TIP per story
+    // uint256 public chapterCreationReward = 0; // REMOVED - was 20 TIP per chapter
+    uint256 public engagementRate = 1 * 10**15; // 0.001 TIP per engagement (kept for genuine engagement)
+    uint256 public qualityBonusMultiplier = 2; // 2x bonus for high quality (human-reviewed only)
     uint256 public minimumQualityScore = 75; // Out of 100
 
     // Creation tracking
@@ -138,8 +114,11 @@ contract UnifiedRewardsController is AccessControl, Pausable, ReentrancyGuard {
         tipToken = TIPToken(_tipToken);
 
         // Initialize milestone rewards
-        milestoneRewards["first_story"] = 100 * 10**18;
-        milestoneRewards["ten_stories"] = 500 * 10**18;
+        // Story creation milestones removed to prevent farming
+        // milestoneRewards["first_story"] = 0; // REMOVED - was 100 TIP
+        // milestoneRewards["ten_stories"] = 0; // REMOVED - was 500 TIP
+        
+        // Reader engagement milestones kept (harder to fake)
         milestoneRewards["hundred_readers"] = 200 * 10**18;
         milestoneRewards["thousand_readers"] = 1000 * 10**18;
 
@@ -163,101 +142,20 @@ contract UnifiedRewardsController is AccessControl, Pausable, ReentrancyGuard {
         });
     }
 
-    // ========== READING REWARDS FUNCTIONS ==========
-
-    /**
-     * @dev Start a reading session for a chapter
-     */
-    function startReading(bytes32 storyId, uint256 chapterNumber) external whenNotPaused {
-        require(storyId != bytes32(0), "Unified: invalid story ID");
-        require(!hasClaimedChapter[msg.sender][storyId][chapterNumber], "Unified: already claimed");
-        
-        readStartTime[msg.sender][storyId][chapterNumber] = block.timestamp;
-    }
-
-    /**
-     * @dev Claim reading reward for completing a chapter
-     */
-    function claimChapterReward(bytes32 storyId, uint256 chapterNumber) 
-        external 
-        whenNotPaused 
-        nonReentrant 
-    {
-        require(storyId != bytes32(0), "Unified: invalid story ID");
-        require(!hasClaimedChapter[msg.sender][storyId][chapterNumber], "Unified: already claimed");
-
-        uint256 startTime = readStartTime[msg.sender][storyId][chapterNumber];
-        require(startTime > 0, "Unified: reading session not started");
-
-        // Check minimum read time
-        uint256 readTime = block.timestamp - startTime;
-        uint256 requiredTime = chapterMinReadTime[storyId][chapterNumber];
-        if (requiredTime == 0) requiredTime = minReadTimePerChapter;
-        require(readTime >= requiredTime, "Unified: insufficient read time");
-
-        // Check daily reading limit
-        uint256 today = block.timestamp / 86400;
-        require(dailyChaptersRead[msg.sender][today] < maxDailyChapters, "Unified: daily limit exceeded");
-
-        // Update reading streak
-        if (today > 0 && lastReadDay[msg.sender] == today - 1) {
-            readingStreak[msg.sender]++;
-        } else if (lastReadDay[msg.sender] != today) {
-            readingStreak[msg.sender] = 1;
-        }
-        lastReadDay[msg.sender] = today;
-
-        // Calculate reward with streak bonus
-        uint256 baseReward = baseRewardPerChapter;
-        uint256 streakBonus = (baseReward * readingStreak[msg.sender] * streakBonusPercentage) / 100;
-        if (streakBonus > (baseReward * maxStreakBonus) / 100) {
-            streakBonus = (baseReward * maxStreakBonus) / 100;
-        }
-        uint256 totalReward = baseReward + streakBonus;
-
-        // Update tracking
-        hasClaimedChapter[msg.sender][storyId][chapterNumber] = true;
-        userChaptersRead[msg.sender][storyId]++;
-        dailyChaptersRead[msg.sender][today]++;
-        delete readStartTime[msg.sender][storyId][chapterNumber];
-
-        // Distribute reward
-        bytes32 contextId = keccak256(abi.encodePacked(storyId, chapterNumber));
-        rewardsManager.distributeReward(msg.sender, totalReward, "read", contextId);
-
-        emit ChapterRewardClaimed(msg.sender, storyId, chapterNumber, totalReward, block.timestamp);
-        if (streakBonus > 0) {
-            emit ReadingStreakBonus(msg.sender, readingStreak[msg.sender], streakBonus);
-        }
-    }
+    // ========== READING REWARDS REMOVED ==========
 
     // ========== CREATION REWARDS FUNCTIONS ==========
 
     /**
-     * @dev Claim reward for creating a new story
+     * @dev Claim reward for creating a new story - REMOVED
+     * @notice This function has been disabled to prevent AI content farming.
+     * Authors earn through reader purchases and remix licensing instead.
      */
-    function claimStoryCreationReward(bytes32 storyId) 
+    function claimStoryCreationReward(bytes32) 
         external 
-        whenNotPaused 
-        nonReentrant 
+        view
     {
-        require(storyId != bytes32(0), "Unified: invalid story ID");
-        require(!hasClaimedCreationReward[msg.sender][storyId], "Unified: already claimed");
-        require(storyCreators[storyId] == msg.sender, "Unified: not story creator");
-
-        hasClaimedCreationReward[msg.sender][storyId] = true;
-        totalStoriesCreated[msg.sender]++;
-
-        // Distribute base creation reward
-        rewardsManager.distributeReward(msg.sender, storyCreationReward, "creator", storyId);
-        emit StoryCreationReward(msg.sender, storyId, storyCreationReward, block.timestamp);
-
-        // Check for milestones
-        if (totalStoriesCreated[msg.sender] == 1 && !milestonesAchieved[msg.sender]["first_story"]) {
-            _claimMilestone(msg.sender, "first_story");
-        } else if (totalStoriesCreated[msg.sender] == 10 && !milestonesAchieved[msg.sender]["ten_stories"]) {
-            _claimMilestone(msg.sender, "ten_stories");
-        }
+        revert("Unified: story creation rewards disabled");
     }
 
     /**
@@ -285,7 +183,7 @@ contract UnifiedRewardsController is AccessControl, Pausable, ReentrancyGuard {
         address creator = storyCreators[storyId];
         require(creator != address(0), "Unified: story not found");
 
-        uint256 reward = readEngagementRate * count;
+        uint256 reward = engagementRate * count;
         if (reward > 0) {
             totalEngagementEarned[creator] += reward;
             rewardsManager.distributeReward(creator, reward, "engagement", storyId);
@@ -319,7 +217,9 @@ contract UnifiedRewardsController is AccessControl, Pausable, ReentrancyGuard {
             address creator = storyCreators[storyId];
             require(creator != address(0), "Unified: story not found");
 
-            uint256 bonus = (storyCreationReward * qualityBonusMultiplier * score) / 100;
+            // Quality bonus now based on a fixed base amount (e.g., 100 TIP) instead of story creation reward
+            uint256 baseQualityReward = 100 * 10**18; // 100 TIP base for quality content
+            uint256 bonus = (baseQualityReward * qualityBonusMultiplier * score) / 100;
             rewardsManager.distributeReward(creator, bonus, "quality", storyId);
             emit QualityBonusReward(creator, storyId, score, bonus);
         }
@@ -395,30 +295,20 @@ contract UnifiedRewardsController is AccessControl, Pausable, ReentrancyGuard {
 
     // ========== ADMIN FUNCTIONS ==========
 
-    /**
-     * @dev Update reading reward configuration
-     */
-    function updateReadingRewardConfig(
-        uint256 _baseReward,
-        uint256 _minReadTime,
-        uint256 _maxDailyChapters
-    ) external onlyRole(ADMIN_ROLE) {
-        baseRewardPerChapter = _baseReward;
-        minReadTimePerChapter = _minReadTime;
-        maxDailyChapters = _maxDailyChapters;
-    }
+    // Reading reward configuration removed
 
     /**
      * @dev Update creation reward configuration
+     * @notice Story and chapter rewards have been removed. Only engagement rate can be updated.
      */
     function updateCreationRewardConfig(
-        uint256 _storyReward,
-        uint256 _chapterReward,
+        uint256, // _storyReward - deprecated
+        uint256, // _chapterReward - deprecated  
         uint256 _engagementRate
     ) external onlyRole(ADMIN_ROLE) {
-        storyCreationReward = _storyReward;
-        chapterCreationReward = _chapterReward;
-        readEngagementRate = _engagementRate;
+        // storyCreationReward = _storyReward; // REMOVED
+        // chapterCreationReward = _chapterReward; // REMOVED
+        engagementRate = _engagementRate;
     }
 
     /**
@@ -437,18 +327,7 @@ contract UnifiedRewardsController is AccessControl, Pausable, ReentrancyGuard {
         });
     }
 
-    /**
-     * @dev Set chapter metadata for reading validation
-     */
-    function setChapterMetadata(
-        bytes32 storyId,
-        uint256 chapterNumber,
-        uint256 wordCount,
-        uint256 minReadTime
-    ) external onlyRole(STORY_MANAGER_ROLE) {
-        chapterWordCount[storyId][chapterNumber] = wordCount;
-        chapterMinReadTime[storyId][chapterNumber] = minReadTime;
-    }
+    // Chapter metadata function removed
 
     /**
      * @dev Pause contract
@@ -470,9 +349,12 @@ contract UnifiedRewardsController is AccessControl, Pausable, ReentrancyGuard {
         milestonesAchieved[user][milestone] = true;
         uint256 reward = milestoneRewards[milestone];
         
-        bytes32 contextId = keccak256(abi.encodePacked("milestone", milestone));
-        rewardsManager.distributeReward(user, reward, "milestone", contextId);
-        emit MilestoneReward(user, milestone, reward);
+        // Only distribute if reward > 0 (some milestones have been disabled)
+        if (reward > 0) {
+            bytes32 contextId = keccak256(abi.encodePacked("milestone", milestone));
+            rewardsManager.distributeReward(user, reward, "milestone", contextId);
+            emit MilestoneReward(user, milestone, reward);
+        }
     }
 
     function _getTotalReadsForCreator(address creator) internal view returns (uint256) {
@@ -484,25 +366,7 @@ contract UnifiedRewardsController is AccessControl, Pausable, ReentrancyGuard {
 
     // ========== VIEW FUNCTIONS ==========
 
-    /**
-     * @dev Get user's reading statistics
-     */
-    function getUserReadingStats(address user) 
-        external 
-        view 
-        returns (
-            uint256 streak,
-            uint256 todayChapters,
-            uint256 totalChapters
-        ) 
-    {
-        uint256 today = block.timestamp / 86400;
-        return (
-            readingStreak[user],
-            dailyChaptersRead[user][today],
-            0 // Would need to track total chapters read
-        );
-    }
+    // getUserReadingStats removed with read-to-earn functionality
 
     /**
      * @dev Get story statistics

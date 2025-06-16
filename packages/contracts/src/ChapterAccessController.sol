@@ -14,7 +14,7 @@ import "./RewardsManager.sol";
  * Features:
  * - Free access to chapters 1-3 (no payment required)
  * - Paid access to chapters 4+ (0.5 TIP per chapter)
- * - Read-to-earn rewards (0.05-0.1 TIP per completion)
+ * - Read-to-earn removed to prevent farming attacks
  * - Author revenue distribution
  * - Chapter registration with IP asset integration
  */
@@ -39,13 +39,7 @@ contract ChapterAccessController is AccessControl, Pausable, ReentrancyGuard {
         uint256 timestamp
     );
     
-    event ChapterCompleted(
-        address indexed reader,
-        bytes32 indexed bookId,
-        uint256 chapterNumber,
-        uint256 rewardAmount,
-        uint256 timestamp
-    );
+    // ChapterCompleted event removed with read-to-earn
     
     event AuthorRevenueDistributed(
         bytes32 indexed bookId,
@@ -61,7 +55,7 @@ contract ChapterAccessController is AccessControl, Pausable, ReentrancyGuard {
     // Pricing configuration
     uint256 public constant FREE_CHAPTERS_COUNT = 3; // Chapters 1-3 are free
     uint256 public unlockPrice = 5 * 10**17; // 0.5 TIP tokens
-    uint256 public baseReadReward = 5 * 10**16; // 0.05 TIP tokens
+    // baseReadReward removed with read-to-earn functionality
     uint256 public authorRevenueShare = 80; // 80% to author, 20% to platform
     
     // Chapter metadata
@@ -78,7 +72,7 @@ contract ChapterAccessController is AccessControl, Pausable, ReentrancyGuard {
     mapping(bytes32 => mapping(uint256 => ChapterInfo)) public chapters;
     mapping(bytes32 => mapping(address => uint256)) public userUnlockedChapters; // bookId => user => latest unlocked chapter
     mapping(address => mapping(bytes32 => mapping(uint256 => bool))) public hasUnlockedChapter;
-    mapping(address => mapping(bytes32 => mapping(uint256 => bool))) public hasCompletedChapter;
+    // hasCompletedChapter mapping removed with read-to-earn
     
     // Revenue tracking
     mapping(bytes32 => uint256) public bookTotalRevenue;
@@ -186,35 +180,7 @@ contract ChapterAccessController is AccessControl, Pausable, ReentrancyGuard {
         emit ChapterUnlocked(msg.sender, bookId, chapterNumber, price, block.timestamp);
     }
 
-    /**
-     * @dev Mark chapter as completed and distribute read rewards
-     * @param bookId Book identifier
-     * @param chapterNumber Chapter that was completed
-     * @param readingTime Time spent reading (for validation)
-     */
-    function completeChapter(
-        bytes32 bookId,
-        uint256 chapterNumber,
-        uint256 readingTime
-    ) external whenNotPaused nonReentrant chapterExists(bookId, chapterNumber) {
-        require(hasUnlockedChapter[msg.sender][bookId][chapterNumber], "ChapterAccess: chapter not unlocked");
-        require(!hasCompletedChapter[msg.sender][bookId][chapterNumber], "ChapterAccess: already completed");
-        require(readingTime >= 30, "ChapterAccess: insufficient reading time"); // Minimum 30 seconds
-        
-        ChapterInfo memory chapter = chapters[bookId][chapterNumber];
-        
-        // Calculate read reward based on word count and reading time
-        uint256 rewardAmount = _calculateReadReward(chapter.wordCount, readingTime);
-        
-        // Mark as completed
-        hasCompletedChapter[msg.sender][bookId][chapterNumber] = true;
-        
-        // Distribute read reward through rewards manager
-        bytes32 contextId = keccak256(abi.encodePacked(bookId, chapterNumber));
-        rewardsManager.distributeReward(msg.sender, rewardAmount, "read", contextId);
-        
-        emit ChapterCompleted(msg.sender, bookId, chapterNumber, rewardAmount, block.timestamp);
-    }
+    // completeChapter function removed with read-to-earn
 
     /**
      * @dev Batch unlock multiple chapters for gas efficiency
@@ -297,26 +263,7 @@ contract ChapterAccessController is AccessControl, Pausable, ReentrancyGuard {
         emit AuthorRevenueDistributed(bookId, chapterNumber, author, authorShare);
     }
 
-    /**
-     * @dev Calculate read reward based on chapter length and reading engagement
-     */
-    function _calculateReadReward(uint256 wordCount, uint256 readingTime) internal view returns (uint256) {
-        // Base reward
-        uint256 reward = baseReadReward;
-        
-        // Bonus for longer chapters (up to 2x for 2000+ words)
-        if (wordCount >= 1000) {
-            uint256 lengthBonus = (wordCount - 1000) * baseReadReward / 2000;
-            reward += lengthBonus;
-        }
-        
-        // Cap at 2x base reward
-        if (reward > baseReadReward * 2) {
-            reward = baseReadReward * 2;
-        }
-        
-        return reward;
-    }
+    // _calculateReadReward function removed with read-to-earn
 
     // View functions
 
@@ -379,24 +326,20 @@ contract ChapterAccessController is AccessControl, Pausable, ReentrancyGuard {
         bytes32 bookId
     ) external view returns (
         uint256 latestUnlockedChapter,
-        uint256 totalUnlocked,
-        uint256 totalCompleted
+        uint256 totalUnlocked
     ) {
         latestUnlockedChapter = userUnlockedChapters[bookId][user];
         
-        // Count unlocked and completed chapters
+        // Count unlocked chapters
         for (uint256 i = 1; i <= latestUnlockedChapter + 10; i++) { // Check a reasonable range
             if (chapters[bookId][i].isActive) {
                 if (hasUnlockedChapter[user][bookId][i]) {
                     totalUnlocked++;
                 }
-                if (hasCompletedChapter[user][bookId][i]) {
-                    totalCompleted++;
-                }
             }
         }
         
-        return (latestUnlockedChapter, totalUnlocked, totalCompleted);
+        return (latestUnlockedChapter, totalUnlocked);
     }
 
     // Admin functions
@@ -404,12 +347,10 @@ contract ChapterAccessController is AccessControl, Pausable, ReentrancyGuard {
     /**
      * @dev Update pricing configuration
      */
-    function updatePricing(uint256 _unlockPrice, uint256 _baseReadReward) external onlyRole(ADMIN_ROLE) {
+    function updatePricing(uint256 _unlockPrice) external onlyRole(ADMIN_ROLE) {
         require(_unlockPrice > 0, "ChapterAccess: invalid unlock price");
-        require(_baseReadReward > 0, "ChapterAccess: invalid read reward");
         
         unlockPrice = _unlockPrice;
-        baseReadReward = _baseReadReward;
     }
 
     /**

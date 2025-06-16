@@ -61,9 +61,11 @@ export default function HomePage() {
               </p>
 
               <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
-                <button className="rounded-full bg-red-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all hover:shadow-xl hover:bg-red-700">
-                  Read & Earn Rewards
-                </button>
+                <Link href="/read">
+                  <button className="rounded-full bg-red-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all hover:shadow-xl hover:bg-red-700">
+                    Start Reading
+                  </button>
+                </Link>
 
                 <Link href="/write">
                   <button className="rounded-full border-2 border-gray-800 px-8 py-4 text-lg font-semibold text-gray-800 transition-all hover:bg-gray-800 hover:text-white">

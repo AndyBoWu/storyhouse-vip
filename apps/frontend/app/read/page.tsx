@@ -149,7 +149,7 @@ export default function ReadPage() {
             </h1>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
               Explore captivating books from talented creators around the world. 
-              Earn $TIP tokens while reading and support your favorite authors.
+              Support your favorite authors by unlocking their premium chapters.
             </p>
           </div>
 
