@@ -5,6 +5,8 @@ import "forge-std/Test.sol";
 import "../src/HybridRevenueController.sol";
 import "../src/RewardsManager.sol";
 import "../src/TIPToken.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
+import "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 
 contract HybridRevenueControllerTest is Test {
     HybridRevenueController public hybridRevenue;
@@ -656,5 +658,378 @@ contract HybridRevenueControllerTest is Test {
         
         vm.prank(reader);
         hybridRevenue.unlockChapter(PARENT_BOOK_ID, 1); // Should work
+    }
+
+    // =============== EDGE CASE TESTS FOR 100% COVERAGE ===============
+
+    function testRegisterBookWithZeroAddress() public {
+        vm.prank(owner);
+        vm.expectRevert("HybridRevenue: zero curator address");
+        hybridRevenue.registerBook(BOOK_ID, address(0), false, bytes32(0), 5, "QmTestMetadata");
+    }
+
+    function testRegisterBookAlreadyExists() public {
+        vm.prank(owner);
+        hybridRevenue.registerBook(BOOK_ID, curator, false, bytes32(0), 5, "QmTestMetadata");
+        
+        vm.prank(owner);
+        vm.expectRevert("HybridRevenue: book already registered");
+        hybridRevenue.registerBook(BOOK_ID, curator, false, bytes32(0), 5, "QmTestMetadata");
+    }
+
+    function testSetChapterAttributionZeroAuthor() public {
+        vm.prank(owner);
+        hybridRevenue.registerBook(BOOK_ID, curator, false, bytes32(0), 5, "QmTestMetadata");
+        
+        vm.prank(curator);
+        vm.expectRevert("HybridRevenue: zero author address");
+        hybridRevenue.setChapterAttribution(BOOK_ID, 1, address(0), BOOK_ID, CHAPTER_PRICE, true);
+    }
+
+    function testSetChapterAttributionInvalidChapterNumber() public {
+        vm.prank(owner);
+        hybridRevenue.registerBook(BOOK_ID, curator, false, bytes32(0), 5, "QmTestMetadata");
+        
+        vm.prank(curator);
+        vm.expectRevert("HybridRevenue: invalid chapter");
+        hybridRevenue.setChapterAttribution(BOOK_ID, 0, author1, BOOK_ID, CHAPTER_PRICE, true);
+        
+        vm.prank(curator);
+        vm.expectRevert("HybridRevenue: invalid chapter");
+        hybridRevenue.setChapterAttribution(BOOK_ID, 6, author1, BOOK_ID, CHAPTER_PRICE, true);
+    }
+
+    function testSetChapterAttributionInactiveBook() public {
+        vm.prank(owner);
+        hybridRevenue.registerBook(BOOK_ID, curator, false, bytes32(0), 5, "QmTestMetadata");
+        
+        vm.prank(owner);
+        hybridRevenue.deactivateBook(BOOK_ID);
+        
+        vm.prank(curator);
+        vm.expectRevert("HybridRevenue: book not active");
+        hybridRevenue.setChapterAttribution(BOOK_ID, 1, author1, BOOK_ID, CHAPTER_PRICE, true);
+    }
+
+    function testUnlockChapterNotConfigured() public {
+        vm.prank(owner);
+        hybridRevenue.registerBook(BOOK_ID, curator, false, bytes32(0), 5, "QmTestMetadata");
+        
+        vm.prank(reader);
+        vm.expectRevert("HybridRevenue: chapter not configured");
+        hybridRevenue.unlockChapter(BOOK_ID, 1);
+    }
+
+    function testUnlockChapterInvalidPrice() public {
+        vm.prank(owner);
+        hybridRevenue.registerBook(BOOK_ID, curator, false, bytes32(0), 5, "QmTestMetadata");
+        
+        vm.prank(curator);
+        hybridRevenue.setChapterAttribution(BOOK_ID, 1, author1, BOOK_ID, 0, true); // Zero price
+        
+        vm.prank(reader);
+        vm.expectRevert("HybridRevenue: invalid price");
+        hybridRevenue.unlockChapter(BOOK_ID, 1);
+    }
+
+    function testUnlockChapterInsufficientBalance() public {
+        vm.prank(owner);
+        hybridRevenue.registerBook(BOOK_ID, curator, false, bytes32(0), 5, "QmTestMetadata");
+        
+        vm.prank(curator);
+        hybridRevenue.setChapterAttribution(BOOK_ID, 1, author1, BOOK_ID, CHAPTER_PRICE, true);
+        
+        // User with no tokens
+        address poorReader = address(0x999);
+        vm.prank(poorReader);
+        vm.expectRevert(abi.encodeWithSelector(IERC20Errors.ERC20InsufficientAllowance.selector, address(hybridRevenue), 0, CHAPTER_PRICE));
+        hybridRevenue.unlockChapter(BOOK_ID, 1);
+    }
+
+    function testUnlockChapterInvalidChapterNumber() public {
+        vm.prank(owner);
+        hybridRevenue.registerBook(BOOK_ID, curator, false, bytes32(0), 5, "QmTestMetadata");
+        
+        vm.prank(reader);
+        vm.expectRevert("HybridRevenue: invalid chapter");
+        hybridRevenue.unlockChapter(BOOK_ID, 0);
+        
+        vm.prank(reader);
+        vm.expectRevert("HybridRevenue: invalid chapter");
+        hybridRevenue.unlockChapter(BOOK_ID, 6);
+    }
+
+    function testBatchUnlockEmptyArray() public {
+        vm.prank(owner);
+        hybridRevenue.registerBook(BOOK_ID, curator, false, bytes32(0), 5, "QmTestMetadata");
+        
+        uint256[] memory emptyArray = new uint256[](0);
+        
+        vm.prank(reader);
+        vm.expectRevert("HybridRevenue: empty array");
+        hybridRevenue.batchUnlockChapters(BOOK_ID, emptyArray);
+    }
+
+    function testBatchUnlockTooManyChapters() public {
+        vm.prank(owner);
+        hybridRevenue.registerBook(BOOK_ID, curator, false, bytes32(0), 15, "QmTestMetadata");
+        
+        uint256[] memory tooManyChapters = new uint256[](11); // More than 10
+        for (uint256 i = 0; i < 11; i++) {
+            tooManyChapters[i] = i + 1;
+        }
+        
+        vm.prank(reader);
+        vm.expectRevert("HybridRevenue: too many chapters");
+        hybridRevenue.batchUnlockChapters(BOOK_ID, tooManyChapters);
+    }
+
+    function testBatchUnlockAlreadyUnlockedChapter() public {
+        vm.prank(owner);
+        hybridRevenue.registerBook(BOOK_ID, curator, false, bytes32(0), 5, "QmTestMetadata");
+        
+        vm.prank(curator);
+        hybridRevenue.setChapterAttribution(BOOK_ID, 1, author1, BOOK_ID, CHAPTER_PRICE, true);
+        
+        vm.prank(reader);
+        hybridRevenue.unlockChapter(BOOK_ID, 1);
+        
+        uint256[] memory chapters = new uint256[](1);
+        chapters[0] = 1;
+        
+        vm.prank(reader);
+        vm.expectRevert("HybridRevenue: chapter already unlocked");
+        hybridRevenue.batchUnlockChapters(BOOK_ID, chapters);
+    }
+
+    function testBatchUnlockInvalidChapterNumber() public {
+        vm.prank(owner);
+        hybridRevenue.registerBook(BOOK_ID, curator, false, bytes32(0), 5, "QmTestMetadata");
+        
+        // Set attribution for chapter 1 so it passes the configured check
+        vm.prank(curator);
+        hybridRevenue.setChapterAttribution(BOOK_ID, 1, author1, BOOK_ID, CHAPTER_PRICE, true);
+        
+        uint256[] memory chapters = new uint256[](2);
+        chapters[0] = 1;
+        chapters[1] = 6; // Invalid chapter number
+        
+        vm.prank(reader);
+        vm.expectRevert("HybridRevenue: invalid chapter");
+        hybridRevenue.batchUnlockChapters(BOOK_ID, chapters);
+    }
+
+    function testBatchUnlockNotConfiguredChapter() public {
+        vm.prank(owner);
+        hybridRevenue.registerBook(BOOK_ID, curator, false, bytes32(0), 5, "QmTestMetadata");
+        
+        vm.prank(curator);
+        hybridRevenue.setChapterAttribution(BOOK_ID, 1, author1, BOOK_ID, CHAPTER_PRICE, true);
+        // Chapter 2 not configured
+        
+        uint256[] memory chapters = new uint256[](2);
+        chapters[0] = 1;
+        chapters[1] = 2; // Not configured
+        
+        vm.prank(reader);
+        vm.expectRevert("HybridRevenue: chapter not configured");
+        hybridRevenue.batchUnlockChapters(BOOK_ID, chapters);
+    }
+
+    function testRevenueDistributionZeroShares() public {
+        vm.prank(owner);
+        hybridRevenue.registerBook(BOOK_ID, curator, false, bytes32(0), 5, "QmTestMetadata");
+        
+        // Update revenue sharing to have zero curator share
+        vm.prank(owner);
+        hybridRevenue.updateRevenueSharing(90, 0, 10);
+        
+        vm.prank(curator);
+        hybridRevenue.setChapterAttribution(BOOK_ID, 1, author1, BOOK_ID, CHAPTER_PRICE, true);
+        
+        uint256 curatorInitialBalance = tipToken.balanceOf(curator);
+        
+        vm.prank(reader);
+        hybridRevenue.unlockChapter(BOOK_ID, 1);
+        
+        // Curator should receive nothing
+        assertEq(tipToken.balanceOf(curator), curatorInitialBalance);
+    }
+
+    function testWithdrawPlatformEarningsZeroAddress() public {
+        vm.prank(owner);
+        vm.expectRevert("HybridRevenue: zero address");
+        hybridRevenue.withdrawPlatformEarnings(address(0), 1 ether);
+    }
+
+    function testWithdrawPlatformEarningsInsufficientEarnings() public {
+        vm.prank(owner);
+        vm.expectRevert("HybridRevenue: insufficient platform earnings");
+        hybridRevenue.withdrawPlatformEarnings(owner, 1 ether);
+    }
+
+    function testOnlyAdminCanWithdrawPlatformEarnings() public {
+        vm.prank(curator);
+        vm.expectRevert();
+        hybridRevenue.withdrawPlatformEarnings(curator, 1 ether);
+    }
+
+    function testOnlyAdminCanUpdateRevenueSharing() public {
+        vm.prank(curator);
+        vm.expectRevert();
+        hybridRevenue.updateRevenueSharing(60, 30, 10);
+    }
+
+    function testOnlyAdminCanDeactivateBook() public {
+        vm.prank(owner);
+        hybridRevenue.registerBook(BOOK_ID, curator, false, bytes32(0), 5, "QmTestMetadata");
+        
+        vm.prank(curator);
+        vm.expectRevert();
+        hybridRevenue.deactivateBook(BOOK_ID);
+    }
+
+    function testPauseAndUnpauseContract() public {
+        vm.prank(owner);
+        hybridRevenue.registerBook(BOOK_ID, curator, false, bytes32(0), 5, "QmTestMetadata");
+        
+        vm.prank(curator);
+        hybridRevenue.setChapterAttribution(BOOK_ID, 1, author1, BOOK_ID, CHAPTER_PRICE, true);
+        
+        vm.prank(owner);
+        hybridRevenue.pause();
+        
+        vm.prank(reader);
+        vm.expectRevert(abi.encodeWithSelector(Pausable.EnforcedPause.selector));
+        hybridRevenue.unlockChapter(BOOK_ID, 1);
+        
+        vm.prank(owner);
+        hybridRevenue.unpause();
+        
+        vm.prank(reader);
+        hybridRevenue.unlockChapter(BOOK_ID, 1); // Should work now
+    }
+
+    function testOnlyAdminCanPauseAndUnpause() public {
+        vm.prank(curator);
+        vm.expectRevert();
+        hybridRevenue.pause();
+        
+        vm.prank(owner);
+        hybridRevenue.pause();
+        
+        vm.prank(curator);
+        vm.expectRevert();
+        hybridRevenue.unpause();
+    }
+
+    function testGetChapterInfoNonExistent() public {
+        vm.prank(owner);
+        hybridRevenue.registerBook(BOOK_ID, curator, false, bytes32(0), 5, "QmTestMetadata");
+        
+        (address originalAuthor, bytes32 sourceBookId, uint256 unlockPrice, bool isOriginalContent) = 
+            hybridRevenue.getChapterInfo(BOOK_ID, 1);
+        
+        assertEq(originalAuthor, address(0));
+        assertEq(sourceBookId, bytes32(0));
+        assertEq(unlockPrice, 0);
+        assertEq(isOriginalContent, false);
+    }
+
+    function testGetBookInfoNonExistent() public {
+        (address curator_, bool isDerivative, bytes32 parentBookId, uint256 totalChapters, bool isActive, string memory ipfsHash) = 
+            hybridRevenue.getBookInfo(bytes32("nonexistent"));
+        
+        assertEq(curator_, address(0));
+        assertEq(isDerivative, false);
+        assertEq(parentBookId, bytes32(0));
+        assertEq(totalChapters, 0);
+        assertEq(isActive, false);
+        assertEq(bytes(ipfsHash).length, 0);
+    }
+
+    function testGetUserBookProgressNoBook() public {
+        (uint256 chaptersUnlocked, uint256 totalSpent, uint256 totalChapters) = 
+            hybridRevenue.getUserBookProgress(reader, bytes32("nonexistent"));
+        
+        assertEq(chaptersUnlocked, 0);
+        assertEq(totalSpent, 0);
+        assertEq(totalChapters, 0);
+    }
+
+    function testRevenueStatsTracking() public {
+        vm.prank(owner);
+        hybridRevenue.registerBook(BOOK_ID, curator, false, bytes32(0), 3, "QmTestMetadata");
+        
+        vm.startPrank(curator);
+        hybridRevenue.setChapterAttribution(BOOK_ID, 1, author1, BOOK_ID, CHAPTER_PRICE, true);
+        hybridRevenue.setChapterAttribution(BOOK_ID, 2, author2, BOOK_ID, CHAPTER_PRICE * 2, true);
+        hybridRevenue.setChapterAttribution(BOOK_ID, 3, author1, BOOK_ID, CHAPTER_PRICE / 2, true);
+        vm.stopPrank();
+        
+        vm.startPrank(reader);
+        hybridRevenue.unlockChapter(BOOK_ID, 1);
+        hybridRevenue.unlockChapter(BOOK_ID, 2);
+        hybridRevenue.unlockChapter(BOOK_ID, 3);
+        vm.stopPrank();
+        
+        (uint256 totalRevenue, uint256 totalChapters, address bookCurator) = 
+            hybridRevenue.getRevenueStats(BOOK_ID);
+        
+        uint256 expectedTotalRevenue = CHAPTER_PRICE + (CHAPTER_PRICE * 2) + (CHAPTER_PRICE / 2);
+        assertEq(totalRevenue, expectedTotalRevenue);
+        assertEq(totalChapters, 3);
+        assertEq(bookCurator, curator);
+        
+        // Check author earnings tracking
+        uint256 expectedAuthor1Earnings = ((CHAPTER_PRICE * 70) / 100) + (((CHAPTER_PRICE / 2) * 70) / 100);
+        uint256 expectedAuthor2Earnings = (((CHAPTER_PRICE * 2) * 70) / 100);
+        
+        assertEq(hybridRevenue.authorTotalEarnings(author1), expectedAuthor1Earnings);
+        assertEq(hybridRevenue.authorTotalEarnings(author2), expectedAuthor2Earnings);
+    }
+
+    function testComplexBatchUnlockWithDifferentPrices() public {
+        vm.prank(owner);
+        hybridRevenue.registerBook(BOOK_ID, curator, false, bytes32(0), 5, "QmTestMetadata");
+        
+        uint256 price1 = 0.5 ether;
+        uint256 price2 = 1.5 ether;
+        uint256 price3 = 2 ether;
+        
+        vm.startPrank(curator);
+        hybridRevenue.setChapterAttribution(BOOK_ID, 1, author1, BOOK_ID, price1, true);
+        hybridRevenue.setChapterAttribution(BOOK_ID, 2, author2, BOOK_ID, price2, true);
+        hybridRevenue.setChapterAttribution(BOOK_ID, 3, author1, BOOK_ID, price3, true);
+        vm.stopPrank();
+        
+        uint256[] memory chapters = new uint256[](3);
+        chapters[0] = 1;
+        chapters[1] = 2;
+        chapters[2] = 3;
+        
+        uint256 readerInitialBalance = tipToken.balanceOf(reader);
+        uint256 author1InitialBalance = tipToken.balanceOf(author1);
+        uint256 author2InitialBalance = tipToken.balanceOf(author2);
+        
+        vm.prank(reader);
+        hybridRevenue.batchUnlockChapters(BOOK_ID, chapters);
+        
+        uint256 totalCost = price1 + price2 + price3;
+        uint256 expectedAuthor1Share = ((price1 * 70) / 100) + ((price3 * 70) / 100);
+        uint256 expectedAuthor2Share = (price2 * 70) / 100;
+        
+        assertEq(tipToken.balanceOf(reader), readerInitialBalance - totalCost);
+        assertEq(tipToken.balanceOf(author1), author1InitialBalance + expectedAuthor1Share);
+        assertEq(tipToken.balanceOf(author2), author2InitialBalance + expectedAuthor2Share);
+        
+        // Check user progress
+        assertEq(hybridRevenue.userTotalSpent(reader, BOOK_ID), totalCost);
+        
+        (uint256 chaptersUnlocked, uint256 totalSpent, uint256 totalChapters) = 
+            hybridRevenue.getUserBookProgress(reader, BOOK_ID);
+        assertEq(chaptersUnlocked, 3);
+        assertEq(totalSpent, totalCost);
+        assertEq(totalChapters, 5);
     }
 }
