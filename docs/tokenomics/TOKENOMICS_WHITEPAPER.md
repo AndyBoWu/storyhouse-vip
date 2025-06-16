@@ -228,13 +228,14 @@ StoryHouse.vip introduces the first **Read-to-Earn storytelling ecosystem** powe
 
 | Activity                 | Immediate Reward | Ongoing Revenue | Total Potential      |
 | ------------------------ | ---------------- | --------------- | -------------------- |
-| **Story Creation**       | 50 TIP           | 0.001 TIP/read  | 50 + reads           |
-| **Chapter Publication**  | 20 TIP           | 5 TIP/unlock    | 20 + unlocks         |
-| **Quality Bonus**        | 25 TIP           | 2x engagement   | 25 + 2x              |
+| **Story Creation**       | 0 TIP (removed)  | 0.001 TIP/read  | reads only           |
+| **Chapter Publication**  | 0 TIP (removed)  | 5 TIP/unlock    | unlocks only         |
+| **Quality Bonus**        | 25 TIP (human)   | 2x engagement   | 25 + 2x              |
 | **Remix Licensing**      | 0                | 25% royalty     | 25% of remix revenue |
-| **Milestone (1K reads)** | 100 TIP          | Higher rates    | 100 + premium        |
+| **Reader Purchases**     | 0                | 80% revenue     | 80% of sales         |
 
 **Creator Potential**: **$500-5000/month** for quality, consistent creators
+**Anti-Bot Protection**: Removed automatic creation rewards to prevent AI farming
 
 ### **Platform Economics**
 
@@ -284,13 +285,14 @@ Long-term Viability = (Token Utility Expansion) × (User Base Growth)
 **Unlike traditional token inflation**, TIP emission is tied to value creation:
 
 ```solidity
-// Simplified emission logic
+// Simplified emission logic - Anti-AI farming protected
 function calculateDailyEmission() {
     uint256 readingActivity = totalChaptersRead * readRewardPerChapter;
-    uint256 creationActivity = totalChaptersPublished * creationRewardPerChapter;
-    uint256 qualityBonuses = calculateQualityBonuses();
+    // creationActivity removed - no automatic creation rewards
+    uint256 qualityBonuses = calculateHumanVerifiedQualityBonuses();
+    uint256 purchaseActivity = totalChaptersPurchased * creatorSharePercentage;
 
-    uint256 totalEmission = readingActivity + creationActivity + qualityBonuses;
+    uint256 totalEmission = readingActivity + qualityBonuses + purchaseActivity;
 
     // Apply sustainability caps
     if (totalEmission > maxDailyEmission) {

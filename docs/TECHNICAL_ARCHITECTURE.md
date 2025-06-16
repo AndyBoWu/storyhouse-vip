@@ -74,15 +74,22 @@ StoryHouse.vip is a revolutionary Web3 publishing platform built on Story Protoc
 ### Smart Contracts ✅ Production Ready
 **Network:** Story Protocol Aeneid Testnet (Chain ID: 1315)
 **Status:** 100% test coverage achieved (220+ comprehensive tests)
+**Security:** Anti-AI farming protection implemented
 
 | Contract | Address | Purpose | Status |
 |----------|---------|---------|--------|
-| TIP Token | `0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E` | Platform token & royalty payments | ✅ 100% tested |
-| Rewards Manager | `0xf5ae031ba92295c2ae86a99e88f09989339707e5` | Reward distribution & claiming | ✅ 100% tested |
+| TIP Token | `0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E` | Platform token with 10B supply cap | ✅ 100% tested (417 lines) |
+| Rewards Manager | `0xf5ae031ba92295c2ae86a99e88f09989339707e5` | Secure reward orchestration | ✅ 100% tested (573 lines) |
 | SPG NFT Contract | `0x26b6aa7e7036fc9e8fa2d8184c2cf07ae2e2412d` | IP asset NFTs | ✅ Integrated |
-| UnifiedRewardsController | TBD | Consolidated reward logic | ✅ 100% tested |
+| UnifiedRewardsController | TBD | Anti-bot reward logic | ✅ 100% tested |
 | ChapterAccessController | TBD | Chapter monetization | ✅ 100% tested |
 | HybridRevenueController | TBD | Multi-author revenue sharing | ✅ 100% tested |
+
+**Key Security Enhancements:**
+- Removed automatic creation rewards (50 TIP/story, 20 TIP/chapter) to prevent AI farming
+- Rewards now based solely on genuine reader engagement and purchases
+- Quality bonuses require human review and verification
+- Comprehensive edge case testing including zero amounts, overflows, and duplicate handling
 
 ## 🆕 **Unified IP Registration Architecture**
 
@@ -256,10 +263,16 @@ Revenue Data ─→ Economic Modeling ─→ Optimization ─→ Recommendations
 ### Enhanced Revenue Distribution
 1. Reader purchases chapter access or creates derivative
 2. AI analyzes content relationships and inheritance
-3. TIP tokens distributed to creator and parent IP holders
+3. TIP tokens distributed to creator and parent IP holders (no automatic creation rewards)
 4. Royalties calculated based on license terms and derivative chain
-5. Automatic distribution via smart contracts with blockchain verification
+5. Automatic distribution via smart contracts with anti-bot protection
 6. Real-time analytics update performance metrics
+
+**Secure Reward Model:**
+- Authors earn through: reader purchases, remix licensing, human-verified quality bonuses
+- Readers earn through: chapter completion rewards, reading streaks, engagement
+- No exploitable automatic rewards for content creation
+- All rewards require genuine user interaction
 
 ## Security & Performance
 
