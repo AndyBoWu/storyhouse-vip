@@ -27,7 +27,7 @@ import "../src/HybridRevenueController.sol";
  * - Validates all integrations
  * - Can be run multiple times safely
  */
-contract Deploy5ContractArchitecture is Script {
+contract Deploy is Script {
     // Deployment registry for the 5-contract architecture
     struct DeploymentRegistry {
         address tipToken;

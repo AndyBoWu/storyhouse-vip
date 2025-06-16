@@ -62,6 +62,6 @@
   },
   "deploymentScripts": {
     "primary": "deploy.sh",
-    "foundryScript": "script/Deploy5ContractArchitecture.s.sol"
+    "foundryScript": "script/Deploy.s.sol"
   }
 }
