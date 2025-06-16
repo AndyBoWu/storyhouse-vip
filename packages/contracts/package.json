@@ -8,8 +8,19 @@
     "test": "forge test",
     "test:coverage": "forge coverage",
     "test:gas": "forge test --gas-report",
-    "deploy:local": "forge script script/Deploy.s.sol --rpc-url http://localhost:8545 --broadcast",
-    "deploy:testnet": "forge script script/Deploy.s.sol --rpc-url $STORY_RPC_URL --broadcast --verify",
+    "test:verbose": "forge test -vvv",
+    
+    "deploy:5-contract:local": "forge script script/Deploy5ContractArchitecture.s.sol --rpc-url http://localhost:8545 --broadcast",
+    "deploy:5-contract:testnet": "forge script script/Deploy5ContractArchitecture.s.sol --rpc-url $STORY_RPC_URL --broadcast --verify",
+    "deploy:5-contract:dry-run": "forge script script/Deploy5ContractArchitecture.s.sol --rpc-url $STORY_RPC_URL",
+    
+    "verify:deployment": "forge script script/VerifyDeployment.s.sol --rpc-url $STORY_RPC_URL",
+    "verify:deployment:local": "forge script script/VerifyDeployment.s.sol --rpc-url http://localhost:8545",
+    
+    "deploy:legacy": "forge script script/DeployAll.s.sol --rpc-url $STORY_RPC_URL --broadcast --verify",
+    "deploy:local": "forge script script/Deploy5ContractArchitecture.s.sol --rpc-url http://localhost:8545 --broadcast",
+    "deploy:testnet": "forge script script/Deploy5ContractArchitecture.s.sol --rpc-url $STORY_RPC_URL --broadcast --verify",
+    
     "verify": "forge verify-contract",
     "clean": "forge clean",
     "fmt": "forge fmt",

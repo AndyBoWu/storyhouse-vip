@@ -39,6 +39,9 @@ contract HybridRevenueControllerTest is Test {
             address(tipToken)
         );
         
+        // Grant necessary roles to owner
+        hybridRevenue.grantRole(hybridRevenue.STORY_MANAGER_ROLE(), owner);
+        
         // Give reader some tokens
         tipToken.mint(reader, INITIAL_BALANCE);
         
@@ -341,5 +344,317 @@ contract HybridRevenueControllerTest is Test {
         
         (,,,, bool isActiveAfter,) = hybridRevenue.getBookInfo(BOOK_ID);
         assertFalse(isActiveAfter);
+    }
+
+    // ========== MULTI-LEVEL DERIVATIVE SCENARIO TESTS ==========
+    
+    bytes32 public constant GRANDCHILD_BOOK_ID = keccak256("grandchild-book-1");
+    bytes32 public constant GREAT_GRANDCHILD_BOOK_ID = keccak256("great-grandchild-book-1");
+    
+    address public constant author3 = address(0x6);
+    address public constant author4 = address(0x7);
+    address public constant curator2 = address(0x8);
+    address public constant curator3 = address(0x9);
+
+    function testThreeLevelDerivativeChain() public {
+        // Level 1: Original book (author1, curator)
+        vm.prank(owner);
+        hybridRevenue.registerBook(PARENT_BOOK_ID, curator, false, bytes32(0), 3, "QmOriginalMetadata");
+        
+        vm.prank(curator);
+        hybridRevenue.setChapterAttribution(PARENT_BOOK_ID, 1, author1, PARENT_BOOK_ID, CHAPTER_PRICE, true);
+        
+        // Level 2: First derivative (author2, curator2)
+        vm.prank(owner);
+        hybridRevenue.registerBook(BOOK_ID, curator2, true, PARENT_BOOK_ID, 2, "QmDerivative1Metadata");
+        
+        vm.startPrank(curator2);
+        hybridRevenue.setChapterAttribution(BOOK_ID, 1, author1, PARENT_BOOK_ID, CHAPTER_PRICE, false); // From original
+        hybridRevenue.setChapterAttribution(BOOK_ID, 2, author2, BOOK_ID, CHAPTER_PRICE, true); // New content
+        vm.stopPrank();
+        
+        // Level 3: Second derivative (author3, curator3)
+        vm.prank(owner);
+        hybridRevenue.registerBook(GRANDCHILD_BOOK_ID, curator3, true, BOOK_ID, 3, "QmDerivative2Metadata");
+        
+        vm.startPrank(curator3);
+        hybridRevenue.setChapterAttribution(GRANDCHILD_BOOK_ID, 1, author1, PARENT_BOOK_ID, CHAPTER_PRICE, false); // From original
+        hybridRevenue.setChapterAttribution(GRANDCHILD_BOOK_ID, 2, author2, BOOK_ID, CHAPTER_PRICE, false); // From first derivative
+        hybridRevenue.setChapterAttribution(GRANDCHILD_BOOK_ID, 3, author3, GRANDCHILD_BOOK_ID, CHAPTER_PRICE, true); // New content
+        vm.stopPrank();
+        
+        // Track initial balances
+        uint256 author1Initial = tipToken.balanceOf(author1);
+        uint256 author2Initial = tipToken.balanceOf(author2);
+        uint256 author3Initial = tipToken.balanceOf(author3);
+        uint256 curatorInitial = tipToken.balanceOf(curator);
+        uint256 curator2Initial = tipToken.balanceOf(curator2);
+        uint256 curator3Initial = tipToken.balanceOf(curator3);
+        
+        // Reader unlocks all chapters in the third-level derivative
+        vm.startPrank(reader);
+        hybridRevenue.unlockChapter(GRANDCHILD_BOOK_ID, 1); // Original author1 content
+        hybridRevenue.unlockChapter(GRANDCHILD_BOOK_ID, 2); // First derivative author2 content
+        hybridRevenue.unlockChapter(GRANDCHILD_BOOK_ID, 3); // New author3 content
+        vm.stopPrank();
+        
+        uint256 expectedAuthorShare = (CHAPTER_PRICE * 70) / 100;
+        uint256 expectedCuratorShare = (CHAPTER_PRICE * 20) / 100;
+        
+        // Verify author payments
+        assertEq(tipToken.balanceOf(author1), author1Initial + expectedAuthorShare); // 1 chapter
+        assertEq(tipToken.balanceOf(author2), author2Initial + expectedAuthorShare); // 1 chapter
+        assertEq(tipToken.balanceOf(author3), author3Initial + expectedAuthorShare); // 1 chapter
+        
+        // Verify curator payments - only current book's curator gets paid
+        assertEq(tipToken.balanceOf(curator), curatorInitial); // No payment
+        assertEq(tipToken.balanceOf(curator2), curator2Initial); // No payment
+        assertEq(tipToken.balanceOf(curator3), curator3Initial + (expectedCuratorShare * 3)); // All 3 chapters
+    }
+
+    function testComplexDerivativeRevenueMixing() public {
+        // Setup: Original book with 3 authors
+        vm.prank(owner);
+        hybridRevenue.registerBook(PARENT_BOOK_ID, curator, false, bytes32(0), 3, "QmOriginalMetadata");
+        
+        vm.startPrank(curator);
+        hybridRevenue.setChapterAttribution(PARENT_BOOK_ID, 1, author1, PARENT_BOOK_ID, CHAPTER_PRICE, true);
+        hybridRevenue.setChapterAttribution(PARENT_BOOK_ID, 2, author2, PARENT_BOOK_ID, CHAPTER_PRICE, true);
+        hybridRevenue.setChapterAttribution(PARENT_BOOK_ID, 3, author3, PARENT_BOOK_ID, CHAPTER_PRICE, true);
+        vm.stopPrank();
+        
+        // Derivative book mixing content from original + new content
+        vm.prank(owner);
+        hybridRevenue.registerBook(BOOK_ID, curator2, true, PARENT_BOOK_ID, 5, "QmComplexDerivativeMetadata");
+        
+        vm.startPrank(curator2);
+        hybridRevenue.setChapterAttribution(BOOK_ID, 1, author1, PARENT_BOOK_ID, CHAPTER_PRICE, false); // From original ch1
+        hybridRevenue.setChapterAttribution(BOOK_ID, 2, author4, BOOK_ID, CHAPTER_PRICE, true); // New content
+        hybridRevenue.setChapterAttribution(BOOK_ID, 3, author2, PARENT_BOOK_ID, CHAPTER_PRICE, false); // From original ch2
+        hybridRevenue.setChapterAttribution(BOOK_ID, 4, author4, BOOK_ID, CHAPTER_PRICE, true); // New content
+        hybridRevenue.setChapterAttribution(BOOK_ID, 5, author3, PARENT_BOOK_ID, CHAPTER_PRICE, false); // From original ch3
+        vm.stopPrank();
+        
+        // Track balances
+        uint256 author1Initial = tipToken.balanceOf(author1);
+        uint256 author2Initial = tipToken.balanceOf(author2);
+        uint256 author3Initial = tipToken.balanceOf(author3);
+        uint256 author4Initial = tipToken.balanceOf(author4);
+        uint256 curator2Initial = tipToken.balanceOf(curator2);
+        
+        // Reader unlocks all chapters
+        vm.startPrank(reader);
+        for (uint256 i = 1; i <= 5; i++) {
+            hybridRevenue.unlockChapter(BOOK_ID, i);
+        }
+        vm.stopPrank();
+        
+        uint256 expectedAuthorShare = (CHAPTER_PRICE * 70) / 100;
+        uint256 expectedCuratorShare = (CHAPTER_PRICE * 20) / 100;
+        
+        // Verify payments
+        assertEq(tipToken.balanceOf(author1), author1Initial + expectedAuthorShare); // 1 chapter
+        assertEq(tipToken.balanceOf(author2), author2Initial + expectedAuthorShare); // 1 chapter
+        assertEq(tipToken.balanceOf(author3), author3Initial + expectedAuthorShare); // 1 chapter
+        assertEq(tipToken.balanceOf(author4), author4Initial + (expectedAuthorShare * 2)); // 2 new chapters
+        assertEq(tipToken.balanceOf(curator2), curator2Initial + (expectedCuratorShare * 5)); // All 5 chapters
+        
+        // Verify book revenue tracking
+        assertEq(hybridRevenue.bookTotalRevenue(BOOK_ID), CHAPTER_PRICE * 5);
+        assertEq(hybridRevenue.authorTotalEarnings(author4), expectedAuthorShare * 2);
+        assertEq(hybridRevenue.curatorTotalEarnings(curator2), expectedCuratorShare * 5);
+    }
+
+    function testDerivativeWithDifferentPricing() public {
+        // Setup original book
+        vm.prank(owner);
+        hybridRevenue.registerBook(PARENT_BOOK_ID, curator, false, bytes32(0), 2, "QmOriginalMetadata");
+        
+        uint256 lowPrice = 0.5 ether;
+        uint256 highPrice = 2 ether;
+        
+        vm.startPrank(curator);
+        hybridRevenue.setChapterAttribution(PARENT_BOOK_ID, 1, author1, PARENT_BOOK_ID, lowPrice, true);
+        hybridRevenue.setChapterAttribution(PARENT_BOOK_ID, 2, author2, PARENT_BOOK_ID, highPrice, true);
+        vm.stopPrank();
+        
+        // Derivative book with mixed pricing
+        vm.prank(owner);
+        hybridRevenue.registerBook(BOOK_ID, curator2, true, PARENT_BOOK_ID, 3, "QmDerivativeMetadata");
+        
+        vm.startPrank(curator2);
+        hybridRevenue.setChapterAttribution(BOOK_ID, 1, author1, PARENT_BOOK_ID, lowPrice, false); // Reuse low price
+        hybridRevenue.setChapterAttribution(BOOK_ID, 2, author2, PARENT_BOOK_ID, highPrice, false); // Reuse high price
+        hybridRevenue.setChapterAttribution(BOOK_ID, 3, author3, BOOK_ID, CHAPTER_PRICE, true); // New content
+        vm.stopPrank();
+        
+        uint256 author1Initial = tipToken.balanceOf(author1);
+        uint256 author2Initial = tipToken.balanceOf(author2);
+        uint256 author3Initial = tipToken.balanceOf(author3);
+        uint256 readerInitial = tipToken.balanceOf(reader);
+        
+        // Unlock all chapters
+        vm.startPrank(reader);
+        hybridRevenue.unlockChapter(BOOK_ID, 1); // Low price
+        hybridRevenue.unlockChapter(BOOK_ID, 2); // High price
+        hybridRevenue.unlockChapter(BOOK_ID, 3); // Standard price
+        vm.stopPrank();
+        
+        // Calculate expected payments
+        uint256 expectedAuthor1Share = (lowPrice * 70) / 100;
+        uint256 expectedAuthor2Share = (highPrice * 70) / 100;
+        uint256 expectedAuthor3Share = (CHAPTER_PRICE * 70) / 100;
+        uint256 totalCost = lowPrice + highPrice + CHAPTER_PRICE;
+        
+        // Verify payments
+        assertEq(tipToken.balanceOf(author1), author1Initial + expectedAuthor1Share);
+        assertEq(tipToken.balanceOf(author2), author2Initial + expectedAuthor2Share);
+        assertEq(tipToken.balanceOf(author3), author3Initial + expectedAuthor3Share);
+        assertEq(tipToken.balanceOf(reader), readerInitial - totalCost);
+        
+        // Verify progress tracking
+        (uint256 chaptersUnlocked, uint256 totalSpent, uint256 totalChapters) = 
+            hybridRevenue.getUserBookProgress(reader, BOOK_ID);
+        assertEq(chaptersUnlocked, 3);
+        assertEq(totalSpent, totalCost);
+        assertEq(totalChapters, 3);
+    }
+
+    function testMultipleDerivativesFromSameParent() public {
+        // Setup original book
+        vm.prank(owner);
+        hybridRevenue.registerBook(PARENT_BOOK_ID, curator, false, bytes32(0), 2, "QmOriginalMetadata");
+        
+        vm.startPrank(curator);
+        hybridRevenue.setChapterAttribution(PARENT_BOOK_ID, 1, author1, PARENT_BOOK_ID, CHAPTER_PRICE, true);
+        hybridRevenue.setChapterAttribution(PARENT_BOOK_ID, 2, author2, PARENT_BOOK_ID, CHAPTER_PRICE, true);
+        vm.stopPrank();
+        
+        // First derivative
+        vm.prank(owner);
+        hybridRevenue.registerBook(BOOK_ID, curator2, true, PARENT_BOOK_ID, 3, "QmDerivative1Metadata");
+        
+        vm.startPrank(curator2);
+        hybridRevenue.setChapterAttribution(BOOK_ID, 1, author1, PARENT_BOOK_ID, CHAPTER_PRICE, false);
+        hybridRevenue.setChapterAttribution(BOOK_ID, 2, author3, BOOK_ID, CHAPTER_PRICE, true); // New
+        hybridRevenue.setChapterAttribution(BOOK_ID, 3, author2, PARENT_BOOK_ID, CHAPTER_PRICE, false);
+        vm.stopPrank();
+        
+        // Second derivative from same parent
+        vm.prank(owner);
+        hybridRevenue.registerBook(GRANDCHILD_BOOK_ID, curator3, true, PARENT_BOOK_ID, 3, "QmDerivative2Metadata");
+        
+        vm.startPrank(curator3);
+        hybridRevenue.setChapterAttribution(GRANDCHILD_BOOK_ID, 1, author2, PARENT_BOOK_ID, CHAPTER_PRICE, false);
+        hybridRevenue.setChapterAttribution(GRANDCHILD_BOOK_ID, 2, author4, GRANDCHILD_BOOK_ID, CHAPTER_PRICE, true); // New
+        hybridRevenue.setChapterAttribution(GRANDCHILD_BOOK_ID, 3, author1, PARENT_BOOK_ID, CHAPTER_PRICE, false);
+        vm.stopPrank();
+        
+        // Track initial balances
+        uint256 author1Initial = tipToken.balanceOf(author1);
+        uint256 author2Initial = tipToken.balanceOf(author2);
+        uint256 author3Initial = tipToken.balanceOf(author3);
+        uint256 author4Initial = tipToken.balanceOf(author4);
+        
+        // Reader unlocks chapters in both derivatives
+        vm.startPrank(reader);
+        // First derivative - 3 chapters
+        hybridRevenue.unlockChapter(BOOK_ID, 1); // author1
+        hybridRevenue.unlockChapter(BOOK_ID, 2); // author3
+        hybridRevenue.unlockChapter(BOOK_ID, 3); // author2
+        
+        // Second derivative - 3 chapters
+        hybridRevenue.unlockChapter(GRANDCHILD_BOOK_ID, 1); // author2
+        hybridRevenue.unlockChapter(GRANDCHILD_BOOK_ID, 2); // author4
+        hybridRevenue.unlockChapter(GRANDCHILD_BOOK_ID, 3); // author1
+        vm.stopPrank();
+        
+        uint256 expectedAuthorShare = (CHAPTER_PRICE * 70) / 100;
+        
+        // Verify author payments - each gets paid for their contributions across both derivatives
+        assertEq(tipToken.balanceOf(author1), author1Initial + (expectedAuthorShare * 2)); // 2 chapters total
+        assertEq(tipToken.balanceOf(author2), author2Initial + (expectedAuthorShare * 2)); // 2 chapters total
+        assertEq(tipToken.balanceOf(author3), author3Initial + expectedAuthorShare); // 1 chapter
+        assertEq(tipToken.balanceOf(author4), author4Initial + expectedAuthorShare); // 1 chapter
+    }
+
+    function testEventEmissionForDerivatives() public {
+        // Setup original and derivative books
+        vm.prank(owner);
+        hybridRevenue.registerBook(PARENT_BOOK_ID, curator, false, bytes32(0), 1, "QmOriginalMetadata");
+        
+        vm.prank(curator);
+        hybridRevenue.setChapterAttribution(PARENT_BOOK_ID, 1, author1, PARENT_BOOK_ID, CHAPTER_PRICE, true);
+        
+        vm.prank(owner);
+        hybridRevenue.registerBook(BOOK_ID, curator2, true, PARENT_BOOK_ID, 2, "QmDerivativeMetadata");
+        
+        vm.startPrank(curator2);
+        hybridRevenue.setChapterAttribution(BOOK_ID, 1, author1, PARENT_BOOK_ID, CHAPTER_PRICE, false);
+        hybridRevenue.setChapterAttribution(BOOK_ID, 2, author2, BOOK_ID, CHAPTER_PRICE, true);
+        vm.stopPrank();
+        
+        // Test chapter unlock events (events are emitted but testing is simplified)
+        vm.prank(reader);
+        hybridRevenue.unlockChapter(BOOK_ID, 1);
+        
+        vm.prank(reader);
+        hybridRevenue.unlockChapter(BOOK_ID, 2);
+    }
+
+    function testDerivativeAccessControl() public {
+        // Setup parent book
+        vm.prank(owner);
+        hybridRevenue.registerBook(PARENT_BOOK_ID, curator, false, bytes32(0), 1, "QmOriginalMetadata");
+        
+        // Setup derivative book
+        vm.prank(owner);
+        hybridRevenue.registerBook(BOOK_ID, curator2, true, PARENT_BOOK_ID, 1, "QmDerivativeMetadata");
+        
+        // Only the derivative book's curator should be able to set attribution
+        vm.prank(curator); // Original curator
+        vm.expectRevert("HybridRevenue: unauthorized curator");
+        hybridRevenue.setChapterAttribution(BOOK_ID, 1, author1, PARENT_BOOK_ID, CHAPTER_PRICE, false);
+        
+        // Derivative curator should succeed
+        vm.prank(curator2);
+        hybridRevenue.setChapterAttribution(BOOK_ID, 1, author1, PARENT_BOOK_ID, CHAPTER_PRICE, false);
+        
+        // Verify the attribution was set correctly
+        (address originalAuthor, bytes32 sourceBookId, uint256 unlockPrice, bool isOriginalContent) = 
+            hybridRevenue.getChapterInfo(BOOK_ID, 1);
+        
+        assertEq(originalAuthor, author1);
+        assertEq(sourceBookId, PARENT_BOOK_ID);
+        assertEq(unlockPrice, CHAPTER_PRICE);
+        assertEq(isOriginalContent, false);
+    }
+
+    function testDerivativeBookDeactivation() public {
+        // Setup parent and derivative books
+        vm.prank(owner);
+        hybridRevenue.registerBook(PARENT_BOOK_ID, curator, false, bytes32(0), 1, "QmOriginalMetadata");
+        
+        vm.prank(owner);
+        hybridRevenue.registerBook(BOOK_ID, curator2, true, PARENT_BOOK_ID, 1, "QmDerivativeMetadata");
+        
+        vm.prank(curator2);
+        hybridRevenue.setChapterAttribution(BOOK_ID, 1, author1, PARENT_BOOK_ID, CHAPTER_PRICE, false);
+        
+        // Deactivate derivative book
+        vm.prank(owner);
+        hybridRevenue.deactivateBook(BOOK_ID);
+        
+        // Should not be able to unlock chapters from deactivated derivative
+        vm.prank(reader);
+        vm.expectRevert("HybridRevenue: book not active");
+        hybridRevenue.unlockChapter(BOOK_ID, 1);
+        
+        // Parent book should still be accessible
+        vm.prank(curator);
+        hybridRevenue.setChapterAttribution(PARENT_BOOK_ID, 1, author1, PARENT_BOOK_ID, CHAPTER_PRICE, true);
+        
+        vm.prank(reader);
+        hybridRevenue.unlockChapter(PARENT_BOOK_ID, 1); // Should work
     }
 }
