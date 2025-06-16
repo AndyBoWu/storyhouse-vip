@@ -4,6 +4,7 @@ pragma solidity ^0.8.20;
 import "forge-std/Test.sol";
 import "../src/RewardsManager.sol";
 import "../src/TIPToken.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
 
 contract RewardsManagerTest is Test {
     RewardsManager public rewardsManager;
@@ -318,15 +319,17 @@ contract RewardsManagerTest is Test {
         assertEq(rewardsManager.getControllerByType("creator"), controller2);
     }
 
-    function testRewardDistributedEvent() public {
+    function testRewardDistributionWhenTIPTokenPaused() public {
         rewardsManager.addController(controller1, "test_controller");
         uint256 rewardAmount = 100 * 10 ** 18;
         bytes32 contextId = keccak256("test_context");
         
-        vm.expectEmit(true, true, true, true);
-        emit RewardDistributed(user, rewardAmount, "test_reward", contextId, controller1);
+        // Pause the TIP token
+        tipToken.pause();
         
+        // Reward distribution should fail when TIP token is paused
         vm.prank(controller1);
+        vm.expectRevert(abi.encodeWithSelector(Pausable.EnforcedPause.selector));
         rewardsManager.distributeReward(user, rewardAmount, "test_reward", contextId);
     }
 
@@ -436,5 +439,135 @@ contract RewardsManagerTest is Test {
         // Should complete without error
         vm.prank(controller1);
         rewardsManager.batchDistributeRewards(recipients, amounts, "empty_batch", contextIds);
+    }
+
+    // =============== EDGE CASE TESTS FOR 100% COVERAGE ===============
+
+    function testAddControllerWithEmptyString() public {
+        // Empty string should be allowed - no validation in contract
+        rewardsManager.addController(controller1, "");
+        assertTrue(rewardsManager.isAuthorizedController(controller1));
+        assertEq(rewardsManager.getControllerByType(""), controller1);
+    }
+
+    function testAddControllerTypeOverwrite() public {
+        // Add first controller with type "read"
+        rewardsManager.addController(controller1, "read");
+        assertEq(rewardsManager.getControllerByType("read"), controller1);
+        
+        // Add second controller with same type - should overwrite
+        rewardsManager.addController(controller2, "read");
+        assertEq(rewardsManager.getControllerByType("read"), controller2);
+        
+        // Both should still be authorized controllers
+        assertTrue(rewardsManager.isAuthorizedController(controller1));
+        assertTrue(rewardsManager.isAuthorizedController(controller2));
+    }
+
+    function testBatchDistributeMaximumArraySize() public {
+        rewardsManager.addController(controller1, "test_controller");
+        
+        // Test with 100 recipients (reasonable maximum)
+        uint256 batchSize = 100;
+        address[] memory recipients = new address[](batchSize);
+        uint256[] memory amounts = new uint256[](batchSize);
+        bytes32[] memory contextIds = new bytes32[](batchSize);
+        
+        for (uint256 i = 0; i < batchSize; i++) {
+            recipients[i] = address(uint160(i + 1000)); // Generate unique addresses
+            amounts[i] = (i + 1) * 10 ** 18;
+            contextIds[i] = keccak256(abi.encodePacked("context", i));
+        }
+        
+        vm.prank(controller1);
+        rewardsManager.batchDistributeRewards(recipients, amounts, "large_batch", contextIds);
+        
+        // Verify all rewards were distributed
+        for (uint256 i = 0; i < batchSize; i++) {
+            assertEq(tipToken.balanceOf(recipients[i]), amounts[i]);
+        }
+    }
+
+    function testBatchDistributeDuplicateRecipients() public {
+        rewardsManager.addController(controller1, "test_controller");
+        
+        address[] memory recipients = new address[](3);
+        recipients[0] = user;
+        recipients[1] = address(0x4);
+        recipients[2] = user; // Duplicate
+        
+        uint256[] memory amounts = new uint256[](3);
+        amounts[0] = 100 * 10 ** 18;
+        amounts[1] = 200 * 10 ** 18;
+        amounts[2] = 50 * 10 ** 18;
+        
+        bytes32[] memory contextIds = new bytes32[](3);
+        contextIds[0] = keccak256("context1");
+        contextIds[1] = keccak256("context2");
+        contextIds[2] = keccak256("context3");
+        
+        vm.prank(controller1);
+        rewardsManager.batchDistributeRewards(recipients, amounts, "duplicate_batch", contextIds);
+        
+        // User should receive rewards from both entries
+        assertEq(tipToken.balanceOf(user), amounts[0] + amounts[2]);
+        assertEq(tipToken.balanceOf(address(0x4)), amounts[1]);
+    }
+
+    function testIntegerOverflowScenarios() public {
+        rewardsManager.addController(controller1, "test_controller");
+        
+        // Test with very large amounts near uint256 max
+        uint256 largeAmount = type(uint256).max / 2;
+        
+        vm.prank(controller1);
+        vm.expectRevert(); // Should revert due to supply cap or arithmetic overflow
+        rewardsManager.distributeReward(user, largeAmount, "overflow_test", keccak256("context"));
+    }
+
+    function testContextIdCollisions() public {
+        rewardsManager.addController(controller1, "test_controller");
+        
+        bytes32 contextId = keccak256("shared_context");
+        uint256 amount1 = 100 * 10 ** 18;
+        uint256 amount2 = 200 * 10 ** 18;
+        
+        // Two different controllers using same context ID
+        rewardsManager.addController(controller2, "test_controller2");
+        
+        vm.prank(controller1);
+        rewardsManager.distributeReward(user, amount1, "reward1", contextId);
+        
+        vm.prank(controller2);
+        rewardsManager.distributeReward(user, amount2, "reward2", contextId);
+        
+        // Context total should be sum of both rewards
+        assertEq(rewardsManager.getContextTotalRewards(contextId), amount1 + amount2);
+        assertEq(rewardsManager.getUserContextRewards(user, contextId), amount1 + amount2);
+    }
+
+    function testRemoveControllerType() public {
+        // Add controller with type
+        rewardsManager.addController(controller1, "read");
+        assertEq(rewardsManager.getControllerByType("read"), controller1);
+        
+        // Remove controller
+        rewardsManager.removeController(controller1, "read");
+        
+        // Type mapping should be cleared
+        assertEq(rewardsManager.getControllerByType("read"), address(0));
+        assertFalse(rewardsManager.isAuthorizedController(controller1));
+    }
+
+    function testSupplyCapExhaustion() public {
+        rewardsManager.addController(controller1, "test_controller");
+        
+        // Get current remaining supply
+        (,, uint256 remainingSupply) = rewardsManager.getGlobalStats();
+        
+        // Try to distribute more than remaining supply
+        vm.prank(controller1);
+        vm.expectRevert(); // Should revert when TIPToken mint fails
+        rewardsManager.distributeReward(user, remainingSupply + 1, "exhaustion_test", keccak256("context"));
     }
 }

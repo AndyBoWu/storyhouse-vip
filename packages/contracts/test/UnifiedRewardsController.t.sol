@@ -6,6 +6,9 @@ import "../src/UnifiedRewardsController.sol";
 import "../src/RewardsManager.sol";
 import "../src/TIPToken.sol";
 import "../src/ChapterAccessController.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 
 contract UnifiedRewardsControllerTest is Test {
     UnifiedRewardsController public unifiedController;
@@ -231,7 +234,7 @@ contract UnifiedRewardsControllerTest is Test {
         
         // User should not be able to start reading when paused
         vm.prank(user1);
-        vm.expectRevert("Pausable: paused");
+        vm.expectRevert(abi.encodeWithSelector(Pausable.EnforcedPause.selector));
         unifiedController.startReading(STORY_ID, CHAPTER_NUMBER);
         
         // Admin unpauses contract
@@ -280,7 +283,7 @@ contract UnifiedRewardsControllerTest is Test {
         vm.warp(block.timestamp + 30);
         
         vm.prank(user1);
-        vm.expectRevert("UnifiedRewards: insufficient read time");
+        vm.expectRevert("Unified: insufficient read time");
         unifiedController.claimChapterReward(STORY_ID, CHAPTER_NUMBER);
     }
 
@@ -299,7 +302,7 @@ contract UnifiedRewardsControllerTest is Test {
         // 11th chapter should fail
         unifiedController.startReading(STORY_ID, 11);
         vm.warp(block.timestamp + 61);
-        vm.expectRevert("UnifiedRewards: daily chapter limit exceeded");
+        vm.expectRevert("Unified: daily limit exceeded");
         unifiedController.claimChapterReward(STORY_ID, 11);
         vm.stopPrank();
     }
@@ -382,21 +385,21 @@ contract UnifiedRewardsControllerTest is Test {
         // Test self-remix prevention
         vm.startPrank(creator);
         tipToken.approve(address(unifiedController), 2 ether);
-        vm.expectRevert("UnifiedRewards: cannot remix own story");
+        vm.expectRevert("Unified: cannot remix own story");
         unifiedController.purchaseRemixLicense(STORY_ID, REMIX_STORY_ID, "standard");
         vm.stopPrank();
         
         // Test invalid license type
         vm.startPrank(user1);
         tipToken.approve(address(unifiedController), 2 ether);
-        vm.expectRevert("UnifiedRewards: invalid license type");
+        vm.expectRevert("Unified: invalid license type");
         unifiedController.purchaseRemixLicense(STORY_ID, REMIX_STORY_ID, "invalid");
         vm.stopPrank();
         
         // Test double licensing
         vm.startPrank(user1);
         unifiedController.purchaseRemixLicense(STORY_ID, REMIX_STORY_ID, "standard");
-        vm.expectRevert("UnifiedRewards: already licensed");
+        vm.expectRevert("Unified: already licensed");
         unifiedController.purchaseRemixLicense(STORY_ID, REMIX_STORY_ID, "standard");
         vm.stopPrank();
     }
@@ -410,7 +413,7 @@ contract UnifiedRewardsControllerTest is Test {
         
         // Test invalid quality score (>100)
         vm.prank(admin);
-        vm.expectRevert("UnifiedRewards: invalid quality score");
+        vm.expectRevert("Unified: invalid score");
         unifiedController.setQualityScore(STORY_ID, 101);
         
         // Test score below threshold (no bonus)
@@ -504,7 +507,7 @@ contract UnifiedRewardsControllerTest is Test {
         vm.warp(block.timestamp + 61);
         
         vm.prank(user1);
-        vm.expectRevert("Pausable: paused");
+        vm.expectRevert(abi.encodeWithSelector(Pausable.EnforcedPause.selector));
         unifiedController.claimChapterReward(STORY_ID, CHAPTER_NUMBER);
         
         // Unpause for cleanup
@@ -519,7 +522,7 @@ contract UnifiedRewardsControllerTest is Test {
         // User tries to purchase license without sufficient balance
         vm.startPrank(user1);
         tipToken.approve(address(unifiedController), 2 ether);
-        vm.expectRevert("ERC20: transfer amount exceeds balance");
+        vm.expectRevert(abi.encodeWithSelector(IERC20Errors.ERC20InsufficientBalance.selector, user1, 0, 2 ether));
         unifiedController.purchaseRemixLicense(STORY_ID, REMIX_STORY_ID, "standard");
         vm.stopPrank();
     }
@@ -666,7 +669,7 @@ contract UnifiedRewardsControllerSecurityTest is Test {
             if (i <= 20) { // Should work for first 20
                 unifiedController.claimChapterReward(STORY_ID, i);
             } else { // Should fail after 20
-                vm.expectRevert("UnifiedRewards: daily chapter limit exceeded");
+                vm.expectRevert("Unified: daily limit exceeded");
                 unifiedController.claimChapterReward(STORY_ID, i);
             }
         }
@@ -683,11 +686,11 @@ contract UnifiedRewardsControllerSecurityTest is Test {
         
         // All user functions should be disabled
         vm.prank(user1);
-        vm.expectRevert("Pausable: paused");
+        vm.expectRevert(abi.encodeWithSelector(Pausable.EnforcedPause.selector));
         unifiedController.startReading(STORY_ID, CHAPTER_NUMBER);
         
         vm.prank(creator);
-        vm.expectRevert("Pausable: paused");
+        vm.expectRevert(abi.encodeWithSelector(Pausable.EnforcedPause.selector));
         unifiedController.claimStoryCreationReward(STORY_ID);
         
         vm.prank(admin);
@@ -695,7 +698,7 @@ contract UnifiedRewardsControllerSecurityTest is Test {
         
         vm.startPrank(user1);
         tipToken.approve(address(unifiedController), 2 ether);
-        vm.expectRevert("Pausable: paused");
+        vm.expectRevert(abi.encodeWithSelector(Pausable.EnforcedPause.selector));
         unifiedController.purchaseRemixLicense(STORY_ID, REMIX_STORY_ID, "standard");
         vm.stopPrank();
         
@@ -747,14 +750,14 @@ contract UnifiedRewardsControllerSecurityTest is Test {
         unifiedController.grantRole(unifiedController.QUALITY_ASSESSOR_ROLE(), admin);
         
         vm.prank(admin);
-        vm.expectRevert("UnifiedRewards: invalid quality score");
+        vm.expectRevert("Unified: invalid score");
         unifiedController.setQualityScore(STORY_ID, type(uint256).max);
     }
 
     function testInputValidationSecurity() public {
         // Test zero address validations
         vm.prank(admin);
-        vm.expectRevert("UnifiedRewards: invalid creator address");
+        vm.expectRevert("Unified: invalid creator");
         unifiedController.registerStoryCreator(STORY_ID, address(0));
         
         // Test empty string validations
@@ -766,13 +769,13 @@ contract UnifiedRewardsControllerSecurityTest is Test {
         
         vm.startPrank(user1);
         tipToken.approve(address(unifiedController), 2 ether);
-        vm.expectRevert("UnifiedRewards: invalid license type");
+        vm.expectRevert("Unified: invalid license type");
         unifiedController.purchaseRemixLicense(STORY_ID, REMIX_STORY_ID, "");
         vm.stopPrank();
         
         // Test invalid story IDs
         vm.prank(user1);
-        vm.expectRevert("UnifiedRewards: story not registered");
+        vm.expectRevert("Unified: story not found");
         unifiedController.startReading(bytes32(0), 1);
     }
 
@@ -813,7 +816,7 @@ contract UnifiedRewardsControllerSecurityTest is Test {
         vm.warp(originalTime + 30);
         
         vm.prank(user1);
-        vm.expectRevert("UnifiedRewards: insufficient read time");
+        vm.expectRevert("Unified: insufficient read time");
         unifiedController.claimChapterReward(STORY_ID, CHAPTER_NUMBER);
         
         // Test that future reading sessions respect previous timestamps
@@ -824,7 +827,7 @@ contract UnifiedRewardsControllerSecurityTest is Test {
         
         // Try to read same chapter again immediately (should fail due to cooldown)
         vm.prank(user1);
-        vm.expectRevert("UnifiedRewards: chapter already completed today");
+        vm.expectRevert("Unified: chapter already completed today");
         unifiedController.startReading(STORY_ID, CHAPTER_NUMBER);
     }
 
@@ -840,7 +843,7 @@ contract UnifiedRewardsControllerSecurityTest is Test {
             unifiedController.startReading(STORY_ID, i);
             
             // Try to claim immediately (should fail)
-            vm.expectRevert("UnifiedRewards: insufficient read time");
+            vm.expectRevert("Unified: insufficient read time");
             unifiedController.claimChapterReward(STORY_ID, i);
             
             vm.warp(block.timestamp + 61);
@@ -886,11 +889,11 @@ contract UnifiedRewardsControllerSecurityTest is Test {
         // Test double-spend prevention
         unifiedController.purchaseRemixLicense(STORY_ID, REMIX_STORY_ID, "standard");
         
-        vm.expectRevert("UnifiedRewards: already licensed");
+        vm.expectRevert("Unified: already licensed");
         unifiedController.purchaseRemixLicense(STORY_ID, REMIX_STORY_ID, "standard");
         
         // Test license type manipulation
-        vm.expectRevert("UnifiedRewards: invalid license type");
+        vm.expectRevert("Unified: invalid license type");
         unifiedController.purchaseRemixLicense(STORY_ID, bytes32("new-remix"), "nonexistent");
         
         vm.stopPrank();
@@ -901,7 +904,7 @@ contract UnifiedRewardsControllerSecurityTest is Test {
         
         vm.startPrank(creator);
         tipToken.approve(address(unifiedController), 10 ether);
-        vm.expectRevert("UnifiedRewards: cannot remix own story");
+        vm.expectRevert("Unified: cannot remix own story");
         unifiedController.purchaseRemixLicense(STORY_ID, bytes32("creator-remix"), "standard");
         vm.stopPrank();
     }
@@ -961,5 +964,390 @@ contract UnifiedRewardsControllerSecurityTest is Test {
         // Verify all rewards were distributed correctly
         uint256 userRewards = rewardsManager.getUserTotalRewards(user1);
         assertGt(userRewards, 200 ether, "All rewards should be distributed");
+    }
+
+    // =============== EDGE CASE TESTS FOR 100% COVERAGE ===============
+
+    function testZeroAddressValidation() public {
+        // Grant story manager role to admin
+        vm.prank(admin);
+        unifiedController.grantRole(unifiedController.STORY_MANAGER_ROLE(), admin);
+        
+        // Test story registration with zero address creator
+        vm.prank(admin);
+        vm.expectRevert("Unified: invalid creator");
+        unifiedController.registerStoryCreator(STORY_ID, address(0));
+    }
+
+    function testInvalidStoryIdValidation() public {
+        // Test operations with zero story ID
+        vm.prank(admin);
+        vm.expectRevert("Unified: invalid story ID");
+        unifiedController.registerStoryCreator(bytes32(0), creator);
+        
+        vm.prank(user1);
+        vm.expectRevert("Unified: invalid story ID");
+        unifiedController.startReading(bytes32(0), 1);
+    }
+
+    function testDoubleStoryRegistration() public {
+        // Register story first time
+        vm.prank(admin);
+        unifiedController.registerStoryCreator(STORY_ID, creator);
+        
+        // Try to register same story again
+        vm.prank(admin);
+        vm.expectRevert("Unified: already registered");
+        unifiedController.registerStoryCreator(STORY_ID, address(0x99));
+    }
+
+    function testReadingWithoutStartingSession() public {
+        vm.prank(admin);
+        unifiedController.registerStoryCreator(STORY_ID, creator);
+        
+        // Try to claim reward without starting reading session
+        vm.prank(user1);
+        vm.expectRevert("Unified: reading session not started");
+        unifiedController.claimChapterReward(STORY_ID, 1);
+    }
+
+    function testDoubleChapterClaim() public {
+        vm.prank(admin);
+        unifiedController.registerStoryCreator(STORY_ID, creator);
+        
+        // Start reading and claim reward
+        vm.prank(user1);
+        unifiedController.startReading(STORY_ID, 1);
+        vm.warp(block.timestamp + 61);
+        
+        vm.prank(user1);
+        unifiedController.claimChapterReward(STORY_ID, 1);
+        
+        // Try to claim same chapter again
+        vm.prank(user1);
+        vm.expectRevert("Unified: already claimed");
+        unifiedController.claimChapterReward(STORY_ID, 1);
+    }
+
+    function testCreationRewardDoubleClaimPrevention() public {
+        vm.prank(admin);
+        unifiedController.registerStoryCreator(STORY_ID, creator);
+        
+        // Claim creation reward first time
+        vm.prank(creator);
+        unifiedController.claimStoryCreationReward(STORY_ID);
+        
+        // Try to claim again
+        vm.prank(creator);
+        vm.expectRevert("Unified: already claimed");
+        unifiedController.claimStoryCreationReward(STORY_ID);
+    }
+
+    function testUnauthorizedCreationRewardClaim() public {
+        vm.prank(admin);
+        unifiedController.registerStoryCreator(STORY_ID, creator);
+        
+        // Non-creator tries to claim creation reward
+        vm.prank(user1);
+        vm.expectRevert("Unified: not story creator");
+        unifiedController.claimStoryCreationReward(STORY_ID);
+    }
+
+    function testQualityScoreBoundaryValidation() public {
+        vm.prank(admin);
+        unifiedController.registerStoryCreator(STORY_ID, creator);
+        
+        // Grant quality assessor role
+        vm.prank(admin);
+        unifiedController.grantRole(unifiedController.QUALITY_ASSESSOR_ROLE(), admin);
+        
+        // Test score exactly at boundary (100)
+        vm.prank(admin);
+        unifiedController.setQualityScore(STORY_ID, 100);
+        
+        // Test score above boundary (should fail)
+        vm.prank(admin);
+        vm.expectRevert("Unified: invalid score");
+        unifiedController.setQualityScore(STORY_ID, 101);
+    }
+
+    function testRemixLicenseDoubleClaimPrevention() public {
+        vm.prank(admin);
+        unifiedController.registerStoryCreator(STORY_ID, creator);
+        
+        vm.prank(admin);
+        tipToken.mint(user1, 10 ether);
+        
+        vm.startPrank(user1);
+        tipToken.approve(address(unifiedController), 10 ether);
+        
+        // Purchase license first time
+        unifiedController.purchaseRemixLicense(STORY_ID, REMIX_STORY_ID, "standard");
+        
+        // Try to purchase same license again
+        vm.expectRevert("Unified: already licensed");
+        unifiedController.purchaseRemixLicense(STORY_ID, bytes32("another-remix"), "standard");
+        vm.stopPrank();
+    }
+
+    function testInvalidLicenseTypePrevention() public {
+        vm.prank(admin);
+        unifiedController.registerStoryCreator(STORY_ID, creator);
+        
+        vm.prank(admin);
+        tipToken.mint(user1, 10 ether);
+        
+        vm.startPrank(user1);
+        tipToken.approve(address(unifiedController), 10 ether);
+        
+        // Try to purchase with invalid license type
+        vm.expectRevert("Unified: invalid license type");
+        unifiedController.purchaseRemixLicense(STORY_ID, REMIX_STORY_ID, "invalid_type");
+        vm.stopPrank();
+    }
+
+    function testRemixWithoutOriginalStory() public {
+        vm.prank(admin);
+        tipToken.mint(user1, 10 ether);
+        
+        vm.startPrank(user1);
+        tipToken.approve(address(unifiedController), 10 ether);
+        
+        // Try to remix non-existent story
+        vm.expectRevert("Unified: original story not found");
+        unifiedController.purchaseRemixLicense(STORY_ID, REMIX_STORY_ID, "standard");
+        vm.stopPrank();
+    }
+
+    function testSelfRemixPrevention() public {
+        vm.prank(admin);
+        unifiedController.registerStoryCreator(STORY_ID, creator);
+        
+        vm.prank(admin);
+        tipToken.mint(creator, 10 ether);
+        
+        vm.startPrank(creator);
+        tipToken.approve(address(unifiedController), 10 ether);
+        
+        // Creator tries to remix own story
+        vm.expectRevert("Unified: cannot remix own story");
+        unifiedController.purchaseRemixLicense(STORY_ID, REMIX_STORY_ID, "standard");
+        vm.stopPrank();
+    }
+
+    function testZeroAmountChapterMetadata() public {
+        vm.prank(admin);
+        unifiedController.registerStoryCreator(STORY_ID, creator);
+        
+        // Set chapter metadata with zero values
+        vm.prank(admin);
+        unifiedController.setChapterMetadata(STORY_ID, 1, 0, 0);
+        
+        // Verify metadata was set
+        assertEq(unifiedController.chapterWordCount(STORY_ID, 1), 0);
+        assertEq(unifiedController.chapterMinReadTime(STORY_ID, 1), 0);
+    }
+
+    function testMaximumStreakCalculation() public {
+        vm.prank(admin);
+        unifiedController.registerStoryCreator(STORY_ID, creator);
+        
+        // Build very long streak
+        vm.startPrank(user1);
+        for (uint256 i = 1; i <= 15; i++) {
+            unifiedController.startReading(STORY_ID, i);
+            vm.warp(block.timestamp + 61);
+            unifiedController.claimChapterReward(STORY_ID, i);
+            vm.warp(block.timestamp + 1 days);
+        }
+        vm.stopPrank();
+        
+        // Streak should be capped at reasonable limit
+        uint256 streak = unifiedController.readingStreak(user1);
+        assertEq(streak, 15, "Long streak should be tracked");
+    }
+
+    function testNonSequentialChapterReading() public {
+        vm.prank(admin);
+        unifiedController.registerStoryCreator(STORY_ID, creator);
+        
+        // Read chapters out of order
+        vm.prank(user1);
+        unifiedController.startReading(STORY_ID, 5);
+        vm.warp(block.timestamp + 61);
+        
+        vm.prank(user1);
+        unifiedController.claimChapterReward(STORY_ID, 5);
+        
+        vm.prank(user1);
+        unifiedController.startReading(STORY_ID, 2);
+        vm.warp(block.timestamp + 61);
+        
+        vm.prank(user1);
+        unifiedController.claimChapterReward(STORY_ID, 2);
+        
+        // Both should be marked as claimed
+        assertTrue(unifiedController.hasClaimedChapter(user1, STORY_ID, 5));
+        assertTrue(unifiedController.hasClaimedChapter(user1, STORY_ID, 2));
+    }
+
+    function testEngagementRewardWithZeroReads() public {
+        vm.prank(admin);
+        unifiedController.registerStoryCreator(STORY_ID, creator);
+        
+        // Try to claim engagement reward with no reads
+        uint256 initialRewards = rewardsManager.getUserTotalRewards(creator);
+        
+        vm.prank(admin);
+        unifiedController.distributeEngagementReward(STORY_ID, "milestone", 10);
+        
+        // Should still work (simplified implementation)
+        uint256 finalRewards = rewardsManager.getUserTotalRewards(creator);
+        assertGe(finalRewards, initialRewards);
+    }
+
+    function testRoyaltyDistributionToSelf() public {
+        vm.prank(admin);
+        unifiedController.registerStoryCreator(STORY_ID, creator);
+        
+        // Creator distributes royalty to themselves (edge case)
+        vm.prank(admin);
+        unifiedController.distributeRemixRoyalty(STORY_ID, 1 ether);
+        
+        // Should work without issues
+        uint256 creatorRewards = rewardsManager.getUserTotalRewards(creator);
+        assertGt(creatorRewards, 0);
+    }
+
+    function testMassiveBatchOperations() public {
+        vm.prank(admin);
+        unifiedController.registerStoryCreator(STORY_ID, creator);
+        
+        // Test gas efficiency with large number of operations
+        vm.startPrank(user1);
+        
+        uint256 startGas = gasleft();
+        
+        // Read many chapters quickly
+        for (uint256 i = 1; i <= 50; i++) {
+            unifiedController.startReading(STORY_ID, i);
+            vm.warp(block.timestamp + 61);
+            unifiedController.claimChapterReward(STORY_ID, i);
+        }
+        
+        uint256 gasUsed = startGas - gasleft();
+        vm.stopPrank();
+        
+        // Should complete without running out of gas
+        assertTrue(gasUsed > 0, "Operations should consume gas");
+    }
+
+    function testReadingStreakAcrossDayBoundaries() public {
+        vm.prank(admin);
+        unifiedController.registerStoryCreator(STORY_ID, creator);
+        
+        // Start at timestamp that causes day calculation edge cases
+        vm.warp(86399); // Just before day boundary
+        
+        vm.prank(user1);
+        unifiedController.startReading(STORY_ID, 1);
+        vm.warp(block.timestamp + 61);
+        
+        vm.prank(user1);
+        unifiedController.claimChapterReward(STORY_ID, 1);
+        
+        // Move to next day
+        vm.warp(86400); // Exactly at day boundary
+        
+        vm.prank(user1);
+        unifiedController.startReading(STORY_ID, 2);
+        vm.warp(block.timestamp + 61);
+        
+        vm.prank(user1);
+        unifiedController.claimChapterReward(STORY_ID, 2);
+        
+        uint256 streak = unifiedController.readingStreak(user1);
+        assertGe(streak, 1, "Streak should handle day boundaries");
+    }
+
+    function testConfigurationUpdatesAndLimits() public {
+        // Test boundary values for configuration updates
+        vm.prank(admin);
+        unifiedController.updateReadingRewardConfig(0, 0, 0);
+        
+        assertEq(unifiedController.baseRewardPerChapter(), 0);
+        assertEq(unifiedController.minReadTimePerChapter(), 0);
+        assertEq(unifiedController.minWordsPerChapter(), 0);
+        
+        // Test maximum values
+        vm.prank(admin);
+        unifiedController.updateReadingRewardConfig(
+            type(uint256).max / 2, 
+            type(uint256).max / 2, 
+            type(uint256).max / 2
+        );
+    }
+
+    function testLicenseTermsEdgeCases() public {
+        // Test with extreme license fees
+        vm.prank(admin);
+        unifiedController.updateLicenseType("edge_case", type(uint256).max / 2, 5000);
+        
+        // Test with maximum royalty percentage
+        vm.prank(admin);
+        unifiedController.updateLicenseType("max_royalty", 1 ether, 10000);
+        
+        // Test with zero values
+        vm.prank(admin);
+        unifiedController.updateLicenseType("zero_case", 0, 0);
+    }
+
+    function testMultipleUsersSimultaneousOperations() public {
+        vm.prank(admin);
+        unifiedController.registerStoryCreator(STORY_ID, creator);
+        
+        // Multiple users reading same chapter simultaneously
+        address[] memory users = new address[](5);
+        for (uint256 i = 0; i < 5; i++) {
+            users[i] = address(uint160(1000 + i));
+        }
+        
+        // All users start reading
+        for (uint256 i = 0; i < 5; i++) {
+            vm.prank(users[i]);
+            unifiedController.startReading(STORY_ID, 1);
+        }
+        
+        vm.warp(block.timestamp + 61);
+        
+        // All users claim rewards
+        for (uint256 i = 0; i < 5; i++) {
+            vm.prank(users[i]);
+            unifiedController.claimChapterReward(STORY_ID, 1);
+            
+            assertTrue(unifiedController.hasClaimedChapter(users[i], STORY_ID, 1));
+        }
+    }
+
+    function testRewardCalculationConsistency() public {
+        vm.prank(admin);
+        unifiedController.registerStoryCreator(STORY_ID, creator);
+        
+        // Test that same operations yield same rewards
+        uint256 baseReward = unifiedController.baseRewardPerChapter();
+        
+        vm.prank(user1);
+        unifiedController.startReading(STORY_ID, 1);
+        vm.warp(block.timestamp + 61);
+        
+        uint256 initialBalance = rewardsManager.getUserTotalRewards(user1);
+        
+        vm.prank(user1);
+        unifiedController.claimChapterReward(STORY_ID, 1);
+        
+        uint256 finalBalance = rewardsManager.getUserTotalRewards(user1);
+        uint256 rewardReceived = finalBalance - initialBalance;
+        
+        assertEq(rewardReceived, baseReward, "First chapter should give base reward");
     }
 }

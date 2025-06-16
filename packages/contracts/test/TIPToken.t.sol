@@ -3,6 +3,9 @@ pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import "../src/TIPToken.sol";
+import "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
 
 contract TIPTokenTest is Test {
     TIPToken public token;
@@ -301,5 +304,114 @@ contract TIPTokenTest is Test {
 
         assertEq(token.balanceOf(recipient), transferAmount / 2);
         assertEq(token.balanceOf(user), transferAmount / 2);
+    }
+
+    // =============== EDGE CASE TESTS FOR 100% COVERAGE ===============
+
+    function testConstructorWithZeroAddress() public {
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableInvalidOwner.selector, address(0)));
+        new TIPToken(address(0));
+    }
+
+    function testOwnerTransferWithPendingMinters() public {
+        // Add a minter
+        token.addMinter(minter);
+        assertTrue(token.isMinter(minter));
+        
+        // Transfer ownership immediately (basic Ownable)
+        address newOwner = address(0x99);
+        token.transferOwnership(newOwner);
+        
+        // Check ownership transferred
+        assertEq(token.owner(), newOwner);
+        assertTrue(token.isMinter(minter)); // Other minters should remain
+    }
+
+    function testAddOwnerAsMinterWhenAlreadyMinter() public {
+        // Owner is already a minter by default
+        assertTrue(token.isMinter(owner));
+        
+        // Try to add owner as minter again - should revert with "already a minter"
+        vm.expectRevert("TIPToken: already a minter");
+        token.addMinter(owner);
+    }
+
+    function testRemoveOwnerAsMinter() public {
+        // Owner is minter by default
+        assertTrue(token.isMinter(owner));
+        
+        // Remove owner as minter
+        token.removeMinter(owner);
+        assertFalse(token.isMinter(owner));
+        
+        // Owner should not be able to mint
+        vm.expectRevert("TIPToken: caller is not a minter");
+        token.mint(user, 100 * 10 ** 18);
+    }
+
+    function testSupplyCapExactlyEqualCurrentSupply() public {
+        uint256 currentSupply = token.totalSupply();
+        
+        token.updateSupplyCap(currentSupply);
+        assertEq(token.supplyCap(), currentSupply);
+        assertEq(token.remainingSupply(), 0);
+        
+        // Should not be able to mint anything
+        vm.expectRevert("TIPToken: supply cap exceeded");
+        token.mint(user, 1);
+    }
+
+    function testMintExactlyToSupplyCap() public {
+        uint256 remainingSupply = token.remainingSupply();
+        uint256 initialBalance = token.balanceOf(user);
+        
+        token.mint(user, remainingSupply);
+        
+        assertEq(token.totalSupply(), token.supplyCap());
+        assertEq(token.balanceOf(user), initialBalance + remainingSupply);
+        assertEq(token.remainingSupply(), 0);
+        
+        // Any further minting should fail
+        vm.expectRevert("TIPToken: supply cap exceeded");
+        token.mint(user, 1);
+    }
+
+    function testApproveAndAllowanceWhenPaused() public {
+        token.pause();
+        
+        // Approve should work when paused
+        token.approve(user, 1000 * 10 ** 18);
+        assertEq(token.allowance(owner, user), 1000 * 10 ** 18);
+        
+        // But transferFrom should fail
+        vm.prank(user);
+        vm.expectRevert(abi.encodeWithSelector(Pausable.EnforcedPause.selector));
+        token.transferFrom(owner, user, 100 * 10 ** 18);
+    }
+
+    function testBurnZeroAmount() public {
+        uint256 initialBalance = token.balanceOf(owner);
+        
+        token.burn(0);
+        
+        assertEq(token.balanceOf(owner), initialBalance);
+        assertEq(token.totalSupply(), INITIAL_SUPPLY);
+    }
+
+    function testBurnMoreThanBalance() public {
+        uint256 balance = token.balanceOf(owner);
+        
+        vm.expectRevert(abi.encodeWithSelector(IERC20Errors.ERC20InsufficientBalance.selector, owner, balance, balance + 1));
+        token.burn(balance + 1);
+    }
+
+    function testMintZeroAmount() public {
+        uint256 initialSupply = token.totalSupply();
+        uint256 initialBalance = token.balanceOf(user);
+        
+        token.mint(user, 0);
+        
+        assertEq(token.totalSupply(), initialSupply);
+        assertEq(token.balanceOf(user), initialBalance);
     }
 }

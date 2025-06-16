@@ -42,7 +42,7 @@ contract DeployChapterAccessScript is Script {
 
         // Verify the deployment
         console.log("Verifying deployment...");
-        console.log("Owner:", chapterAccess.owner());
+        console.log("Has Admin Role:", chapterAccess.hasRole(chapterAccess.DEFAULT_ADMIN_ROLE(), deployer));
         console.log("TIP Token:", address(chapterAccess.tipToken()));
         console.log("Rewards Manager:", address(chapterAccess.rewardsManager()));
         console.log("Unlock Price:", chapterAccess.unlockPrice());
