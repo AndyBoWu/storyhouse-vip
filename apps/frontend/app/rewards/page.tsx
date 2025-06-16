@@ -28,7 +28,7 @@ export default function RewardsPage() {
               <Sparkles className="w-8 h-8" />
             </div>
             <p className="text-xl md:text-2xl text-purple-100 max-w-3xl mx-auto">
-              Earn TIP tokens for creating stories, reading chapters, and engaging with the community
+              Earn TIP tokens for creating stories and engaging with the community
             </p>
             <div className="mt-8 flex justify-center">
               <WalletConnect />
@@ -60,11 +60,11 @@ export default function RewardsPage() {
             <div className="bg-green-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
               <Coins className="w-6 h-6 text-green-600" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Chapter Reading</h3>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">Staking Rewards</h3>
             <p className="text-gray-600 mb-4">
-              Get 10 TIP tokens for each chapter you read. Build streaks for bonus rewards!
+              Stake your TIP tokens to earn passive rewards. Coming in ~2 weeks!
             </p>
-            <div className="text-2xl font-bold text-green-600">10 TIP</div>
+            <div className="text-2xl font-bold text-green-600">12-20% APY</div>
           </div>
 
           <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
@@ -164,9 +164,9 @@ export default function RewardsPage() {
             </div>
 
             <div className="bg-white rounded-lg p-4">
-              <h4 className="font-semibold text-gray-900 mb-2">Read Controller</h4>
+              <h4 className="font-semibold text-gray-900 mb-2">Chapter Access</h4>
               <p className="text-sm text-gray-600 mb-2">
-                Manages chapter reading rewards and streak bonuses
+                Manages chapter unlocking and author revenue sharing
               </p>
               <a
                 href="https://aeneid.storyscan.xyz/address/0x04553ba8316d407b1c58b99172956d2d5fe100e5"

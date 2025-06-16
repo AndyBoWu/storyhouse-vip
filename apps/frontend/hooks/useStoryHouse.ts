@@ -5,13 +5,10 @@ import {
   STORYHOUSE_CONTRACTS,
   TIP_TOKEN_ABI,
   CREATOR_REWARDS_CONTROLLER_ABI,
-  READ_REWARDS_CONTROLLER_ABI,
   REWARDS_MANAGER_ABI,
   formatTIPAmount,
   generateStoryId,
   createStoryCreationCall,
-  createChapterRewardCall,
-  createStartReadingCall,
   type UserRewards,
   type RewardClaim,
   REWARD_AMOUNTS,
@@ -74,23 +71,16 @@ export function useUserRewards(): UserRewards & { isLoading: boolean } {
     args: address ? [address] : undefined,
   })
 
-  const { data: readingStreak, isLoading: loadingStreak } = useReadContract({
-    address: STORYHOUSE_CONTRACTS.READ_REWARDS_CONTROLLER,
-    abi: READ_REWARDS_CONTROLLER_ABI,
-    functionName: 'readingStreak',
-    args: address ? [address] : undefined,
-  })
-
-  const isLoading = loadingTotal || loadingStories || loadingStreak
+  const isLoading = loadingTotal || loadingStories
 
   return {
     totalEarned: totalEarned || BigInt(0),
     creationRewards: BigInt(0), // Would need additional tracking
-    readingRewards: BigInt(0), // Would need additional tracking
-    streakBonus: BigInt(0), // Would need calculation
+    readingRewards: BigInt(0), // Removed - no longer supported
+    streakBonus: BigInt(0), // Removed - no longer supported
     storiesCreated: Number(storiesCreated || 0),
-    chaptersRead: 0, // Would need additional tracking
-    currentStreak: Number(readingStreak || 0),
+    chaptersRead: 0, // Removed - no longer supported
+    currentStreak: 0, // Removed - no longer supported
     isLoading,
   }
 }
@@ -135,63 +125,7 @@ export function useClaimStoryReward() {
   }
 }
 
-// Hook for starting reading sessions and claiming chapter rewards
-export function useReadingRewards() {
-  const [currentReading, setCurrentReading] = useState<{
-    storyId: string
-    chapterNumber: number
-    startTime: number
-  } | null>(null)
-
-  const { 
-    writeContract: writeStartReading, 
-    isPending: isStartingPending 
-  } = useWriteContract()
-
-  const { 
-    writeContract: writeClaimReward, 
-    data: claimHash, 
-    isPending: isClaimingPending 
-  } = useWriteContract()
-
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
-    hash: claimHash,
-  })
-
-  const startReadingSession = (storyId: string, chapterNumber: number) => {
-    setCurrentReading({
-      storyId,
-      chapterNumber,
-      startTime: Date.now(),
-    })
-
-    writeStartReading({
-      address: STORYHOUSE_CONTRACTS.READ_REWARDS_CONTROLLER,
-      abi: READ_REWARDS_CONTROLLER_ABI,
-      functionName: 'startReading',
-      args: [storyId as `0x${string}`, BigInt(chapterNumber)],
-    })
-  }
-
-  const claimChapterReward = (storyId: string, chapterNumber: number) => {
-    writeClaimReward({
-      address: STORYHOUSE_CONTRACTS.READ_REWARDS_CONTROLLER,
-      abi: READ_REWARDS_CONTROLLER_ABI,
-      functionName: 'claimChapterReward',
-      args: [storyId as `0x${string}`, BigInt(chapterNumber)],
-    })
-  }
-
-  return {
-    startReadingSession,
-    claimChapterReward,
-    isStarting: isStartingPending,
-    isClaiming: isClaimingPending || isConfirming,
-    isSuccess,
-    transactionHash: claimHash,
-    currentReading,
-  }
-}
+// Reading rewards hook removed - functionality discontinued
 
 // Hook to check if user has claimed specific rewards
 export function useRewardStatus(storyId: string, chapterNumber?: number) {
@@ -204,20 +138,11 @@ export function useRewardStatus(storyId: string, chapterNumber?: number) {
     args: address && storyId ? [address, storyId as `0x${string}`] : undefined,
   })
 
-  const { data: hasClaimedChapter } = useReadContract({
-    address: STORYHOUSE_CONTRACTS.READ_REWARDS_CONTROLLER,
-    abi: READ_REWARDS_CONTROLLER_ABI,
-    functionName: 'hasClaimedChapter',
-    args: address && storyId && chapterNumber !== undefined ? [
-      address,
-      storyId as `0x${string}`,
-      BigInt(chapterNumber)
-    ] : undefined,
-  })
+  const hasClaimedChapter = false // Reading rewards removed
 
   return {
     hasClaimedCreation: !!hasClaimedCreation,
-    hasClaimedChapter: !!hasClaimedChapter,
+    hasClaimedChapter: false, // Reading rewards removed
   }
 }
 
@@ -241,14 +166,12 @@ export function useStoryHouse() {
   const userRewards = useUserRewards()
   const globalStats = useGlobalStats()
   const claimStoryReward = useClaimStoryReward()
-  const readingRewards = useReadingRewards()
 
   return {
     tipToken,
     userRewards,
     globalStats,
     claimStoryReward,
-    readingRewards,
     // Utility functions
     generateStoryId,
     formatTIPAmount,

@@ -382,8 +382,6 @@ export default function BookPage() {
                       <span>•</span>
                       <span>{chapter.reads} reads</span>
                       <span>•</span>
-                      <span>{chapter.earnings} TIP earned</span>
-                      <span>•</span>
                       <span>{formatDate(chapter.createdAt)}</span>
                     </div>
                   </div>

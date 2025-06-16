@@ -152,11 +152,11 @@ contract ChapterAccessControllerTest is Test {
         assertEq(price, 0); // Should be 0 since already unlocked
         
         // Check progress
-        (uint256 latestUnlocked, uint256 totalUnlocked, uint256 totalCompleted) = 
+        (uint256 latestUnlocked, uint256 totalUnlocked) = 
             chapterAccess.getUserProgress(user1, BOOK_ID);
         assertEq(latestUnlocked, 2);
         assertEq(totalUnlocked, 1);
-        assertEq(totalCompleted, 0);
+        // assertEq(totalCompleted, 0); // Removed with read-to-earn
     }
 
     function testUnlockPaidChapter() public {
@@ -191,28 +191,12 @@ contract ChapterAccessControllerTest is Test {
         assertEq(price, 0); // Should be 0 since already unlocked
     }
 
+    // Chapter completion test removed - read-to-earn functionality discontinued
+    /*
     function testCompleteChapter() public {
-        // Register and unlock a chapter
-        vm.prank(owner);
-        chapterAccess.registerChapter(BOOK_ID, 1, author, IP_ASSET_ID, 1000);
-        
-        vm.prank(user1);
-        chapterAccess.unlockChapter(BOOK_ID, 1);
-        
-        uint256 userBalanceBefore = tipToken.balanceOf(user1);
-        
-        vm.prank(user1);
-        chapterAccess.completeChapter(BOOK_ID, 1, 60); // 60 seconds reading time
-        
-        uint256 userBalanceAfter = tipToken.balanceOf(user1);
-        
-        // User should receive read reward
-        assertTrue(userBalanceAfter > userBalanceBefore);
-        
-        // Check completion status
-        (, , uint256 totalCompleted) = chapterAccess.getUserProgress(user1, BOOK_ID);
-        assertEq(totalCompleted, 1);
+        // Functionality removed
     }
+    */
 
     function testBatchUnlockChapters() public {
         // Register multiple chapters
@@ -272,7 +256,7 @@ contract ChapterAccessControllerTest is Test {
         
         vm.prank(user1);
         vm.expectRevert("ChapterAccess: chapter not unlocked");
-        chapterAccess.completeChapter(BOOK_ID, 1, 60);
+        // chapterAccess.completeChapter(BOOK_ID, 1, 60); // Removed
     }
 
     function testCannotCompleteWithInsufficientReadTime() public {
@@ -284,18 +268,16 @@ contract ChapterAccessControllerTest is Test {
         
         vm.prank(user1);
         vm.expectRevert("ChapterAccess: insufficient reading time");
-        chapterAccess.completeChapter(BOOK_ID, 1, 20); // Less than 30 seconds
+        // chapterAccess.completeChapter(BOOK_ID, 1, 20); // Removed
     }
 
     function testUpdatePricing() public {
         uint256 newUnlockPrice = 1 * 10**18; // 1 TIP
-        uint256 newReadReward = 1 * 10**17; // 0.1 TIP
         
         vm.prank(owner);
-        chapterAccess.updatePricing(newUnlockPrice, newReadReward);
+        chapterAccess.updatePricing(newUnlockPrice);
         
         assertEq(chapterAccess.unlockPrice(), newUnlockPrice);
-        assertEq(chapterAccess.baseReadReward(), newReadReward);
     }
 
     function testOnlyOwnerCanRegisterChapter() public {
@@ -307,7 +289,7 @@ contract ChapterAccessControllerTest is Test {
     function testOnlyOwnerCanUpdatePricing() public {
         vm.prank(user1);
         vm.expectRevert();
-        chapterAccess.updatePricing(1 * 10**18, 1 * 10**17);
+        chapterAccess.updatePricing(1 * 10**18);
     }
 
     // ============================================================================
@@ -539,20 +521,20 @@ contract ChapterAccessControllerTest is Test {
         vm.stopPrank();
         
         // Check progress
-        (uint256 latestUnlockedChapter, uint256 totalUnlocked, uint256 totalCompleted) = 
+        (uint256 latestUnlockedChapter, uint256 totalUnlocked) = 
             chapterAccess.getUserProgress(user1, BOOK_ID);
         
         assertEq(totalUnlocked, 3, "Should have 3 unlocked chapters");
         assertEq(latestUnlockedChapter, 5, "Latest unlocked should be chapter 5");
-        assertEq(totalCompleted, 0, "Should have 0 completed chapters (no completion calls made)");
+        // assertEq(totalCompleted, 0); // Removed with read-to-earn
         
         // Test with user who hasn't unlocked anything
-        (uint256 latestUnlockedChapter2, uint256 totalUnlocked2, uint256 totalCompleted2) = 
+        (uint256 latestUnlockedChapter2, uint256 totalUnlocked22) = 
             chapterAccess.getUserProgress(user2, BOOK_ID);
         
-        assertEq(totalUnlocked2, 0, "Should have no unlocked chapters");
+        assertEq(totalUnlocked22, 0, "Should have no unlocked chapters");
         assertEq(latestUnlockedChapter2, 0, "Latest unlocked should be 0");
-        assertEq(totalCompleted2, 0, "Should be 0 completed");
+        // assertEq(totalCompleted2, 0); // Removed with read-to-earn
     }
 
     function testCanAccessChapterComprehensiveScenarios() public {
@@ -685,26 +667,19 @@ contract ChapterAccessControllerTest is Test {
         chapterAccess.unlockChapter(BOOK_ID, 99);
     }
 
+    // Complete non-existent chapter test removed - functionality discontinued
+    /*
     function testCompleteNonExistentChapter() public {
-        vm.prank(user1);
-        vm.expectRevert("ChapterAccess: chapter does not exist");
-        chapterAccess.completeChapter(BOOK_ID, 99, 60);
+        // Functionality removed
     }
+    */
 
+    // Complete chapter twice test removed - functionality discontinued
+    /*
     function testCompleteChapterTwice() public {
-        vm.prank(owner);
-        chapterAccess.registerChapter(BOOK_ID, 1, author, IP_ASSET_ID, 1000);
-        
-        vm.prank(user1);
-        chapterAccess.unlockChapter(BOOK_ID, 1);
-        
-        vm.prank(user1);
-        chapterAccess.completeChapter(BOOK_ID, 1, 60);
-        
-        vm.prank(user1);
-        vm.expectRevert("ChapterAccess: already completed");
-        chapterAccess.completeChapter(BOOK_ID, 1, 60);
+        // Functionality removed
     }
+    */
 
     function testUnlockChapterInsufficientBalance() public {
         vm.prank(owner);
@@ -777,14 +752,10 @@ contract ChapterAccessControllerTest is Test {
     function testUpdatePricingWithZeroUnlockPrice() public {
         vm.prank(owner);
         vm.expectRevert("ChapterAccess: invalid unlock price");
-        chapterAccess.updatePricing(0, 1 * 10**17);
+        chapterAccess.updatePricing(0);
     }
 
-    function testUpdatePricingWithZeroReadReward() public {
-        vm.prank(owner);
-        vm.expectRevert("ChapterAccess: invalid read reward");
-        chapterAccess.updatePricing(1 * 10**18, 0);
-    }
+    // Zero read reward test removed - functionality discontinued
 
     function testUpdateRevenueShareTooHigh() public {
         vm.prank(owner);
@@ -843,39 +814,12 @@ contract ChapterAccessControllerTest is Test {
         chapterAccess.unpause();
     }
 
+    // Calculate read reward test removed - functionality discontinued
+    /*
     function testCalculateReadRewardForDifferentWordCounts() public {
-        // Test with chapter under 1000 words (base reward only)
-        vm.prank(owner);
-        chapterAccess.registerChapter(BOOK_ID, 1, author, IP_ASSET_ID, 500);
-        
-        vm.prank(user1);
-        chapterAccess.unlockChapter(BOOK_ID, 1);
-        
-        uint256 balanceBefore = tipToken.balanceOf(user1);
-        vm.prank(user1);
-        chapterAccess.completeChapter(BOOK_ID, 1, 60);
-        uint256 balanceAfter = tipToken.balanceOf(user1);
-        
-        uint256 reward1 = balanceAfter - balanceBefore;
-        
-        // Test with chapter over 3000 words (should be capped at 2x base reward)
-        vm.prank(owner);
-        chapterAccess.registerChapter(BOOK_ID, 2, author, IP_ASSET_ID, 3000);
-        
-        vm.prank(user1);
-        chapterAccess.unlockChapter(BOOK_ID, 2);
-        
-        balanceBefore = tipToken.balanceOf(user1);
-        vm.prank(user1);
-        chapterAccess.completeChapter(BOOK_ID, 2, 180);
-        balanceAfter = tipToken.balanceOf(user1);
-        
-        uint256 reward2 = balanceAfter - balanceBefore;
-        
-        // Reward for longer chapter should be higher but capped
-        assertGt(reward2, reward1, "Longer chapter should give higher reward");
-        assertEq(reward2, chapterAccess.baseReadReward() * 2, "Reward should be capped at 2x base");
+        // Functionality removed
     }
+    */
 
     function testRevenueDistributionEdgeCases() public {
         // Test with custom revenue share
@@ -931,12 +875,12 @@ contract ChapterAccessControllerTest is Test {
         vm.prank(user1);
         chapterAccess.unlockChapter(BOOK_ID, 10);
         
-        (uint256 latestUnlocked, uint256 totalUnlocked, uint256 totalCompleted) = 
+        (uint256 latestUnlocked, uint256 totalUnlocked) = 
             chapterAccess.getUserProgress(user1, BOOK_ID);
         
         assertEq(latestUnlocked, 10, "Latest unlocked should be 10");
         assertEq(totalUnlocked, 2, "Should have 2 unlocked chapters");
-        assertEq(totalCompleted, 0, "Should have 0 completed chapters");
+        // assertEq(totalCompleted, 0); // Removed with read-to-earn
     }
 
     function testCanAccessChapterNonExistentChapter() public {
@@ -962,27 +906,10 @@ contract ChapterAccessControllerTest is Test {
         assertFalse(isFree4, "Chapter 4 should be paid");
     }
 
+    // Minimum reading time validation test removed - functionality discontinued
+    /*
     function testMinimumReadingTimeValidation() public {
-        vm.prank(owner);
-        chapterAccess.registerChapter(BOOK_ID, 1, author, IP_ASSET_ID, 1000);
-        
-        vm.prank(user1);
-        chapterAccess.unlockChapter(BOOK_ID, 1);
-        
-        // Test exactly 30 seconds (should pass)
-        vm.prank(user1);
-        chapterAccess.completeChapter(BOOK_ID, 1, 30);
-        
-        // Register another chapter for user2
-        vm.prank(owner);
-        chapterAccess.registerChapter(BOOK_ID, 2, author, IP_ASSET_ID, 1000);
-        
-        vm.prank(user2);
-        chapterAccess.unlockChapter(BOOK_ID, 2);
-        
-        // Test 29 seconds (should fail)
-        vm.prank(user2);
-        vm.expectRevert("ChapterAccess: insufficient reading time");
-        chapterAccess.completeChapter(BOOK_ID, 2, 29);
+        // Functionality removed
     }
+    */
 }

@@ -46,7 +46,7 @@ contract DeployChapterAccessScript is Script {
         console.log("TIP Token:", address(chapterAccess.tipToken()));
         console.log("Rewards Manager:", address(chapterAccess.rewardsManager()));
         console.log("Unlock Price:", chapterAccess.unlockPrice());
-        console.log("Base Read Reward:", chapterAccess.baseReadReward());
+        // console.log("Base Read Reward:", chapterAccess.baseReadReward()); // Removed
         console.log("Free Chapters Count:", chapterAccess.FREE_CHAPTERS_COUNT());
 
         vm.stopBroadcast();

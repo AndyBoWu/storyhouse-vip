@@ -23,7 +23,7 @@ interface RewardsDashboardProps {
 
 export default function RewardsDashboard({ className = '' }: RewardsDashboardProps) {
   const { address, isConnected } = useAccount()
-  const { tipToken, userRewards, globalStats, claimStoryReward, readingRewards } = useStoryHouse()
+  const { tipToken, userRewards, globalStats, claimStoryReward } = useStoryHouse()
   const [activeTab, setActiveTab] = useState<'overview' | 'claim' | 'stats'>('overview')
 
   if (!isConnected) {
@@ -91,7 +91,6 @@ export default function RewardsDashboard({ className = '' }: RewardsDashboardPro
         {activeTab === 'claim' && (
           <ClaimTab 
             claimStoryReward={claimStoryReward}
-            readingRewards={readingRewards}
             userRewards={userRewards}
           />
         )}
@@ -159,12 +158,12 @@ function OverviewTab({ tipToken, userRewards, globalStats }: any) {
           <div className="flex items-center justify-between mb-4">
             <Flame className="w-8 h-8 text-orange-600" />
             <span className="text-sm font-medium text-orange-700 bg-orange-200 px-2 py-1 rounded">
-              Reading Streak
+              Stories Published
             </span>
           </div>
           <div className="space-y-1">
-            <div className="text-3xl font-bold text-orange-900">{userRewards.currentStreak}</div>
-            <div className="text-sm text-orange-600">Days in a row</div>
+            <div className="text-3xl font-bold text-orange-900">{userRewards.storiesCreated}</div>
+            <div className="text-sm text-orange-600">Total Stories</div>
           </div>
         </motion.div>
       </div>
@@ -186,8 +185,8 @@ function OverviewTab({ tipToken, userRewards, globalStats }: any) {
             <div className="text-sm text-gray-600">Stories Created</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-gray-900">{userRewards.chaptersRead}</div>
-            <div className="text-sm text-gray-600">Chapters Read</div>
+            <div className="text-2xl font-bold text-gray-900">{userRewards.storiesCreated * 5}</div>
+            <div className="text-sm text-gray-600">Chapters Written</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold text-gray-900">
@@ -239,7 +238,7 @@ function OverviewTab({ tipToken, userRewards, globalStats }: any) {
   )
 }
 
-function ClaimTab({ claimStoryReward, readingRewards, userRewards }: any) {
+function ClaimTab({ claimStoryReward, userRewards }: any) {
   const [storyTitle, setStoryTitle] = useState('')
   const [testStoryId] = useState('test-story-id-123')
   const [testChapterNumber] = useState(1)
@@ -252,13 +251,6 @@ function ClaimTab({ claimStoryReward, readingRewards, userRewards }: any) {
     claimStoryReward.claimReward(storyTitle, '0x1234567890123456789012345678901234567890' as any)
   }
 
-  const handleStartReading = () => {
-    readingRewards.startReadingSession(testStoryId, testChapterNumber)
-  }
-
-  const handleClaimChapterReward = () => {
-    readingRewards.claimChapterReward(testStoryId, testChapterNumber)
-  }
 
   return (
     <div className="space-y-6">
@@ -338,81 +330,36 @@ function ClaimTab({ claimStoryReward, readingRewards, userRewards }: any) {
         </div>
       </motion.div>
 
-      {/* Reading Rewards */}
+      {/* Future Staking Rewards */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="bg-white border border-gray-200 rounded-xl p-6"
+        className="bg-gray-50 border border-gray-200 rounded-xl p-6"
       >
         <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-          <BookOpen className="w-5 h-5 text-green-600" />
-          Reading Rewards (10 TIP per chapter)
+          <Flame className="w-5 h-5 text-gray-400" />
+          Staking Rewards (Coming Soon)
         </h3>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <button
-            onClick={handleStartReading}
-            disabled={readingRewards.isStarting}
-            className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-all ${
-              readingRewards.isStarting
-                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : 'bg-green-600 hover:bg-green-700 text-white'
-            }`}
-          >
-            {readingRewards.isStarting ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Starting...
-              </>
-            ) : (
-              <>
-                <BookOpen className="w-4 h-4" />
-                Start Reading (Demo)
-              </>
-            )}
-          </button>
-
-          <button
-            onClick={handleClaimChapterReward}
-            disabled={readingRewards.isClaiming}
-            className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-all ${
-              readingRewards.isClaiming
-                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : 'bg-orange-600 hover:bg-orange-700 text-white'
-            }`}
-          >
-            {readingRewards.isClaiming ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Claiming...
-              </>
-            ) : (
-              <>
-                <Coins className="w-4 h-4" />
-                Claim Chapter Reward (10 TIP)
-              </>
-            )}
-          </button>
-        </div>
-
-        {readingRewards.isSuccess && (
-          <div className="mt-4 bg-green-50 border border-green-200 rounded-lg p-3">
-            <p className="text-sm text-green-700">
-              ✅ Chapter reward claimed successfully!
-              {readingRewards.transactionHash && (
-                <a
-                  href={getExplorerUrl(readingRewards.transactionHash)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="ml-2 underline hover:no-underline"
-                >
-                  View transaction
-                </a>
-              )}
-            </p>
+        <p className="text-gray-600 mb-4">
+          Stake your TIP tokens to earn passive rewards and unlock exclusive platform benefits.
+        </p>
+        
+        <div className="bg-white rounded-lg p-4 space-y-2">
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-600">Expected APY:</span>
+            <span className="font-medium text-gray-900">12-20%</span>
           </div>
-        )}
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-600">Lock Periods:</span>
+            <span className="font-medium text-gray-900">30, 90, 180 days</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-600">Launch Date:</span>
+            <span className="font-medium text-gray-900">~2 weeks</span>
+          </div>
+        </div>
       </motion.div>
     </div>
   )
@@ -468,8 +415,8 @@ function StatsTab({ userRewards, globalStats, tipToken }: any) {
               <span className="font-semibold">{userRewards.storiesCreated}</span>
             </div>
             <div className="flex justify-between items-center py-2 border-b border-gray-100">
-              <span className="text-gray-600">Current Reading Streak</span>
-              <span className="font-semibold">{userRewards.currentStreak} days</span>
+              <span className="text-gray-600">Total Chapters Written</span>
+              <span className="font-semibold">{userRewards.storiesCreated * 5}</span>
             </div>
             <div className="flex justify-between items-center py-2 border-b border-gray-100">
               <span className="text-gray-600">Total Rewards Earned</span>
