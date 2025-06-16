@@ -119,10 +119,38 @@ cd apps/backend && npm run dev   # Port 3002
 |-----------|------------|---------|
 | Frontend | Next.js | 15.3.3 |
 | Backend | Next.js API | 15.3.3 |
+| Smart Contracts | **Foundry** | Latest |
 | Blockchain | Story Protocol SDK | 1.3.2 |
 | AI | OpenAI GPT-4 | Latest |
 | Storage | Cloud Storage | - |
 | Hosting | Vercel | - |
+
+## 🔨 Smart Contract Development
+
+This project uses **[Foundry](https://book.getfoundry.sh/)** for smart contract development, testing, and deployment.
+
+### Quick Setup for Smart Contracts
+```bash
+# Install Foundry
+curl -L https://foundry.paradigm.xyz | bash && foundryup
+
+# Navigate to contracts directory  
+cd packages/contracts
+
+# Install dependencies
+forge install
+
+# Build contracts
+forge build
+
+# Run comprehensive test suite
+forge test
+
+# Run with coverage analysis
+forge coverage
+```
+
+**📚 Complete Guide**: See [`packages/contracts/README.md`](./packages/contracts/README.md) for detailed development instructions.
 
 ## 🔗 Smart Contracts (Testnet)
 
