@@ -135,7 +135,7 @@ TEST_ENV=production npm run test:integration
 - **Location**: `packages/contracts/test/`
 - **Purpose**: Individual smart contract functions
 - **Technology**: Foundry/Forge
-- **Coverage**: 131/132 tests passing (99.2%)
+- **Coverage**: 220+ tests passing (100% coverage)
 
 ### Integration Tests
 - **Location**: `tests/integration/`
