@@ -4,18 +4,40 @@
 
 StoryHouse.vip provides a comprehensive RESTful API for creating, managing, and licensing IP assets with PIL (Programmable IP License) support, blockchain derivative registration, AI-powered content analytics, automated notifications, and real-time royalty distribution.
 
-**🆕 Phase 5.3 Updates:**
+**🆕 Phase 5.4 Updates:**
+- Unified IP registration with 40% gas cost reduction
+- Single-transaction processing using `mintAndRegisterIpAssetWithPilTerms`
+- Enhanced R2 metadata integration with SHA-256 verification
+- Intelligent flow detection with backward compatibility
+
+**Previous Phase 5.3 Updates:**
 - Enhanced UI/UX with zero commission messaging
 - Color-coded chapter states for better visual hierarchy
 - Improved publishing workflow with clear review process
 - Optimized pricing tiers and input handling
-- Latest Vercel deployments with performance improvements
 
-**🆕 Unified Registration Updates:**
-- Single-transaction IP registration with 40% gas savings
-- Automatic R2 metadata generation and storage
-- Feature flag controlled gradual rollout
-- Backward compatible with legacy flow
+### Service Capability Detection
+
+Check if unified registration is available and supported.
+
+```http
+GET /api/ip/register-unified
+```
+
+**Response:**
+```json
+{
+  "available": true,
+  "features": {
+    "gasOptimized": true,
+    "atomicOperations": true,
+    "enhancedMetadata": true,
+    "backwardCompatible": true
+  },
+  "supportedLicenseTiers": ["free", "reading", "premium", "exclusive"],
+  "sdkVersion": "1.3.2"
+}
+```
 
 ### Base URLs
 ```
