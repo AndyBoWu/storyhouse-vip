@@ -13,7 +13,7 @@
 2. ✅ Story Protocol Aeneid testnet added to MetaMask
 3. ✅ Test IP tokens for gas fees (from faucet)
 4. ✅ Frontend running on localhost:3001
-5. ✅ All 6 contracts deployed and operational
+5. ✅ All 5 contracts deployed and operational (optimized architecture)
 
 ---
 
@@ -167,7 +167,7 @@
    - Check "Stories Created" count
    - Check "Chapters Read" count
    - Verify "Global TIP Distributed" shows network total
-   - Confirm "Active Contracts" shows 6
+   - Confirm "Active Contracts" shows 5
 
 3. **Quick Links Testing**
 
@@ -206,7 +206,7 @@
 
 1. **Contract Address Verification**
 
-   - Verify all 6 contract addresses in technical details section
+   - Verify all 5 contract addresses in technical details section
    - Click each "View on StoryScan" link
    - Confirm contracts exist and have transaction history
 
@@ -241,10 +241,9 @@
 
 - TIP Token: `0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E`
 - Rewards Manager: `0xf5ae031ba92295c2ae86a99e88f09989339707e5`
-- Creator Controller: `0x8e2d21d1b9c744f772f15a7007de3d5757eea333`
-- Read Controller: `0x04553ba8316d407b1c58b99172956d2d5fe100e5`
-- Access Control: `0x41e2db0d016e83ddc3c464ffd260d22a6c898341`
-- Remix Licensing: `0x16144746a33d9a172039efc64bc2e12445fbbef2`
+- Unified Rewards Controller: `[TBD - pending deployment]`
+- Chapter Access Controller: `[TBD - pending deployment]`
+- Hybrid Revenue Controller: `[TBD - pending deployment]`
 
 ---
 
