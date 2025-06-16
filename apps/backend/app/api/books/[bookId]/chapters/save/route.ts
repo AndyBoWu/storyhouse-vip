@@ -137,7 +137,24 @@ export async function POST(
 
       console.log('✅ Chapter saved successfully:', contentUrl)
 
-      // TODO: Update book metadata to include this chapter in the chapter map
+      // Update book metadata to include this chapter in the chapter map
+      try {
+        // Get current book metadata
+        const bookMetadata = await BookStorageService.getBookMetadata(authorAddress, slug)
+        
+        // Update chapter map and count
+        bookMetadata.chapterMap[`ch${body.chapterNumber}`] = chapterPath
+        bookMetadata.totalChapters = Object.keys(bookMetadata.chapterMap).length
+        bookMetadata.updatedAt = new Date().toISOString()
+        
+        // Save updated metadata
+        await BookStorageService.storeBookMetadata(authorAddress, slug, bookMetadata)
+        console.log('✅ Book metadata updated with new chapter')
+      } catch (metadataError) {
+        console.error('⚠️ Failed to update book metadata:', metadataError)
+        // Don't fail the whole operation if metadata update fails
+        // The chapter is still saved and can be discovered by direct listing
+      }
       
       return NextResponse.json({
         success: true,

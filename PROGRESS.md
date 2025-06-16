@@ -129,9 +129,26 @@
 
 ---
 
-## 🎯 **Next Phase Priorities**
+## 🎯 **Current Development Focus (Phase 6.1)**
 
-### Integration Testing (In Progress)
+### 🧪 **QA Testing & UX Refinements**
+**Status: In Progress** - Comprehensive testing of 5-contract architecture with UX improvements
+
+#### **QA Testing Implementation**
+- ✅ **Version Tracking System**: Deployed with floating badge and API endpoints
+- ✅ **Comprehensive Test Cases**: 20 test suites covering all user journeys
+- ✅ **Git Commit Tracking**: Fixed to show actual deployment versions
+- 🔄 **Active Testing**: Visual story map validation with branching paths
+
+#### **UX Improvement Identified**
+**Premium Publishing Flow Redundancy**
+- **Issue**: Redundant screen in premium chapter publishing flow
+- **Current Flow**: Write → Review → "Premium Explanation" → Choose License Tier → Publish
+- **Better Flow**: Write → Review → Choose License Tier (Premium/Exclusive) → Publish
+- **Impact**: Removes unnecessary friction and extra click in publishing journey
+- **Rationale**: Users who click "Premium" already decided - no need for explanation screen
+
+### Integration Testing (Next Priority)
 - Cross-contract interaction testing
 - End-to-end user journey validation
 - Multi-contract scenario testing

@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useWriteContract, useWaitForTransactionReceipt, useAccount, useWalletClient } from 'wagmi'
 import { Address, Hash } from 'viem'
-import { uploadStoryToIPFS } from '@/lib/ipfs/web3storage'
 import {
   STORY_PROTOCOL_CONTRACTS,
   IP_ASSET_REGISTRY_ABI,

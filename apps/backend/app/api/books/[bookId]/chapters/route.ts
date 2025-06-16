@@ -91,7 +91,8 @@ export async function GET(
     const listCommand = new ListObjectsV2Command({
       Bucket: BUCKET_NAME,
       Prefix: chaptersPrefix,
-      Delimiter: '/'
+      // Remove delimiter to list all files, not just folders
+      // Delimiter: '/'
     })
 
     let listResponse
@@ -118,21 +119,32 @@ export async function GET(
       IsTruncated: listResponse.IsTruncated
     })
 
-    // Get chapter numbers from the folder prefixes
+    // Get chapter numbers from files (since we removed delimiter)
     const chapters: number[] = []
+    const chapterSet = new Set<number>()
     
-    if (listResponse.CommonPrefixes) {
-      for (const prefix of listResponse.CommonPrefixes) {
-        if (prefix.Prefix) {
-          // Extract chapter number from path like "books/author/slug/chapters/ch1/"
-          const chapterMatch = prefix.Prefix.match(/\/ch(\d+)\/$/)
-          if (chapterMatch) {
-            const chapterNumber = parseInt(chapterMatch[1], 10)
-            chapters.push(chapterNumber)
-            console.log(`📄 Found chapter: ${chapterNumber}`)
+    // Check if there are any objects (files) that indicate chapters
+    if (listResponse.Contents && listResponse.Contents.length > 0) {
+      console.log('📁 Files found in listing:', listResponse.Contents.length)
+      console.log('📁 First few files:', listResponse.Contents.slice(0, 5).map(obj => obj.Key))
+      
+      // Extract chapter numbers from file paths
+      for (const object of listResponse.Contents) {
+        if (object.Key) {
+          // Match chapter patterns like "chapters/ch6/content.json"
+          const fileChapterMatch = object.Key.match(/chapters\/ch(\d+)\//);
+          if (fileChapterMatch) {
+            const chapterNumber = parseInt(fileChapterMatch[1], 10);
+            if (!chapterSet.has(chapterNumber)) {
+              chapterSet.add(chapterNumber);
+              chapters.push(chapterNumber);
+              console.log(`📄 Found chapter ${chapterNumber} from file: ${object.Key}`);
+            }
           }
         }
       }
+    } else {
+      console.log('📁 No files found in listing')
     }
 
     // Sort chapters to get the latest

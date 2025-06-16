@@ -662,9 +662,16 @@ Realistic capture: 0.01% = $150M
 
 ### **Blockchain Architecture**
 
+**Tech Stack:**
+- **Frontend**: Next.js 15.3.3, TypeScript, React 19
+- **Backend**: Next.js API Routes, Story Protocol SDK v1.3.2+
+- **Smart Contracts**: Solidity, 5-contract architecture
+- **AI**: OpenAI GPT-4 for story generation
+- **Storage**: Cloudflare R2 with SHA-256 verification
+
 **Multi-Chain Strategy:**
 
-- **Primary**: Ethereum (security, decentralization)
+- **Primary**: Story Protocol Testnet (Sepolia)
 - **Scaling**: Polygon (low costs, fast transactions)
 - **Future**: Arbitrum, Optimism (L2 scaling)
 
