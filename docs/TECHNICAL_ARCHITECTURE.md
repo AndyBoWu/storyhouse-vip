@@ -78,12 +78,12 @@ StoryHouse.vip is a revolutionary Web3 publishing platform built on Story Protoc
 
 | Contract | Address | Purpose | Status |
 |----------|---------|---------|--------|
-| TIP Token | `0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E` | Platform token with 10B supply cap | ✅ 100% tested (417 lines) |
-| Rewards Manager | `0xf5ae031ba92295c2ae86a99e88f09989339707e5` | Secure reward orchestration | ✅ 100% tested (573 lines) |
+| TIP Token | `0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E` | Platform token with 10B supply cap | ✅ Deployed & 100% tested |
+| Rewards Manager | `0xf5ae031ba92295c2ae86a99e88f09989339707e5` | Secure reward orchestration | ✅ Deployed & 100% tested |
 | SPG NFT Contract | `0x26b6aa7e7036fc9e8fa2d8184c2cf07ae2e2412d` | IP asset NFTs | ✅ Integrated |
-| UnifiedRewardsController | TBD | Anti-bot reward logic | ✅ 100% tested |
-| ChapterAccessController | TBD | Chapter monetization | ✅ 100% tested |
-| HybridRevenueController | TBD | Multi-author revenue sharing | ✅ 100% tested |
+| UnifiedRewardsController | `[Pending deployment]` | Consolidates all reward logic (replaced 3 legacy controllers) | ✅ 100% tested |
+| ChapterAccessController | `[Pending deployment]` | Chapter monetization with 80/20 author/platform split | ✅ 100% tested |
+| HybridRevenueController | `[Pending deployment]` | Multi-author revenue sharing (70/20/10 split) | ✅ 100% tested |
 
 **Key Security Enhancements:**
 - Removed automatic creation rewards (50 TIP/story, 20 TIP/chapter) to prevent AI farming
