@@ -38,15 +38,13 @@ forge update
 ```
 packages/contracts/
 ├── src/                          # Smart Contracts (Production)
-│   ├── TIPToken.sol             # Main platform token
-│   ├── TIPTokenTestnet.sol      # Testnet version  
+│   ├── TIPToken.sol             # Platform token (works on testnet & mainnet)
 │   ├── RewardsManager.sol       # Central reward orchestrator
 │   ├── UnifiedRewardsController.sol # Combined Read/Creator/Remix rewards
 │   ├── ChapterAccessController.sol  # Chapter monetization
 │   └── HybridRevenueController.sol  # Multi-author revenue sharing
 ├── test/                        # Test Files (Foundry *.t.sol)
 │   ├── TIPToken.t.sol
-│   ├── TIPTokenTestnet.t.sol
 │   ├── RewardsManager.t.sol
 │   ├── UnifiedRewardsController.t.sol
 │   ├── ChapterAccessController.t.sol
@@ -170,20 +168,20 @@ forge fmt --check
 
 ## 📊 Architecture Overview
 
-### Optimized 6-Contract Architecture
-This repository contains an **optimized smart contract architecture** that was consolidated from 9 to 6 contracts for better gas efficiency and maintainability:
+### Optimized 5-Contract Architecture
+This repository contains an **optimized smart contract architecture** that was consolidated from 9 to 5 contracts for better gas efficiency and maintainability:
 
-1. **TIPToken.sol** (3.7KB) - Main platform token with minting, burning, and access control
-2. **TIPTokenTestnet.sol** (3.6KB) - Testnet version with flexible configuration
-3. **RewardsManager.sol** (7.5KB) - Central orchestrator for all reward distributions
-4. **UnifiedRewardsController.sol** (20.4KB) - Consolidated Read/Creator/Remix reward logic
-5. **ChapterAccessController.sol** (15.3KB) - Chapter monetization with integrated AccessControl
-6. **HybridRevenueController.sol** (16.0KB) - Multi-author revenue sharing for collaborative stories
+1. **TIPToken.sol** (3.7KB) - Platform token with minting, burning, and access control (works on testnet & mainnet)
+2. **RewardsManager.sol** (7.5KB) - Central orchestrator for all reward distributions
+3. **UnifiedRewardsController.sol** (20.4KB) - Consolidated Read/Creator/Remix reward logic
+4. **ChapterAccessController.sol** (15.3KB) - Chapter monetization with integrated AccessControl
+5. **HybridRevenueController.sol** (16.0KB) - Multi-author revenue sharing for collaborative stories
 
 ### Key Optimizations
-- ✅ **40% fewer contracts** (reduced from 9 to 6)
+- ✅ **44% fewer contracts** (reduced from 9 to 5)
 - ✅ **Integrated AccessControl** (no standalone AccessControlManager)
 - ✅ **Unified reward logic** (combined 3 reward controllers into 1)
+- ✅ **No code duplication** (removed redundant testnet token)
 - ✅ **Gas optimized** architecture with fewer cross-contract calls
 
 ## 🧪 Testing Standards
@@ -194,7 +192,7 @@ This repository contains an **optimized smart contract architecture** that was c
 - Test functions start with **`test`** (e.g., `testMinting`)
 
 ### Test Coverage Goals
-- **Structural Coverage**: 100% (6/6 contracts have test files)
+- **Structural Coverage**: 100% (5/5 contracts have test files)
 - **Functional Coverage**: Target 95%+ line coverage
 - **Edge Cases**: All revert conditions tested
 - **Integration**: Cross-contract interactions verified
