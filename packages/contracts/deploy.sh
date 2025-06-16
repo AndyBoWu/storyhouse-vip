@@ -1,8 +1,8 @@
 #!/bin/bash
 
-echo "🚀 StoryHouse 5-Contract Architecture Deployment"
-echo "=============================================="
-echo "This script deploys the new optimized architecture"
+echo "🚀 StoryHouse Smart Contract Deployment"
+echo "======================================="
+echo "Deploying the optimized 5-contract architecture"
 echo ""
 
 # Color codes for output
@@ -124,7 +124,7 @@ DEPLOYMENT_BLOCK=$(cast block-number --rpc-url $RPC_URL)
 echo ""
 echo -e "${BLUE}💾 Creating deployment summary...${NC}"
 
-cat > deployments-5-contracts-result.json << EOF
+cat > deployment-result.json << EOF
 {
   "deployment": {
     "timestamp": "$DEPLOYMENT_DATE",
@@ -167,4 +167,4 @@ echo "   2. Verify contracts on StoryScan"
 echo "   3. Update application configurations"
 echo "   4. Run integration tests"
 echo ""
-echo -e "${GREEN}✅ Deployment successful! Check deployments-5-contracts-result.json for details.${NC}"
+echo -e "${GREEN}✅ Deployment successful! Check deployment-result.json for details.${NC}"
