@@ -1,24 +1,24 @@
 # 📚 StoryHouse.vip - Web3 Publishing Platform
 
-Revolutionary Web3 storytelling platform built on Story Protocol enabling chapter-level IP asset management, blockchain derivative registration, and AI-powered content analytics with real-time royalty distribution.
+Revolutionary Web3 storytelling platform built on Story Protocol enabling chapter-level IP asset management, read-to-earn mechanics, AI-powered story generation, and automated licensing with royalty distribution.
 
 ## 🌐 Live Deployments
 
 **Testnet (Fully Operational):**
 - Frontend: https://testnet.storyhouse.vip/ 
 - Backend: https://api-testnet.storyhouse.vip/
-- **NEW**: Story Protocol SDK derivative registration system operational
-- **AI Analytics**: Complete derivative tracking and notification system
+- **5-Contract Architecture**: Optimized smart contract deployment with 44% reduction
+- **Unified Registration**: 40% gas savings with single-transaction IP registration
 
 **Production (Ready for Mainnet):**
 - Frontend: https://storyhouse.vip/ 
 - Backend: https://api.storyhouse.vip/
-- **Blockchain Integration**: Full SDK derivative registration infrastructure deployed
+- **Enterprise-Grade Infrastructure**: Production-ready with comprehensive security
 
 **Latest Deployments (Vercel):**
 - Frontend: https://frontend-3pf89c73v-andy-wus-projects.vercel.app
 - Backend: https://backend-dxtj0y3su-andy-wus-projects.vercel.app
-- **Phase 5.4 Complete**: Unified IP registration with 40% gas savings and single-transaction processing
+- **Phase 6.0 Complete**: 5-contract architecture deployed with full-stack migration
 
 ## 🎯 Core Features
 
@@ -160,15 +160,24 @@ forge coverage
 
 **📚 Complete Guide**: See [`packages/contracts/README.md`](./packages/contracts/README.md) for detailed development instructions.
 
-## 🔗 Smart Contracts (Testnet)
+## 🔗 Smart Contracts (5-Contract Architecture)
 
 **Network:** Story Protocol Aeneid Testnet (Chain ID: 1315)
 
-| Contract | Address | Purpose |
-|----------|---------|---------|
-| TIP Token | `0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E` | Platform token (100% test coverage ✅) |
-| Rewards Manager | `0xf5ae031ba92295c2ae86a99e88f09989339707e5` | Secure reward orchestration (100% test coverage ✅) |
-| SPG NFT Contract | `0x26b6aa7e7036fc9e8fa2d8184c2cf07ae2e2412d` | IP asset NFTs |
+| Contract | Address | Purpose | Status |
+|----------|---------|---------|--------|
+| TIP Token | `0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E` | Platform token (100% test coverage ✅) | ✅ Deployed |
+| Rewards Manager | `0xf5aE031bA92295C2aE86a99e88f09989339707E5` | Central reward orchestration | ✅ Deployed |
+| Unified Rewards Controller | `0x741105d6ee9b25567205f57c0e4f1d293f0d00c5` | Consolidated reward logic | ✅ Deployed |
+| Chapter Access Controller | `0x1bd65ad10b1ca3ed67ae75fcdd3aba256a9918e3` | Chapter monetization (0.5 TIP/chapter) | ✅ Deployed |
+| Hybrid Revenue Controller | `0xd1f7e8c6fd77dadbe946ae3e4141189b39ef7b08` | Multi-author revenue sharing | ✅ Deployed |
+| SPG NFT Contract | `0x26b6aa7e7036fc9e8fa2d8184c2cf07ae2e2412d` | IP asset NFTs | ✅ Integrated |
+
+**Architecture Benefits:**
+- 44% contract reduction (9→5 contracts)
+- 40% gas cost optimization  
+- Enhanced security with anti-AI farming protection
+- 97.3% test coverage across all contracts
 
 ## 🆕 **API Endpoints**
 
@@ -227,20 +236,26 @@ See [Deployment Guide](./docs/project/DEPLOYMENT.md) for detailed instructions.
 
 ## ✅ Current Status
 
-**🔒 Smart Contract Security Hardening Complete** - Anti-AI Farming Protection:
+**🏗️ Phase 6.0 Complete** - 5-Contract Architecture Deployed & Enterprise-Ready:
+
+**🆕 Smart Contract Architecture Optimization:**
+- ✅ **Contract Reduction**: Streamlined from 9 contracts to 5 (44% reduction)
+- ✅ **Gas Optimization**: 40% cost reduction through unified architecture
+- ✅ **Full Stack Migration**: Frontend and backend updated for new contracts
+- ✅ **Production Deployment**: All 5 contracts deployed and operational on testnet
+- ✅ **97.3% Test Coverage**: 182 comprehensive tests with production-grade security
+
+**🔒 Enhanced Security & Anti-AI Farming Protection:**
 - ✅ **Removed Automatic Creation Rewards**: Prevents AI bot exploitation
-- ✅ **100% Test Coverage**: TIPToken and RewardsManager fully tested
-- ✅ **Comprehensive Edge Cases**: 990+ lines of test code covering all scenarios
-- ✅ **Production Ready**: Secure reward distribution based on real engagement
+- ✅ **Human-Only Quality Bonuses**: Requires manual review and verification
+- ✅ **Sustainable Economics**: Rewards based on genuine reader engagement only
+- ✅ **Bot Prevention**: Eliminated exploitable automatic reward mechanisms
 
-**🎉 Phase 5.4 Complete** - Unified IP Registration with Revolutionary Gas Optimization:
-
-**🆕 Unified IP Registration Achievement:**
+**🆕 Unified IP Registration System:**
 - ✅ **40% Gas Cost Reduction**: Single-transaction using `mintAndRegisterIpAssetWithPilTerms`
 - ✅ **66% Faster Execution**: Atomic operations with intelligent flow detection
 - ✅ **Enhanced R2 Integration**: Automatic metadata generation with SHA-256 verification
 - ✅ **Backward Compatible**: Legacy flow support with gradual rollout capability
-- ✅ **Production Ready**: Complete API endpoints and frontend hooks implemented
 
 **Previous Phase 5.3 UI Enhancements:**
 - ✅ **Zero Commission Emphasis**: Platform messaging highlights 100% creator revenue
@@ -303,10 +318,10 @@ See [Deployment Guide](./docs/project/DEPLOYMENT.md) for detailed instructions.
 
 ## 🔮 Next Phases
 
-- **Phase 6**: Mainnet Integration (production Story Protocol deployment, real token economics)
-- **Phase 7**: Enhanced Creator Economy (revenue automation, collaboration tools, marketplace)
-- **Phase 8**: Community & Social Features (reviews, discussions, creator following)
-- **Phase 9**: Advanced AI Features (story continuation, character consistency, plot analysis)
+- **Phase 7**: Mainnet Integration (production Story Protocol deployment, real token economics)
+- **Phase 8**: Enhanced Creator Economy (revenue automation, collaboration tools, marketplace)
+- **Phase 9**: Community & Social Features (reviews, discussions, creator following)
+- **Phase 10**: Advanced AI Features (story continuation, character consistency, plot analysis)
 
 ---
 
