@@ -70,8 +70,14 @@ function PublishingModal({
   // Reset state when modal opens
   useEffect(() => {
     if (isOpen) {
-      setCurrentStep('options')
-      setPublishingOption(null)
+      // For premium chapters (4+), skip options and go directly to wallet
+      if (chapterNumber > 3) {
+        setCurrentStep('wallet')
+        setPublishingOption('protected') // Premium chapters always use protected publishing
+      } else {
+        setCurrentStep('options')
+        setPublishingOption(null)
+      }
       // Auto-set license tier based on chapter number
       // Chapters 1-3: free, Chapters 4+: premium (no free option for premium chapters)
       setLicenseTier(chapterNumber <= 3 ? 'free' : 'premium')
@@ -385,7 +391,10 @@ function PublishingModal({
                     </div>
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">Connect Your Wallet</h3>
                     <p className="text-gray-600">
-                      Connect to Aeneid testnet to register your chapter as an IP Asset on Story Protocol.
+                      {chapterNumber > 3 
+                        ? 'Connect to publish your premium chapter with full IP protection and monetization.'
+                        : 'Connect to Aeneid testnet to register your chapter as an IP Asset on Story Protocol.'
+                      }
                     </p>
                   </div>
 
@@ -447,14 +456,17 @@ function PublishingModal({
                     </div>
                   )}
 
-                  <div className="text-center">
-                    <button
-                      onClick={() => setCurrentStep('options')}
-                      className="text-gray-500 hover:text-gray-700 text-sm"
-                    >
-                      ← Back to options
-                    </button>
-                  </div>
+                  {/* Only show back button for free chapters */}
+                  {chapterNumber <= 3 && (
+                    <div className="text-center">
+                      <button
+                        onClick={() => setCurrentStep('options')}
+                        className="text-gray-500 hover:text-gray-700 text-sm"
+                      >
+                        ← Back to options
+                      </button>
+                    </div>
+                  )}
                 </motion.div>
               )}
 
@@ -807,12 +819,6 @@ function PublishingModal({
                           <span className="text-blue-800">{getPublishingStepDisplay().text}</span>
                         </div>
 
-                        {ipfsHash && (
-                          <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
-                            <CheckCircle className="w-5 h-5 text-green-600" />
-                            <span className="text-green-800">Content uploaded to IPFS: {ipfsHash.slice(0, 12)}...</span>
-                          </div>
-                        )}
                       </div>
                     </>
                   ) : publishResult && !publishResult.success ? (
@@ -827,16 +833,11 @@ function PublishingModal({
                         <p className="text-gray-600 mb-4">
                           {publishResult.error || 'An error occurred during publication'}
                         </p>
-                        {contractError && (
-                          <div className="text-xs text-red-600 bg-red-50 p-3 rounded-lg">
-                            Contract Error: {contractError.message}
-                          </div>
-                        )}
                       </div>
 
                       <div className="flex gap-3">
                         <button
-                          onClick={() => setCurrentStep(chapterNumber <= 3 ? 'wallet' : (publishingOption === 'simple' ? 'pricing' : 'ip-setup'))}
+                          onClick={() => setCurrentStep('wallet')}
                           className="flex-1 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                         >
                           ← Try Again
@@ -868,7 +869,7 @@ function PublishingModal({
                           onClick={() => {
                             console.log('🔄 Force resetting publishing state...')
                             resetPublishing()
-                            setCurrentStep('options')
+                            setCurrentStep(chapterNumber > 3 ? 'wallet' : 'options')
                           }}
                           className="text-sm text-red-600 hover:text-red-800 underline mt-2"
                         >
@@ -884,7 +885,7 @@ function PublishingModal({
                           Close
                         </button>
                         <button
-                          onClick={() => setCurrentStep('options')}
+                          onClick={() => setCurrentStep(chapterNumber > 3 ? 'wallet' : 'options')}
                           className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                         >
                           Try Again
