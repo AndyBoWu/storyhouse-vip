@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Pausable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "./TIPToken.sol";
@@ -18,7 +18,10 @@ import "./RewardsManager.sol";
  * - Author revenue distribution
  * - Chapter registration with IP asset integration
  */
-contract ChapterAccessController is Ownable, Pausable, ReentrancyGuard {
+contract ChapterAccessController is AccessControl, Pausable, ReentrancyGuard {
+    // Role definitions
+    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+    bytes32 public constant STORY_MANAGER_ROLE = keccak256("STORY_MANAGER_ROLE");
     // Events
     event ChapterRegistered(
         bytes32 indexed bookId,
@@ -99,10 +102,13 @@ contract ChapterAccessController is Ownable, Pausable, ReentrancyGuard {
     }
 
     constructor(
-        address initialOwner,
+        address initialAdmin,
         address _tipToken,
         address _rewardsManager
-    ) Ownable(initialOwner) {
+    ) {
+        _grantRole(DEFAULT_ADMIN_ROLE, initialAdmin);
+        _grantRole(ADMIN_ROLE, initialAdmin);
+        
         tipToken = TIPToken(_tipToken);
         rewardsManager = RewardsManager(_rewardsManager);
     }
@@ -121,7 +127,7 @@ contract ChapterAccessController is Ownable, Pausable, ReentrancyGuard {
         address author,
         string memory ipAssetId,
         uint256 wordCount
-    ) external onlyOwner {
+    ) external onlyRole(STORY_MANAGER_ROLE) {
         require(author != address(0), "ChapterAccess: invalid author");
         require(chapterNumber > 0, "ChapterAccess: invalid chapter number");
         require(wordCount > 0, "ChapterAccess: invalid word count");
@@ -398,7 +404,7 @@ contract ChapterAccessController is Ownable, Pausable, ReentrancyGuard {
     /**
      * @dev Update pricing configuration
      */
-    function updatePricing(uint256 _unlockPrice, uint256 _baseReadReward) external onlyOwner {
+    function updatePricing(uint256 _unlockPrice, uint256 _baseReadReward) external onlyRole(ADMIN_ROLE) {
         require(_unlockPrice > 0, "ChapterAccess: invalid unlock price");
         require(_baseReadReward > 0, "ChapterAccess: invalid read reward");
         
@@ -409,7 +415,7 @@ contract ChapterAccessController is Ownable, Pausable, ReentrancyGuard {
     /**
      * @dev Update revenue sharing
      */
-    function updateRevenueShare(uint256 _authorRevenueShare) external onlyOwner {
+    function updateRevenueShare(uint256 _authorRevenueShare) external onlyRole(ADMIN_ROLE) {
         require(_authorRevenueShare <= 95, "ChapterAccess: author share too high");
         require(_authorRevenueShare >= 50, "ChapterAccess: author share too low");
         
@@ -419,7 +425,7 @@ contract ChapterAccessController is Ownable, Pausable, ReentrancyGuard {
     /**
      * @dev Withdraw platform earnings
      */
-    function withdrawPlatformEarnings(address to, uint256 amount) external onlyOwner {
+    function withdrawPlatformEarnings(address to, uint256 amount) external onlyRole(ADMIN_ROLE) {
         require(to != address(0), "ChapterAccess: zero address");
         require(amount <= platformTotalEarnings, "ChapterAccess: insufficient earnings");
         
@@ -430,14 +436,14 @@ contract ChapterAccessController is Ownable, Pausable, ReentrancyGuard {
     /**
      * @dev Pause contract (emergency)
      */
-    function pause() external onlyOwner {
+    function pause() external onlyRole(ADMIN_ROLE) {
         _pause();
     }
 
     /**
      * @dev Unpause contract
      */
-    function unpause() external onlyOwner {
+    function unpause() external onlyRole(ADMIN_ROLE) {
         _unpause();
     }
 }
