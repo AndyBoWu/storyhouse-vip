@@ -1,0 +1,59 @@
+{
+  "networks": {
+    "story-protocol-aeneid": {
+      "chainId": 1315,
+      "rpcUrl": "https://aeneid.storyrpc.io",
+      "explorer": "https://aeneid.storyscan.xyz",
+      "deployer": "0xD9b6d1bd7D8A90915B905EB801c55bA5De1d4476",
+      "deploymentDate": "2025-06-04",
+      "contracts": {
+        "TIPToken": {
+          "address": "0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E",
+          "status": "deployed"
+        },
+        "AccessControlManager": {
+          "address": "0x41e2db0d016e83ddc3c464ffd260d22a6c898341",
+          "status": "deployed"
+        },
+        "RewardsManager": {
+          "address": "0xf5ae031ba92295c2ae86a99e88f09989339707e5",
+          "status": "deployed",
+          "dependencies": {
+            "tipToken": "0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E"
+          }
+        },
+        "CreatorRewardsController": {
+          "address": "0x8e2d21d1b9c744f772f15a7007de3d5757eea333",
+          "status": "deployed",
+          "configured": true,
+          "dependencies": {
+            "rewardsManager": "0xf5ae031ba92295c2ae86a99e88f09989339707e5"
+          }
+        },
+        "ReadRewardsController": {
+          "address": "0x04553ba8316d407b1c58b99172956d2d5fe100e5",
+          "status": "deployed",
+          "configured": true,
+          "dependencies": {
+            "rewardsManager": "0xf5ae031ba92295c2ae86a99e88f09989339707e5"
+          }
+        },
+        "RemixLicensingController": {
+          "address": "0x16144746a33d9a172039efc64bc2e12445fbbef2",
+          "status": "deployed",
+          "configured": true,
+          "dependencies": {
+            "rewardsManager": "0xf5ae031ba92295c2ae86a99e88f09989339707e5",
+            "tipToken": "0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E"
+          }
+        }
+      },
+      "summary": {
+        "totalContracts": 6,
+        "allDeployed": true,
+        "fullyConfigured": true,
+        "readyForProduction": true
+      }
+    }
+  }
+}

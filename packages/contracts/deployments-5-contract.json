@@ -1,15 +1,21 @@
 {
   "metadata": {
-    "version": "2.0",
+    "version": "3.0",
     "architecture": "5-contract-optimized",
-    "description": "Optimized StoryHouse smart contract architecture with 44% contract reduction",
-    "lastUpdated": "2024-06-16",
+    "description": "Primary StoryHouse smart contract architecture - Legacy 6-contract architecture deprecated",
+    "lastUpdated": "2025-06-16",
+    "status": "PRIMARY",
     "optimizations": [
       "Unified reward controllers (3→1)",
       "Integrated AccessControl into contracts",
       "Removed redundant contracts",
       "Gas optimized batch operations"
-    ]
+    ],
+    "deprecation": {
+      "legacyArchitecture": "6-contract",
+      "deprecationDate": "2025-06-16",
+      "reason": "Replaced by optimized 5-contract architecture for better gas efficiency"
+    }
   },
   "networks": {
     "story-protocol-aeneid": {

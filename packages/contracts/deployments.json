@@ -1,59 +1,68 @@
 {
+  "metadata": {
+    "version": "1.0",
+    "architecture": "5-contract-optimized",
+    "description": "StoryHouse primary smart contract deployment registry",
+    "lastUpdated": "2025-06-16"
+  },
   "networks": {
     "story-protocol-aeneid": {
       "chainId": 1315,
       "rpcUrl": "https://aeneid.storyrpc.io",
       "explorer": "https://aeneid.storyscan.xyz",
       "deployer": "0xD9b6d1bd7D8A90915B905EB801c55bA5De1d4476",
-      "deploymentDate": "2025-06-04",
       "contracts": {
         "TIPToken": {
           "address": "0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E",
-          "status": "deployed"
-        },
-        "AccessControlManager": {
-          "address": "0x41e2db0d016e83ddc3c464ffd260d22a6c898341",
-          "status": "deployed"
+          "status": "deployed",
+          "deploymentDate": "2025-06-04",
+          "verified": true
         },
         "RewardsManager": {
-          "address": "0xf5ae031ba92295c2ae86a99e88f09989339707e5",
+          "address": "0xf5aE031bA92295C2aE86a99e88f09989339707E5",
           "status": "deployed",
+          "deploymentDate": "2025-06-04",
+          "verified": true,
           "dependencies": {
             "tipToken": "0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E"
           }
         },
-        "CreatorRewardsController": {
-          "address": "0x8e2d21d1b9c744f772f15a7007de3d5757eea333",
-          "status": "deployed",
-          "configured": true,
+        "UnifiedRewardsController": {
+          "address": null,
+          "status": "pending_deployment",
           "dependencies": {
-            "rewardsManager": "0xf5ae031ba92295c2ae86a99e88f09989339707e5"
+            "rewardsManager": "0xf5aE031bA92295C2aE86a99e88f09989339707E5",
+            "tipToken": "0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E"
           }
         },
-        "ReadRewardsController": {
-          "address": "0x04553ba8316d407b1c58b99172956d2d5fe100e5",
-          "status": "deployed",
-          "configured": true,
+        "ChapterAccessController": {
+          "address": null,
+          "status": "pending_deployment",
           "dependencies": {
-            "rewardsManager": "0xf5ae031ba92295c2ae86a99e88f09989339707e5"
+            "rewardsManager": "0xf5aE031bA92295C2aE86a99e88f09989339707E5",
+            "tipToken": "0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E"
           }
         },
-        "RemixLicensingController": {
-          "address": "0x16144746a33d9a172039efc64bc2e12445fbbef2",
-          "status": "deployed",
-          "configured": true,
+        "HybridRevenueController": {
+          "address": null,
+          "status": "pending_deployment",
           "dependencies": {
-            "rewardsManager": "0xf5ae031ba92295c2ae86a99e88f09989339707e5",
+            "rewardsManager": "0xf5aE031bA92295C2aE86a99e88f09989339707E5",
             "tipToken": "0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E"
           }
         }
       },
-      "summary": {
-        "totalContracts": 6,
-        "allDeployed": true,
-        "fullyConfigured": true,
-        "readyForProduction": true
+      "deploymentStatus": {
+        "phase": "partial",
+        "deployedContracts": 2,
+        "totalContracts": 5,
+        "readyForProduction": false
       }
     }
+  },
+  "deploymentScripts": {
+    "primary": "deploy-5-contracts.sh",
+    "foundryScript": "script/Deploy5ContractArchitecture.s.sol",
+    "verification": "script/VerifyDeployment.s.sol"
   }
 }
