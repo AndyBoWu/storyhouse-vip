@@ -53,6 +53,11 @@ if [ -z "$PRIVATE_KEY" ]; then
     exit 1
 fi
 
+# Add 0x prefix if not present
+if [[ ! "$PRIVATE_KEY" =~ ^0x ]]; then
+    PRIVATE_KEY="0x$PRIVATE_KEY"
+fi
+
 export PRIVATE_KEY
 
 # Get deployer address
