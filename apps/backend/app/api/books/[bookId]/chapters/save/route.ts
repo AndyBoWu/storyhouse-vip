@@ -140,7 +140,7 @@ export async function POST(
       // Update book metadata to include this chapter in the chapter map
       try {
         // Get current book metadata
-        const bookMetadata = await BookStorageService.getBookMetadata(authorAddress, slug)
+        const bookMetadata = await BookStorageService.getBookMetadata(bookId)
         
         // Update chapter map and count
         bookMetadata.chapterMap[`ch${body.chapterNumber}`] = chapterPath
