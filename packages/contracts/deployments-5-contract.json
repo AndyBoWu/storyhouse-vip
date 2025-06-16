@@ -1,0 +1,228 @@
+{
+  "metadata": {
+    "version": "2.0",
+    "architecture": "5-contract-optimized",
+    "description": "Optimized StoryHouse smart contract architecture with 44% contract reduction",
+    "lastUpdated": "2024-06-16",
+    "optimizations": [
+      "Unified reward controllers (3→1)",
+      "Integrated AccessControl into contracts",
+      "Removed redundant contracts",
+      "Gas optimized batch operations"
+    ]
+  },
+  "networks": {
+    "story-protocol-aeneid": {
+      "chainId": 1315,
+      "rpcUrl": "https://aeneid.storyrpc.io",
+      "explorer": "https://aeneid.storyscan.xyz",
+      "deployer": "0xD9b6d1bd7D8A90915B905EB801c55bA5De1d4476",
+      "deploymentDate": "2024-06-16",
+      "deploymentScript": "Deploy5ContractArchitecture.s.sol",
+      "verificationScript": "VerifyDeployment.s.sol",
+      "contracts": {
+        "TIPToken": {
+          "address": "0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E",
+          "size": "3.7KB",
+          "status": "deployed",
+          "verified": true,
+          "description": "Platform token with controlled minting, burning, and pausable transfers",
+          "features": [
+            "ERC20 standard",
+            "Controlled minting",
+            "Burnable tokens",
+            "Pausable transfers",
+            "Supply cap enforcement"
+          ]
+        },
+        "RewardsManager": {
+          "address": "0xf5ae031ba92295c2ae86a99e88f09989339707e5",
+          "size": "7.5KB", 
+          "status": "deployed",
+          "verified": true,
+          "description": "Central reward orchestrator and tracking system",
+          "dependencies": {
+            "tipToken": "0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E"
+          },
+          "features": [
+            "Controller management",
+            "Reward tracking",
+            "Statistics aggregation",
+            "Anti-double-claiming"
+          ]
+        },
+        "UnifiedRewardsController": {
+          "address": "TBD",
+          "size": "20.4KB",
+          "status": "pending_deployment",
+          "verified": false,
+          "description": "Unified controller for reading, creation, and remix rewards",
+          "dependencies": {
+            "rewardsManager": "0xf5ae031ba92295c2ae86a99e88f09989339707e5",
+            "tipToken": "0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E"
+          },
+          "features": [
+            "Reading rewards with anti-gaming",
+            "Creation rewards and bonuses",
+            "Remix licensing and royalties",
+            "Quality scoring system",
+            "Engagement tracking",
+            "Reading streak bonuses"
+          ],
+          "replacedContracts": [
+            "ReadRewardsController",
+            "CreatorRewardsController", 
+            "RemixLicensingController"
+          ]
+        },
+        "ChapterAccessController": {
+          "address": "TBD",
+          "size": "15.3KB",
+          "status": "pending_deployment",
+          "verified": false,
+          "description": "Chapter monetization with integrated access control",
+          "dependencies": {
+            "rewardsManager": "0xf5ae031ba92295c2ae86a99e88f09989339707e5",
+            "tipToken": "0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E"
+          },
+          "features": [
+            "Chapter registration and pricing",
+            "Access control and unlocking",
+            "Revenue distribution",
+            "Platform earnings management",
+            "Batch operations"
+          ]
+        },
+        "HybridRevenueController": {
+          "address": "TBD",
+          "size": "16.0KB",
+          "status": "pending_deployment",
+          "verified": false,
+          "description": "Multi-author collaborative revenue sharing",
+          "dependencies": {
+            "rewardsManager": "0xf5ae031ba92295c2ae86a99e88f09989339707e5",
+            "tipToken": "0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E"
+          },
+          "features": [
+            "Multi-author book registration",
+            "Chapter attribution",
+            "Derivative book tracking",
+            "Revenue sharing automation",
+            "IPFS metadata integration"
+          ]
+        }
+      },
+      "deploymentOrder": [
+        "TIPToken",
+        "RewardsManager", 
+        "UnifiedRewardsController",
+        "ChapterAccessController",
+        "HybridRevenueController"
+      ],
+      "roleSetup": {
+        "TIPToken": {
+          "minters": ["RewardsManager"],
+          "owner": "0xD9b6d1bd7D8A90915B905EB801c55bA5De1d4476"
+        },
+        "RewardsManager": {
+          "authorizedControllers": [
+            "UnifiedRewardsController",
+            "ChapterAccessController", 
+            "HybridRevenueController"
+          ],
+          "controllerTypes": {
+            "unified": "UnifiedRewardsController",
+            "chapter": "ChapterAccessController",
+            "revenue": "HybridRevenueController"
+          }
+        },
+        "UnifiedRewardsController": {
+          "ADMIN_ROLE": ["0xD9b6d1bd7D8A90915B905EB801c55bA5De1d4476"],
+          "STORY_MANAGER_ROLE": ["0xD9b6d1bd7D8A90915B905EB801c55bA5De1d4476"],
+          "QUALITY_ASSESSOR_ROLE": ["0xD9b6d1bd7D8A90915B905EB801c55bA5De1d4476"]
+        }
+      },
+      "summary": {
+        "totalContracts": 5,
+        "contractReduction": "44% (from 9 to 5 contracts)",
+        "allDeployed": false,
+        "fullyConfigured": false,
+        "readyForProduction": false,
+        "pendingDeployments": [
+          "UnifiedRewardsController",
+          "ChapterAccessController",
+          "HybridRevenueController"
+        ],
+        "gasOptimizations": [
+          "Batch operations implemented",
+          "Unified controller reduces cross-contract calls",
+          "Integrated AccessControl eliminates standalone manager"
+        ]
+      }
+    },
+    "story-protocol-mainnet": {
+      "chainId": 1_513,
+      "rpcUrl": "TBD",
+      "explorer": "TBD",
+      "status": "not_deployed",
+      "description": "Production deployment configuration for Story Protocol mainnet"
+    },
+    "local-development": {
+      "chainId": 31337,
+      "rpcUrl": "http://localhost:8545",
+      "explorer": "N/A",
+      "status": "development",
+      "description": "Local development environment configuration"
+    }
+  },
+  "migrationPlan": {
+    "fromLegacy": {
+      "description": "Migration from 6-contract to 5-contract architecture",
+      "steps": [
+        "Deploy new UnifiedRewardsController",
+        "Deploy ChapterAccessController", 
+        "Deploy HybridRevenueController",
+        "Update RewardsManager controller registrations",
+        "Transfer data from legacy contracts (if needed)",
+        "Deprecate legacy controllers"
+      ],
+      "legacyContracts": {
+        "AccessControlManager": "0x41e2db0d016e83ddc3c464ffd260d22a6c898341",
+        "CreatorRewardsController": "0x8e2d21d1b9c744f772f15a7007de3d5757eea333",
+        "ReadRewardsController": "0x04553ba8316d407b1c58b99172956d2d5fe100e5", 
+        "RemixLicensingController": "0x16144746a33d9a172039efc64bc2e12445fbbef2"
+      }
+    }
+  },
+  "testing": {
+    "testCoverage": {
+      "TIPToken": "95%+",
+      "RewardsManager": "100%",
+      "UnifiedRewardsController": "~80% (needs edge cases)",
+      "ChapterAccessController": "~75% (needs revenue tests)",
+      "HybridRevenueController": "~70% (needs derivative tests)"
+    },
+    "criticalTests": [
+      "Reentrancy attack prevention",
+      "Daily reading limits enforcement", 
+      "Revenue distribution accuracy",
+      "Platform earnings withdrawal",
+      "Multi-level derivative scenarios",
+      "Token transfer failure handling"
+    ]
+  },
+  "securityConsiderations": {
+    "auditStatus": "pending",
+    "knownRisks": [
+      "UnifiedRewardsController complexity (20.4KB)",
+      "Single point of failure for rewards",
+      "Complex upgrade path due to size"
+    ],
+    "mitigations": [
+      "Circuit breaker mechanisms",
+      "Comprehensive test coverage",
+      "Role-based access control",
+      "Pausable functionality"
+    ]
+  }
+}
