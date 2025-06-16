@@ -46,7 +46,8 @@ Complete licensing infrastructure with Story Protocol SDK v1.3.2:
 - Readers earn $TIP tokens while reading
 - Free chapters 1-3, paid chapters 4+ (0.5 TIP each)
 - **Revenue Split**: 80% to authors, 20% platform fee
-- Dynamic pricing based on engagement
+- **Anti-AI Farming**: Removed automatic creation rewards to prevent exploitation
+- **Organic Growth Model**: Earnings based on real reader engagement only
 
 ### 🆕 **Real-Time Royalty Distribution**
 Complete chapter-level royalty management system:
@@ -134,6 +135,7 @@ This project uses **[Foundry](https://book.getfoundry.sh/)** for smart contract 
 - **All critical issues resolved** including arithmetic underflow and OpenZeppelin v5 compatibility
 - **Comprehensive edge case testing** including reentrancy protection
 - **Gas optimized** 5-contract architecture
+- **Anti-AI Farming Security**: Removed automatic rewards to prevent exploitation
 
 ### Quick Setup for Smart Contracts
 ```bash
@@ -165,7 +167,7 @@ forge coverage
 | Contract | Address | Purpose |
 |----------|---------|---------|
 | TIP Token | `0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E` | Platform token (100% test coverage ✅) |
-| Rewards Manager | `0xf5ae031ba92295c2ae86a99e88f09989339707e5` | Reward orchestration (100% test coverage ✅) |
+| Rewards Manager | `0xf5ae031ba92295c2ae86a99e88f09989339707e5` | Secure reward orchestration (100% test coverage ✅) |
 | SPG NFT Contract | `0x26b6aa7e7036fc9e8fa2d8184c2cf07ae2e2412d` | IP asset NFTs |
 
 ## 🆕 **API Endpoints**
@@ -224,6 +226,12 @@ See [Deployment Guide](./docs/project/DEPLOYMENT.md) for detailed instructions.
 7. **Monetize**: Earn from licenses, derivatives, and reader engagement with automated royalty distribution
 
 ## ✅ Current Status
+
+**🔒 Smart Contract Security Hardening Complete** - Anti-AI Farming Protection:
+- ✅ **Removed Automatic Creation Rewards**: Prevents AI bot exploitation
+- ✅ **100% Test Coverage**: TIPToken and RewardsManager fully tested
+- ✅ **Comprehensive Edge Cases**: 990+ lines of test code covering all scenarios
+- ✅ **Production Ready**: Secure reward distribution based on real engagement
 
 **🎉 Phase 5.4 Complete** - Unified IP Registration with Revolutionary Gas Optimization:
 
