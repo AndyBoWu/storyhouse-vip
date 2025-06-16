@@ -1,3 +1,7 @@
+# StoryHouse Smart Contracts - Foundry Configuration
+# This project uses Foundry as the primary smart contract development framework
+# See packages/contracts/README.md for complete development guide
+
 [profile.default]
 src = "src"
 out = "out"
