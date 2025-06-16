@@ -61,8 +61,7 @@
     }
   },
   "deploymentScripts": {
-    "primary": "deploy-5-contracts.sh",
-    "foundryScript": "script/Deploy5ContractArchitecture.s.sol",
-    "verification": "script/VerifyDeployment.s.sol"
+    "primary": "deploy.sh",
+    "foundryScript": "script/Deploy5ContractArchitecture.s.sol"
   }
 }
