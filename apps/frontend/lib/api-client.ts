@@ -186,6 +186,10 @@ export const apiClient = {
     return apiRequest(`/api/books/${bookId}/chapters`)
   },
 
+  async getChapter(bookId: string, chapterNumber: number) {
+    return apiRequest(`/api/books/${bookId}/chapter/${chapterNumber}`)
+  },
+
   // Generic GET method for flexibility
   async get(endpoint: string) {
     return apiRequest(endpoint)

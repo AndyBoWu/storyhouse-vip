@@ -81,7 +81,7 @@ export default function BookPage() {
         // Load actual chapter details instead of placeholder data
         const chapterPromises = chaptersResponse.data.chapters.map(async (chapterNum: number) => {
           try {
-            const chapterResponse = await apiClient.get(`/books/${bookId}/chapter/${chapterNum}`);
+            const chapterResponse = await apiClient.getChapter(bookId, chapterNum);
             return {
               number: chapterNum,
               title: chapterResponse.title || `Chapter ${chapterNum}`,
