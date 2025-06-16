@@ -257,4 +257,184 @@ contract RewardsManagerTest is Test {
         assertEq(totalDistributed, 100 * 10 ** 18);
         assertEq(uniqueRecipients, 1);
     }
+
+    function testRewardTrackingFunctions() public {
+        rewardsManager.addController(controller1, "test_controller");
+        
+        bytes32 contextId1 = keccak256("story1");
+        bytes32 contextId2 = keccak256("story2");
+        uint256 amount1 = 100 * 10 ** 18;
+        uint256 amount2 = 200 * 10 ** 18;
+        
+        // Initially should be zero
+        assertEq(rewardsManager.getUserTotalRewards(user), 0);
+        assertEq(rewardsManager.getUserContextRewards(user, contextId1), 0);
+        assertEq(rewardsManager.getContextTotalRewards(contextId1), 0);
+        
+        // Distribute first reward
+        vm.prank(controller1);
+        rewardsManager.distributeReward(user, amount1, "read", contextId1);
+        
+        assertEq(rewardsManager.getUserTotalRewards(user), amount1);
+        assertEq(rewardsManager.getUserContextRewards(user, contextId1), amount1);
+        assertEq(rewardsManager.getContextTotalRewards(contextId1), amount1);
+        assertEq(rewardsManager.getUserContextRewards(user, contextId2), 0);
+        
+        // Distribute second reward to same context
+        vm.prank(controller1);
+        rewardsManager.distributeReward(user, amount1, "read", contextId1);
+        
+        assertEq(rewardsManager.getUserTotalRewards(user), amount1 * 2);
+        assertEq(rewardsManager.getUserContextRewards(user, contextId1), amount1 * 2);
+        assertEq(rewardsManager.getContextTotalRewards(contextId1), amount1 * 2);
+        
+        // Distribute to different context
+        vm.prank(controller1);
+        rewardsManager.distributeReward(user, amount2, "creator", contextId2);
+        
+        assertEq(rewardsManager.getUserTotalRewards(user), amount1 * 2 + amount2);
+        assertEq(rewardsManager.getUserContextRewards(user, contextId1), amount1 * 2);
+        assertEq(rewardsManager.getUserContextRewards(user, contextId2), amount2);
+        assertEq(rewardsManager.getContextTotalRewards(contextId1), amount1 * 2);
+        assertEq(rewardsManager.getContextTotalRewards(contextId2), amount2);
+    }
+
+    function testGetControllerByType() public {
+        // Initially should return zero address
+        assertEq(rewardsManager.getControllerByType("read"), address(0));
+        assertEq(rewardsManager.getControllerByType("creator"), address(0));
+        
+        // Add controllers
+        rewardsManager.addController(controller1, "read");
+        rewardsManager.addController(controller2, "creator");
+        
+        assertEq(rewardsManager.getControllerByType("read"), controller1);
+        assertEq(rewardsManager.getControllerByType("creator"), controller2);
+        assertEq(rewardsManager.getControllerByType("nonexistent"), address(0));
+        
+        // Remove controller
+        rewardsManager.removeController(controller1, "read");
+        assertEq(rewardsManager.getControllerByType("read"), address(0));
+        assertEq(rewardsManager.getControllerByType("creator"), controller2);
+    }
+
+    function testRewardDistributedEvent() public {
+        rewardsManager.addController(controller1, "test_controller");
+        uint256 rewardAmount = 100 * 10 ** 18;
+        bytes32 contextId = keccak256("test_context");
+        
+        vm.expectEmit(true, true, true, true);
+        emit RewardDistributed(user, rewardAmount, "test_reward", contextId, controller1);
+        
+        vm.prank(controller1);
+        rewardsManager.distributeReward(user, rewardAmount, "test_reward", contextId);
+    }
+
+    function testBatchDistributeZeroAddressInArray() public {
+        rewardsManager.addController(controller1, "test_controller");
+        
+        address[] memory recipients = new address[](2);
+        recipients[0] = user;
+        recipients[1] = address(0); // Zero address
+        
+        uint256[] memory amounts = new uint256[](2);
+        amounts[0] = 100 * 10 ** 18;
+        amounts[1] = 200 * 10 ** 18;
+        
+        bytes32[] memory contextIds = new bytes32[](2);
+        contextIds[0] = keccak256("context1");
+        contextIds[1] = keccak256("context2");
+        
+        vm.prank(controller1);
+        vm.expectRevert("RewardsManager: zero address");
+        rewardsManager.batchDistributeRewards(recipients, amounts, "batch_reward", contextIds);
+    }
+
+    function testBatchDistributeZeroAmountInArray() public {
+        rewardsManager.addController(controller1, "test_controller");
+        
+        address[] memory recipients = new address[](2);
+        recipients[0] = user;
+        recipients[1] = address(0x4);
+        
+        uint256[] memory amounts = new uint256[](2);
+        amounts[0] = 100 * 10 ** 18;
+        amounts[1] = 0; // Zero amount
+        
+        bytes32[] memory contextIds = new bytes32[](2);
+        contextIds[0] = keccak256("context1");
+        contextIds[1] = keccak256("context2");
+        
+        vm.prank(controller1);
+        vm.expectRevert("RewardsManager: zero amount");
+        rewardsManager.batchDistributeRewards(recipients, amounts, "batch_reward", contextIds);
+    }
+
+    function testMultipleUsersRewardTracking() public {
+        rewardsManager.addController(controller1, "test_controller");
+        
+        address user2 = address(0x6);
+        bytes32 contextId = keccak256("shared_context");
+        uint256 amount1 = 100 * 10 ** 18;
+        uint256 amount2 = 200 * 10 ** 18;
+        
+        // Distribute to first user
+        vm.prank(controller1);
+        rewardsManager.distributeReward(user, amount1, "test", contextId);
+        
+        // Distribute to second user
+        vm.prank(controller1);
+        rewardsManager.distributeReward(user2, amount2, "test", contextId);
+        
+        // Check individual user rewards
+        assertEq(rewardsManager.getUserTotalRewards(user), amount1);
+        assertEq(rewardsManager.getUserTotalRewards(user2), amount2);
+        assertEq(rewardsManager.getUserContextRewards(user, contextId), amount1);
+        assertEq(rewardsManager.getUserContextRewards(user2, contextId), amount2);
+        
+        // Check context total (should be sum of both)
+        assertEq(rewardsManager.getContextTotalRewards(contextId), amount1 + amount2);
+        
+        // Check global stats
+        (uint256 totalDistributed, uint256 uniqueRecipients,) = rewardsManager.getGlobalStats();
+        assertEq(totalDistributed, amount1 + amount2);
+        assertEq(uniqueRecipients, 2);
+    }
+
+    function testHasReceivedRewardsTracking() public {
+        rewardsManager.addController(controller1, "test_controller");
+        
+        // Initially no one has received rewards
+        (,uint256 uniqueRecipients,) = rewardsManager.getGlobalStats();
+        assertEq(uniqueRecipients, 0);
+        assertFalse(rewardsManager.hasReceivedRewards(user));
+        
+        // Distribute first reward
+        vm.prank(controller1);
+        rewardsManager.distributeReward(user, 100 * 10 ** 18, "test", keccak256("context"));
+        
+        assertTrue(rewardsManager.hasReceivedRewards(user));
+        (,uniqueRecipients,) = rewardsManager.getGlobalStats();
+        assertEq(uniqueRecipients, 1);
+        
+        // Distribute second reward to same user
+        vm.prank(controller1);
+        rewardsManager.distributeReward(user, 100 * 10 ** 18, "test", keccak256("context2"));
+        
+        // Unique recipients should not increase
+        (,uniqueRecipients,) = rewardsManager.getGlobalStats();
+        assertEq(uniqueRecipients, 1);
+    }
+
+    function testEmptyBatchDistribution() public {
+        rewardsManager.addController(controller1, "test_controller");
+        
+        address[] memory recipients = new address[](0);
+        uint256[] memory amounts = new uint256[](0);
+        bytes32[] memory contextIds = new bytes32[](0);
+        
+        // Should complete without error
+        vm.prank(controller1);
+        rewardsManager.batchDistributeRewards(recipients, amounts, "empty_batch", contextIds);
+    }
 }
