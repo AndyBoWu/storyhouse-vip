@@ -311,11 +311,15 @@ contract Deploy is Script {
 
         // Setup TIP Token minter role for RewardsManager
         TIPToken tipToken = TIPToken(registry.tipToken);
-        try tipToken.addMinter(registry.rewardsManager) {
-            console.log("[OK] Added RewardsManager as TIP token minter");
-            emit PermissionSetupCompleted(registry.rewardsManager, "TIP token minter role");
-        } catch {
-            console.log("[WARN]  RewardsManager already added as minter or failed");
+        if (!tipToken.minters(registry.rewardsManager)) {
+            try tipToken.addMinter(registry.rewardsManager) {
+                console.log("[OK] Added RewardsManager as TIP token minter");
+                emit PermissionSetupCompleted(registry.rewardsManager, "TIP token minter role");
+            } catch {
+                console.log("[WARN]  Failed to add RewardsManager as minter");
+            }
+        } else {
+            console.log("[OK] RewardsManager already registered as TIP token minter");
         }
 
         // Setup role permissions for controllers

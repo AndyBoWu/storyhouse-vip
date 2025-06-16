@@ -28,24 +28,30 @@
           }
         },
         "UnifiedRewardsController": {
-          "address": null,
-          "status": "pending_deployment",
+          "address": "0x741105d6ee9b25567205f57c0e4f1d293f0d00c5",
+          "status": "deployed",
+          "deploymentDate": "2025-06-16",
+          "verified": false,
           "dependencies": {
             "rewardsManager": "0xf5aE031bA92295C2aE86a99e88f09989339707E5",
             "tipToken": "0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E"
           }
         },
         "ChapterAccessController": {
-          "address": null,
-          "status": "pending_deployment",
+          "address": "0x1bd65ad10b1ca3ed67ae75fcdd3aba256a9918e3",
+          "status": "deployed",
+          "deploymentDate": "2025-06-16",
+          "verified": false,
           "dependencies": {
             "rewardsManager": "0xf5aE031bA92295C2aE86a99e88f09989339707E5",
             "tipToken": "0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E"
           }
         },
         "HybridRevenueController": {
-          "address": null,
-          "status": "pending_deployment",
+          "address": "0xd1f7e8c6fd77dadbe946ae3e4141189b39ef7b08",
+          "status": "deployed",
+          "deploymentDate": "2025-06-16",
+          "verified": false,
           "dependencies": {
             "rewardsManager": "0xf5aE031bA92295C2aE86a99e88f09989339707E5",
             "tipToken": "0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E"
@@ -53,10 +59,10 @@
         }
       },
       "deploymentStatus": {
-        "phase": "partial",
-        "deployedContracts": 2,
+        "phase": "complete",
+        "deployedContracts": 5,
         "totalContracts": 5,
-        "readyForProduction": false
+        "readyForProduction": true
       }
     }
   },
