@@ -59,9 +59,12 @@ export const CONTRACT_ADDRESSES = {
     pilTemplate: '0x7dD80b7c81E44ef5F62d8e1b8C68b1a5A5E5C5F8',
     royaltyModule: '0x6Ef8A46584b69Be6b7bB6Aa3cb3F2c46AE97A2B1',
     
-    // StoryHouse contracts
+    // StoryHouse contracts (5-contract architecture)
     tipToken: '0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E',
-    storyRewards: '0xf5ae031ba92295c2ae86a99e88f09989339707e5',
+    rewardsManager: '0xf5ae031ba92295c2ae86a99e88f09989339707e5',
+    unifiedRewardsController: '0x741105d6ee9b25567205f57c0e4f1d293f0d00c5',
+    chapterAccessController: '0x1bd65ad10b1ca3ed67ae75fcdd3aba256a9918e3',
+    hybridRevenueController: '0xd1f7e8c6fd77dadbe946ae3e4141189b39ef7b08',
     spgNftContract: '0x26b6aa7e7036fc9e8fa2d8184c2cf07ae2e2412d',
   },
   [storyMainnet.id]: {
@@ -72,7 +75,10 @@ export const CONTRACT_ADDRESSES = {
     royaltyModule: '0x0000000000000000000000000000000000000000',
     
     tipToken: '0x0000000000000000000000000000000000000000',
-    storyRewards: '0x0000000000000000000000000000000000000000',
+    rewardsManager: '0x0000000000000000000000000000000000000000',
+    unifiedRewardsController: '0x0000000000000000000000000000000000000000',
+    chapterAccessController: '0x0000000000000000000000000000000000000000',
+    hybridRevenueController: '0x0000000000000000000000000000000000000000',
     spgNftContract: '0x0000000000000000000000000000000000000000',
   }
 } as const
