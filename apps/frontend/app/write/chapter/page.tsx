@@ -217,7 +217,8 @@ function ChapterWritingPageContent() {
     wordCount: wordCount,
     readingTime: Math.ceil(wordCount / 200),
     themes: genre ? [decodeURIComponent(genre)] : [], // Use genre from URL
-    contentUrl: `chapter-${bookId}-${chapterNumber}` // Generate a temporary identifier
+    contentUrl: `chapter-${bookId}-${chapterNumber}`, // Generate a temporary identifier
+    chapterNumber: chapterNumber // Add the chapter number to the story object
   })
   
   // Memoized style object to prevent re-creation

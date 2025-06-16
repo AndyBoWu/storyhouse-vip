@@ -127,14 +127,18 @@ const roadmapData: RoadmapPhase[] = [
   },
   {
     phase: 'Phase 7.0',
-    title: 'Ecosystem Expansion',
+    title: 'Mobile & Ecosystem Expansion',
     status: 'upcoming',
     date: 'Q2 2025',
     items: [
-      'Mobile applications (iOS/Android)',
-      'Partner integrations',
-      'Translation system',
-      'Audio narration features',
+      'Native iOS app with full story reading experience',
+      'Native Android app with offline reading support',
+      'Mobile-optimized AI story generation',
+      'Push notifications for new chapters',
+      'Mobile wallet integration (WalletConnect)',
+      'Partner platform integrations',
+      'Multi-language translation system',
+      'Audio narration with AI voices',
       'Community governance launch'
     ]
   },

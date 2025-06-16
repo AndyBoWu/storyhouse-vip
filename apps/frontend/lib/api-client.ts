@@ -225,6 +225,13 @@ export const apiClient = {
   },
 
   async saveBookChapter(bookId: string, chapterData: any) {
+    console.log('📝 Saving chapter:', {
+      bookId,
+      chapterNumber: chapterData.chapterNumber,
+      title: chapterData.title,
+      wordCount: chapterData.wordCount
+    })
+    
     return apiRequest(`/api/books/${bookId}/chapters/save`, {
       method: 'POST',
       body: JSON.stringify(chapterData),
