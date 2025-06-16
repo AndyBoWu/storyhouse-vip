@@ -131,16 +131,13 @@ forge build --force    # Force recompilation
 anvil
 
 # Deploy to local network (in another terminal)
-forge script script/DeployAll.s.sol --rpc-url http://localhost:8545 --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --broadcast
+forge script script/Deploy5ContractArchitecture.s.sol --rpc-url http://localhost:8545 --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --broadcast
 ```
 
 ### Testnet Deployment
 ```bash
 # Deploy to Story Protocol Testnet
-forge script script/DeployAll.s.sol --rpc-url $STORY_TESTNET_RPC --private-key $PRIVATE_KEY --broadcast --verify
-
-# Or use the optimized deployment script
-forge script scripts/deploy-optimized.js --rpc-url $STORY_TESTNET_RPC --private-key $PRIVATE_KEY --broadcast
+forge script script/Deploy5ContractArchitecture.s.sol --rpc-url $STORY_TESTNET_RPC --private-key $PRIVATE_KEY --broadcast --verify
 ```
 
 ## 🧰 Development Tools
@@ -290,7 +287,7 @@ forge coverage
 
 # 6. Start local development
 anvil                                    # Terminal 1: Start local blockchain
-forge script script/DeployAll.s.sol --rpc-url http://localhost:8545 --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --broadcast  # Terminal 2: Deploy contracts
+forge script script/Deploy5ContractArchitecture.s.sol --rpc-url http://localhost:8545 --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --broadcast  # Terminal 2: Deploy contracts
 ```
 
 **Ready to build the future of Web3 storytelling!** 🎯
