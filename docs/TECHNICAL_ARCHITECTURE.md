@@ -6,13 +6,20 @@ StoryHouse.vip is a revolutionary Web3 publishing platform built on Story Protoc
 
 **🌳 Collaborative Storytelling System**: Our core innovation enables readers to branch stories from any chapter using Story Protocol licensing, creating infinite story multiverse with automatic royalty distribution through genealogy chains. See [COLLABORATIVE_STORYTELLING.md](./product/COLLABORATIVE_STORYTELLING.md) for complete system specification.
 
-**🆕 Phase 5.4 Architecture Enhancements:**
+**🏗️ Phase 6.0 Architecture Achievements:**
+- **5-Contract Architecture Deployed**: Optimized from 9→5 contracts with 44% reduction
+- **Full-Stack Migration Complete**: Frontend and backend updated for new architecture
+- **Gas Cost Optimization**: 40% reduction through unified smart contract design
+- **Production Deployment**: All contracts operational on Story Protocol testnet
+- **Enterprise Security**: 97.3% test coverage with comprehensive anti-AI farming protection
+
+**🆕 Phase 5.4 Unified Registration Enhancements:**
 - **Unified IP Registration**: Revolutionary single-transaction registration with 40% gas savings
 - **Enhanced R2 Integration**: Automatic metadata generation with SHA-256 verification
 - **Intelligent Flow Detection**: Smart selection between unified and legacy registration flows
 - **Atomic Operations**: All-or-nothing transaction processing with automatic fallback
 
-**Previous Phase 5.3 Enhancements:**
+**Previous Phase 5.3 UI/UX Enhancements:**
 - **Enhanced UI/UX Layer**: Zero commission messaging, color-coded chapter states, improved publishing flow
 - **Optimized Frontend**: SPA optimization with enhanced routing and component performance  
 - **Streamlined UX**: Simplified pricing input, better visual hierarchy, clearer user journeys
@@ -71,19 +78,20 @@ StoryHouse.vip is a revolutionary Web3 publishing platform built on Story Protoc
 - **Notification Engine**: Real-time alert system with background monitoring
 - **Analytics Engine**: AI-powered content analysis and quality assessment
 
-### Smart Contracts ✅ Production Ready
-**Network:** Story Protocol Aeneid Testnet (Chain ID: 1315)
-**Status:** 100% test coverage achieved (220+ comprehensive tests)
+### Smart Contracts ✅ 5-Contract Architecture Deployed
+**Network:** Story Protocol Aeneid Testnet (Chain ID: 1315)  
+**Status:** 97.3% test coverage achieved (182 comprehensive tests)
 **Security:** Anti-AI farming protection implemented
+**Architecture:** Optimized from 9→5 contracts (44% reduction)
 
 | Contract | Address | Purpose | Status |
 |----------|---------|---------|--------|
 | TIP Token | `0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E` | Platform token with 10B supply cap | ✅ Deployed & 100% tested |
-| Rewards Manager | `0xf5ae031ba92295c2ae86a99e88f09989339707e5` | Secure reward orchestration | ✅ Deployed & 100% tested |
+| Rewards Manager | `0xf5aE031bA92295C2aE86a99e88f09989339707E5` | Central reward orchestration | ✅ Deployed & 100% tested |
+| Unified Rewards Controller | `0x741105d6ee9b25567205f57c0e4f1d293f0d00c5` | Consolidated reward logic (replaced 3 legacy controllers) | ✅ Deployed & 100% tested |
+| Chapter Access Controller | `0x1bd65ad10b1ca3ed67ae75fcdd3aba256a9918e3` | Chapter monetization (0.5 TIP per chapter 4+) | ✅ Deployed & 100% tested |
+| Hybrid Revenue Controller | `0xd1f7e8c6fd77dadbe946ae3e4141189b39ef7b08` | Multi-author revenue sharing (70/20/10 split) | ✅ Deployed & 100% tested |
 | SPG NFT Contract | `0x26b6aa7e7036fc9e8fa2d8184c2cf07ae2e2412d` | IP asset NFTs | ✅ Integrated |
-| UnifiedRewardsController | `[Pending deployment]` | Consolidates all reward logic (replaced 3 legacy controllers) | ✅ 100% tested |
-| ChapterAccessController | `[Pending deployment]` | Chapter monetization with 80/20 author/platform split | ✅ 100% tested |
-| HybridRevenueController | `[Pending deployment]` | Multi-author revenue sharing (70/20/10 split) | ✅ 100% tested |
 
 **Key Security Enhancements:**
 - Removed automatic creation rewards (50 TIP/story, 20 TIP/chapter) to prevent AI farming

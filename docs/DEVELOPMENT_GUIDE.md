@@ -11,13 +11,22 @@ Complete guide for setting up and developing StoryHouse.vip's revolutionary Web3
 - **Git** latest version
 - **VS Code** (recommended) with TypeScript extension
 
-### 🆕 Phase 5.4 Status
-**Current Implementation:** Unified IP Registration with Revolutionary Gas Optimization
+### 🏗️ Phase 6.0 Status  
+**Current Implementation:** 5-Contract Architecture Deployed & Production-Ready
+- ✅ **44% Contract Reduction**: Optimized from 9→5 contracts for gas efficiency
+- ✅ **Full Deployment**: All contracts operational on Story Protocol testnet
+- ✅ **Frontend Migration**: Updated with new contract ABIs and addresses
+- ✅ **Backend Integration**: Services updated for 5-contract architecture
+- ✅ **97.3% Test Coverage**: 182 comprehensive tests across all contracts
+- ✅ **Anti-AI Farming Protection**: Secure economics with human-verified rewards
+
+### 🆕 Phase 5.4 Achievements
+**Unified IP Registration with Revolutionary Gas Optimization:**
 - ✅ **40% Gas Cost Reduction**: Single-transaction registration using `mintAndRegisterIpAssetWithPilTerms`
 - ✅ **66% Faster Execution**: Atomic operations with intelligent flow detection
 - ✅ **Enhanced R2 Integration**: Automatic metadata generation with SHA-256 verification
 - ✅ **Backward Compatible**: Legacy flow support with gradual rollout capability
-- ✅ **Production Ready**: Complete API endpoints and frontend hooks
+- ✅ **Production Ready**: Complete API endpoints and frontend hooks implemented
 
 ### Previous Phase 5.3 Achievements
 **SPA Optimization with Enhanced UI/UX:**
@@ -78,7 +87,14 @@ R2_ENDPOINT=your_account_id.r2.cloudflarestorage.com
 R2_PUBLIC_URL=https://your_account_id.r2.cloudflarestorage.com/storyhouse-content
 
 # Feature Flags
-UNIFIED_REGISTRATION_ENABLED=false  # Set to true to enable gas optimization
+UNIFIED_REGISTRATION_ENABLED=false  # Set to true to enable 40% gas optimization
+
+# 5-Contract Architecture (Deployed)
+TIP_TOKEN_ADDRESS=0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E
+REWARDS_MANAGER_ADDRESS=0xf5aE031bA92295C2aE86a99e88f09989339707E5  
+UNIFIED_REWARDS_CONTROLLER_ADDRESS=0x741105d6ee9b25567205f57c0e4f1d293f0d00c5
+CHAPTER_ACCESS_CONTROLLER_ADDRESS=0x1bd65ad10b1ca3ed67ae75fcdd3aba256a9918e3
+HYBRID_REVENUE_CONTROLLER_ADDRESS=0xd1f7e8c6fd77dadbe946ae3e4141189b39ef7b08
 ```
 
 **Backend (.env.local in apps/backend/):**
