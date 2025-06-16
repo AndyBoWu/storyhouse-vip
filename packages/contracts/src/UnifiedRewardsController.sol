@@ -200,7 +200,7 @@ contract UnifiedRewardsController is AccessControl, Pausable, ReentrancyGuard {
         require(dailyChaptersRead[msg.sender][today] < maxDailyChapters, "Unified: daily limit exceeded");
 
         // Update reading streak
-        if (lastReadDay[msg.sender] == today - 1) {
+        if (today > 0 && lastReadDay[msg.sender] == today - 1) {
             readingStreak[msg.sender]++;
         } else if (lastReadDay[msg.sender] != today) {
             readingStreak[msg.sender] = 1;

@@ -18,6 +18,9 @@ optimizer_runs = 200
 verbosity = 2
 gas_reports = ["*"]
 
+# Exclude legacy scripts from compilation
+exclude = ["script/legacy/**/*"]
+
 # Remappings for dependencies
 remappings = [
     "@openzeppelin/=lib/openzeppelin-contracts/",

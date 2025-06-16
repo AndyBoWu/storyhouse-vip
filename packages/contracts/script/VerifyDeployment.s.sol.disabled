@@ -42,7 +42,7 @@ contract VerifyDeployment is Script {
     uint256 constant MAX_ACCEPTABLE_GAS_COST = 15_000_000; // 15M gas for full deployment
     uint256 constant MIN_TIP_BALANCE_THRESHOLD = 1000 * 10**18; // 1000 TIP minimum
 
-    function run() external view {
+    function run() external {
         console.log("=== StoryHouse 5-Contract Architecture Verification ===");
         console.log("Chain ID:", block.chainid);
         console.log("Block number:", block.number);
@@ -86,7 +86,7 @@ contract VerifyDeployment is Script {
         address unifiedRewardsController,
         address chapterAccessController,
         address hybridRevenueController
-    ) internal view returns (VerificationResult memory) {
+    ) internal returns (VerificationResult memory) {
         VerificationResult memory result;
         result.totalChecks = 25; // Total number of verification checks
         
