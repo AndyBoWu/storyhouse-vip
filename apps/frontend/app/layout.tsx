@@ -5,6 +5,7 @@ import './protection.css'
 import Web3Provider from '@/components/Web3Provider'
 import AntiScrapeHeaders from '@/components/ui/AntiScrapeHeaders'
 import Footer from '@/components/ui/Footer'
+import VersionDisplay from '@/components/ui/VersionDisplay'
 
 // Configure reading-optimized fonts
 const inter = Inter({
@@ -67,6 +68,7 @@ export default function RootLayout({
             {children}
           </div>
           <Footer />
+          <VersionDisplay />
         </Web3Provider>
       </body>
     </html>

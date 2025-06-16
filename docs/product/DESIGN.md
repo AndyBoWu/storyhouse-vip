@@ -8,13 +8,7 @@ Date: June 1, 2025
 
 **Sub-headline:** "First 3 chapters FREE. Earn $TIP tokens while reading. Remix content and earn from your creativity."
 
-**Dual Call-to-Action Strategy:**
-
-```typescript
-// Two prominent buttons side by side
-<CTAButton primary>Start Reading Free</CTAButton>
-<CTAButton secondary>Create Your Story</CTAButton>
-```
+**Dual Call-to-Action:** "Start Reading Free" | "Create Your Story"
 
 **Trust Indicator:** "No wallet needed to start • Powered by Story Protocol"
 
@@ -22,49 +16,44 @@ Date: June 1, 2025
 
 **For Readers:**
 
-- "Read first 3 chapters FREE - no signup required"
-- "Earn $TIP tokens for reading first 3 chapters only (discovery rewards)"
-- "Chapters 4+ require payment to unlock (no read rewards)"
-- "Remix stories and earn from your creativity"
+- Read first 3 chapters FREE 
+- Earn $TIP tokens for reading (first 3 chapters only)
+- Chapters 4+ require payment to unlock
+- Remix stories and earn from creativity
 
 **For Writers:**
 
-- "AI helps you write, blockchain helps you earn"
-- "Get paid instantly when readers unlock your chapters"
-- "Earn licensing fees when others remix your work"
-- "Build recurring revenue from remix derivatives"
+- AI helps you write, blockchain helps you earn
+- Get paid instantly when readers unlock chapters
+- Earn licensing fees from remixes
+- Build recurring revenue from derivatives
 
 **For Remix Creators:**
 
-- "Transform existing stories into new creations"
-- "Pay licensing fees, earn from your unique content"
-- "Tap into established audiences with your fresh perspective"
+- Transform existing stories into new creations
+- Pay licensing fees, earn from unique content
+- Tap into established audiences
 
 > **📚 Full System Details**: See [COLLABORATIVE_STORYTELLING.md](./COLLABORATIVE_STORYTELLING.md) for complete specification of our chapter-level branching system, Story Protocol integration, and royalty distribution model.
 
-Based on blockchain landing page best practices, this section should use **clean, professional design with plenty of white space**[9](https://www.brightscout.com/insight/15-examples-sleek-blockchain-websites).
 
 ## **Product Demo Section**
 
-**"See StoryHouse.vip in Action"**
+**Demo Features:**
 
-Use the landing page best practice of **showing your product in action**[2](https://unbounce.com/landing-page-articles/landing-page-best-practices/). Include:
-
-- **Three-panel demo:** Reader earning tokens → Writer creating content → Remixer building derivatives
-- **Read-to-Earn visualization:** Show TIP tokens accumulating as user reads
-- **MetaMask integration flow:** Smooth wallet connection after chapter 3
-- **AI generation preview:** Show how text prompt + emoji + image = generated chapter
-- **Remix workflow:** Demonstrate licensing fee payment and derivative content creation
+- Three-panel demo: Reader earning tokens → Writer creating content → Remixer building derivatives
+- Read-to-Earn visualization: TIP tokens accumulating as user reads
+- MetaMask integration flow: Wallet connection after chapter 3
+- AI generation preview: Text prompt + emoji + image = generated chapter
+- Remix workflow: Licensing fee payment and derivative content creation
 
 ## **Trust & Credibility Section**
 
-Critical for blockchain platforms due to **scam concerns**[3](https://www.linkedin.com/pulse/blockchain-landing-page-development-key-elements-ammar-iqbal-rh4sf). Include:
-
-- **"Built on Story Protocol"** - leverage their credibility
-- **"MetaMask Secured"** - trusted wallet integration
-- **Security badges** from any smart contract audits
-- **Team photos and LinkedIn profiles** - blockchain sites need real faces[3](https://www.linkedin.com/pulse/blockchain-landing-page-development-key-elements-ammar-iqbal-rh4sf)
-- **Early user testimonials** showcasing read-to-earn success stories
+- "Built on Story Protocol" - leverage their credibility
+- "MetaMask Secured" - trusted wallet integration
+- Security badges from smart contract audits
+- Team photos and LinkedIn profiles
+- Early user testimonials showcasing read-to-earn success stories
 
 ## **How It Works Section**
 
@@ -123,16 +112,13 @@ Based on the **83% mobile traffic** statistic[4](https://www.emailtooltester.com
 
 ## **Conversion Optimization Features**
 
-**Enhanced Multi-Step Onboarding:**
+**Multi-Step Onboarding:**
 
-```typescript
-// Frictionless landing page flow
-Step 1: Browse and read (no signup required)
-Step 2: Hook at chapter 3 cliffhanger
-Step 3: MetaMask connection (with clear value prop)
-Step 4: First $TIP purchase and earn demonstration
-Step 5: Remix discovery and creation tutorial
-```
+1. Browse and read (no signup required)
+2. Hook at chapter 3 cliffhanger
+3. MetaMask connection (with clear value prop)
+4. First $TIP purchase and earn demonstration
+5. Remix discovery and creation tutorial
 
 **Social Proof Elements:**
 
@@ -145,36 +131,12 @@ Step 5: Remix discovery and creation tutorial
 
 ## **Advanced Royalty Dashboard Design**
 
-**Creator Royalty Management Interface at `/creator/royalties`:**
+**Creator Royalty Management Interface:**
 
 **3-Tab Dashboard Layout:**
-
-```
-┌─────────────────────────────────────────────┐
-│ 💰 Royalty Management Dashboard             │
-│                                            │
-│ [Claimable] [History] [Analytics]          │
-│                                            │
-│ Tab 1: Claimable Royalties                 │
-│ ├─ Individual chapter claiming interface    │
-│ ├─ Real-time validation with TIP amounts   │
-│ ├─ One-click claiming with gas estimation  │
-│ └─ Multi-chapter batch claiming options    │
-│                                            │
-│ Tab 2: Royalty History                     │
-│ ├─ Complete transaction history            │
-│ ├─ Chapter-level breakdown                 │
-│ ├─ Revenue attribution and analytics       │
-│ └─ Export functionality for tax purposes   │
-│                                            │
-│ Tab 3: Advanced Analytics                  │
-│ ├─ ROI analysis and tier optimization     │
-│ ├─ Break-even calculations                 │
-│ ├─ Revenue forecasting with confidence     │
-│ ├─ Economic modeling and recommendations   │
-│ └─ Performance optimization insights       │
-└─────────────────────────────────────────────┘
-```
+1. **Claimable Royalties**: Individual/batch claiming with gas estimation
+2. **Royalty History**: Complete transaction history and chapter breakdown
+3. **Advanced Analytics**: ROI analysis, forecasting, and optimization insights
 
 **Multi-Tier Revenue Visualization:**
 
@@ -273,36 +235,7 @@ Full engagement: Profile completion with preferences
 - **Social media ads** highlighting successful reader earnings
 - **Remix opportunity alerts** for engaged but non-creating users
 
-This enhanced landing page design balances the **complex tokenomics** with **intuitive user experience**, emphasizing the unique read-to-earn value proposition while making blockchain technology feel **rewarding and accessible** rather than intimidating.
 
-The key is positioning reading as an **earning opportunity** while maintaining the creative and community aspects that make StoryHouse.vip unique in the digital publishing landscape.
-
-### Citations:
-
-1. https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/26116951/86def7cd-a06b-49ac-96f9-50aa569230ad/paste.txt
-2. https://unbounce.com/landing-page-articles/landing-page-best-practices/
-3. https://www.linkedin.com/pulse/blockchain-landing-page-development-key-elements-ammar-iqbal-rh4sf
-4. https://www.emailtooltester.com/en/blog/free-landing-page/
-5. https://www.webstacks.com/blog/web-3-design
-6. https://blog.clickpointsoftware.com/use-ai-prompts-to-build-high-converting-landing-pages-for-lead-gen
-7. https://moosend.com/blog/landing-page-best-practices/
-8. https://www.growthchain.io/blog/top-crypto-landing-page-designs
-9. https://www.brightscout.com/insight/15-examples-sleek-blockchain-websites
-10. https://www.lapa.ninja/category/web3/
-11. https://saaslandingpage.com/tag/web3/
-12. https://www.reddit.com/r/ethdev/comments/tef584/where_can_i_find_developers_who_can_make_a_good/
-13. https://www.reddit.com/r/webdev/comments/1evmrk6/best_practices_for_building_effective_landing/
-14. https://www.lapa.ninja/category/blockchain/
-15. https://www.landingfolio.com/inspiration/landing-page/crypto
-16. https://www.subframe.com/tips/blockchain-website-design-examples
-17. https://landingi.com/product/ai-landing-page/
-18. https://instapage.com/en/functionality/create-your-landing-page-for-blockchain-companies
-19. https://www.apexure.com/blog/how-to-generate-ai-landing-page-designs-like-a-pro
-20. https://landingi.com/landing-page/ai-landing-page-generator/
-
----
-
-Answer from Perplexity: [pplx.ai/share](https://www.perplexity.ai/search/pplx.ai/share)
 
 # Frontend Implementation Guide
 
@@ -312,53 +245,17 @@ Answer from Perplexity: [pplx.ai/share](https://www.perplexity.ai/search/pplx.ai
 
 ## 🎯 Overview
 
-The StoryHouse.vip frontend is a modern, responsive web application that seamlessly integrates AI-powered content creation with blockchain-based rewards. Built with Next.js 15 and the latest Web3 technologies, it provides an intuitive user experience for both readers and creators in the decentralized storytelling ecosystem.
+Modern, responsive web application integrating AI-powered content creation with blockchain-based rewards.
 
 ## 🏗️ Architecture
 
 ### Application Structure
 
-```
-apps/frontend/
-├── src/
-│   ├── app/                    # Next.js 15 App Router
-│   │   ├── api/               # API routes
-│   │   │   ├── generate/      # AI story generation
-│   │   │   └── auth/          # Authentication endpoints
-│   │   ├── create/            # Story creation interface
-│   │   ├── read/              # Reading experience
-│   │   ├── profile/           # User dashboard
-│   │   ├── rewards/           # Reward tracking
-│   │   ├── remix/             # Remix licensing
-│   │   └── layout.tsx         # Root layout with Web3 providers
-│   ├── components/            # React components
-│   │   ├── ui/               # Base UI components (shadcn/ui)
-│   │   ├── web3/             # Web3-specific components
-│   │   ├── story/            # Story-related components
-│   │   ├── rewards/          # Reward system components
-│   │   ├── creator/          # Creator tools
-│   │   └── remix/            # Remix licensing components
-│   ├── hooks/                # Custom React hooks
-│   │   ├── useContract.ts    # Contract interaction hooks
-│   │   ├── useRewards.ts     # Reward system hooks
-│   │   ├── useAI.ts          # AI integration hooks
-│   │   ├── useAuth.ts        # Authentication hooks
-│   │   └── useAnalytics.ts   # Analytics hooks
-│   ├── lib/                  # Utility libraries
-│   │   ├── contracts.ts      # Contract configurations
-│   │   ├── wagmi.ts          # Wagmi configuration
-│   │   ├── openai.ts         # OpenAI client
-│   │   ├── analytics.ts      # Analytics integration
-│   │   └── utils.ts          # General utilities
-│   ├── types/                # TypeScript definitions
-│   │   ├── contracts.ts      # Contract type definitions
-│   │   ├── story.ts          # Story-related types
-│   │   ├── rewards.ts        # Reward system types
-│   │   ├── user.ts           # User profile types
-│   │   └── api.ts            # API response types
-│   └── styles/               # Global styles and themes
-└── public/                   # Static assets
-```
+- **app/**: Next.js 15 App Router (create, read, profile, rewards, remix)
+- **components/**: React components (ui, web3, story, rewards, creator, remix)
+- **hooks/**: Custom hooks (contracts, rewards, AI, auth, analytics)
+- **lib/**: Utilities (contracts, wagmi, openai, analytics)
+- **types/**: TypeScript definitions (contracts, story, rewards, user, api)
 
 ### Technology Stack
 
@@ -394,180 +291,37 @@ apps/frontend/
 
 ### Color Palette
 
-```css
-/* Primary Colors */
---primary: 263 70% 50%; /* Deep purple for primary actions */
---primary-foreground: 0 0% 98%; /* White text on primary */
-
-/* Secondary Colors */
---secondary: 220 14% 96%; /* Light background */
---secondary-foreground: 220 9% 46%; /* Muted text */
-
-/* Accent Colors */
---accent: 142 76% 36%; /* Success/reward green */
---accent-foreground: 355 7% 97%; /* Light text on accent */
-
-/* Destructive Colors */
---destructive: 0 84% 60%; /* Error red */
---destructive-foreground: 0 0% 98%; /* White text on destructive */
-
-/* Muted Colors */
---muted: 220 14% 96%; /* Background variations */
---muted-foreground: 220 9% 46%; /* Subtle text */
-
-/* Border & Input */
---border: 220 13% 91%; /* Subtle borders */
---input: 220 13% 91%; /* Input backgrounds */
---ring: 263 70% 50%; /* Focus rings */
-```
+- **Primary**: Deep purple for primary actions
+- **Secondary**: Light background with muted text
+- **Accent**: Success/reward green  
+- **Destructive**: Error red
+- **Muted**: Subtle backgrounds and borders
 
 ### Typography
 
-```css
-/* Font Stack */
-font-family:
-  Inter,
-  -apple-system,
-  BlinkMacSystemFont,
-  "Segoe UI",
-  Roboto,
-  sans-serif;
-
-/* Typography Scale */
---text-xs: 0.75rem; /* 12px */
---text-sm: 0.875rem; /* 14px */
---text-base: 1rem; /* 16px */
---text-lg: 1.125rem; /* 18px */
---text-xl: 1.25rem; /* 20px */
---text-2xl: 1.5rem; /* 24px */
---text-3xl: 1.875rem; /* 30px */
---text-4xl: 2.25rem; /* 36px */
-```
+- **Font Stack**: Inter, system fonts  
+- **Scale**: 12px-36px range with consistent spacing
 
 ### Spacing & Layout
 
-```css
-/* Spacing Scale (Tailwind) */
-space-1: 0.25rem; /* 4px */
-space-2: 0.5rem; /* 8px */
-space-4: 1rem; /* 16px */
-space-6: 1.5rem; /* 24px */
-space-8: 2rem; /* 32px */
-space-12: 3rem; /* 48px */
-space-16: 4rem; /* 64px */
-
-/* Container Sizes */
-max-width-sm: 640px; /* Small screens */
-max-width-md: 768px; /* Medium screens */
-max-width-lg: 1024px; /* Large screens */
-max-width-xl: 1280px; /* Extra large screens */
-max-width-2xl: 1536px; /* 2X large screens */
-```
+- **Spacing Scale**: 4px-64px (Tailwind standard)
+- **Container Sizes**: 640px-1536px responsive breakpoints
 
 ## 🧩 Component Library
 
 ### Core UI Components
 
-#### Button Component
+#### Core Components
 
-```typescript
-// components/ui/Button.tsx
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'
-  size?: 'default' | 'sm' | 'lg' | 'icon'
-  loading?: boolean
-}
-
-// Usage Examples
-<Button variant="default" size="lg">Primary Action</Button>
-<Button variant="outline" loading={isPending}>Submit</Button>
-<Button variant="ghost" size="sm">Secondary</Button>
-```
-
-#### Card Component
-
-```typescript
-// components/ui/Card.tsx
-interface CardProps {
-  children: React.ReactNode
-  className?: string
-  padding?: 'none' | 'sm' | 'md' | 'lg'
-  hover?: boolean
-}
-
-// Usage
-<Card padding="lg" hover>
-  <CardHeader>
-    <CardTitle>Story Title</CardTitle>
-    <CardDescription>Story description...</CardDescription>
-  </CardHeader>
-  <CardContent>
-    Story content here...
-  </CardContent>
-  <CardFooter>
-    <Button>Read Story</Button>
-  </CardFooter>
-</Card>
-```
-
-#### Input Components
-
-```typescript
-// components/ui/Input.tsx
-interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
-  label?: string;
-  error?: string;
-  helpText?: string;
-}
-
-// Textarea
-interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
-  label?: string;
-  error?: string;
-  maxLength?: number;
-  showCount?: boolean;
-}
-
-// Select
-interface SelectProps {
-  label?: string;
-  options: Array<{ value: string; label: string }>;
-  value?: string;
-  onChange: (value: string) => void;
-  error?: string;
-}
-```
+- **Button**: Multiple variants (default, outline, ghost) and sizes with loading states
+- **Card**: Flexible container with header, content, footer and hover effects  
+- **Input/Textarea**: Form inputs with labels, error states, and validation
+- **Select**: Dropdown with options, labels, and error handling
 
 ### Web3 Components
 
 #### Wallet Connection
-
-```typescript
-// components/web3/WalletButton.tsx
-export function WalletButton() {
-  const { address, isConnected } = useAccount()
-  const { disconnect } = useDisconnect()
-
-  if (isConnected) {
-    return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline">
-            {truncateAddress(address)}
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          <DropdownMenuItem onClick={() => disconnect()}>
-            Disconnect
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    )
-  }
-
-  return <ConnectKitButton />
-}
-```
+- **WalletButton**: Connect/disconnect with address display and dropdown menu
 
 #### Token Balance Display
 
