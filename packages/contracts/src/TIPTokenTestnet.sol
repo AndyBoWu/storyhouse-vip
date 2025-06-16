@@ -7,10 +7,10 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Pausable.sol";
 
 /**
- * @title TIP Token Test Version
- * @dev Test version of TIP token for development and testing
+ * @title TIP Token Testnet Version
+ * @dev Testnet version of TIP token for development and testing
  */
-contract TIPTokenTest is ERC20, ERC20Burnable, Ownable, Pausable {
+contract TIPTokenTestnet is ERC20, ERC20Burnable, Ownable, Pausable {
     // Events
     event MinterAdded(address indexed minter);
     event MinterRemoved(address indexed minter);
@@ -24,11 +24,11 @@ contract TIPTokenTest is ERC20, ERC20Burnable, Ownable, Pausable {
     uint256 public supplyCap = 10_000_000_000 * 10 ** 18; // 10B TIP tokens (can be updated)
 
     modifier onlyMinter() {
-        require(minters[msg.sender], "TIPTokenTest: caller is not a minter");
+        require(minters[msg.sender], "TIPTokenTestnet: caller is not a minter");
         _;
     }
 
-    constructor(address initialOwner) ERC20("TIP Token Test", "TIPT") Ownable(initialOwner) {
+    constructor(address initialOwner) ERC20("TIP Token Testnet", "TIPT") Ownable(initialOwner) {
         _mint(initialOwner, INITIAL_SUPPLY);
         minters[initialOwner] = true;
         emit MinterAdded(initialOwner);
@@ -39,8 +39,8 @@ contract TIPTokenTest is ERC20, ERC20Burnable, Ownable, Pausable {
      * @param _minter Address to add as minter
      */
     function addMinter(address _minter) external onlyOwner {
-        require(_minter != address(0), "TIPTokenTest: zero address");
-        require(!minters[_minter], "TIPTokenTest: already a minter");
+        require(_minter != address(0), "TIPTokenTestnet: zero address");
+        require(!minters[_minter], "TIPTokenTestnet: already a minter");
 
         minters[_minter] = true;
         emit MinterAdded(_minter);
@@ -51,7 +51,7 @@ contract TIPTokenTest is ERC20, ERC20Burnable, Ownable, Pausable {
      * @param _minter Address to remove as minter
      */
     function removeMinter(address _minter) external onlyOwner {
-        require(minters[_minter], "TIPTokenTest: not a minter");
+        require(minters[_minter], "TIPTokenTestnet: not a minter");
 
         minters[_minter] = false;
         emit MinterRemoved(_minter);
@@ -63,7 +63,7 @@ contract TIPTokenTest is ERC20, ERC20Burnable, Ownable, Pausable {
      * @param amount Amount of tokens to mint
      */
     function mint(address to, uint256 amount) external onlyMinter whenNotPaused {
-        require(totalSupply() + amount <= supplyCap, "TIPTokenTest: supply cap exceeded");
+        require(totalSupply() + amount <= supplyCap, "TIPTokenTestnet: supply cap exceeded");
         _mint(to, amount);
     }
 
@@ -72,7 +72,7 @@ contract TIPTokenTest is ERC20, ERC20Burnable, Ownable, Pausable {
      * @param newCap New supply cap (must be >= current total supply)
      */
     function updateSupplyCap(uint256 newCap) external onlyOwner {
-        require(newCap >= totalSupply(), "TIPTokenTest: cap below current supply");
+        require(newCap >= totalSupply(), "TIPTokenTestnet: cap below current supply");
 
         uint256 oldCap = supplyCap;
         supplyCap = newCap;
