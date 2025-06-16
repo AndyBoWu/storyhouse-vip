@@ -38,6 +38,10 @@ const nextConfig = {
   // API routes will be served from backend domain
   env: {
     NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api-testnet.storyhouse.vip',
+    // Build-time environment variables for version tracking
+    BUILD_TIME: new Date().toISOString(),
+    GIT_COMMIT: process.env.VERCEL_GIT_COMMIT_SHA || 'unknown',
+    GIT_BRANCH: process.env.VERCEL_GIT_COMMIT_REF || 'main',
   },
 }
 

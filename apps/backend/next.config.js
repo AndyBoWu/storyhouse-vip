@@ -35,6 +35,12 @@ const nextConfig = {
     });
     return config;
   },
+  // Build-time environment variables for version tracking
+  env: {
+    BUILD_TIME: new Date().toISOString(),
+    GIT_COMMIT: process.env.VERCEL_GIT_COMMIT_SHA || 'unknown',
+    GIT_BRANCH: process.env.VERCEL_GIT_COMMIT_REF || 'main',
+  },
   // Body parser configuration moved to individual API route files
   // CORS configuration for cross-origin requests from frontend
   async headers() {
