@@ -101,7 +101,7 @@ export class ClientStoryProtocolService {
         contentRestrictions: [],
         royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address,
         mintingFee: 0n,
-        currency: '0x0000000000000000000000000000000000000000' as Address
+        currency: '0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E' as Address // TIP token // TIP token
       },
       reading: {
         ...basePilTerms,
@@ -117,7 +117,7 @@ export class ClientStoryProtocolService {
         contentRestrictions: [],
         royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address,
         mintingFee: 500000000000000000n, // 0.5 TIP
-        currency: '0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E' as Address // TIP token
+        currency: '0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E' as Address // TIP token // TIP token
       },
       premium: {
         ...basePilTerms,
@@ -134,7 +134,7 @@ export class ClientStoryProtocolService {
         royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address, // TODO: Set actual royalty policy
         commercialRevShare: 10, // 10% royalty
         mintingFee: 100000000000000000000n, // 100 TIP
-        currency: '0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E' as Address
+        currency: '0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E' as Address // TIP token
       },
       exclusive: {
         ...basePilTerms,
@@ -151,7 +151,7 @@ export class ClientStoryProtocolService {
         royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address,
         commercialRevShare: 25, // 25% royalty
         mintingFee: 1000000000000000000000n, // 1000 TIP
-        currency: '0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E' as Address
+        currency: '0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E' as Address // TIP token
       }
     }
 
