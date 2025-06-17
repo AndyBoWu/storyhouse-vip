@@ -13,6 +13,7 @@ import {
   AlertCircle,
   Loader2 
 } from 'lucide-react'
+import { apiRequest } from '@/lib/api-client'
 
 export interface LicenseTemplate {
   id: string
@@ -68,9 +69,8 @@ export default function LicenseSelector({
     const fetchTemplates = async () => {
       try {
         setLoading(true)
-        // Note: Using localhost for now since Vercel deployment is having issues
-        const response = await fetch('http://localhost:3002/api/licenses/templates')
-        const data = await response.json()
+        // Use apiRequest for consistent API handling and CORS
+        const data = await apiRequest('/licenses/templates')
         
         if (data.success) {
           setTemplates(data.templates)
