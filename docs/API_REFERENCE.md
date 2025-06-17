@@ -171,6 +171,41 @@ GET /api/ip/register-unified
 }
 ```
 
+### Generate IP Metadata
+
+Generate and store IP metadata for Story Protocol without executing blockchain transactions.
+
+```http
+POST /api/ip/metadata
+```
+
+**Request Body:**
+```json
+{
+  "story": {
+    "id": "unique-story-id",
+    "title": "Chapter Title",
+    "content": "Full chapter content...",
+    "author": "0x1234567890123456789012345678901234567890",
+    "genre": "Fantasy",
+    "mood": "Adventurous",
+    "createdAt": "2024-01-01T00:00:00Z"
+  },
+  "licenseTier": "premium"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "metadataUri": "https://r2-bucket.../ip-metadata.json",
+    "metadataHash": "0xabcdef123456789..."
+  }
+}
+```
+
 ---
 
 ## 🔗 **Story Protocol SDK Derivative Registration API**

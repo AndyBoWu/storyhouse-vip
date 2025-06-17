@@ -1,7 +1,7 @@
 {
   "name": "storyhouse-vip",
-  "version": "1.0.0",
-  "description": "Revolutionary Web3 Storytelling Platform built on Story Protocol",
+  "version": "6.1.0",
+  "description": "Revolutionary Web3 Storytelling Platform built on Story Protocol - Chapter-level IP management with unified registration",
   "private": true,
   "workspaces": [
     "apps/*",
@@ -67,6 +67,6 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/storyhouse-vip.git"
+    "url": "https://github.com/AndyBoWu/storyhouse-vip.git"
   }
 }
