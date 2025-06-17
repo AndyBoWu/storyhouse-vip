@@ -280,26 +280,15 @@ export default function MyStoriesPage() {
                           onClick={() => handleViewBook(book)}
                         >
                           {/* Book Cover */}
-                          <div className="mb-4 relative h-48 bg-gradient-to-br from-purple-100 to-blue-100 rounded-lg overflow-hidden">
-                            {book.coverUrl && (
+                          {book.coverUrl && (
+                            <div className="mb-4">
                               <img
                                 src={book.coverUrl}
                                 alt={`${book.title} cover`}
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  // Hide image on error, showing gradient background
-                                  e.currentTarget.style.display = 'none'
-                                }}
+                                className="w-full h-48 object-cover rounded-lg"
                               />
-                            )}
-                            {/* Fallback content when no image loads */}
-                            <div className="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
-                              <div className="text-center">
-                                <div className="text-4xl mb-2">{book.emojis?.[0] || '📚'}</div>
-                                <h4 className="text-sm font-medium text-gray-700 line-clamp-2">{book.title}</h4>
-                              </div>
                             </div>
-                          </div>
+                          )}
                           
                           <div className="flex items-start justify-between mb-4">
                             <div className="flex-1">
