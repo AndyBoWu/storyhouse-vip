@@ -11,7 +11,7 @@ import type {
   QualityAssessment 
 } from './types/shared'
 
-const getApiBaseUrl = (): string => {
+export const getApiBaseUrl = (): string => {
   // FORCE localhost for development debugging
   if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
     console.log('🔧 FORCING localhost:3002 for development');

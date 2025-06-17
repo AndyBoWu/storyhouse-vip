@@ -68,14 +68,17 @@ export async function GET(
     const { bookId } = await params
     
     // Parse bookId to get author address and slug
-    const parts = bookId.split('-')
-    if (parts.length < 2) {
+    // bookId format: {authorAddress}/{slug}
+    const decodedBookId = decodeURIComponent(bookId)
+    const parts = decodedBookId.split('/')
+    if (parts.length !== 2) {
+      console.error('Invalid book ID format:', bookId, 'decoded:', decodedBookId)
       return new NextResponse('Invalid book ID format', { status: 400 })
     }
     
-    // Extract author address (first part) and slug (rest joined with -)
+    // Extract author address and slug
     const authorAddress = parts[0]
-    const slug = parts.slice(1).join('-')
+    const slug = parts[1]
     
     // Generate the cover key
     const coverKey = `books/${authorAddress}/${slug}/cover.jpg`

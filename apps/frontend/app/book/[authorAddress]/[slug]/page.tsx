@@ -7,7 +7,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, Lock } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import apiClient from '@/lib/api-client';
+import apiClient, { getApiBaseUrl } from '@/lib/api-client';
 import ShareButton from '@/components/ui/ShareButton';
 
 // Dynamically import WalletConnect to avoid hydration issues
@@ -201,16 +201,16 @@ export default function BookPage() {
           <div className="md:col-span-1">
             {book.coverUrl ? (
               <Image
-                src={book.coverUrl}
+                src={book.coverUrl.startsWith('/') ? `${getApiBaseUrl()}${book.coverUrl}` : book.coverUrl}
                 alt={book.title}
                 width={300}
-                height={400}
-                className="w-full rounded-lg shadow-md hover:shadow-xl transition-shadow"
+                height={450}
+                className="w-full aspect-[2/3] object-cover rounded-lg shadow-md hover:shadow-xl transition-shadow"
                 unoptimized={true}
                 onError={() => console.log('Image failed to load:', book.coverUrl)}
               />
             ) : (
-              <div className="w-full aspect-[3/4] bg-gradient-to-b from-purple-600 to-blue-600 rounded-lg shadow-md flex items-center justify-center">
+              <div className="w-full aspect-[2/3] bg-gradient-to-b from-purple-600 to-blue-600 rounded-lg shadow-md flex items-center justify-center">
                 <span className="text-white text-4xl font-bold">
                   {book.title.charAt(0)}
                 </span>

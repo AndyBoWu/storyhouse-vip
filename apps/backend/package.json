@@ -11,7 +11,9 @@
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
-    "migrate-book": "cp .env.testnet .env.local && tsx scripts/migrate-book-format.ts"
+    "migrate-book": "cp .env.testnet .env.local && tsx scripts/migrate-book-format.ts",
+    "list-books": "cp .env.testnet .env.local && tsx scripts/list-r2-books.ts",
+    "check-cover": "cp .env.testnet .env.local && tsx scripts/check-book-cover.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.825.0",
