@@ -75,7 +75,11 @@ export async function GET(
         createdAt: chapterData.createdAt || new Date().toISOString(),
         nextChapter: chapterNum + 1,
         previousChapter: chapterNum > 1 ? chapterNum - 1 : undefined,
-        totalChapters: bookMetadata.totalChapters || 1
+        totalChapters: bookMetadata.totalChapters || 1,
+        // Include IP asset information for license minting
+        ipAssetId: chapterData.ipAssetId,
+        parentIpAssetId: chapterData.parentIpAssetId || bookMetadata.ipAssetId,
+        licenseTermsId: bookMetadata.licenseTermsId // Reading license terms ID from book
       };
 
       return NextResponse.json(formattedResponse);

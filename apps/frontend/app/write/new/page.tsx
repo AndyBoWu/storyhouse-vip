@@ -258,6 +258,16 @@ function NewStoryPageContent() {
                        ipOptions.licenseType === 'premium' ? 100 : 0
         }
         formData.append('licenseTerms', JSON.stringify(licenseConfig))
+        
+        // Add IP Asset ID and transaction hash from blockchain registration
+        if (registrationResult.ipAssetId) {
+          formData.append('ipAssetId', registrationResult.ipAssetId)
+          console.log('📝 IP Asset ID:', registrationResult.ipAssetId)
+        }
+        if (registrationResult.transactionHash) {
+          formData.append('transactionHash', registrationResult.transactionHash)
+          console.log('🔗 Transaction hash:', registrationResult.transactionHash)
+        }
 
         // Add cover file if available
         if (bookCover) {
@@ -357,7 +367,7 @@ function NewStoryPageContent() {
           {/* Story Title */}
           <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
             <label className="block text-lg font-semibold text-gray-800 mb-4">
-              📖 Story Title (optional):
+              📖 Story Title:
             </label>
             <input
               type="text"
@@ -372,7 +382,7 @@ function NewStoryPageContent() {
           {/* Book Cover Upload */}
           <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
             <label className="block text-lg font-semibold text-gray-800 mb-4">
-              🎨 Book Cover (optional):
+              🎨 Book Cover:
             </label>
             
             {bookCoverPreview ? (

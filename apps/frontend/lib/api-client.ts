@@ -177,6 +177,12 @@ export const apiClient = {
     return apiRequest(`/api/books/${encodeURIComponent(bookId)}`)
   },
 
+  async deleteBook(bookId: string) {
+    return apiRequest(`/api/books/${encodeURIComponent(bookId)}`, {
+      method: 'DELETE'
+    })
+  },
+
   async getBookChapters(bookId: string) {
     return apiRequest(`/api/books/${encodeURIComponent(bookId)}/chapters`)
   },

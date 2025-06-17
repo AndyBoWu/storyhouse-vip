@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { chapterUnlockStorage } from '@/lib/storage/chapterUnlockStorage'
+import { BookStorageService } from '@/lib/storage/bookStorage'
 
 interface UnlockChapterRequest {
   userAddress: string
@@ -18,6 +19,9 @@ interface UnlockChapterResponse {
     alreadyUnlocked: boolean
     chapterContent?: string
     transactionHash?: string
+    ipAssetId?: string
+    parentIpAssetId?: string
+    licenseTermsId?: string
   }
   error?: string
 }
@@ -180,13 +184,45 @@ export async function GET(
     // For paid chapters, only allow if unlocked or if it's actually free
     const canAccess = isFree || alreadyUnlocked
     
+    // Fetch chapter and book metadata to get IP asset information
+    let ipAssetId: string | undefined
+    let parentIpAssetId: string | undefined
+    let licenseTermsId: string | undefined
+    
+    try {
+      const { authorAddress, slug } = BookStorageService.parseBookId(bookId as any)
+      
+      // Get chapter metadata for IP asset ID
+      const chapterData = await BookStorageService.getChapterContent(
+        authorAddress,
+        slug,
+        chapterNum
+      )
+      ipAssetId = chapterData.ipAssetId
+      parentIpAssetId = chapterData.parentIpAssetId
+      
+      // Get book metadata for license terms ID
+      const bookMetadata = await BookStorageService.getBookMetadata(bookId as any)
+      licenseTermsId = bookMetadata.licenseTermsId
+      
+      // If chapter doesn't have parent IP, use book's IP asset ID
+      if (!parentIpAssetId && bookMetadata.ipAssetId) {
+        parentIpAssetId = bookMetadata.ipAssetId
+      }
+    } catch (err) {
+      console.log('Could not fetch IP asset information:', err)
+      // Don't fail the whole request if IP info is missing
+    }
+    
     console.log('🔍 Chapter access check:', {
       bookId,
       chapterNumber: chapterNum,
       userAddress: userAddress || 'none',
       isFree,
       alreadyUnlocked,
-      canAccess
+      canAccess,
+      ipAssetId,
+      licenseTermsId
     })
     
     return NextResponse.json({
@@ -197,7 +233,10 @@ export async function GET(
         unlockPrice,
         isFree,
         canAccess,
-        alreadyUnlocked
+        alreadyUnlocked,
+        ipAssetId,
+        parentIpAssetId,
+        licenseTermsId
       }
     } as UnlockChapterResponse)
 
