@@ -26,7 +26,19 @@ trap cleanup INT
 echo -e "${YELLOW}Cleaning up existing processes...${NC}"
 pkill -f "next dev -p 3001" 2>/dev/null || true
 pkill -f "next dev -p 3002" 2>/dev/null || true
+pkill -f "next dev" 2>/dev/null || true  # Kill any other next dev processes
 sleep 2
+
+# Clear Next.js build caches to ensure fresh builds
+echo -e "${YELLOW}Clearing build caches...${NC}"
+if [ -d "apps/frontend/.next" ]; then
+    rm -rf apps/frontend/.next
+    echo -e "${GREEN}✓ Frontend cache cleared${NC}"
+fi
+if [ -d "apps/backend/.next" ]; then
+    rm -rf apps/backend/.next
+    echo -e "${GREEN}✓ Backend cache cleared${NC}"
+fi
 
 # Check if node_modules exist
 if [ ! -d "apps/frontend/node_modules" ]; then
@@ -44,9 +56,10 @@ echo -e "\n${BLUE}Starting Backend API on port 3002...${NC}"
 (cd apps/backend && npm run dev) &
 BACKEND_PID=$!
 
-# Wait for backend to start
+# Wait for backend to start with initialization logs
 echo -e "${YELLOW}Waiting for backend to start...${NC}"
-sleep 5
+echo -e "${YELLOW}Looking for SDK initialization...${NC}"
+sleep 8  # Give more time for SDK initialization
 
 # Start Frontend on port 3001
 echo -e "\n${GREEN}Starting Frontend on port 3001...${NC}"

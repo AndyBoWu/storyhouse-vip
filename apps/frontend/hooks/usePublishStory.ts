@@ -86,6 +86,14 @@ export function usePublishStory() {
       const isDevelopment = process.env.NODE_ENV === 'development'
       const enableTestnet = process.env.NEXT_PUBLIC_ENABLE_TESTNET === 'true'
       const forceRealTransactions = process.env.NEXT_PUBLIC_FORCE_REAL_TRANSACTIONS === 'true'
+      
+      console.log('🔍 Publishing mode debug:')
+      console.log('  - NODE_ENV:', process.env.NODE_ENV)
+      console.log('  - isDevelopment:', isDevelopment)
+      console.log('  - NEXT_PUBLIC_ENABLE_TESTNET:', process.env.NEXT_PUBLIC_ENABLE_TESTNET)
+      console.log('  - enableTestnet:', enableTestnet)
+      console.log('  - address:', address)
+      console.log('  - walletClient:', !!walletClient)
 
       console.log(`🔍 Debug - isDevelopment: ${isDevelopment}, enableTestnet: ${enableTestnet}`)
       console.log(`🔍 Environment check - NODE_ENV: ${process.env.NODE_ENV}`)

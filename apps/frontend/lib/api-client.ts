@@ -147,6 +147,14 @@ export const apiClient = {
   async checkUnifiedRegistration() {
     return apiRequest('/api/ip/register-unified')
   },
+
+  // Generate IP metadata without executing blockchain transaction
+  async generateIPMetadata(data: { story: any; licenseTier: string }) {
+    return apiRequest('/api/ip/metadata', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  },
   
   async licenseIP(data: any) {
     return apiRequest('/api/ip/license', {
@@ -186,7 +194,7 @@ export const apiClient = {
     return apiRequest(`/api/books/${bookId}/chapters`)
   },
 
-  async getChapter(bookId: string, chapterNumber: number) {
+  async getBookChapter(bookId: string, chapterNumber: number) {
     return apiRequest(`/api/books/${bookId}/chapter/${chapterNumber}`)
   },
 

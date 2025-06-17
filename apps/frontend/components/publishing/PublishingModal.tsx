@@ -44,7 +44,7 @@ function PublishingModal({
   const [licenseTier, setLicenseTier] = useState<'free' | 'premium' | 'exclusive'>('premium')
   const [chapterPrice, setChapterPrice] = useState(0.5)
   const [priceInput, setPriceInput] = useState('0.5')
-  const [ipRegistration, setIpRegistration] = useState(false)
+  const [ipRegistration, setIpRegistration] = useState(true) // Default to true for IP protection
   const [isClient, setIsClient] = useState(false)
 
   // Prevent hydration mismatch by only rendering after client-side hydration
@@ -115,9 +115,21 @@ function PublishingModal({
   }
 
   const handlePublish = async () => {
-    // If wallet is not connected, trigger connection first
-    if (!address || !isConnected) {
-      console.log('Wallet not connected, triggering connection...')
+    try {
+      console.log('🚀 handlePublish called')
+      console.log('📊 Publishing state:', {
+        address,
+        isConnected,
+        publishingOption,
+        chapterPrice,
+        story,
+        chapterNumber,
+        bookId
+      })
+      
+      // If wallet is not connected, trigger connection first
+      if (!address || !isConnected) {
+        console.log('Wallet not connected, triggering connection...')
       try {
         await connect({ connector: injected() })
         // Wait a bit for the connection to establish
@@ -146,6 +158,18 @@ function PublishingModal({
         licenseTier: licenseTier as 'free' | 'reading' | 'premium' | 'exclusive'
       }
 
+      console.log('📞 About to call publishStory with:', {
+        story: {
+          title: story.title,
+          wordCount: story.wordCount,
+          chapterNumber,
+          hasContent: !!story.content,
+          contentLength: story.content?.length
+        },
+        options,
+        bookId
+      })
+      
       const result = await publishStory({
         title: story.title,
         content: story.content,
@@ -175,6 +199,10 @@ function PublishingModal({
     } catch (error) {
       console.error('Publishing error:', error)
       alert(`Publishing error: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
+    } catch (outerError) {
+      console.error('🔥 handlePublish outer error:', outerError)
+      alert(`Critical error: ${outerError instanceof Error ? outerError.message : 'Unknown error'}`)
     }
   }
 
@@ -604,6 +632,16 @@ function PublishingModal({
               {/* Step 4: Pricing Setup */}
               {currentStep === 'pricing' && chapterNumber > 3 && (
                 <motion.div
+                  onAnimationComplete={() => {
+                    console.log('💰 Pricing step rendered. Modal state:', {
+                      currentStep,
+                      chapterNumber,
+                      chapterPrice,
+                      isConnected,
+                      address,
+                      publishingOption
+                    })
+                  }}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="space-y-6"
@@ -686,11 +724,23 @@ function PublishingModal({
                       ← Back
                     </button>
                     <button
-                      onClick={handlePublish}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        console.log('🔘 Publish button clicked! Event:', e)
+                        console.log('Button state:', {
+                          isConnected,
+                          chapterNumber,
+                          chapterPrice,
+                          disabled: !isConnected || (chapterNumber > 3 && chapterPrice <= 0)
+                        })
+                        handlePublish()
+                      }}
                       disabled={!isConnected || (chapterNumber > 3 && chapterPrice <= 0)}
                       className="flex-1 px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg font-medium hover:from-green-700 hover:to-emerald-700 transition-all disabled:opacity-50"
+                      type="button"
                     >
-                      Publish
+                      {(!isConnected || (chapterNumber > 3 && chapterPrice <= 0)) ? 'Publish (Disabled)' : 'Publish'}
                     </button>
                   </div>
                 </motion.div>

@@ -3,6 +3,8 @@ import { useAccount } from 'wagmi'
 import { Address, Hash } from 'viem'
 import { apiClient } from '@/lib/api-client'
 import { PublishResult } from '@/lib/contracts/storyProtocol'
+import { usePublishStory } from './usePublishStory'
+import { createClientStoryProtocolService } from '@/lib/services/storyProtocolClient'
 
 interface StoryData {
   title: string
@@ -25,6 +27,8 @@ type UnifiedPublishStep =
   | 'idle'
   | 'checking-unified-support'
   | 'unified-registration' // Single step for unified flow
+  | 'generating-metadata'
+  | 'blockchain-transaction'
   | 'minting-nft' // Fallback to legacy flow
   | 'registering-ip'
   | 'creating-license'
@@ -47,6 +51,7 @@ export function useUnifiedPublishStory() {
   const [ipAssetId, setIPAssetId] = useState<Address | null>(null)
 
   const { address } = useAccount()
+  const { publishStory } = usePublishStory()
 
   // Check unified registration support on mount
   useEffect(() => {
@@ -69,6 +74,13 @@ export function useUnifiedPublishStory() {
     options: PublishOptions, 
     bookId?: string
   ): Promise<UnifiedPublishResult> => {
+    console.log('🚀 publishStoryUnified called with:', {
+      storyData,
+      options,
+      bookId,
+      address
+    })
+    
     if (!address) {
       const error = 'Wallet not connected'
       setPublishResult({ success: false, error })
@@ -122,7 +134,7 @@ export function useUnifiedPublishStory() {
     bookId?: string
   ): Promise<UnifiedPublishResult> => {
     setCurrentStep('unified-registration')
-    console.log('🔗 Executing unified IP registration...')
+    console.log('🔗 Executing unified IP registration on client-side...')
 
     const nftContract = process.env.NEXT_PUBLIC_STORY_SPG_NFT_CONTRACT as Address
 
@@ -130,52 +142,79 @@ export function useUnifiedPublishStory() {
       throw new Error('SPG NFT Contract not configured')
     }
 
-    // Prepare story data for unified registration
-    const storyForRegistration = {
-      id: `${address.toLowerCase()}-${Date.now()}`,
+    // Step 1: Generate and store metadata via backend
+    setCurrentStep('generating-metadata')
+    console.log('📝 Generating metadata...')
+    
+    const storyForMetadata = {
+      id: `${address!.toLowerCase()}-${Date.now()}`,
       title: storyData.title,
       content: storyData.content,
-      author: address,
+      author: address!,
       genre: storyData.themes[0] || 'Fiction',
       mood: storyData.themes[1] || 'Neutral',
       createdAt: new Date().toISOString()
     }
 
-    // Execute unified registration API call
-    const result = await apiClient.registerUnifiedIP({
-      story: storyForRegistration,
-      nftContract,
-      account: address,
-      licenseTier: options.licenseTier,
-      includeMetadata: true
-    })
+    let metadataUri: string | undefined
+    let metadataHash: Hash | undefined
 
-    if (!result.success) {
-      throw new Error(result.error || 'Unified registration failed')
+    try {
+      // Call backend to generate and store metadata only
+      const metadataResult = await apiClient.generateIPMetadata({
+        story: storyForMetadata,
+        licenseTier: options.licenseTier
+      })
+
+      if (metadataResult.success && metadataResult.data) {
+        metadataUri = metadataResult.data.metadataUri
+        metadataHash = metadataResult.data.metadataHash as Hash
+        console.log('✅ Metadata generated:', { uri: metadataUri, hash: metadataHash })
+      }
+    } catch (error) {
+      console.warn('⚠️ Failed to generate metadata, proceeding without:', error)
     }
 
-    const { data } = result
-    const registeredIPAssetId = data.ipAsset.id as Address
-    const transactionHash = data.transactionHash as Hash
-    const mintedTokenId = BigInt(data.ipAsset.tokenId || Date.now())
+    // Step 2: Execute blockchain transaction with user's wallet
+    setCurrentStep('blockchain-transaction')
+    console.log('🔗 Executing blockchain transaction with user wallet...')
 
-    setTokenId(mintedTokenId)
-    setIPAssetId(registeredIPAssetId)
-
-    console.log('✅ Unified registration complete!')
-    console.log('🎫 Token ID:', mintedTokenId.toString())
-    console.log('📝 IP Asset ID:', registeredIPAssetId)
-    console.log('🔗 Transaction:', transactionHash)
-    console.log('📄 License Terms ID:', data.licenseTermsId)
-    console.log('🌐 Metadata URI:', data.metadataUri)
-
-    // Save chapter content to R2 storage
-    setCurrentStep('saving-to-storage')
-    console.log('💾 Saving chapter content to R2 storage...')
-    
-    const finalBookId = bookId || `${address.toLowerCase()}-${storyData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
+    // Initialize client-side Story Protocol service
+    const storyProtocolClient = createClientStoryProtocolService(address!)
     
     try {
+      const registrationResult = await storyProtocolClient.mintAndRegisterWithPilTerms({
+        spgNftContract: nftContract,
+        metadata: {
+          ipMetadataURI: metadataUri,
+          ipMetadataHash: metadataHash,
+          nftMetadataURI: metadataUri,
+          nftMetadataHash: metadataHash
+        },
+        licenseTier: options.licenseTier,
+        recipient: address!
+      })
+
+      const registeredIPAssetId = registrationResult.ipId as Address
+      const transactionHash = registrationResult.txHash as Hash
+      const mintedTokenId = BigInt(registrationResult.tokenId || Date.now())
+
+      setTokenId(mintedTokenId)
+      setIPAssetId(registeredIPAssetId)
+
+      console.log('✅ Unified registration complete!')
+      console.log('🎫 Token ID:', mintedTokenId.toString())
+      console.log('📝 IP Asset ID:', registeredIPAssetId)
+      console.log('🔗 Transaction:', transactionHash)
+      console.log('📄 License Terms ID:', registrationResult.licenseTermsId)
+      console.log('🌐 Metadata URI:', metadataUri)
+
+      // Step 3: Save chapter content to R2 storage
+      setCurrentStep('saving-to-storage')
+      console.log('💾 Saving chapter content to R2 storage...')
+      
+      const finalBookId = bookId || `${address!.toLowerCase()}-${storyData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
+      
       const saveResult = await apiClient.saveBookChapter(finalBookId, {
         bookId: finalBookId,
         chapterNumber: storyData.chapterNumber,
@@ -183,8 +222,8 @@ export function useUnifiedPublishStory() {
         content: storyData.content,
         wordCount: storyData.wordCount,
         readingTime: storyData.readingTime,
-        authorAddress: address.toLowerCase(),
-        authorName: `${address.slice(-4)}`,
+        authorAddress: address!.toLowerCase(),
+        authorName: `${address!.slice(-4)}`,
         ipAssetId: registeredIPAssetId,
         transactionHash: transactionHash,
         genre: storyData.themes[0] || 'General',
@@ -192,31 +231,31 @@ export function useUnifiedPublishStory() {
       })
 
       console.log('✅ Chapter content saved to R2:', saveResult.data?.contentUrl)
-    } catch (saveError) {
-      console.error('❌ Failed to save chapter content to R2:', saveError)
-      throw new Error(`Failed to save chapter content: ${saveError instanceof Error ? saveError.message : 'Unknown error'}`)
-    }
 
-    // Success!
-    setCurrentStep('success')
-    const unifiedResult: UnifiedPublishResult = {
-      success: true,
-      method: 'unified',
-      gasOptimized: true,
-      data: {
-        transactionHash,
-        ipAssetId: registeredIPAssetId,
-        tokenId: mintedTokenId,
-        licenseTermsId: data.licenseTermsId ? BigInt(data.licenseTermsId) : undefined,
-        contentUrl: storyData.contentUrl,
-        explorerUrl: `https://aeneid.storyscan.io/tx/${transactionHash}`
-      },
-      metadataUri: data.metadataUri
-    }
+      // Success!
+      setCurrentStep('success')
+      const unifiedResult: UnifiedPublishResult = {
+        success: true,
+        method: 'unified',
+        gasOptimized: true,
+        data: {
+          transactionHash,
+          ipAssetId: registeredIPAssetId,
+          tokenId: mintedTokenId,
+          licenseTermsId: registrationResult.licenseTermsId ? BigInt(registrationResult.licenseTermsId) : undefined,
+          contentUrl: storyData.contentUrl,
+          explorerUrl: `https://aeneid.storyscan.io/tx/${transactionHash}`
+        },
+        metadataUri: metadataUri
+      }
 
-    setPublishResult(unifiedResult)
-    console.log('🎉 Unified publishing complete!', unifiedResult)
-    return unifiedResult
+      setPublishResult(unifiedResult)
+      console.log('🎉 Unified publishing complete!', unifiedResult)
+      return unifiedResult
+    } catch (error) {
+      console.error('❌ Unified registration failed:', error)
+      throw error
+    }
   }
 
   const executeLegacyRegistration = async (
@@ -224,53 +263,29 @@ export function useUnifiedPublishStory() {
     options: PublishOptions,
     bookId?: string
   ): Promise<UnifiedPublishResult> => {
-    console.log('🔄 Executing legacy registration flow...')
+    console.log('🔄 Using legacy registration flow (3 transactions)...')
     
-    // Import the original publishing hook logic here
-    // This would be the same as the current usePublishStory implementation
-    // For now, we'll simulate it with a simplified version
+    // Use the legacy publishStory hook
+    const result = await publishStory(storyData, options, bookId)
     
-    setCurrentStep('minting-nft')
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    
-    setCurrentStep('registering-ip')
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    
-    if (options.ipRegistration) {
-      setCurrentStep('creating-license')
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      setCurrentStep('attaching-license')
-      await new Promise(resolve => setTimeout(resolve, 1000))
+    if (!result.success) {
+      throw new Error(result.error || 'Legacy registration failed')
     }
     
-    setCurrentStep('saving-to-storage')
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    // Mock legacy result
-    setCurrentStep('success')
-    const mockTxHash = `0x${Array.from({length: 64}, () => Math.floor(Math.random() * 16).toString(16)).join('')}` as Hash
-    const mockIPAssetId = `0x${Math.random().toString(16).substring(2).padEnd(40, '0').substring(0, 40)}` as Address
-    const mockTokenId = BigInt(Date.now())
-    
-    setTokenId(mockTokenId)
-    setIPAssetId(mockIPAssetId)
-    
-    const legacyResult: UnifiedPublishResult = {
+    // Convert legacy result to unified result format
+    const unifiedResult: UnifiedPublishResult = {
       success: true,
       method: 'legacy',
       gasOptimized: false,
-      data: {
-        transactionHash: mockTxHash,
-        ipAssetId: mockIPAssetId,
-        tokenId: mockTokenId,
-        contentUrl: storyData.contentUrl,
-        explorerUrl: `https://aeneid.storyscan.io/tx/${mockTxHash}`
-      }
+      data: result.data!,
+      metadataUri: undefined // Legacy flow doesn't return metadata URI
     }
     
-    setPublishResult(legacyResult)
-    return legacyResult
+    setPublishResult(unifiedResult)
+    setTokenId(result.data?.tokenId || null)
+    setIPAssetId(result.data?.ipAssetId || null)
+    
+    return unifiedResult
   }
 
   const reset = () => {
