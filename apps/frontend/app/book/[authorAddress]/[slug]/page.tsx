@@ -47,7 +47,9 @@ interface Chapter {
 export default function BookPage() {
   const params = useParams();
   const router = useRouter();
-  const bookId = params.bookId as string;
+  const authorAddress = params.authorAddress as string;
+  const slug = params.slug as string;
+  const bookId = `${authorAddress}/${slug}`;
   const { address } = useAccount();
   
   const [book, setBook] = useState<BookDetails | null>(null);
@@ -280,7 +282,7 @@ export default function BookPage() {
               {/* Only show Write Chapter button if current user is the author */}
               {address && book.authorAddress && address.toLowerCase() === book.authorAddress.toLowerCase() && (
                 <button
-                  onClick={() => router.push(`/write/chapter?bookId=${bookId}&chapterNumber=${nextChapterNumber}`)}
+                  onClick={() => router.push(`/write/chapter?bookId=${encodeURIComponent(bookId)}&chapterNumber=${nextChapterNumber}`)}
                   className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
                 >
                   ✍️ Write Chapter {nextChapterNumber}
@@ -332,7 +334,7 @@ export default function BookPage() {
               return (
                 <Link
                   key={chapter.number}
-                  href={`/book/${bookId}/chapter/${chapter.number}`}
+                  href={`/book/${authorAddress}/${slug}/chapter/${chapter.number}`}
                   className="block"
                 >
                   <div className={`border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer ${chapterStyle}`}>

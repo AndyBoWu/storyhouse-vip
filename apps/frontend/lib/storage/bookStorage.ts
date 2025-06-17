@@ -26,7 +26,7 @@ export class BookStorageService {
    * Generate storage paths for a book
    */
   static generateBookPaths(authorAddress: AuthorAddress, slug: string): BookStoragePath {
-    const bookId = `${authorAddress.toLowerCase()}-${slug}`
+    const bookId = `${authorAddress.toLowerCase()}/${slug}`
     // Store with structure: books/{authorAddress}/{slug}/ (remove leading slash)
     const bookFolder = `${BOOK_SYSTEM_CONSTANTS.BOOKS_ROOT_PATH.replace(/^\//, '')}/${authorAddress.toLowerCase()}/${slug}`
     
@@ -55,12 +55,22 @@ export class BookStorageService {
    * Parse book ID to extract author address and slug
    */
   static parseBookId(bookId: BookId): { authorAddress: AuthorAddress; slug: string } {
-    const match = bookId.match(BOOK_SYSTEM_CONSTANTS.BOOK_ID_PATTERN)
-    if (!match) {
-      throw new Error(`Invalid book ID format: ${bookId}`)
+    // Handle URL-encoded slashes
+    const decodedBookId = decodeURIComponent(bookId)
+    
+    // Split by first slash to separate address and slug
+    const slashIndex = decodedBookId.indexOf('/')
+    if (slashIndex === -1) {
+      throw new Error(`Invalid book ID format: ${bookId}. Expected format: authorAddress/slug`)
     }
     
-    const [authorAddress, slug] = bookId.split('-', 2)
+    const authorAddress = decodedBookId.substring(0, slashIndex)
+    const slug = decodedBookId.substring(slashIndex + 1)
+    
+    if (!authorAddress || !slug) {
+      throw new Error(`Invalid book ID format: ${bookId}. Both author address and slug are required`)
+    }
+    
     return { 
       authorAddress: authorAddress as AuthorAddress, 
       slug: slug 

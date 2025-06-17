@@ -10,7 +10,7 @@
 
 export interface BookMetadata {
   // Basic Information
-  bookId: string;              // "{authorAddress}-{slug}" format
+  bookId: string;              // "{authorAddress}/{slug}" format
   title: string;               // "The Detective's Portal: Sci-Fi Adventure"
   description: string;         // Book description
   authorAddress: string;       // "0x5678..."
@@ -23,13 +23,13 @@ export interface BookMetadata {
   licenseTermsId?: string;    // PIL terms for licensing
   
   // Branching Information
-  parentBook?: string;        // "0x1234-detective" (for derivative books)
+  parentBook?: string;        // "0x1234.../detective" (for derivative books)
   branchPoint?: string;       // "ch3" (where branching occurred)
-  derivativeBooks: string[];  // ["0x9abc-detective-dark"] (child books)
+  derivativeBooks: string[];  // ["0x9abc.../detective-dark"] (child books)
   
   // Chapter Resolution Map - CORE FEATURE
   chapterMap: {
-    [chapterNumber: string]: string; // "ch1": "0x1234-detective/chapters/ch1"
+    [chapterNumber: string]: string; // "ch1": "0x1234.../detective/chapters/ch1"
   };
   
   // Revenue Attribution
@@ -367,7 +367,7 @@ export const BOOK_SYSTEM_CONSTANTS = {
   
   // Patterns
   SLUG_PATTERN: /^[a-z0-9-]+$/,
-  BOOK_ID_PATTERN: /^0x[a-fA-F0-9]{40}-[a-z0-9-]+$/,
+  BOOK_ID_PATTERN: /^0x[a-fA-F0-9]{40}\/[a-z0-9-]+$/,
 } as const;
 
 // Types are exported automatically by the interface declarations above

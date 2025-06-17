@@ -4,9 +4,16 @@
 
 The world's first Web3 storytelling platform with **chapter-level IP assets**, **read-to-earn mechanics**, and **AI-powered remix creation** on Story Protocol.
 
-## 🏗️ Current Phase: 6.1 - QA & Production Refinements
+## 🏗️ Current Phase: 6.2 - Enhanced Book System
 
 ### Recent Achievements
+- ✅ Book ID format migration from `authorAddress-slug` to `authorAddress/slug`
+- ✅ RESTful URL structure with clean hierarchical paths
+- ✅ Fixed chapter content loading errors with improved API endpoints
+- ✅ Smart ID detection supporting both book and story formats
+- ✅ Proper URL encoding for special characters in identifiers
+
+### Phase 6.1 Achievements
 - ✅ Fixed unified IP registration to use client-side transactions
 - ✅ Removed server-side blockchain operation requirements
 - ✅ Implemented metadata-only backend API

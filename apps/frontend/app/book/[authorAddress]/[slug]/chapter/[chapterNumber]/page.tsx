@@ -32,7 +32,9 @@ export default function ChapterPage() {
   const params = useParams();
   const router = useRouter();
   const { address } = useAccount();
-  const bookId = params.bookId as string;
+  const authorAddress = params.authorAddress as string;
+  const slug = params.slug as string;
+  const bookId = `${authorAddress}/${slug}`;
   const chapterNumber = parseInt(params.chapterNumber as string);
   
   const [chapter, setChapter] = useState<ChapterContent | null>(null);
@@ -225,7 +227,7 @@ export default function ChapterPage() {
         <div className="text-center">
           <h2 className="text-2xl font-bold text-red-600 mb-4">Error</h2>
           <p className="text-gray-600 mb-4">{error || 'Chapter not found'}</p>
-          <Link href={`/book/${bookId}`} className="text-blue-600 hover:underline">
+          <Link href={`/book/${authorAddress}/${slug}`} className="text-blue-600 hover:underline">
             Back to Book
           </Link>
         </div>
@@ -243,7 +245,7 @@ export default function ChapterPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Link 
-                href={`/book/${bookId}`}
+                href={`/book/${authorAddress}/${slug}`}
                 className="text-sm text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
               >
                 ← Back to {chapter.bookTitle}
@@ -309,7 +311,7 @@ export default function ChapterPage() {
             <div className="flex justify-between items-center">
               {chapter.previousChapter ? (
                 <Link
-                  href={`/book/${bookId}/chapter/${chapter.previousChapter}`}
+                  href={`/book/${authorAddress}/${slug}/chapter/${chapter.previousChapter}`}
                   className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-lg transition-colors"
                 >
                   ← Previous Chapter
@@ -319,7 +321,7 @@ export default function ChapterPage() {
               )}
 
               <Link
-                href={`/book/${bookId}`}
+                href={`/book/${authorAddress}/${slug}`}
                 className="px-4 py-2 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
               >
                 Table of Contents
@@ -327,14 +329,14 @@ export default function ChapterPage() {
 
               {chapter.nextChapter && chapter.nextChapter <= chapter.totalChapters ? (
                 <Link
-                  href={`/book/${bookId}/chapter/${chapter.nextChapter}`}
+                  href={`/book/${authorAddress}/${slug}/chapter/${chapter.nextChapter}`}
                   className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
                 >
                   Next Chapter →
                 </Link>
               ) : (
                 <button
-                  onClick={() => router.push(`/write/chapter?bookId=${bookId}&chapterNumber=${chapter.chapterNumber + 1}`)}
+                  onClick={() => router.push(`/write/chapter?bookId=${encodeURIComponent(bookId)}&chapterNumber=${chapter.chapterNumber + 1}`)}
                   className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
                 >
                   ✍️ Write Next Chapter
