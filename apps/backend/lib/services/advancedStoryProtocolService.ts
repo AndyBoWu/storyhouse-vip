@@ -228,7 +228,7 @@ export class AdvancedStoryProtocolService {
       derivativesApproval: false,
       derivativesReciprocal: licenseConfig.derivativesAllowed, // 🔗 CRITICAL: Enable derivative chains for all tiers that allow derivatives
       derivativeRevCeiling: BigInt(0),
-      currency: '0x1514000000000000000000000000000000000000' as Address, // TIP token
+      currency: '0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E' as Address, // TIP token
       uri: ''
     }
   }
@@ -314,7 +314,7 @@ export class AdvancedStoryProtocolService {
         derivativesApproval: false, // No approval needed
         derivativesReciprocal: licenseConfig.shareAlike || false,
         derivativeRevCeiling: BigInt(0), // No ceiling
-        currency: '0x1514000000000000000000000000000000000000' as Address, // WIP token address
+        currency: '0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E' as Address, // TIP token address
         uri: '', // License metadata URI (can be empty for now)
         txOptions: {}
       }
