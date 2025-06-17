@@ -32,7 +32,9 @@ export async function POST(
   { params }: { params: Promise<{ bookId: string }> }
 ) {
   try {
-    const { bookId } = await params
+    const { bookId: encodedBookId } = await params
+    // Decode the bookId in case it was URL encoded
+    const bookId = decodeURIComponent(encodedBookId)
     const body: SaveChapterRequest = await request.json()
 
     console.log('📝 Saving chapter for book:', bookId)
@@ -58,17 +60,33 @@ export async function POST(
       }, { status: 400 })
     }
 
-    // Parse book ID
-    const bookIdParts = bookId.split('-')
-    if (bookIdParts.length < 2) {
-      return NextResponse.json({
-        success: false,
-        error: 'Invalid book ID format'
-      }, { status: 400 })
+    // Parse book ID - handle both slash and hyphen formats
+    let authorAddress: string
+    let slug: string
+    
+    if (bookId.includes('/')) {
+      // New format: authorAddress/slug
+      const parts = bookId.split('/')
+      if (parts.length !== 2) {
+        return NextResponse.json({
+          success: false,
+          error: 'Invalid book ID format - expected authorAddress/slug'
+        }, { status: 400 })
+      }
+      authorAddress = parts[0].toLowerCase()
+      slug = parts[1]
+    } else {
+      // Legacy format: authorAddress-slug-parts
+      const bookIdParts = bookId.split('-')
+      if (bookIdParts.length < 2) {
+        return NextResponse.json({
+          success: false,
+          error: 'Invalid book ID format'
+        }, { status: 400 })
+      }
+      authorAddress = bookIdParts[0].toLowerCase()
+      slug = bookIdParts.slice(1).join('-')
     }
-
-    const authorAddress = bookIdParts[0].toLowerCase()
-    const slug = bookIdParts.slice(1).join('-')
 
     // Validate author matches
     if (authorAddress !== body.authorAddress.toLowerCase()) {

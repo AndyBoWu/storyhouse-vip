@@ -233,7 +233,10 @@ export const apiClient = {
       wordCount: chapterData.wordCount
     })
     
-    return apiRequest(`/api/books/${bookId}/chapters/save`, {
+    // Encode the bookId to handle slashes properly in the URL
+    const encodedBookId = encodeURIComponent(bookId)
+    
+    return apiRequest(`/api/books/${encodedBookId}/chapters/save`, {
       method: 'POST',
       body: JSON.stringify(chapterData),
     })

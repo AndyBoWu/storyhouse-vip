@@ -74,7 +74,10 @@ export async function GET(
         createdAt: chapterData.createdAt || new Date().toISOString(),
         nextChapter: chapterNum + 1,
         previousChapter: chapterNum > 1 ? chapterNum - 1 : undefined,
-        totalChapters: bookMetadata.totalChapters || 1
+        totalChapters: bookMetadata.totalChapters || 1,
+        // Include blockchain registration info
+        ipAssetId: chapterData.ipAssetId || bookMetadata.ipAssetId,
+        transactionHash: chapterData.transactionHash
       };
 
       return NextResponse.json(formattedResponse);
