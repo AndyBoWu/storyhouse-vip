@@ -115,7 +115,7 @@ export const apiClient = {
   },
   
   async getChapter(storyId: string, chapterNumber: number) {
-    return apiRequest(`/api/chapters/${storyId}/${chapterNumber}`)
+    return apiRequest(`/api/chapters/${encodeURIComponent(storyId)}/${chapterNumber}`)
   },
   
   // Upload operations
@@ -187,15 +187,15 @@ export const apiClient = {
   },
 
   async getBookById(bookId: string) {
-    return apiRequest(`/api/books/${bookId}`)
+    return apiRequest(`/api/books/${encodeURIComponent(bookId)}`)
   },
 
   async getBookChapters(bookId: string) {
-    return apiRequest(`/api/books/${bookId}/chapters`)
+    return apiRequest(`/api/books/${encodeURIComponent(bookId)}/chapters`)
   },
 
   async getBookChapter(bookId: string, chapterNumber: number) {
-    return apiRequest(`/api/books/${bookId}/chapter/${chapterNumber}`)
+    return apiRequest(`/api/books/${encodeURIComponent(bookId)}/chapter/${chapterNumber}`)
   },
 
   // Generic GET method for flexibility

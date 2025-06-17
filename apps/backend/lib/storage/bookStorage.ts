@@ -26,7 +26,7 @@ export class BookStorageService {
    * Generate storage paths for a book
    */
   static generateBookPaths(authorAddress: AuthorAddress, slug: string): BookStoragePath {
-    const bookId = `${authorAddress.toLowerCase()}-${slug}`
+    const bookId = `${authorAddress.toLowerCase()}/${slug}`
     // Store with structure: books/{authorAddress}/{slug}/ (remove leading slash)
     const bookFolder = `${BOOK_SYSTEM_CONSTANTS.BOOKS_ROOT_PATH.replace(/^\//, '')}/${authorAddress.toLowerCase()}/${slug}`
     
@@ -55,14 +55,21 @@ export class BookStorageService {
    * Parse book ID to extract author address and slug
    */
   static parseBookId(bookId: BookId): { authorAddress: AuthorAddress; slug: string } {
-    const match = bookId.match(BOOK_SYSTEM_CONSTANTS.BOOK_ID_PATTERN)
-    if (!match) {
-      throw new Error(`Invalid book ID format: ${bookId}`)
+    // Handle URL-encoded slashes
+    const decodedBookId = decodeURIComponent(bookId)
+    
+    // Split by first slash to separate address and slug
+    const slashIndex = decodedBookId.indexOf('/')
+    if (slashIndex === -1) {
+      throw new Error(`Invalid book ID format: ${bookId}. Expected format: authorAddress/slug`)
     }
     
-    const parts = bookId.split('-')
-    const authorAddress = parts[0]
-    const slug = parts.slice(1).join('-') // Join all parts after the address
+    const authorAddress = decodedBookId.substring(0, slashIndex)
+    const slug = decodedBookId.substring(slashIndex + 1)
+    
+    if (!authorAddress || !slug) {
+      throw new Error(`Invalid book ID format: ${bookId}. Both author address and slug are required`)
+    }
     
     return { 
       authorAddress: authorAddress as AuthorAddress, 
@@ -232,7 +239,7 @@ export class BookStorageService {
     parentBook?: string,
     branchPoint?: string
   ): BookMetadata {
-    const bookId = `${authorAddress.toLowerCase()}-${slug}` as BookId
+    const bookId = `${authorAddress.toLowerCase()}/${slug}` as BookId
     const now = new Date().toISOString()
     
     return {
@@ -504,18 +511,8 @@ export class BookStorageService {
  */
 export async function getBookById(bookId: string): Promise<BookMetadata | null> {
   try {
-    // Parse bookId to get authorAddress and slug
-    const parts = bookId.split('-');
-    if (parts.length < 2) {
-      console.error('Invalid book ID format:', bookId);
-      return null;
-    }
-    
-    // Ethereum address is 42 chars (0x + 40 hex chars)
-    const authorAddress = parts[0] as AuthorAddress;
-    const slug = parts.slice(1).join('-'); // Handle slugs with hyphens
-    
-    console.log('📚 Fetching book:', { bookId, authorAddress, slug });
+    // The bookId is already parsed by the route, just use it directly
+    console.log('📚 Fetching book:', { bookId });
     
     const bookMetadata = await BookStorageService.getBookMetadata(bookId);
     return bookMetadata;

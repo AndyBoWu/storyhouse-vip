@@ -18,6 +18,7 @@ Revolutionary Web3 storytelling platform built on Story Protocol enabling chapte
 **Latest Deployments (Vercel):**
 - Frontend: https://frontend-3pf89c73v-andy-wus-projects.vercel.app
 - Backend: https://backend-dxtj0y3su-andy-wus-projects.vercel.app
+- **Phase 6.2 Complete**: Book ID format migration with improved URL structure
 - **Phase 6.0 Complete**: 5-contract architecture deployed with full-stack migration
 
 ## 🎯 Core Features
@@ -81,6 +82,14 @@ Real-time alerts and monitoring:
 - **Background Monitoring**: Automated detection every 6 hours with intelligent caching
 - **Multi-channel Delivery**: In-app, email, push, and webhook notifications
 - **Quality Alerts**: Automated improvement suggestions and collaboration matching
+
+### 📚 **Enhanced Book System** (Phase 6.2)
+Improved book identification and URL structure:
+- **Clean URLs**: RESTful format `/book/authorAddress/slug` for better semantics
+- **Multi-Book Support**: Natural hierarchy supporting multiple books per author
+- **Smart Routing**: Intelligent detection of book vs story IDs with backward compatibility
+- **URL Encoding**: Proper handling of special characters in book identifiers
+- **R2 Integration**: Optimized storage paths matching the new ID structure
 
 ## 🏗️ Architecture
 

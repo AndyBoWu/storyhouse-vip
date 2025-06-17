@@ -36,8 +36,21 @@ export async function GET(
     console.log(`📖 Fetching chapter ${chapterNumber} of story ${storyId}`)
 
     try {
-      // Generate the key for this chapter
-      const chapterKey = R2Service.generateChapterKey(storyId, chapterNum)
+      // Check if this is a book ID (contains slash) vs story ID
+      const decodedStoryId = decodeURIComponent(storyId)
+      const isBookId = decodedStoryId.includes('/')
+      let chapterKey: string
+      
+      if (isBookId) {
+        // For books, use the book storage structure
+        const slashIndex = decodedStoryId.indexOf('/')
+        const authorAddress = decodedStoryId.substring(0, slashIndex)
+        const slug = decodedStoryId.substring(slashIndex + 1)
+        chapterKey = `books/${authorAddress}/${slug}/chapters/ch${chapterNum}/content.json`
+      } else {
+        // For stories, use the legacy structure
+        chapterKey = R2Service.generateChapterKey(storyId, chapterNum)
+      }
       
       // Fetch chapter content from R2
       const chapterContent = await R2Service.getContent(chapterKey)
@@ -59,8 +72,17 @@ export async function GET(
       })
 
       // Fetch book metadata to get additional info
-      const bookMetadataKey = `books/${storyId}/metadata.json`;
+      let bookMetadataKey: string;
       let bookMetadata: any = {};
+      
+      if (isBookId) {
+        const slashIndex = decodedStoryId.indexOf('/')
+        const authorAddress = decodedStoryId.substring(0, slashIndex)
+        const slug = decodedStoryId.substring(slashIndex + 1)
+        bookMetadataKey = `books/${authorAddress}/${slug}/metadata.json`
+      } else {
+        bookMetadataKey = `books/${storyId}/metadata.json`
+      }
       
       try {
         const bookMetadataContent = await R2Service.getContent(bookMetadataKey);
@@ -153,7 +175,21 @@ export async function PUT(
 
     try {
       // First, fetch the existing chapter
-      const chapterKey = R2Service.generateChapterKey(storyId, chapterNum)
+      // Check if this is a book ID (contains slash) vs story ID
+      const decodedStoryId = decodeURIComponent(storyId)
+      const isBookId = decodedStoryId.includes('/')
+      let chapterKey: string
+      
+      if (isBookId) {
+        // For books, use the book storage structure
+        const slashIndex = decodedStoryId.indexOf('/')
+        const authorAddress = decodedStoryId.substring(0, slashIndex)
+        const slug = decodedStoryId.substring(slashIndex + 1)
+        chapterKey = `books/${authorAddress}/${slug}/chapters/ch${chapterNum}/content.json`
+      } else {
+        // For stories, use the legacy structure
+        chapterKey = R2Service.generateChapterKey(storyId, chapterNum)
+      }
       const existingContent = await R2Service.getContent(chapterKey)
       
       if (!existingContent) {
@@ -260,7 +296,21 @@ export async function DELETE(
     console.log(`🗑️ Deleting chapter ${chapterNumber} of story ${storyId}`)
 
     try {
-      const chapterKey = R2Service.generateChapterKey(storyId, chapterNum)
+      // Check if this is a book ID (contains slash) vs story ID
+      const decodedStoryId = decodeURIComponent(storyId)
+      const isBookId = decodedStoryId.includes('/')
+      let chapterKey: string
+      
+      if (isBookId) {
+        // For books, use the book storage structure
+        const slashIndex = decodedStoryId.indexOf('/')
+        const authorAddress = decodedStoryId.substring(0, slashIndex)
+        const slug = decodedStoryId.substring(slashIndex + 1)
+        chapterKey = `books/${authorAddress}/${slug}/chapters/ch${chapterNum}/content.json`
+      } else {
+        // For stories, use the legacy structure
+        chapterKey = R2Service.generateChapterKey(storyId, chapterNum)
+      }
       
       // Check if chapter exists before attempting deletion
       const existingContent = await R2Service.getContent(chapterKey)

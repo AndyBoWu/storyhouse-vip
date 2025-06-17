@@ -39,7 +39,7 @@ export async function GET(
       authorAddress: book.authorAddress || book.author,
       authorName: book.authorName || 'Anonymous',
       description: book.description,
-      coverUrl: `${process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api-testnet.storyhouse.vip'}/api/books/${bookId}/cover`, // Use absolute URL for cover
+      coverUrl: `${process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api-testnet.storyhouse.vip'}/api/books/${encodeURIComponent(bookId)}/cover`, // Use absolute URL for cover
       genre: book.genres || [],
       totalChapters: book.chapters || 0,
       totalReads: book.totalReads || 0,

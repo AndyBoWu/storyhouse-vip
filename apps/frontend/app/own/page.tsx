@@ -190,7 +190,9 @@ export default function MyStoriesPage() {
 
   const handleViewBook = (book: RegisteredBook) => {
     // Navigate to the new book landing page
-    router.push(`/book/${book.id}`)
+    // Parse the book ID to get author address and slug
+    const [authorAddress, slug] = book.id.split('/')
+    router.push(`/book/${authorAddress}/${slug}`)
   }
 
   return (
