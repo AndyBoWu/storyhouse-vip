@@ -104,18 +104,34 @@ export async function GET(
     try {
       listResponse = await client.send(listCommand)
     } catch (r2Error) {
-      console.warn('⚠️ R2 listing failed, assuming new book with no chapters:', r2Error)
-      // For new books, return default values
-      return NextResponse.json({
-        success: true,
-        data: {
-          bookId,
-          totalChapters: 0,
-          latestChapter: 0,
-          nextChapterNumber: 1,
-          chapters: []
-        }
+      console.warn('⚠️ R2 listing failed with new format, trying old format...')
+      
+      // Try old format with hyphen separator
+      const oldChaptersPrefix = `books/${authorAddress}-${slug}/chapters/`
+      console.log('🔍 Trying old prefix:', oldChaptersPrefix)
+      
+      const oldListCommand = new ListObjectsV2Command({
+        Bucket: BUCKET_NAME,
+        Prefix: oldChaptersPrefix,
       })
+      
+      try {
+        listResponse = await client.send(oldListCommand)
+        console.log('✅ Found chapters using old format')
+      } catch (oldFormatError) {
+        console.warn('⚠️ R2 listing failed for both formats, assuming new book with no chapters:', oldFormatError)
+        // For new books, return default values
+        return NextResponse.json({
+          success: true,
+          data: {
+            bookId,
+            totalChapters: 0,
+            latestChapter: 0,
+            nextChapterNumber: 1,
+            chapters: []
+          }
+        })
+      }
     }
     
     console.log('📊 Chapter listing response:', {
