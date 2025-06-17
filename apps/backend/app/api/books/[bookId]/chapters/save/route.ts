@@ -109,6 +109,7 @@ export async function POST(
 
       // IP Registration
       ipAssetId: body.ipAssetId,
+      transactionHash: body.transactionHash,
       parentIpAssetId: undefined, // TODO: Get from book metadata
 
       // Economics (based on chapter number and design spec)
