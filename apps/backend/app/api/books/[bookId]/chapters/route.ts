@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { ListObjectsV2Command } from '@aws-sdk/client-s3'
 import { S3Client } from '@aws-sdk/client-s3'
+import { BookStorageService } from '@/lib/storage/bookStorage'
 
 // Initialize R2 client
 let r2Client: S3Client
@@ -67,17 +68,21 @@ export async function GET(
 
     console.log('📚 Getting chapter count for book:', bookId)
 
-    // Parse book ID to get author address and slug
-    const bookIdParts = bookId.split('-')
-    if (bookIdParts.length < 2) {
+    // Parse book ID using the standard parsing logic
+    let authorAddress: string
+    let slug: string
+    
+    try {
+      const parsed = BookStorageService.parseBookId(bookId)
+      authorAddress = parsed.authorAddress.toLowerCase()
+      slug = parsed.slug
+    } catch (parseError) {
+      console.error('❌ Failed to parse book ID:', parseError)
       return NextResponse.json({
         success: false,
         error: 'Invalid book ID format'
       }, { status: 400 })
     }
-
-    const authorAddress = bookIdParts[0].toLowerCase()
-    const slug = bookIdParts.slice(1).join('-')
     
     console.log('📖 Parsed book info:', { authorAddress, slug })
 
