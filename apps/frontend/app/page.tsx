@@ -3,6 +3,7 @@
 import { PenTool } from 'lucide-react'
 import Link from 'next/link'
 import WalletConnect from '@/components/WalletConnect'
+import FeatureCards from '@/components/features/FeatureCards'
 
 export default function HomePage() {
   return (
@@ -75,32 +76,8 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Features Grid */}
-            <div className="grid gap-8 md:grid-cols-3">
-              <div className="bg-white/70 backdrop-blur-sm rounded-xl p-6 text-gray-800 border border-white/50">
-                <div className="mb-4 text-4xl">📚</div>
-                <h3 className="mb-2 text-xl font-bold">Immerse & Discover</h3>
-                <p className="text-gray-600">
-                  Dive deep into captivating narratives. Every chapter opens new dimensions of possibility.
-                </p>
-              </div>
-
-              <div className="bg-white/70 backdrop-blur-sm rounded-xl p-6 text-gray-800 border border-white/50">
-                <div className="mb-4 text-4xl">🤖</div>
-                <h3 className="mb-2 text-xl font-bold">Dream & Create</h3>
-                <p className="text-gray-600">
-                  Transform imagination into reality with AI. Your wildest ideas become living stories.
-                </p>
-              </div>
-
-              <div className="bg-white/70 backdrop-blur-sm rounded-xl p-6 text-gray-800 border border-white/50">
-                <div className="mb-4 text-4xl">🔄</div>
-                <h3 className="mb-2 text-xl font-bold">Expand & Evolve</h3>
-                <p className="text-gray-600">
-                  Build upon existing worlds. Create infinite variations that spawn new universes.
-                </p>
-              </div>
-            </div>
+            {/* Features Section */}
+            <FeatureCards />
 
             {/* Story Protocol Badge */}
             <div className="mt-16">
