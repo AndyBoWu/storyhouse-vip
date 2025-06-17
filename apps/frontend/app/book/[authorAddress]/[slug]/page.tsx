@@ -9,6 +9,7 @@ import { ArrowLeft, Lock } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import apiClient, { getApiBaseUrl } from '@/lib/api-client';
 import ShareButton from '@/components/ui/ShareButton';
+import { BookIPInfo } from '@/components/book';
 
 // Dynamically import WalletConnect to avoid hydration issues
 const WalletConnect = dynamic(() => import('@/components/WalletConnect'), {
@@ -196,9 +197,9 @@ export default function BookPage() {
       <div className="container mx-auto px-4 py-8">
       {/* Book Details Section */}
       <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Book Cover */}
-          <div className="md:col-span-1">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Book Cover - Left */}
+          <div className="lg:col-span-3">
             {book.coverUrl ? (
               <Image
                 src={book.coverUrl.startsWith('/') ? `${getApiBaseUrl()}${book.coverUrl}` : book.coverUrl}
@@ -218,8 +219,8 @@ export default function BookPage() {
             )}
           </div>
 
-          {/* Book Info */}
-          <div className="md:col-span-2">
+          {/* Book Info - Middle */}
+          <div className="lg:col-span-5">
             <h1 className="text-3xl font-bold mb-2">{book.title}</h1>
             <div className="flex items-center text-gray-600 mb-4">
               <span>by</span>
@@ -296,11 +297,16 @@ export default function BookPage() {
               />
             </div>
           </div>
+
+          {/* Blockchain Registration Info - Right */}
+          <div className="lg:col-span-4">
+            <BookIPInfo bookId={bookId} />
+          </div>
         </div>
       </div>
 
       {/* Chapters Section */}
-      <div className="bg-white rounded-lg shadow-lg p-6">
+      <div className="bg-white rounded-lg shadow-lg p-6 mt-6">
         <h2 className="text-2xl font-bold mb-6">Chapters</h2>
         
         {(!chapters || chapters.length === 0) ? (

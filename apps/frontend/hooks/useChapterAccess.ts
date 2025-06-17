@@ -9,6 +9,9 @@ interface ChapterAccessInfo {
   isFree: boolean
   canAccess: boolean
   alreadyUnlocked: boolean
+  ipAssetId?: string
+  parentIpAssetId?: string
+  licenseTermsId?: string
 }
 
 interface UnlockChapterParams {

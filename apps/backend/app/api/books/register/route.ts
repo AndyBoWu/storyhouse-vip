@@ -51,13 +51,19 @@ export async function POST(request: NextRequest) {
     // Get optional cover file
     const coverFile = formData.get('coverFile') as File | null
     
+    // Get IP Asset ID and transaction hash from frontend registration
+    const ipAssetId = formData.get('ipAssetId') as string | null
+    const transactionHash = formData.get('transactionHash') as string | null
+    
     console.log('📝 Book registration data:', {
       title,
       authorAddress,
       genres,
       contentRating,
       hasCover: !!coverFile,
-      coverSize: coverFile ? `${(coverFile.size / 1024).toFixed(1)}KB` : 'N/A'
+      coverSize: coverFile ? `${(coverFile.size / 1024).toFixed(1)}KB` : 'N/A',
+      ipAssetId,
+      transactionHash
     })
 
     // ===== VALIDATION =====
@@ -130,14 +136,18 @@ export async function POST(request: NextRequest) {
     }
 
     // ===== STORY PROTOCOL IP REGISTRATION =====
-    // TODO: Implement Story Protocol IP registration
-    // For now, we'll skip blockchain registration and focus on storage
+    // NOTE: IP registration is done from the frontend where the user's wallet is connected
+    // The backend receives and stores the IP Asset ID and transaction hash
     
-    let ipAssetId: string | undefined
+    console.log('📝 Book registered on Story Protocol:', {
+      ipAssetId: ipAssetId || 'Not provided',
+      transactionHash: transactionHash || 'Not provided'
+    })
+    
+    // Use the values from frontend or undefined if not provided
+    const finalIpAssetId = ipAssetId || undefined
+    const finalTransactionHash = transactionHash || undefined
     let licenseTermsId: string | undefined
-    let transactionHash: string | undefined
-    
-    console.log('⚠️ Story Protocol IP registration not yet implemented - proceeding with storage only')
 
     // ===== COVER IMAGE STORAGE =====
     
@@ -197,7 +207,7 @@ export async function POST(request: NextRequest) {
         description,
         genres,
         contentRating,
-        ipAssetId,
+        finalIpAssetId,
         undefined, // parentBook - this is an original book
         undefined  // branchPoint - this is an original book
       )
@@ -217,6 +227,11 @@ export async function POST(request: NextRequest) {
       // Add license terms ID if created
       if (licenseTermsId) {
         bookMetadata.licenseTermsId = licenseTermsId
+      }
+
+      // Add transaction hash if available
+      if (finalTransactionHash) {
+        bookMetadata.transactionHash = finalTransactionHash
       }
 
       // Store book metadata
