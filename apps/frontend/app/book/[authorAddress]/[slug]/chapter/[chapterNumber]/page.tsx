@@ -79,7 +79,7 @@ export default function ChapterPage() {
       console.log(`🔍 Loading chapter info for: ${bookId}/chapter/${chapterNumber}`);
       
       // Always fetch basic info first to get author address
-      const chapterInfo = await apiClient.get(`/books/${bookId}/chapter/${chapterNumber}/info`);
+      const chapterInfo = await apiClient.get(`/books/${encodeURIComponent(bookId)}/chapter/${chapterNumber}/info`);
       
       console.log('📋 Chapter info loaded:', chapterInfo);
       
@@ -93,7 +93,7 @@ export default function ChapterPage() {
         if (pricing.isFree || userIsOwner) {
           // Fetch full content
           console.log('🔓 User has access, fetching full content...');
-          const fullChapter = await apiClient.get(`/books/${bookId}/chapter/${chapterNumber}`);
+          const fullChapter = await apiClient.get(`/books/${encodeURIComponent(bookId)}/chapter/${chapterNumber}`);
           console.log('📖 Full chapter loaded:', { title: fullChapter.title, hasContent: !!fullChapter.content });
           setChapter(fullChapter);
           setHasAccess(true);
