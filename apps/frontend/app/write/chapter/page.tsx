@@ -521,62 +521,6 @@ function ChapterWritingPageContent() {
       </div>
 
 
-      {/* Publishing Progress */}
-      {isPublishing && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-8 max-w-md w-full mx-4">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">Publishing Chapter</h3>
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                {currentStep === 'validating' ? (
-                  <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                ) : (
-                  <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
-                    <span className="text-white text-xs">✓</span>
-                  </div>
-                )}
-                <span className="text-gray-700">Validating chapter data</span>
-              </div>
-              
-              <div className="flex items-center gap-3">
-                {currentStep === 'minting-nft' || currentStep === 'registering-ip' || currentStep === 'creating-license' || currentStep === 'attaching-license' ? (
-                  <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                ) : currentStep === 'saving-to-storage' || currentStep === 'success' ? (
-                  <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
-                    <span className="text-white text-xs">✓</span>
-                  </div>
-                ) : (
-                  <div className="w-5 h-5 bg-gray-300 rounded-full"></div>
-                )}
-                <span className="text-gray-700">Blockchain registration</span>
-              </div>
-              
-              <div className="flex items-center gap-3">
-                {currentStep === 'saving-to-storage' ? (
-                  <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                ) : currentStep === 'success' ? (
-                  <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
-                    <span className="text-white text-xs">✓</span>
-                  </div>
-                ) : (
-                  <div className="w-5 h-5 bg-gray-300 rounded-full"></div>
-                )}
-                <span className="text-gray-700">Saving to storage</span>
-              </div>
-            </div>
-            
-            <div className="mt-6 text-center">
-              <p className="text-sm text-gray-600">
-                {currentStep === 'validating' && 'Checking chapter data...'}
-                {(currentStep === 'minting-nft' || currentStep === 'registering-ip') && 'Registering on blockchain...'}
-                {(currentStep === 'creating-license' || currentStep === 'attaching-license') && 'Setting up licensing...'}
-                {currentStep === 'saving-to-storage' && 'Uploading to storage...'}
-                {currentStep === 'success' && 'Chapter published successfully!'}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Publishing Modal */}
       {showPublishingModal && (

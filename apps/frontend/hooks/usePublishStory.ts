@@ -242,8 +242,23 @@ export function usePublishStory() {
         setCurrentStep('saving-to-storage' as any)
         console.log('💾 Saving chapter content to R2 storage...')
         
-        // Use provided bookId or generate one as fallback (without chapter number)
-        const finalBookId = bookId || `${address.toLowerCase()}-${storyData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
+        // Ensure bookId is in the correct format: authorAddress/slug
+        let finalBookId = bookId
+        if (!finalBookId) {
+          // If no bookId provided, create one with proper format
+          const slug = storyData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+          finalBookId = `${address.toLowerCase()}/${slug}`
+        } else if (!finalBookId.includes('/')) {
+          // If bookId doesn't have slash, it's likely in wrong format, fix it
+          // Extract author address and slug from the bookId
+          const parts = finalBookId.split('-')
+          if (parts[0].startsWith('0x') && parts[0].length === 42) {
+            // Format: 0xaddress-slug-parts -> 0xaddress/slug-parts
+            const authorAddr = parts[0]
+            const slug = parts.slice(1).join('-')
+            finalBookId = `${authorAddr}/${slug}`
+          }
+        }
         
         try {
           const saveResult = await apiClient.saveBookChapter(finalBookId, {
