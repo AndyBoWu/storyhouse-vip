@@ -6,6 +6,12 @@ StoryHouse.vip is a revolutionary Web3 publishing platform built on Story Protoc
 
 **🌳 Collaborative Storytelling System**: Our core innovation enables readers to branch stories from any chapter using Story Protocol licensing, creating infinite story multiverse with automatic royalty distribution through genealogy chains. See [COLLABORATIVE_STORYTELLING.md](./product/COLLABORATIVE_STORYTELLING.md) for complete system specification.
 
+**🏗️ Phase 6.1 Architecture Updates:**
+- **Client-Side Unified Registration**: Fixed blockchain transactions to execute with user's MetaMask wallet
+- **Metadata-Only Backend**: Backend API now only handles metadata generation, not blockchain ops
+- **No Server Private Key**: Removed requirement for server-side blockchain operations
+- **Proper Separation of Concerns**: Clear distinction between client-side blockchain and server-side metadata
+
 **🏗️ Phase 6.0 Architecture Achievements:**
 - **5-Contract Architecture Deployed**: Optimized from 9→5 contracts with 44% reduction
 - **Full-Stack Migration Complete**: Frontend and backend updated for new architecture

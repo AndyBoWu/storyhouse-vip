@@ -247,6 +247,8 @@ storyhouse-vip/
 
 - Get testnet tokens from [Story Protocol Faucet](https://aeneid.faucet.story.foundation/)
 - No private keys needed - uses MetaMask integration
+- **Important**: All blockchain transactions are executed client-side with user's wallet
+- Backend only handles metadata generation, not blockchain operations
 - Add testnet network to MetaMask
 
 ---
@@ -344,6 +346,51 @@ npm update
 # Check workspace integrity
 npm ls --depth=0
 ```
+
+---
+
+## 🔗 Unified IP Registration Flow
+
+### Architecture Overview
+
+The unified registration system uses a client-server separation:
+
+1. **Client-Side (Frontend)**:
+   - Executes blockchain transactions with user's MetaMask wallet
+   - Uses Story Protocol SDK directly in the browser
+   - Handles transaction signing and gas payment
+
+2. **Server-Side (Backend)**:
+   - Generates and stores IP metadata only
+   - No blockchain operations or private keys
+   - Provides metadata URI and hash to frontend
+
+### Implementation Details
+
+```typescript
+// Frontend: Client-side blockchain transaction
+const storyProtocolClient = createClientStoryProtocolService(userAddress)
+const result = await storyProtocolClient.mintAndRegisterWithPilTerms({
+  spgNftContract: nftContract,
+  metadata: { ipMetadataURI, ipMetadataHash },
+  licenseTier: 'premium',
+  recipient: userAddress
+})
+
+// Backend: Metadata generation only
+POST /api/ip/metadata
+{
+  "story": { ... },
+  "licenseTier": "premium"
+}
+// Returns: { metadataUri, metadataHash }
+```
+
+### Key Benefits
+- No server-side private keys required
+- Users control their own transactions
+- 40% gas savings with single transaction
+- Clear separation of concerns
 
 ---
 

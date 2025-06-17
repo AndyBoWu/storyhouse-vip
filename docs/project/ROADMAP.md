@@ -4,6 +4,21 @@
 
 The world's first Web3 storytelling platform with **chapter-level IP assets**, **read-to-earn mechanics**, and **AI-powered remix creation** on Story Protocol.
 
+## 🏗️ Current Phase: 6.1 - QA & Production Refinements
+
+### Recent Achievements
+- ✅ Fixed unified IP registration to use client-side transactions
+- ✅ Removed server-side blockchain operation requirements
+- ✅ Implemented metadata-only backend API
+- ✅ Successfully registered Chapter 6 with unified flow
+- ✅ Clear separation of concerns between client and server
+
+### In Progress
+- [ ] Comprehensive QA testing of all features
+- [ ] Performance optimization for production load
+- [ ] Documentation updates and API refinements
+- [ ] Mainnet deployment preparation
+
 ## ✅ Completed Milestones
 
 ### Platform Foundation

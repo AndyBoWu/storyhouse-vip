@@ -236,6 +236,15 @@ See [Deployment Guide](./docs/project/DEPLOYMENT.md) for detailed instructions.
 
 ## ✅ Current Status
 
+**🏗️ Phase 6.1 In Progress** - QA & Production Refinements:
+
+**🆕 Unified Registration Fixed** - Client-Side Transaction Execution:
+- ✅ **Fixed Registration Flow**: Moved blockchain transactions to client-side with user's MetaMask
+- ✅ **No Server Private Key**: Removed server-side blockchain operations 
+- ✅ **Metadata-Only Backend**: Backend now only handles metadata generation
+- ✅ **Proper Error Handling**: Clear error messages and fallback to legacy flow
+- ✅ **Live & Working**: Successfully registered Chapter 6 with unified flow
+
 **🏗️ Phase 6.0 Complete** - 5-Contract Architecture Deployed & Enterprise-Ready:
 
 **🆕 Smart Contract Architecture Optimization:**
