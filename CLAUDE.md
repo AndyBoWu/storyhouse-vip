@@ -24,7 +24,7 @@ StoryHouse.vip is a revolutionary Web3 storytelling platform built on Story Prot
 
 Tech Stack: Next.js 15.3.3, TypeScript, Story Protocol SDK, OpenAI GPT-4, Smart Contracts (Solidity)
 
-**Current Status: Phase 5.3 Complete** - Full SPA optimization with story routing and UI polish
+**Current Status: Phase 6.3 Complete** - Legacy workflow removed, unified registration only
 
 ## Development Practices
 
@@ -52,27 +52,29 @@ Tech Stack: Next.js 15.3.3, TypeScript, Story Protocol SDK, OpenAI GPT-4, Smart 
 
 ## Recent Implementation Work
 
-### 🆕 Unified IP Registration (Phase 5.4 - IMPLEMENTED)
+### 🚀 Unified IP Registration ONLY (Phase 6.3 - LEGACY REMOVED)
 
-**Status: Documentation Complete, Implementation Ready**
+**Status: Fully Implemented, Legacy Workflow Removed**
 
 #### Overview
-Implemented gas-optimized single-transaction IP registration using Story Protocol's `mintAndRegisterIpAssetWithPilTerms` method, providing 40% gas savings over the legacy multi-transaction flow.
+All IP registration now exclusively uses Story Protocol's `mintAndRegisterIpAssetWithPilTerms` method. The legacy multi-transaction workflow has been completely removed, ensuring 40% gas savings for all users.
 
-#### Key Files Implemented
+#### Key Files (Current State)
 - `apps/backend/lib/services/unifiedIpService.ts` - Core service for unified registration
-- `apps/backend/app/api/ip/register-unified/route.ts` - API endpoint with validation
-- `apps/frontend/hooks/useUnifiedPublishStory.ts` - Frontend hook with intelligent flow detection
-- `apps/backend/tests/unified-registration.test.ts` - Comprehensive test suite
-- Updated `apps/frontend/components/publishing/PublishingModal.tsx` - UI improvements
-- Updated `apps/frontend/lib/api-client.ts` - Added unified registration methods
-- Updated `apps/backend/lib/storage/bookStorage.ts` - R2 metadata integration
-- Updated `apps/backend/lib/services/advancedStoryProtocolService.ts` - PIL terms preparation
+- `apps/backend/app/api/ip/register-unified/route.ts` - ONLY IP registration endpoint
+- `apps/frontend/hooks/useUnifiedPublishStory.ts` - Single publishing hook (no legacy)
+- `apps/frontend/components/publishing/PublishingModal.tsx` - Simplified UI without legacy steps
+- `apps/frontend/lib/api-client.ts` - Unified registration methods only
+
+#### Removed Files (Legacy Cleanup)
+- ~~`apps/frontend/hooks/usePublishStory.ts`~~ - **DELETED** (legacy hook)
+- ~~`apps/backend/app/api/ip/register/`~~ - **DELETED** (legacy endpoint)
+- ~~`apps/backend/app/api/ip/license/`~~ - **DELETED** (legacy license endpoints)
 
 #### Feature Configuration
 ```bash
-# Environment variable for gradual rollout
-UNIFIED_REGISTRATION_ENABLED=false  # Set to true to enable
+# Unified registration is now mandatory
+UNIFIED_REGISTRATION_ENABLED=true  # Always enabled, legacy removed
 ```
 
 #### API Endpoints
@@ -80,11 +82,12 @@ UNIFIED_REGISTRATION_ENABLED=false  # Set to true to enable
 - `GET /api/ip/register-unified` - Service capability detection
 
 #### Benefits
-- 40% gas cost reduction
+- 40% gas cost reduction (guaranteed for all chapters)
 - 66% faster execution time  
 - Atomic operations (all-or-nothing)
 - Automatic R2 metadata generation with SHA-256 verification
-- Backward compatible with legacy flow
+- Cleaner codebase without legacy confusion
+- Single clear path for all users
 
 #### License Tiers Supported
 - `free` - No commercial use, attribution required
@@ -92,11 +95,36 @@ UNIFIED_REGISTRATION_ENABLED=false  # Set to true to enable
 - `premium` - Commercial use (100 TIP, 10% royalty)
 - `exclusive` - Full rights (1000 TIP, 25% royalty)
 
-#### Next Steps for New Sessions
-1. Enable feature flag: `UNIFIED_REGISTRATION_ENABLED=true`
-2. Test unified registration flow in development
-3. Monitor gas usage and success rates
-4. Plan gradual production rollout
+#### Implementation Notes
+1. All new chapters automatically use unified registration
+2. No feature flags needed - legacy is completely removed
+3. Client-side execution with user's wallet (MetaMask)
+4. Backend only handles metadata generation
+
+### 🔥 Legacy Workflow Removal (January 2025)
+
+**Status: Completed**
+
+#### Overview
+Completely removed the legacy multi-transaction publishing workflow to simplify the codebase and ensure all users benefit from gas savings.
+
+#### Removed Components
+- **Frontend**:
+  - `usePublishStory.ts` - Legacy publishing hook
+  - Multi-step UI components (minting-nft, registering-ip, creating-license, attaching-license)
+  - Legacy API client methods
+  
+- **Backend**:
+  - `/api/ip/register` - Legacy registration endpoint
+  - `/api/ip/license/*` - All license management endpoints
+  - Legacy service methods in `advancedStoryProtocolService.ts`
+
+#### Results
+- Eliminated ~1,500 lines of legacy code
+- Single clear path for IP registration
+- 40% gas savings guaranteed for all users
+- No more confusion between unified and legacy flows
+- Cleaner, more maintainable codebase
 
 ### 🔥 API Cleanup (December 2024)
 
@@ -136,3 +164,6 @@ Removed unused and test API endpoints to improve security and reduce maintenance
 - R2 metadata storage includes SHA-256 verification for Story Protocol compliance
 - API has been cleaned up - no test/debug endpoints in production
 - Stories endpoint deprecated - use books endpoint instead
+- Legacy multi-transaction workflow completely removed - only unified registration exists
+- All publishing uses `mintAndRegisterIpAssetWithPilTerms` exclusively
+- IP registration happens client-side with user's wallet

@@ -8,7 +8,7 @@ Revolutionary Web3 storytelling platform built on Story Protocol enabling chapte
 - Frontend: https://testnet.storyhouse.vip/ 
 - Backend: https://api-testnet.storyhouse.vip/
 - **5-Contract Architecture**: Optimized smart contract deployment with 44% reduction
-- **Unified Registration**: 40% gas savings with single-transaction IP registration
+- **Unified Registration ONLY**: 40% gas savings with single-transaction IP registration (legacy removed)
 
 **Production (Ready for Mainnet):**
 - Frontend: https://storyhouse.vip/ 
@@ -29,12 +29,13 @@ Register individual chapters as IP assets ($50-500 each) vs traditional book-lev
 - Granular licensing control
 - Lower barrier to entry for creators
 
-### 🆕 **Unified IP Registration System**
-Revolutionary single-transaction IP registration (Phase 5.4):
-- **40% Gas Cost Reduction**: Using Story Protocol's `mintAndRegisterIpAssetWithPilTerms`
-- **66% Faster Execution**: Atomic operations with automatic fallback
+### 🚀 **Unified IP Registration System** (Legacy Workflow Removed)
+Revolutionary single-transaction IP registration - NOW THE ONLY METHOD:
+- **40% Gas Cost Reduction**: Exclusively using Story Protocol's `mintAndRegisterIpAssetWithPilTerms`
+- **66% Faster Execution**: Atomic operations - all or nothing
 - **Enhanced Metadata**: SHA-256 verified R2 storage integration
-- **Backward Compatible**: Intelligent flow detection with legacy support
+- **Legacy Workflow REMOVED**: Cleaner codebase, no more multi-transaction confusion
+- **Client-Side Execution**: Direct wallet integration for optimal performance
 
 ### PIL (Programmable IP License) System
 Complete licensing infrastructure with Story Protocol SDK v1.3.2:
@@ -188,7 +189,13 @@ forge coverage
 - Enhanced security with anti-AI farming protection
 - 97.3% test coverage across all contracts
 
-## 🆕 **API Endpoints**
+## 🆕 **API Endpoints** (Legacy IP Registration Removed)
+
+**IP Registration** (Unified Only):
+- `POST /api/ip/register-unified` - Single-transaction IP registration with PIL terms
+- `GET /api/ip/register-unified` - Check unified registration capabilities
+- ~~`POST /api/ip/register`~~ - **REMOVED** (legacy multi-transaction)
+- ~~`POST /api/ip/license/*`~~ - **REMOVED** (legacy license endpoints)
 
 **Royalty System** (All operational on testnet):
 - `POST /api/royalties/claim` - Individual chapter claiming with validation
@@ -247,12 +254,13 @@ See [Deployment Guide](./docs/project/DEPLOYMENT.md) for detailed instructions.
 
 **🏗️ Phase 6.1 In Progress** - QA & Production Refinements:
 
-**🆕 Unified Registration Fixed** - Client-Side Transaction Execution:
-- ✅ **Fixed Registration Flow**: Moved blockchain transactions to client-side with user's MetaMask
-- ✅ **No Server Private Key**: Removed server-side blockchain operations 
-- ✅ **Metadata-Only Backend**: Backend now only handles metadata generation
-- ✅ **Proper Error Handling**: Clear error messages and fallback to legacy flow
-- ✅ **Live & Working**: Successfully registered Chapter 6 with unified flow
+**🔥 Legacy Workflow Completely Removed** - Unified Registration ONLY:
+- ✅ **Single Method Only**: All publishing uses `mintAndRegisterIpAssetWithPilTerms`
+- ✅ **Legacy Endpoints Deleted**: Removed /api/ip/register, /api/ip/license/*
+- ✅ **Frontend Cleanup**: Deleted usePublishStory.ts and all multi-transaction code
+- ✅ **No More Confusion**: One clear path for IP registration
+- ✅ **Client-Side Execution**: Direct wallet integration for security
+- ✅ **40% Gas Savings**: Guaranteed for all new chapters
 
 **🏗️ Phase 6.0 Complete** - 5-Contract Architecture Deployed & Enterprise-Ready:
 

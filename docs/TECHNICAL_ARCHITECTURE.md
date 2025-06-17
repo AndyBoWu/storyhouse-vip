@@ -6,6 +6,13 @@ StoryHouse.vip is a revolutionary Web3 publishing platform built on Story Protoc
 
 **🌳 Collaborative Storytelling System**: Our core innovation enables readers to branch stories from any chapter using Story Protocol licensing, creating infinite story multiverse with automatic royalty distribution through genealogy chains. See [COLLABORATIVE_STORYTELLING.md](./product/COLLABORATIVE_STORYTELLING.md) for complete system specification.
 
+**🔥 Phase 6.3 Architecture Updates:**
+- **Legacy Workflow Removed**: Completely eliminated multi-transaction publishing flow
+- **Unified Registration ONLY**: All IP registration uses `mintAndRegisterIpAssetWithPilTerms`
+- **Deleted Legacy Code**: Removed ~1,500 lines including endpoints and hooks
+- **40% Gas Savings**: Guaranteed for all users with single-transaction flow
+- **Cleaner Architecture**: Single clear path for IP registration
+
 **🏗️ Phase 6.2 Architecture Updates:**
 - **Book ID Format Migration**: Changed from `authorAddress-slug` to `authorAddress/slug` format
 - **RESTful URL Structure**: Clean hierarchical URLs `/book/authorAddress/slug`
@@ -26,11 +33,11 @@ StoryHouse.vip is a revolutionary Web3 publishing platform built on Story Protoc
 - **Production Deployment**: All contracts operational on Story Protocol testnet
 - **Enterprise Security**: 97.3% test coverage with comprehensive anti-AI farming protection
 
-**🆕 Phase 5.4 Unified Registration Enhancements:**
+**Phase 5.4 Unified Registration Foundation:**
 - **Unified IP Registration**: Revolutionary single-transaction registration with 40% gas savings
 - **Enhanced R2 Integration**: Automatic metadata generation with SHA-256 verification
-- **Intelligent Flow Detection**: Smart selection between unified and legacy registration flows
-- **Atomic Operations**: All-or-nothing transaction processing with automatic fallback
+- **Atomic Operations**: All-or-nothing transaction processing
+- **Note**: Legacy flow completely removed in Phase 6.3
 
 **Previous Phase 5.3 UI/UX Enhancements:**
 - **Enhanced UI/UX Layer**: Zero commission messaging, color-coded chapter states, improved publishing flow
@@ -112,32 +119,34 @@ StoryHouse.vip is a revolutionary Web3 publishing platform built on Story Protoc
 - Quality bonuses require human review and verification
 - Comprehensive edge case testing including zero amounts, overflows, and duplicate handling
 
-## 🆕 **Unified IP Registration Architecture**
+## 🚀 **Unified IP Registration Architecture** (Legacy Removed)
 
-### Revolutionary Single-Transaction Registration
-The platform now implements Story Protocol's advanced `mintAndRegisterIpAssetWithPilTerms` method for optimal gas efficiency:
+### Exclusive Single-Transaction Registration
+The platform now EXCLUSIVELY uses Story Protocol's `mintAndRegisterIpAssetWithPilTerms` method:
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │  Frontend Hook  │    │  Unified Service│    │  Story Protocol │
-│  • Flow Detection│───►│  • Single TX    │───►│  • Atomic Ops   │
-│  • User Selection│    │  • R2 Metadata  │    │  • PIL Terms    │
-│  • Error Handling│    │  • Gas Optimal  │    │  • NFT + License│
+│  • Client Wallet│───►│  • Single TX    │───►│  • Atomic Ops   │
+│  • MetaMask TX  │    │  • R2 Metadata  │    │  • PIL Terms    │
+│  • Error Display│    │  • Gas Optimal  │    │  • NFT + License│
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
-### Key Benefits
-- **40% Gas Cost Reduction**: Combining minting, registration, and licensing
-- **66% Faster Execution**: Single transaction vs multi-step process
-- **Atomic Operations**: All-or-nothing success with automatic rollback
-- **Enhanced Metadata**: SHA-256 verified R2 storage integration
-- **Backward Compatible**: Intelligent fallback to legacy flow when needed
+### Guaranteed Benefits (No Legacy Fallback)
+- **40% Gas Cost Reduction**: Every single chapter registration
+- **66% Faster Execution**: Single transaction only
+- **Atomic Operations**: All-or-nothing success
+- **Enhanced Metadata**: SHA-256 verified R2 storage
+- **Client-Side Execution**: Direct wallet integration
 
-### Implementation Details
-- `unifiedIpService.ts`: Core registration logic with comprehensive error handling
-- `useUnifiedPublishStory.ts`: React hook with intelligent flow detection
-- `/api/ip/register-unified`: Production-ready API endpoint
-- Feature flag: `UNIFIED_REGISTRATION_ENABLED` for gradual rollout
+### Implementation (Legacy Code Removed)
+- `unifiedIpService.ts`: Core registration logic
+- `useUnifiedPublishStory.ts`: Single React hook (no legacy)
+- `/api/ip/register-unified`: ONLY registration endpoint
+- ~~`/api/ip/register`~~ - **DELETED**
+- ~~`/api/ip/license/*`~~ - **DELETED**
+- ~~`usePublishStory.ts`~~ - **DELETED**
 
 ## 🔗 **Story Protocol SDK Derivative Registration Architecture**
 

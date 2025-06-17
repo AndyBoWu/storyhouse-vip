@@ -10,11 +10,12 @@ StoryHouse.vip provides a comprehensive RESTful API for creating, managing, and 
 - Full-stack migration complete with updated ABIs and addresses
 - Enhanced security with 97.3% test coverage and anti-AI farming protection
 
-**🆕 Phase 5.4 Unified Registration Updates:**
-- Unified IP registration with 40% gas cost reduction
+**🔥 Phase 6.3 Legacy Workflow Removed:**
+- **ONLY** unified IP registration - legacy multi-transaction flow removed
+- Guaranteed 40% gas cost reduction for all users
 - Single-transaction processing using `mintAndRegisterIpAssetWithPilTerms`
 - Enhanced R2 metadata integration with SHA-256 verification
-- Intelligent flow detection with backward compatibility
+- Cleaner codebase without legacy confusion
 
 **Previous Phase 5.3 UI/UX Updates:**
 - Enhanced UI/UX with zero commission messaging
@@ -163,11 +164,11 @@ GET /api/ip/register-unified
 }
 ```
 
-**Error Response (Service Disabled):**
+**Error Response (Service Unavailable):**
 ```json
 {
   "success": false,
-  "error": "Unified registration is not enabled. Use /api/ip/register instead."
+  "error": "Service temporarily unavailable. Please try again later."
 }
 ```
 
@@ -910,37 +911,14 @@ GET /api/licenses/templates
 }
 ```
 
-### Attach License to IP Asset
+### ~~Attach License to IP Asset~~ (REMOVED)
 
-Attach a PIL license to an existing IP asset.
+**This endpoint has been removed.** License attachment is now handled automatically as part of the unified registration flow using `mintAndRegisterIpAssetWithPilTerms`.
 
-```http
-POST /api/ip/license/attach
-```
+~~`POST /api/ip/license/attach`~~ - **REMOVED**
 
-**Request Body:**
-```json
-{
-  "ipAssetId": "0x1234567890abcdef",
-  "licenseTemplateId": "premium",
-  "walletAddress": "0x9876543210fedcba",
-  "chainId": 1315
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "message": "PIL license attached successfully",
-  "data": {
-    "licenseTermsId": "lt_1234567890_abcdef123",
-    "ipAssetId": "0x1234567890abcdef",
-    "transactionHash": "0xabc123...",
-    "effectiveDate": "YYYY-MM-DDTHH:MM:SS.SSSZ"
-  }
-}
-```
+All IP registration and licensing must use the unified endpoint:
+- `POST /api/ip/register-unified` - Single-transaction registration with PIL terms
 
 ---
 
