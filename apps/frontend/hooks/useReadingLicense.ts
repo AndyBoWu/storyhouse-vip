@@ -146,7 +146,7 @@ export function useReadingLicense() {
     return {
       chapterNumber,
       isFree,
-      mintingFee: isFree ? '0' : '10',
+      mintingFee: isFree ? '0' : '0.5',
       currency: 'TIP',
       transferable: false,
       licenseType: 'reading',

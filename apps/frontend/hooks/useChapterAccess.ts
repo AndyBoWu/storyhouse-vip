@@ -137,7 +137,7 @@ export function useChapterAccess() {
     return {
       chapterNumber,
       isFree,
-      unlockPrice: isFree ? 0 : 10,
+      unlockPrice: isFree ? 0 : 0.5,
       currency: 'TIP',
       readReward: isFree ? 0.05 : 0 // Only free chapters have reading rewards
     }

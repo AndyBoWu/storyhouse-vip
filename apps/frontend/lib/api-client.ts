@@ -604,6 +604,46 @@ export const apiClient = {
   async getAutoDerivativeServiceInfo() {
     return apiRequest('/api/derivatives/auto-register')
   },
+
+  // =============================================================================
+  // GENERIC HTTP METHODS
+  // =============================================================================
+
+  /**
+   * Generic GET request
+   */
+  async get(endpoint: string) {
+    return apiRequest(endpoint)
+  },
+
+  /**
+   * Generic POST request
+   */
+  async post(endpoint: string, data?: any) {
+    return apiRequest(endpoint, {
+      method: 'POST',
+      body: data ? JSON.stringify(data) : undefined,
+    })
+  },
+
+  /**
+   * Generic PUT request
+   */
+  async put(endpoint: string, data?: any) {
+    return apiRequest(endpoint, {
+      method: 'PUT',
+      body: data ? JSON.stringify(data) : undefined,
+    })
+  },
+
+  /**
+   * Generic DELETE request
+   */
+  async delete(endpoint: string) {
+    return apiRequest(endpoint, {
+      method: 'DELETE',
+    })
+  },
 }
 
 /**
