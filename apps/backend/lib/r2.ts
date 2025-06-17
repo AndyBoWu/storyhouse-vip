@@ -85,6 +85,7 @@ export const r2Client = {
   get: async (key: string) => {
     try {
       const client = getR2Client()
+      console.log(`🔍 R2 GET: Bucket="${BUCKET_NAME}", Key="${key}"`)
       const command = new GetObjectCommand({
         Bucket: BUCKET_NAME,
         Key: key,
@@ -92,8 +93,10 @@ export const r2Client = {
       const response = await client.send(command)
       const content = await response.Body?.transformToString()
       if (!content) throw new Error('Content not found')
+      console.log(`✅ R2 GET Success: Retrieved ${content.length} characters`)
       return { text: () => Promise.resolve(content) }
     } catch (error) {
+      console.error(`❌ R2 GET Failed for key "${key}":`, error)
       throw new Error('Failed to fetch content')
     }
   },
@@ -269,6 +272,8 @@ export class R2Service {
   static async getContent(key: string): Promise<string> {
     try {
       const client = getR2Client()
+      console.log(`🔍 R2Service.getContent: Bucket="${BUCKET_NAME}", Key="${key}"`)
+      
       const command = new GetObjectCommand({
         Bucket: BUCKET_NAME,
         Key: key,
@@ -281,9 +286,10 @@ export class R2Service {
         throw new Error('Content not found')
       }
 
+      console.log(`✅ R2Service.getContent Success: Retrieved ${content.length} characters`)
       return content
     } catch (error) {
-      console.error('Error fetching from R2:', error)
+      console.error(`❌ R2Service.getContent Failed for key "${key}":`, error)
       throw new Error('Failed to fetch content')
     }
   }
