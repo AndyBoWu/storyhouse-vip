@@ -7,14 +7,13 @@ This is the backend API for StoryHouse.vip, providing all server-side functional
 - **Story Management**: Create, read, update stories with cloud storage
 - **AI Generation**: GPT-4 powered story generation with metadata
 - **IP Registration**: Story Protocol integration for IP asset management
-- **Collections**: Story collection management and collaboration
 - **Cloud Storage**: Content storage integration
-- **Security**: Anti-scraping and bot protection
+- **Blockchain Integration**: Story Protocol SDK for IP management
 
 ## API Endpoints
 
-### Stories
-- `GET /api/stories` - List all published stories
+### Books & Content
+- `GET /api/books` - List all published books (replaces deprecated /api/stories)
 - `POST /api/upload` - Upload story content to cloud storage
 - `GET|PUT|DELETE /api/chapters/[storyId]/[chapterNumber]` - Chapter operations
 
@@ -22,14 +21,9 @@ This is the backend API for StoryHouse.vip, providing all server-side functional
 - `POST /api/generate` - Generate story content with AI
 
 ### IP Management
-- `POST /api/ip/register` - Register stories as IP assets
+- `POST /api/ip/register` - Register stories as IP assets (legacy)
+- `POST /api/ip/register-unified` - Unified single-transaction IP registration (recommended)
 - `GET|POST|PUT /api/ip/license` - License management
-
-### Collections
-- `GET|POST|PUT /api/collections` - Collection management
-
-### Security
-- `GET|POST /api/security` - Security and anti-scraping checks
 
 ## Environment Setup
 

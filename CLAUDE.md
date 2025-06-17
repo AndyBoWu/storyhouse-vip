@@ -98,9 +98,41 @@ UNIFIED_REGISTRATION_ENABLED=false  # Set to true to enable
 3. Monitor gas usage and success rates
 4. Plan gradual production rollout
 
+### 🔥 API Cleanup (December 2024)
+
+**Status: Completed**
+
+#### Overview
+Removed unused and test API endpoints to improve security and reduce maintenance burden. Cleaned up ~10 endpoints that were either test/debug endpoints exposing sensitive data or unused features.
+
+#### Removed Endpoints
+- **Test/Debug Endpoints** (security risk):
+  - `/api/test`, `/api/test-pil`, `/api/test-r2` - Test endpoints
+  - `/api/debug-env`, `/api/debug-r2` - Debug endpoints exposing environment variables
+  - `/api/books/[bookId]/debug-chapters` - Debug endpoint
+
+- **Unused Feature Endpoints**:
+  - `/api/security` - Unused security endpoint
+  - `/api/collections` - Collections feature never implemented in UI
+  - `/api/unlock-stats` - Statistics endpoint with no UI
+  - `/api/stories` - Deprecated in favor of `/api/books`
+
+#### Code Updates
+- Updated `api-client.ts` to redirect `getStories()` to `/api/books`
+- Removed unused methods: `getCollections()`, `createCollection()`, `checkSecurity()`
+- All frontend functionality preserved using existing endpoints
+
+#### Results
+- Reduced API surface from 88 to ~78 endpoints
+- Eliminated security risk from debug endpoints
+- Removed 1,438 lines of unused code
+- Improved maintainability
+
 ## Memories
 
 - Remember that our mainnet is not integrated yet
 - Unified registration uses Story Protocol SDK v1.3.2+ 
 - All license terms are configured in `advancedStoryProtocolService.ts`
 - R2 metadata storage includes SHA-256 verification for Story Protocol compliance
+- API has been cleaned up - no test/debug endpoints in production
+- Stories endpoint deprecated - use books endpoint instead
