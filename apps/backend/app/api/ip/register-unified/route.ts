@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createUnifiedIpService } from '@/lib/services/unifiedIpService'
+import { createUnifiedIpService, getInitializedUnifiedIpService } from '@/lib/services/unifiedIpService'
 import { BookStorageService } from '@/lib/storage/bookStorage'
 import { z } from 'zod'
 
@@ -55,8 +55,8 @@ export async function POST(request: NextRequest) {
     const validatedData = UnifiedRegistrationSchema.parse(body)
     const { story, nftContract, account, licenseTier, includeMetadata } = validatedData
 
-    // Initialize unified IP service
-    const unifiedIpService = createUnifiedIpService()
+    // Initialize unified IP service with proper async initialization
+    const unifiedIpService = await getInitializedUnifiedIpService()
 
     let metadataUri: string | undefined
     let metadataHash: string | undefined
@@ -157,11 +157,11 @@ export async function POST(request: NextRequest) {
  */
 export async function GET() {
   try {
-    const unifiedIpService = createUnifiedIpService()
+    const unifiedIpService = await getInitializedUnifiedIpService()
     
     return NextResponse.json({
       enabled: UNIFIED_REGISTRATION_ENABLED,
-      available: unifiedIpService.supportsUnifiedRegistration(),
+      available: await unifiedIpService.supportsUnifiedRegistration(),
       features: {
         singleTransaction: true,
         gasOptimized: true,

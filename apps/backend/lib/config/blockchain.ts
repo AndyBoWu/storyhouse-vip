@@ -118,18 +118,34 @@ export const TX_RETRY_CONFIG = {
   gasIncreasePercentage: 10, // 10% increase per retry
 } as const
 
+// BlockchainConfig type expected by IPService
+export interface BlockchainConfig {
+  chainId: number
+  chainName: string
+  rpcUrl: string
+  explorerUrl: string
+  account?: `0x${string}`
+  contracts: any
+  gasLimits: typeof GAS_LIMITS
+  retryConfig: typeof TX_RETRY_CONFIG
+}
+
 // Get comprehensive blockchain configuration
-export function getBlockchainConfig(chainId?: number) {
+export function getBlockchainConfig(chainId?: number): BlockchainConfig {
   const activeChainId = chainId || DEFAULT_CHAIN.id
   const chain = getChainConfig(activeChainId)
   const contracts = getContractAddresses(activeChainId)
   
   return {
-    chain,
+    chainId: chain.id,
+    chainName: chain.name,
+    rpcUrl: chain.rpcUrls.default.http[0],
+    explorerUrl: chain.blockExplorers.default.url,
+    account: process.env.STORY_PRIVATE_KEY ? `0x${process.env.STORY_PRIVATE_KEY}` as `0x${string}` : undefined,
     contracts,
     gasLimits: GAS_LIMITS,
     retryConfig: TX_RETRY_CONFIG,
-    rpcUrl: chain.rpcUrls.default.http[0],
+    chain,
     explorer: chain.blockExplorers.default.url,
   }
 }
@@ -153,20 +169,20 @@ export function getStoryProtocolConfig(chainId?: number) {
 }
 
 // Validate blockchain configuration
-export function validateBlockchainConfig(chainId?: number): boolean {
+export function validateBlockchainConfig(chainId?: number): { isValid: boolean; errors: string[] } {
+  const errors: string[] = []
+  
   try {
     const config = getBlockchainConfig(chainId)
     
     // Check if chain is defined
     if (!config.chain || !config.chain.id) {
-      console.error('Invalid chain configuration')
-      return false
+      errors.push('Invalid chain configuration')
     }
     
     // Check if RPC URL is available
     if (!config.rpcUrl) {
-      console.error('RPC URL not configured')
-      return false
+      errors.push('RPC URL not configured')
     }
     
     // Check if core contracts are configured
@@ -174,15 +190,20 @@ export function validateBlockchainConfig(chainId?: number): boolean {
     for (const contract of requiredContracts) {
       if (!config.contracts[contract as keyof typeof config.contracts] || 
           config.contracts[contract as keyof typeof config.contracts] === '0x0000000000000000000000000000000000000000') {
-        console.error(`Contract ${contract} not properly configured`)
-        return false
+        errors.push(`Contract ${contract} not properly configured`)
       }
     }
     
-    return true
+    return {
+      isValid: errors.length === 0,
+      errors
+    }
   } catch (error) {
-    console.error('Error validating blockchain configuration:', error)
-    return false
+    errors.push(`Error validating blockchain configuration: ${error}`)
+    return {
+      isValid: false,
+      errors
+    }
   }
 }
 

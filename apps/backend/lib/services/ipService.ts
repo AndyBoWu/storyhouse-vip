@@ -23,10 +23,8 @@ import {
   getBlockchainConfig,
   getStoryProtocolConfig,
   validateBlockchainConfig,
-  calculateGasWithBuffer,
   logBlockchainOperation,
-  logGasUsage,
-  type BlockchainConfig
+  BlockchainConfig
 } from '../config/blockchain'
 import {
   parseBlockchainError,
@@ -46,23 +44,37 @@ export class IPService {
   private walletClient: WalletClient | null = null
   private isInitialized: boolean = false
 
+  private initializationPromise: Promise<void> | null = null
+
   constructor(config?: StoryProtocolConfig) {
     this.blockchainConfig = getBlockchainConfig()
     this.config = config || getStoryProtocolConfig()
-    this.initializeClients()
+    this.initializationPromise = this.initializeClients()
+  }
+
+  /**
+   * Ensure the service is initialized before use
+   */
+  protected async ensureInitialized(): Promise<void> {
+    if (this.initializationPromise) {
+      await this.initializationPromise
+    }
   }
 
   /**
    * Initialize Story Protocol SDK client and Viem clients
    */
   private async initializeClients() {
+    console.log('🔧 Starting IPService initialization...')
     try {
       // Validate configuration
       const validation = validateBlockchainConfig()
       if (!validation.isValid) {
         console.error('❌ Invalid blockchain configuration:', validation.errors)
+        this.isInitialized = false
         return
       }
+      console.log('✅ Blockchain configuration validated')
 
       // Initialize public client for reading blockchain state
       this.publicClient = createPublicClient({
@@ -109,9 +121,11 @@ export class IPService {
         chainId: 1315, // Story Protocol SDK v1.3.2+ uses numeric chain IDs
       }
 
+      console.log('🔗 Initializing Story Protocol SDK with config:', storyConfig)
       this.storyClient = StoryClient.newClient(storyConfig)
       this.isInitialized = true
 
+      console.log('✅ Story Protocol SDK initialized successfully!')
       logBlockchainOperation('SDK_INITIALIZED', {
         chainId: this.blockchainConfig.chainId,
         rpcUrl: this.blockchainConfig.rpcUrl,

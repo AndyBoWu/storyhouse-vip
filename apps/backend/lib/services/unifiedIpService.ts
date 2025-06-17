@@ -60,9 +60,25 @@ export class UnifiedIpService extends IPService {
   async mintAndRegisterWithPilTerms(
     request: UnifiedRegistrationRequest
   ): Promise<UnifiedRegistrationResponse> {
-    const storyClient = this.getStoryClient()
+    console.log('🚀 UnifiedIpService.mintAndRegisterWithPilTerms called')
     
-    if (!this.isAvailable() || !storyClient) {
+    // Ensure parent class is initialized
+    await this.ensureInitialized()
+    console.log('✅ Parent class initialization ensured')
+    
+    const storyClient = this.getStoryClient()
+    const isAvailable = this.isAvailable()
+    
+    console.log('📊 Service status:', {
+      isAvailable,
+      hasStoryClient: !!storyClient
+    })
+    
+    if (!isAvailable || !storyClient) {
+      console.error('❌ Service not available:', {
+        isAvailable,
+        hasStoryClient: !!storyClient
+      })
       return {
         success: false,
         error: 'Story Protocol SDK not initialized'
@@ -188,6 +204,9 @@ export class UnifiedIpService extends IPService {
   async estimateUnifiedRegistrationGas(
     request: UnifiedRegistrationRequest
   ): Promise<{ success: boolean; gasEstimate?: bigint; error?: string }> {
+    // Ensure parent class is initialized
+    await this.ensureInitialized()
+    
     const storyClient = this.getStoryClient()
     
     if (!this.isAvailable() || !storyClient) {
@@ -219,14 +238,37 @@ export class UnifiedIpService extends IPService {
   /**
    * Helper method to determine if unified registration is available
    */
-  supportsUnifiedRegistration(): boolean {
+  async supportsUnifiedRegistration(): Promise<boolean> {
+    // Ensure initialization before checking
+    await this.ensureInitialized()
+    
     // Check if the Story Protocol SDK version supports mintAndRegisterIpAssetWithPilTerms
     // This could be a version check or feature detection
     return this.isAvailable()
   }
 }
 
-// Export singleton instance creator
+// Singleton instance to ensure proper initialization
+let unifiedIpServiceInstance: UnifiedIpService | null = null
+let initializationPromise: Promise<UnifiedIpService> | null = null
+
+// Export singleton instance creator with initialization guarantee
 export function createUnifiedIpService(config?: StoryProtocolConfig): UnifiedIpService {
-  return new UnifiedIpService(config)
+  if (!unifiedIpServiceInstance) {
+    unifiedIpServiceInstance = new UnifiedIpService(config)
+  }
+  return unifiedIpServiceInstance
+}
+
+// Alternative: Get initialized service (async)
+export async function getInitializedUnifiedIpService(config?: StoryProtocolConfig): Promise<UnifiedIpService> {
+  if (!initializationPromise) {
+    initializationPromise = (async () => {
+      const service = createUnifiedIpService(config)
+      // Wait a bit for the async initialization in the parent class
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      return service
+    })()
+  }
+  return initializationPromise
 }
