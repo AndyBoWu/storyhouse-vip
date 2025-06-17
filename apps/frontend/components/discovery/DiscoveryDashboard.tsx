@@ -230,6 +230,10 @@ export default function DiscoveryDashboard() {
                   src={book.coverUrl} 
                   alt={book.title}
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    // Hide image on error, showing gradient background
+                    e.currentTarget.style.display = 'none'
+                  }}
                 />
               </div>
             ) : (
