@@ -72,22 +72,18 @@ export async function POST(
       } as MintReadingLicenseResponse, { status: 400 })
     }
 
-    // Initialize Story Protocol service
-    const storyService = new AdvancedStoryProtocolService()
-    // TODO: Initialize with proper wallet client
-    // For now, we'll simulate the license minting
-
-    console.log('🔗 Creating reading license terms if needed...')
+    // For reading license minting, we need to simulate the transaction
+    // since the backend doesn't have access to user's wallet
+    // The actual minting should happen on the frontend with the user's wallet
     
-    // Step 1: Create reading license terms if not provided
-    let licenseTermsId = body.readingLicenseTermsId
-    if (!licenseTermsId) {
-      const licenseResult = await storyService.createChapterLicenseTerms('reading')
-      if (!licenseResult.success) {
-        throw new Error(licenseResult.error || 'Failed to create reading license terms')
-      }
-      licenseTermsId = licenseResult.licenseTermsId!
-    }
+    console.log('🔗 Simulating reading license mint...')
+    
+    // Get reading license terms configuration
+    const readingLicenseConfig = AdvancedStoryProtocolService.getLicenseTier('reading')
+    
+    // Generate a deterministic license terms ID for reading tier
+    // In production, this would be retrieved from the blockchain
+    const licenseTermsId = body.readingLicenseTermsId || `reading_terms_${bookId}_${chapterNumber}`
 
     console.log('🎫 Minting reading license token...', {
       licenseTermsId,
@@ -101,7 +97,7 @@ export async function POST(
     
     const licenseTokenId = `license_${Date.now()}_${Math.random().toString(36).slice(2)}`
     const transactionHash = `0x${Math.random().toString(16).slice(2).padStart(64, '0')}`
-    const mintingFee = (10 * 10**18).toString() // 10 TIP in wei
+    const mintingFee = readingLicenseConfig.defaultMintingFee.toString() // 0.5 TIP in wei for reading licenses
 
     console.log('✅ Reading license minted successfully:', {
       licenseTokenId,
@@ -153,7 +149,8 @@ export async function GET(
 
     // Check if this is a paid chapter
     const isFree = chapterNum <= 3
-    const mintingFee = isFree ? '0' : (10 * 10**18).toString()
+    const readingLicenseConfig = AdvancedStoryProtocolService.getLicenseTier('reading')
+    const mintingFee = isFree ? '0' : readingLicenseConfig.defaultMintingFee.toString()
     
     return NextResponse.json({
       success: true,
