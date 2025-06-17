@@ -107,7 +107,8 @@ export const apiClient = {
   },
   
   async getStories() {
-    return apiRequest('/api/stories')
+    // Use books endpoint instead of deprecated stories
+    return apiRequest('/api/books')
   },
   
   async getStoryChapters(walletAddress: string, storySlug: string) {
@@ -163,22 +164,8 @@ export const apiClient = {
     })
   },
   
-  // Collections
-  async getCollections() {
-    return apiRequest('/api/collections')
-  },
-  
-  async createCollection(data: any) {
-    return apiRequest('/api/collections', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    })
-  },
-  
-  // Security
-  async checkSecurity() {
-    return apiRequest('/api/security')
-  },
+  // Collections - removed (unused)
+  // Security - removed (unused)
 
   // Books operations (for new book landing pages)
   async getBooks(authorAddress?: string) {

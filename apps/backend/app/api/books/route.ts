@@ -304,9 +304,9 @@ export async function GET(request: NextRequest) {
             console.log(`      📊 Chapter count: ${chapterCount}`)
 
             // Generate the correct cover URL using the API endpoint with full domain
-            const bookId = `${authorFromPrefix}-${bookSlug}`
+            const bookId = `${authorFromPrefix}/${bookSlug}`
             const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api-testnet.storyhouse.vip'
-            const coverUrl = `${baseUrl}/api/books/${bookId}/cover`
+            const coverUrl = `${baseUrl}/api/books/${encodeURIComponent(bookId)}/cover`
 
             const book: RegisteredBook = {
               id: bookId,
