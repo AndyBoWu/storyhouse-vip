@@ -132,8 +132,28 @@ export class BookStorageService {
       const metadataJson = await R2Service.getContent(paths.metadataPath)
       return JSON.parse(metadataJson) as BookMetadata
     } catch (error) {
-      console.error('Error retrieving book metadata:', error)
-      throw new Error(`Book not found: ${bookId}`)
+      console.log(`🔄 Book metadata not found at new path, trying old format...`)
+      
+      // Try old format with hyphen separator
+      try {
+        const oldBookId = `${authorAddress}-${slug}`
+        const oldPath = `books/${oldBookId}/metadata.json`
+        console.log(`🔍 Checking old path: ${oldPath}`)
+        
+        const metadataJson = await R2Service.getContent(oldPath)
+        const bookData = JSON.parse(metadataJson) as BookMetadata
+        
+        // Update the bookId and id fields to use new format
+        bookData.bookId = bookId
+        bookData.id = bookId
+        
+        console.log(`✅ Found book metadata at old path, returning with updated bookId`)
+        return bookData
+        
+      } catch (fallbackError) {
+        console.error('Error retrieving book metadata from both new and old paths:', error)
+        throw new Error(`Book not found: ${bookId}`)
+      }
     }
   }
   
@@ -364,8 +384,27 @@ export class BookStorageService {
       return JSON.parse(content) as ChapterMetadata
       
     } catch (error) {
-      console.error('❌ Failed to get chapter content:', error)
-      throw new Error(`Chapter not found: ${authorAddress}/${slug}/ch${chapterNumber}`)
+      console.log(`🔄 Chapter not found at new path, trying old format...`)
+      
+      // Try old format with hyphen separator
+      try {
+        const oldBookId = `${authorAddress}-${slug}`
+        const oldPath = `books/${oldBookId}/chapters/ch${chapterNumber}/content.json`
+        console.log(`🔍 Checking old path: ${oldPath}`)
+        
+        const content = await R2Service.getContent(oldPath)
+        const chapterData = JSON.parse(content) as ChapterMetadata
+        
+        // Update the bookId in the returned data to use new format
+        chapterData.bookId = `${authorAddress}/${slug}`
+        
+        console.log(`✅ Found chapter at old path, returning with updated bookId`)
+        return chapterData
+        
+      } catch (fallbackError) {
+        console.error('❌ Failed to get chapter content from both new and old paths:', error)
+        throw new Error(`Chapter not found: ${authorAddress}/${slug}/ch${chapterNumber}`)
+      }
     }
   }
 
