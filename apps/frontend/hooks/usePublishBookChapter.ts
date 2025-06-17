@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useAccount } from 'wagmi'
 import { apiClient } from '@/lib/api-client'
-import { usePublishStory } from './usePublishStory'
+import { useUnifiedPublishStory } from './useUnifiedPublishStory'
 
 interface BookChapterData {
   bookId: string
@@ -22,6 +22,7 @@ interface PublishBookChapterOptions {
   publishingOption: 'simple' | 'protected'
   chapterPrice: number
   ipRegistration?: boolean
+  licenseTier: 'free' | 'reading' | 'premium' | 'exclusive'
   licenseTerms?: {
     commercialUse: boolean
     derivativesAllowed: boolean
@@ -58,7 +59,7 @@ export function usePublishBookChapter() {
   const [currentStep, setCurrentStep] = useState<PublishStep>('idle')
   const [publishResult, setPublishResult] = useState<PublishBookChapterResult | null>(null)
   const { address } = useAccount()
-  const { publishStory, reset: resetStoryPublishing } = usePublishStory()
+  const { publishStory, reset: resetStoryPublishing } = useUnifiedPublishStory()
 
   const publishBookChapter = async (
     chapterData: BookChapterData,

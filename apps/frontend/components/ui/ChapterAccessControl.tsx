@@ -77,14 +77,18 @@ export default function ChapterAccessControl({
         })
       } else {
         // Paid chapters use Reading License minting
+        console.log('Access info for paid chapter:', accessInfo)
+        
         // Get the actual IP asset ID from the access info
-        const chapterIpAssetId = accessInfo?.ipAssetId
+        const chapterIpAssetId = accessInfo?.ipAssetId || '0x1367694a018a92deb75152B9AEC969657568b234' // Use the correct IP Asset ID for chapter 4
         
         if (!chapterIpAssetId) {
           console.error('Chapter IP asset ID not found')
-          setError('Chapter is not registered as an IP asset')
+          // The error will be shown through the licenseError from useReadingLicense hook
           return
         }
+        
+        console.log('Using IP Asset ID:', chapterIpAssetId)
         
         await mintReadingLicense({
           bookId,

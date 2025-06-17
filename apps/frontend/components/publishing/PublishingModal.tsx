@@ -225,14 +225,6 @@ function PublishingModal({
             : 'Unified IP registration...', 
           icon: <Shield className="w-5 h-5" /> 
         }
-      case 'minting-nft':
-        return { text: 'Minting NFT...', icon: <Coins className="w-5 h-5" /> }
-      case 'registering-ip':
-        return { text: 'Registering IP Asset...', icon: <Shield className="w-5 h-5" /> }
-      case 'creating-license':
-        return { text: 'Creating license terms...', icon: <BookOpen className="w-5 h-5" /> }
-      case 'attaching-license':
-        return { text: 'Attaching license terms...', icon: <Link className="w-5 h-5" /> }
       case 'saving-to-storage':
         return { text: 'Saving to storage...', icon: <Upload className="w-5 h-5" /> }
       default:
