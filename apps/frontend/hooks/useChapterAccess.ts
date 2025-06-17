@@ -36,7 +36,7 @@ export function useChapterAccess() {
         params.append('userAddress', address)
       }
 
-      const data = await apiClient.get(`/books/${bookId}/chapter/${chapterNumber}/unlock?${params}`)
+      const data = await apiClient.get(`/books/${encodeURIComponent(bookId)}/chapter/${chapterNumber}/unlock?${params}`)
       
       if (!data.success) {
         throw new Error(data.error || 'Failed to check chapter access')
@@ -78,7 +78,7 @@ export function useChapterAccess() {
 
       // For free chapters, unlock immediately
       if (accessInfo.isFree) {
-        const data = await apiClient.post(`/books/${bookId}/chapter/${chapterNumber}/unlock`, {
+        const data = await apiClient.post(`/books/${encodeURIComponent(bookId)}/chapter/${chapterNumber}/unlock`, {
           userAddress: address,
           readingSessionId: `session-${Date.now()}`
         })

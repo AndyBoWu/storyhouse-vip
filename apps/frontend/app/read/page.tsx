@@ -25,7 +25,7 @@ interface PublicStory {
   totalReads: number
   rating: number
   preview: string
-  coverImage?: string
+  coverUrl?: string
   tags: string[]
 }
 
@@ -58,7 +58,7 @@ export default function ReadPage() {
             totalReads: book.totalReads || 0,
             rating: book.rating || 0,
             preview: book.description || 'No description available.',
-            coverImage: book.coverUrl,
+            coverUrl: book.coverUrl,
             tags: book.genres?.map((g: string) => g.toLowerCase()) || []
           }))
           setStories(publicStories)

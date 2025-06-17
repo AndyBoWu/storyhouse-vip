@@ -151,7 +151,7 @@ export default function ChapterPage() {
   const handleAccessGranted = async () => {
     try {
       // When access is granted (e.g., after payment), fetch full content
-      const fullChapter = await apiClient.get(`/books/${bookId}/chapter/${chapterNumber}`);
+      const fullChapter = await apiClient.get(`/books/${encodeURIComponent(bookId)}/chapter/${chapterNumber}`);
       setChapter(fullChapter);
       setHasAccess(true);
     } catch (err) {
