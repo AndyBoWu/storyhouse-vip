@@ -3,7 +3,6 @@ import { useAccount } from 'wagmi'
 import { Address, Hash } from 'viem'
 import { apiClient } from '@/lib/api-client'
 import { PublishResult } from '@/lib/contracts/storyProtocol'
-import { usePublishStory } from './usePublishStory'
 import { createClientStoryProtocolService } from '@/lib/services/storyProtocolClient'
 
 interface StoryData {
@@ -26,13 +25,9 @@ interface PublishOptions {
 type UnifiedPublishStep =
   | 'idle'
   | 'checking-unified-support'
-  | 'unified-registration' // Single step for unified flow
+  | 'unified-registration'
   | 'generating-metadata'
   | 'blockchain-transaction'
-  | 'minting-nft' // Fallback to legacy flow
-  | 'registering-ip'
-  | 'creating-license'
-  | 'attaching-license'
   | 'saving-to-storage'
   | 'success'
   | 'error'
@@ -51,7 +46,6 @@ export function useUnifiedPublishStory() {
   const [ipAssetId, setIPAssetId] = useState<Address | null>(null)
 
   const { address } = useAccount()
-  const { publishStory } = usePublishStory()
 
   // Check unified registration support on mount
   useEffect(() => {
@@ -90,17 +84,13 @@ export function useUnifiedPublishStory() {
     try {
       setCurrentStep('checking-unified-support')
 
-      // Check if we should use unified registration
-      const shouldUseUnified = isUnifiedSupported && 
-                               options.ipRegistration && 
-                               options.publishingOption === 'protected'
-
-      if (shouldUseUnified) {
+      // Always use unified registration for IP-protected content
+      if (options.ipRegistration && options.publishingOption === 'protected') {
         console.log('🚀 Using unified registration (single transaction)')
         return await executeUnifiedRegistration(storyData, options, bookId)
       } else {
-        console.log('🔄 Falling back to legacy registration (multiple transactions)')
-        return await executeLegacyRegistration(storyData, options, bookId)
+        // Simple publishing without IP registration
+        throw new Error('Simple publishing without IP registration is not supported. Please enable IP registration.')
       }
 
     } catch (error) {
@@ -274,35 +264,6 @@ export function useUnifiedPublishStory() {
     }
   }
 
-  const executeLegacyRegistration = async (
-    storyData: StoryData,
-    options: PublishOptions,
-    bookId?: string
-  ): Promise<UnifiedPublishResult> => {
-    console.log('🔄 Using legacy registration flow (3 transactions)...')
-    
-    // Use the legacy publishStory hook
-    const result = await publishStory(storyData, options, bookId)
-    
-    if (!result.success) {
-      throw new Error(result.error || 'Legacy registration failed')
-    }
-    
-    // Convert legacy result to unified result format
-    const unifiedResult: UnifiedPublishResult = {
-      success: true,
-      method: 'legacy',
-      gasOptimized: false,
-      data: result.data!,
-      metadataUri: undefined // Legacy flow doesn't return metadata URI
-    }
-    
-    setPublishResult(unifiedResult)
-    setTokenId(result.data?.tokenId || null)
-    setIPAssetId(result.data?.ipAssetId || null)
-    
-    return unifiedResult
-  }
 
   const reset = () => {
     setCurrentStep('idle')
