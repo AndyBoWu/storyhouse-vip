@@ -222,7 +222,7 @@ Revenue Data ─→ Economic Modeling ─→ Optimization ─→ Recommendations
 ### Core API Endpoints
 - `GET /api/licenses/templates` - Retrieve license templates
 - `POST /api/ip/license/attach` - Attach license to IP asset
-- `GET /api/test-pil` - SDK compatibility testing
+- `GET /api/ip/register-unified` - Check unified registration capability
 
 ### 🆕 Derivative Registration API
 - `POST /api/derivatives/register` - Manual blockchain derivative registration

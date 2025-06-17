@@ -258,17 +258,14 @@ storyhouse-vip/
 ### Test API Connections
 
 ```bash
-# Test backend API
-curl http://localhost:3002/api/test
+# Test backend API - Get books list
+curl http://localhost:3002/api/books
 
-# Test frontend
-curl http://localhost:3001/api/test
+# Test frontend health check
+curl http://localhost:3001/api/version
 
-# Test R2 storage
-curl -X POST http://localhost:3002/api/test-r2
-
-# Test Story Protocol SDK
-curl -X GET http://localhost:3002/api/test-pil
+# Test unified IP registration status
+curl -X GET http://localhost:3002/api/ip/register-unified
 
 # 🆕 Test derivative registration system
 curl -X POST http://localhost:3002/api/derivatives/register \
@@ -425,7 +422,7 @@ cat apps/backend/.env.local | grep R2
 **4. Blockchain & SDK Connection Issues**
 ```bash
 # Test Story Protocol SDK connection
-curl -X GET http://localhost:3002/api/test-pil
+curl -X GET http://localhost:3002/api/ip/register-unified
 
 # Test derivative registration endpoint
 curl -X POST http://localhost:3002/api/derivatives/register \
@@ -433,13 +430,13 @@ curl -X POST http://localhost:3002/api/derivatives/register \
   -d '{"derivativeChapterId": "0x123", "parentIpId": "0x456", "authorAddress": "0x789"}'
 
 # Check if SDK is properly initialized
-curl -X GET http://localhost:3002/api/debug-env
+# Note: Debug endpoints have been removed for security
 ```
 
 **5. R2 Storage Issues**
 ```bash
 # Test R2 connection
-curl -X POST http://localhost:3002/api/test-r2
+# Note: Test endpoints have been removed for security
 ```
 
 **6. 🆕 AI Analysis Issues**
@@ -543,12 +540,12 @@ npm run test
 npm run build
 
 # 🆕 Test key integrations
-curl -X GET http://localhost:3002/api/test-pil
+curl -X GET http://localhost:3002/api/ip/register-unified
 curl -X GET "http://localhost:3002/api/discovery?type=content-similarity"
 curl -X GET http://localhost:3002/api/notifications/0x1234567890abcdef
 
 # 🆕 Verify blockchain connectivity
-curl -X GET http://localhost:3002/api/debug-env
+# Note: Debug endpoints have been removed for security
 ```
 
 ---
@@ -610,7 +607,7 @@ Before starting development:
 - [ ] All API tests passing
 
 **🆕 Advanced Features:**
-- [ ] Story Protocol SDK integration working (test with `/api/test-pil`)
+- [ ] Story Protocol SDK integration working (test with `/api/ip/register-unified`)
 - [ ] AI content analysis operational (test with `/api/discovery`)
 - [ ] Derivative registration endpoints responding
 - [ ] Notification system functional

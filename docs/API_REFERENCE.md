@@ -946,30 +946,9 @@ POST /api/ip/license/attach
 
 ## Stories & Content API
 
-### Get All Stories
+### Get All Books (formerly Stories)
 
-Fetch published stories from cloud storage.
-
-```http
-GET /api/stories
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "stories": [
-    {
-      "id": "story_1703123456",
-      "title": "The Detective's Portal",
-      "genre": "Mystery",
-      "chapters": 3,
-      "authorAddress": "0x1234567890123456789012345678901234567890",
-      "contentUrl": "https://r2-endpoint/stories/story_1703123456.json"
-    }
-  ]
-}
-```
+**Note:** The `/api/stories` endpoint has been deprecated. Use `/api/books` instead.
 
 ### Get Books
 
@@ -1091,49 +1070,14 @@ POST /api/generate
 
 ## Utility APIs
 
-### Test PIL Integration
+### Utility APIs
 
-Test Story Protocol SDK v1.3.2 compatibility.
-
-```http
-GET /api/test-pil
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "message": "PIL Integration Test Successful!",
-  "data": {
-    "serviceStatus": {
-      "initialized": false,
-      "chainId": 1315,
-      "availableTiers": ["standard", "premium", "exclusive"]
-    }
-  }
-}
-```
-
-### Debug Environment
-
-Check environment configuration.
-
-```http
-GET /api/debug-env
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "environment": {
-    "hasR2BucketName": true,
-    "hasR2AccessKey": true,
-    "hasStoryProtocolConfig": true,
-    "nodeEnv": "development"
-  }
-}
-```
+**Note:** Test and debug endpoints have been removed for security reasons. These endpoints exposed sensitive environment information and are no longer available:
+- `/api/test` - Removed
+- `/api/test-pil` - Removed  
+- `/api/test-r2` - Removed
+- `/api/debug-env` - Removed
+- `/api/debug-r2` - Removed
 
 ---
 
