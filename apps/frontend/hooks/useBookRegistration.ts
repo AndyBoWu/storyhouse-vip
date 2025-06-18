@@ -2,8 +2,8 @@ import { useState, useCallback } from 'react'
 import { useAccount, useWriteContract, useWaitForTransactionReceipt, usePublicClient } from 'wagmi'
 import { parseBookId } from '@/lib/contracts/hybridRevenueController'
 
-// HybridRevenueControllerV2 deployed address (2025-01-18)
-export const HYBRID_REVENUE_CONTROLLER_V2_ADDRESS = '0x9c6a3c50e5d77f99d805d8d7c935acb23208fd9f'
+// HybridRevenueControllerV2 deployed address (2025-06-18 - Full Version)
+export const HYBRID_REVENUE_CONTROLLER_V2_ADDRESS = '0x99dA048826Bbb8189FBB6C3e62EaA75d0fB36812'
 
 // ABI for HybridRevenueControllerV2
 export const HYBRID_V2_ABI = [
@@ -87,6 +87,8 @@ export function useBookRegistration() {
    * Check if a book is already registered
    */
   const checkBookRegistration = useCallback(async (bookId: string): Promise<boolean> => {
+    if (!publicClient) return false
+    
     try {
       const { bytes32Id } = parseBookId(bookId)
       
@@ -97,9 +99,14 @@ export function useBookRegistration() {
         args: [bytes32Id],
       })
       
-      return bookData[4] // isActive
+      // Check if curator address is not zero address (indicates book exists)
+      const curator = bookData[0] as string
+      const isActive = bookData[4] as boolean
+      
+      return curator !== '0x0000000000000000000000000000000000000000' && isActive
     } catch (error) {
       console.error('Error checking book registration:', error)
+      // If error occurs, assume book is not registered
       return false
     }
   }, [publicClient])
@@ -245,11 +252,17 @@ export function useBookRegistration() {
     }
   }, [address, writeSetAttribution, attributionHash])
   
+  // Check if the service is supported (contract deployed)
+  const isSupported = HYBRID_REVENUE_CONTROLLER_V2_ADDRESS && 
+                     HYBRID_REVENUE_CONTROLLER_V2_ADDRESS !== '0x...' &&
+                     !!publicClient
+
   return {
     registerBook,
     setChapterAttribution,
     checkBookRegistration,
     isLoading: isLoading || isRegisterPending || isAttributionPending,
-    error
+    error,
+    isSupported
   }
 }

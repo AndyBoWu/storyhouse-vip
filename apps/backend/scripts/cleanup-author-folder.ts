@@ -28,7 +28,7 @@ async function cleanupAuthorFolder() {
   })
 
   const bucketName = process.env.R2_BUCKET_NAME!
-  const authorAddress = '0x3873c0d1bcfa245773b13b694a49dac5b3f03ca2'
+  const authorAddress = '0xd49646149734f829c722a547f6be217571a8355d'
   const prefix = `books/${authorAddress}/`
 
   console.log('🔧 Configuration:')

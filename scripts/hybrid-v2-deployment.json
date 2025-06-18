@@ -1,5 +1,5 @@
 {
-  "contractName": "HybridRevenueControllerV2Standalone",
+  "contractName": "HybridRevenueControllerV2 (was Standalone - needs redeployment)",
   "address": "0x9c6a3c50e5d77f99d805d8d7c935acb23208fd9f",
   "deployer": "0xD9b6d1bd7D8A90915B905EB801c55bA5De1d4476",
   "tipToken": "0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E",
@@ -45,6 +45,8 @@
     "status": "pending"
   },
   "nextSteps": [
+    "🚨 REDEPLOY REQUIRED - This was Standalone version",
+    "🚨 Run: cd packages/contracts && ./deploy.sh v2",
     "✅ Update backend environment variables",
     "✅ Update frontend environment variables", 
     "✅ Update contract configurations in codebase",
