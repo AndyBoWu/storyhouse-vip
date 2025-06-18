@@ -100,7 +100,7 @@ export class ClientStoryProtocolService {
         derivativesAttribution: true,
         derivativesApproval: false,
         derivativesReciprocal: false,
-        royaltyPolicy: '0xBe54FB168b3c982b7AaE60dB6CF75Bd8447b390E' as Address, // LAP royalty policy
+        royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address, // Zero address for free tier - no royalty policy needed
         defaultMintingFee: 0n,
         currency: '0x0000000000000000000000000000000000000000' as Address // Zero address - payment handled externally with TIP tokens
       },
@@ -113,7 +113,7 @@ export class ClientStoryProtocolService {
         derivativesAttribution: false,
         derivativesApproval: false,
         derivativesReciprocal: false,
-        royaltyPolicy: '0xBe54FB168b3c982b7AaE60dB6CF75Bd8447b390E' as Address, // LAP royalty policy
+        royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address, // Zero address - no royalties for reading tier
         defaultMintingFee: 500000000000000000n, // 0.5 TIP
         currency: '0x0000000000000000000000000000000000000000' as Address // Zero address - payment handled externally with TIP tokens
       },
@@ -126,10 +126,10 @@ export class ClientStoryProtocolService {
         derivativesAttribution: true,
         derivativesApproval: true,
         derivativesReciprocal: false,
-        royaltyPolicy: '0xBe54FB168b3c982b7AaE60dB6CF75Bd8447b390E' as Address, // LAP royalty policy - works with TIP tokens via HybridRevenueController
+        royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address, // Zero address - royalties handled by HybridRevenueController
         commercialRevShare: 10, // 10% royalty
         defaultMintingFee: 100000000000000000000n, // 100 TIP
-        currency: '0x0000000000000000000000000000000000000000' as Address // Zero address - payment handled externally with TIP tokens
+        currency: '0x0000000000000000000000000000000000000000' as Address // Zero address - all payments handled by HybridRevenueController
       },
       exclusive: {
         ...basePilTerms,
@@ -140,10 +140,10 @@ export class ClientStoryProtocolService {
         derivativesAttribution: false,
         derivativesApproval: false,
         derivativesReciprocal: false,
-        royaltyPolicy: '0xBe54FB168b3c982b7AaE60dB6CF75Bd8447b390E' as Address, // LAP royalty policy - works with TIP tokens via HybridRevenueController
+        royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address, // Zero address - royalties handled by HybridRevenueController
         commercialRevShare: 25, // 25% royalty
         defaultMintingFee: 1000000000000000000000n, // 1000 TIP
-        currency: '0x0000000000000000000000000000000000000000' as Address // Zero address - payment handled externally with TIP tokens
+        currency: '0x0000000000000000000000000000000000000000' as Address // Zero address - all payments handled by HybridRevenueController
       }
     }
 

@@ -167,5 +167,7 @@ Removed unused and test API endpoints to improve security and reduce maintenance
 - Legacy multi-transaction workflow completely removed - only unified registration exists
 - All publishing uses `mintAndRegisterIpAssetWithPilTerms` exclusively
 - IP registration happens client-side with user's wallet
-- **Royalty Policy Decision**: All tiers use LAP policy (0xBe54FB168b3c982b7AaE60dB6CF75Bd8447b390E) with zero address currency to support TIP tokens
-- **Revenue Distribution**: Handled by HybridRevenueController (70% author, 20% curator, 10% platform) instead of Story Protocol royalties
+- **Royalty Policy Decision (January 2025)**: All tiers use zero address (0x0000...0000) for both royalty policy and currency
+- **Revenue Distribution**: 100% handled by HybridRevenueController (70% author, 20% curator, 10% platform)
+- **Story Protocol Role**: IP registration and licensing only - no royalty involvement
+- **Token Strategy**: TIP tokens exclusively - no WIP token dependencies

@@ -341,21 +341,28 @@ Bob (reader) was unable to mint a reading license for Chapter 4 of Andy's book "
 ### **Problem Summary**
 When publishing chapters with royalty-bearing licenses (premium/exclusive), Story Protocol's LRP (Liquid Royalty Policy) requires a whitelisted currency token. Since TIP token is not on Story Protocol's whitelist, the system was failing with "Royalty policy requires currency token" error.
 
-### **Solution: LAP Policy for All Tiers**
-We've standardized all license tiers to use LAP (Liquid Absolute Percentage) royalty policy, which works with zero address currency. This allows us to:
+### **Solution: Zero Address Royalty Policy for All Tiers**
+We've standardized all license tiers to use zero address for royalty policy, completely bypassing Story Protocol's royalty system. This allows us to:
 - ✅ Keep using TIP tokens exclusively
-- ✅ Avoid dependency on Story Protocol's whitelisted tokens
-- ✅ Handle royalty distribution through our HybridRevenueController
-- ✅ Maintain full control over token economics
+- ✅ Avoid all dependencies on Story Protocol's whitelisted tokens
+- ✅ Handle ALL revenue distribution through our HybridRevenueController
+- ✅ Maintain complete control over token economics
 
 ### **Implementation Details**
-1. **All tiers now use LAP policy**: `0xBe54FB168b3c982b7AaE60dB6CF75Bd8447b390E`
-2. **Currency remains zero address**: `0x0000000000000000000000000000000000000000`
-3. **Royalty distribution**: Handled by HybridRevenueController (70% author, 20% curator, 10% platform)
-4. **TIP payments**: Continue to work as before through separate transfer logic
+1. **All tiers use zero address royalty policy**: `0x0000000000000000000000000000000000000000`
+2. **Currency also zero address**: `0x0000000000000000000000000000000000000000`
+3. **Revenue distribution**: 100% handled by HybridRevenueController (70% author, 20% curator, 10% platform)
+4. **TIP payments**: All payments flow through HybridRevenueController
+
+### **Technical Decision Rationale**
+After comparing LAP (Liquid Absolute Percentage) vs LRP (Liquid Royalty Policy):
+- **LAP**: Still requires currency token configuration, offers no benefits for our use case
+- **LRP**: Requires whitelisted tokens, incompatible with TIP token
+- **Zero Address**: Simplest solution, full control, no Story Protocol dependencies
 
 ### **Benefits**
-- No changes needed to TIP token integration
-- Story Protocol handles IP registration and licensing
-- HybridRevenueController manages actual revenue distribution
-- Full compatibility with existing smart contract architecture
+- No Story Protocol royalty complications
+- Users only need TIP tokens (no WIP token required)
+- Story Protocol handles IP registration and licensing only
+- HybridRevenueController manages all revenue distribution
+- Maximum flexibility for future enhancements

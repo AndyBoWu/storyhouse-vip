@@ -97,15 +97,11 @@ function PublishingModal({
         await connect({ connector: injected() })
       }
 
-      if (publishingOption === 'simple') {
+      if (chapterNumber <= 3) {
         // Chapters 1-3 are free, skip license and pricing steps
-        if (chapterNumber <= 3) {
-          setChapterPrice(0) // Set price to 0 for free chapters
-          setLicenseTier('free') // Auto-set to free license
-          setCurrentStep('publishing') // Skip directly to publishing
-        } else {
-          setCurrentStep('license') // Show license selection for paid chapters
-        }
+        setChapterPrice(0) // Set price to 0 for free chapters
+        setLicenseTier('free') // Auto-set to free license
+        setCurrentStep('publishing') // Skip directly to publishing
       } else {
         setCurrentStep('license') // Show license selection for protected publishing
       }
@@ -309,7 +305,7 @@ function PublishingModal({
                     {chapterNumber <= 3 ? (
                       <motion.button
                         onClick={() => {
-                          setPublishingOption('simple')
+                          setPublishingOption('protected') // Always use protected mode since simple publishing is removed
                           setChapterPrice(0) // Ensure free chapters have 0 price
                           setCurrentStep('wallet')
                         }}

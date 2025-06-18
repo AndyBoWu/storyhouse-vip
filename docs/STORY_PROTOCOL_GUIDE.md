@@ -326,7 +326,7 @@ async function createStoryHouseLicenseTerms(
   
   const licenseTerms = await client.license.registerPILTerms({
     transferable: tier !== 'exclusive', // Exclusive licenses are non-transferable
-    royaltyPolicy: 'LAP', // Using LAP for all tiers to support TIP tokens
+    royaltyPolicy: '0x0000000000000000000000000000000000000000', // Zero address - royalties handled by HybridRevenueController
     defaultMintingFee: BigInt(config.price * 10**18), // Convert to wei
     expiration: 0n, // No expiration
     commercialUse: config.commercialUse,
@@ -619,10 +619,11 @@ async function createDerivativeCollectionGroup(
 const STORYHOUSE_ROYALTY_CONFIG = {
   TIP_TOKEN_ADDRESS: '0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E',
   ROYALTY_POLICIES: {
-    free: { policyType: 'LAP', stakingReward: 0, distributionDelay: 0 },
-    reading: { policyType: 'LAP', stakingReward: 2, distributionDelay: 3600 },
-    premium: { policyType: 'LAP', stakingReward: 5, distributionDelay: 86400 },
-    exclusive: { policyType: 'LAP', stakingReward: 10, distributionDelay: 604800 }
+    // All tiers use zero address - royalties handled by HybridRevenueController
+    free: { policyType: 'None', address: '0x0000000000000000000000000000000000000000' },
+    reading: { policyType: 'None', address: '0x0000000000000000000000000000000000000000' },
+    premium: { policyType: 'None', address: '0x0000000000000000000000000000000000000000' },
+    exclusive: { policyType: 'None', address: '0x0000000000000000000000000000000000000000' }
   },
   ECONOMIC_CONSTANTS: {
     PLATFORM_FEE_RATE: 5, // 5% platform fee
@@ -642,7 +643,7 @@ const STORYHOUSE_ROYALTY_CONFIG = {
 }
 ```
 
-> **Note on Royalty Policy Decision**: StoryHouse uses LAP (Liquid Absolute Percentage) policy for all license tiers to support TIP tokens. Since TIP token is not on Story Protocol's whitelist, we use zero address for currency and handle royalty distribution through our HybridRevenueController smart contract, which manages the 70/20/10 split between authors, curators, and platform.
+> **Note on Royalty Policy Decision (January 2025)**: StoryHouse uses zero address (0x0000...0000) for both royalty policy and currency across all license tiers. This completely bypasses Story Protocol's royalty system, avoiding any token whitelist issues. All revenue distribution is handled through our HybridRevenueController smart contract, which manages the 70/20/10 split between authors, curators, and platform using TIP tokens exclusively.
 
 ### Claim Chapter Royalties
 
