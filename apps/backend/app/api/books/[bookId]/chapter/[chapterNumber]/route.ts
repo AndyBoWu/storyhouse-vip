@@ -9,10 +9,26 @@ interface ChapterParams {
 
 /**
  * GET /api/books/[bookId]/chapter/[chapterNumber] - Fetch a specific book chapter
+ * HEAD /api/books/[bookId]/chapter/[chapterNumber] - Check chapter access without content
  */
 export async function GET(
   request: NextRequest,
   context: { params: Promise<ChapterParams> }
+) {
+  return handleChapterRequest(request, context, false);
+}
+
+export async function HEAD(
+  request: NextRequest,
+  context: { params: Promise<ChapterParams> }
+) {
+  return handleChapterRequest(request, context, true);
+}
+
+async function handleChapterRequest(
+  request: NextRequest,
+  context: { params: Promise<ChapterParams> },
+  headOnly: boolean = false
 ) {
   try {
     const params = await context.params;
@@ -75,6 +91,11 @@ export async function GET(
 
       // If no access, return limited metadata only
       if (!accessResult.hasAccess) {
+        if (headOnly) {
+          // For HEAD requests, just return the status code
+          return new NextResponse(null, { status: 403 });
+        }
+        
         return NextResponse.json({
           bookId: bookId,
           chapterNumber: chapterNum,
@@ -109,6 +130,11 @@ export async function GET(
         wordCount: chapterData.wordCount,
         hasContent: !!chapterData.content
       });
+
+      // For HEAD requests, just return success status
+      if (headOnly) {
+        return new NextResponse(null, { status: 200 });
+      }
 
       // Format response for chapter reading page
       const formattedResponse = {

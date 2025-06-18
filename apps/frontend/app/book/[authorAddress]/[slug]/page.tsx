@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useAccount } from 'wagmi';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowLeft, Lock } from 'lucide-react';
+import { ArrowLeft, Lock, Unlock, BookOpen, CheckCircle } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import apiClient, { getApiBaseUrl } from '@/lib/api-client';
 import ShareButton from '@/components/ui/ShareButton';
@@ -83,10 +83,32 @@ export default function BookPage() {
       }
       
       if (chaptersResponse.success && chaptersResponse.data) {
-        // Load actual chapter details instead of placeholder data
+        // Load actual chapter details and check unlock status
         const chapterPromises = chaptersResponse.data.chapters.map(async (chapterNum: number) => {
           try {
             const chapterResponse = await apiClient.getChapter(bookId, chapterNum);
+            
+            // Check if user has unlocked this chapter
+            let isUnlocked = false;
+            if (address && chapterNum >= 4) {
+              try {
+                // Make a HEAD request to the chapter API with user address header to check access
+                const testResponse = await fetch(`${getApiBaseUrl()}/api/books/${encodeURIComponent(bookId)}/chapter/${chapterNum}`, {
+                  method: 'HEAD',
+                  headers: {
+                    'x-user-address': address
+                  }
+                });
+                // If we get 200, user has access. If 403, user needs to unlock
+                isUnlocked = testResponse.status === 200;
+              } catch (accessError) {
+                console.log(`Could not check access for chapter ${chapterNum}:`, accessError);
+                isUnlocked = false;
+              }
+            } else if (chapterNum <= 3) {
+              isUnlocked = true; // Free chapters are always unlocked
+            }
+            
             return {
               number: chapterNum,
               title: chapterResponse.title || `Chapter ${chapterNum}`,
@@ -95,7 +117,8 @@ export default function BookPage() {
               earnings: 0, // TODO: Get from metadata when available  
               wordCount: chapterResponse.wordCount || 0,
               status: 'published' as const,
-              createdAt: chapterResponse.createdAt || new Date().toISOString()
+              createdAt: chapterResponse.createdAt || new Date().toISOString(),
+              unlocked: isUnlocked
             };
           } catch (error) {
             console.error(`Failed to load chapter ${chapterNum}:`, error);
@@ -354,14 +377,38 @@ export default function BookPage() {
               const isUnlocked = chapter.unlocked || false; // Assuming we have this data
               const unlockPrice = isPaid ? 0.5 : 0; // Updated to match our pricing
               
-              // Determine styling based on chapter state
+              // Enhanced visual design with better unlock indication
               let chapterStyle = '';
+              let iconComponent = null;
+              let statusBadge = null;
+              
               if (isFree) {
-                chapterStyle = 'border-green-200 bg-green-50 border-l-4 border-l-green-400';
+                chapterStyle = 'border-emerald-200 bg-emerald-50 border-l-4 border-l-emerald-500 shadow-sm';
+                iconComponent = <BookOpen className="w-5 h-5 text-emerald-600" />;
+                statusBadge = (
+                  <span className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-semibold flex items-center gap-1">
+                    <CheckCircle className="w-3 h-3" />
+                    FREE
+                  </span>
+                );
               } else if (isPaid && !isUnlocked) {
-                chapterStyle = 'border-gray-200 bg-gray-50 border-l-4 border-l-gray-400';
+                chapterStyle = 'border-slate-200 bg-slate-50 border-l-4 border-l-slate-400 shadow-sm';
+                iconComponent = <Lock className="w-5 h-5 text-slate-500" />;
+                statusBadge = (
+                  <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-semibold flex items-center gap-1">
+                    <Lock className="w-3 h-3" />
+                    LOCKED
+                  </span>
+                );
               } else if (isPaid && isUnlocked) {
-                chapterStyle = 'border-purple-200 bg-purple-50 border-l-4 border-l-purple-400';
+                chapterStyle = 'border-violet-200 bg-violet-50 border-l-4 border-l-violet-500 shadow-sm ring-1 ring-violet-200/50';
+                iconComponent = <Unlock className="w-5 h-5 text-violet-600" />;
+                statusBadge = (
+                  <span className="px-3 py-1 bg-violet-100 text-violet-700 rounded-full text-xs font-semibold flex items-center gap-1">
+                    <CheckCircle className="w-3 h-3" />
+                    UNLOCKED
+                  </span>
+                );
               }
               
               return (
@@ -370,43 +417,45 @@ export default function BookPage() {
                   href={`/book/${authorAddress}/${slug}/chapter/${chapter.number}`}
                   className="block"
                 >
-                  <div className={`border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer ${chapterStyle}`}>
-                    <div className="flex justify-between items-start mb-2">
+                  <div className={`border rounded-xl p-5 hover:shadow-lg transition-all duration-200 cursor-pointer ${chapterStyle}`}>
+                    <div className="flex justify-between items-start mb-3">
                       <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          {isPaid && !isUnlocked && <Lock className="w-4 h-4 text-gray-400" />}
-                          {isPaid && isUnlocked && <span className="text-purple-600">🔓</span>}
+                        <div className="flex items-center gap-3 mb-2">
+                          {iconComponent}
                           <h3 className={`text-lg font-semibold ${
-                            isPaid && isUnlocked ? 'text-purple-900' : ''
+                            isFree ? 'text-emerald-800' : 
+                            isPaid && isUnlocked ? 'text-violet-800' : 'text-slate-700'
                           }`}>
                             Chapter {chapter.number}: {chapter.title}
                           </h3>
                         </div>
-                        <p className={`text-sm mt-1 line-clamp-2 ${
-                          isPaid && !isUnlocked ? 'text-gray-500' : 'text-gray-600'
+                        <p className={`text-sm leading-relaxed ${
+                          isPaid && !isUnlocked ? 'text-slate-500' : 'text-slate-600'
                         }`}>
                           {chapter.preview}
                         </p>
                         {isPaid && !isUnlocked && (
-                          <p className="text-gray-600 text-sm font-medium mt-2">
-                            Unlock for {unlockPrice} TIP
-                          </p>
-                        )}
-                      </div>
-                      <div className="ml-4">
-                        {isFree && (
-                          <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">
-                            FREE
-                          </span>
-                        )}
-                        {isPaid && !isUnlocked && (
-                          <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs font-medium">
-                            LOCKED
-                          </span>
+                          <div className="mt-3 p-2 bg-amber-50 border border-amber-200 rounded-lg">
+                            <p className="text-amber-700 text-sm font-medium flex items-center gap-2">
+                              <Lock className="w-4 h-4" />
+                              Unlock for {unlockPrice} TIP
+                            </p>
+                          </div>
                         )}
                         {isPaid && isUnlocked && (
-                          <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium">
-                            PREMIUM
+                          <div className="mt-3 p-2 bg-violet-50 border border-violet-200 rounded-lg">
+                            <p className="text-violet-700 text-sm font-medium flex items-center gap-2">
+                              <CheckCircle className="w-4 h-4" />
+                              You own this chapter
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                      <div className="ml-4 flex flex-col items-end gap-2">
+                        {statusBadge}
+                        {isPaid && isUnlocked && (
+                          <span className="text-xs text-violet-600 font-medium">
+                            ✨ Premium Access
                           </span>
                         )}
                       </div>
