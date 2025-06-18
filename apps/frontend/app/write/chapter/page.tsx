@@ -208,13 +208,10 @@ function ChapterWritingPageContent() {
     console.log('Chapter published successfully:', result)
     setShowPublishingModal(false)
     
-    // For first chapter, redirect to book page to show registration prompt
-    if (chapterNumber === 1) {
-      const bookUrl = `/book/${bookId.replace('/', '/')}`
-      router.push(bookUrl)
-    } else {
-      router.push('/own')
-    }
+    // Always redirect to book page after publishing to show the new chapter
+    // and any follow-up actions (registration, pricing setup, etc.)
+    const bookUrl = `/book/${bookId.replace('/', '/')}`
+    router.push(bookUrl)
   }
   
   // Convert chapter data to the format expected by PublishingModal
