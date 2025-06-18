@@ -108,7 +108,51 @@ export default function ChapterAccessControl({
             
             // Handle transaction initiation
             if (licenseData.transactionInitiated) {
-              console.log('🎉 Transaction initiated! User should confirm in MetaMask and refresh after confirmation.')
+              console.log('🎉 Transaction initiated! Monitoring for completion...')
+              
+              // Start monitoring for transaction completion
+              const checkCompletion = async () => {
+                let attempts = 0
+                const maxAttempts = 30 // 30 seconds max
+                
+                const intervalId = setInterval(async () => {
+                  attempts++
+                  
+                  try {
+                    // Check if the chapter is now unlocked on the blockchain
+                    const updatedAccessInfo = await checkChapterAccess(bookId, chapterNumber)
+                    
+                    if (updatedAccessInfo?.canAccess || updatedAccessInfo?.alreadyUnlocked) {
+                      console.log('✅ Chapter unlock detected on blockchain!')
+                      clearInterval(intervalId)
+                      
+                      // Update UI state
+                      setAccessInfo({
+                        canAccess: true,
+                        alreadyUnlocked: true,
+                        unlockPrice: pricing.unlockPrice,
+                        isFree: false,
+                        transactionHash: licenseData.transactionHash || 'blockchain_confirmed'
+                      })
+                      
+                      setHasSuccessfulUnlock(true)
+                      onAccessGranted()
+                      return
+                    }
+                  } catch (error) {
+                    console.log('Checking unlock status...', attempts)
+                  }
+                  
+                  // Stop checking after max attempts
+                  if (attempts >= maxAttempts) {
+                    console.log('⏱️ Stopped monitoring. Please refresh page to see updated status.')
+                    clearInterval(intervalId)
+                  }
+                }, 1000) // Check every second
+              }
+              
+              // Start monitoring
+              checkCompletion()
               return
             }
             
