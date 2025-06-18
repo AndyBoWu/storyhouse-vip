@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Pausable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "./TIPToken.sol";
-import "./RewardsManager.sol";
+// RewardsManager import removed - no longer needed
 
 /**
  * @title Chapter Access Controller
@@ -50,7 +50,6 @@ contract ChapterAccessController is AccessControl, Pausable, ReentrancyGuard {
 
     // State variables
     TIPToken public tipToken;
-    RewardsManager public rewardsManager;
     
     // Pricing configuration
     uint256 public constant FREE_CHAPTERS_COUNT = 3; // Chapters 1-3 are free
@@ -97,14 +96,12 @@ contract ChapterAccessController is AccessControl, Pausable, ReentrancyGuard {
 
     constructor(
         address initialAdmin,
-        address _tipToken,
-        address _rewardsManager
+        address _tipToken
     ) {
         _grantRole(DEFAULT_ADMIN_ROLE, initialAdmin);
         _grantRole(ADMIN_ROLE, initialAdmin);
         
         tipToken = TIPToken(_tipToken);
-        rewardsManager = RewardsManager(_rewardsManager);
     }
 
     /**

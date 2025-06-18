@@ -39,16 +39,16 @@ forge update
 packages/contracts/
 ├── src/                          # Smart Contracts (Production)
 │   ├── TIPToken.sol             # Platform token with 10B supply cap
-│   ├── RewardsManager.sol       # Secure reward orchestrator (anti-bot protected)
-│   ├── UnifiedRewardsController.sol # Reader rewards only (no auto-creation rewards)
-│   ├── ChapterAccessController.sol  # Chapter monetization
-│   └── HybridRevenueController.sol  # Multi-author revenue sharing
-├── test/                        # Test Files (Foundry *.t.sol) - 100% Coverage Achieved ✅
-│   ├── TIPToken.t.sol          # 100% coverage (417 lines of test code)
-│   ├── RewardsManager.t.sol    # 100% coverage (573 lines of test code)
-│   ├── UnifiedRewardsController.t.sol
+│   ├── ChapterAccessController.sol  # Chapter monetization with tiered pricing
+│   ├── HybridRevenueController.sol  # Legacy revenue controller (V1)
+│   ├── HybridRevenueControllerV2.sol     # PERMISSIONLESS revenue sharing (V2)
+│   └── HybridRevenueControllerV2Standalone.sol # V2 without external dependencies
+├── test/                        # Test Files (Foundry *.t.sol)
+│   ├── TIPToken.t.sol          # Platform token tests
 │   ├── ChapterAccessController.t.sol
-│   └── HybridRevenueController.t.sol
+│   ├── HybridRevenueController.t.sol
+│   ├── RewardsManager.t.sol    # Legacy tests (contract removed)
+│   └── UnifiedRewardsController.t.sol # Legacy tests (contract removed)
 ├── script/                      # Deployment Scripts (Foundry *.s.sol)
 ├── lib/                         # Dependencies (git submodules)
 ├── out/                         # Compiled artifacts
@@ -165,32 +165,35 @@ forge fmt --check
 
 ## 📊 Architecture Overview
 
-### Production-Ready 5-Contract Architecture
-This repository contains a **production-ready smart contract architecture** that was consolidated from 9 to 5 contracts for better gas efficiency and maintainability, now with 100% test coverage and anti-AI farming protection:
+### Streamlined 4-Contract Architecture
+This repository contains a **streamlined smart contract architecture** focused on core monetization and permissionless book management:
 
-1. **TIPToken.sol** (3.7KB) - Platform token with 10B supply cap, minting roles, and pausable transfers (100% tested)
-2. **RewardsManager.sol** (7.5KB) - Secure reward orchestrator with anti-bot protection (100% tested)
-3. **UnifiedRewardsController.sol** (20.4KB) - Reader engagement rewards only (removed automatic creation rewards)
-4. **ChapterAccessController.sol** (15.3KB) - Chapter monetization with integrated AccessControl
-5. **HybridRevenueController.sol** (16.0KB) - Multi-author revenue sharing for collaborative stories
+1. **TIPToken.sol** - Platform token with 10B supply cap, minting roles, and pausable transfers
+2. **ChapterAccessController.sol** - Chapter monetization with tiered pricing (free chapters 1-3, paid 4+)
+3. **HybridRevenueControllerV2.sol** - **PERMISSIONLESS** multi-author revenue sharing (70/20/10 split)
+4. **HybridRevenueControllerV2Standalone.sol** - Standalone version without RewardsManager dependency
 
-**Security Enhancements:**
-- 🔒 Removed automatic creation rewards (50 TIP/story, 20 TIP/chapter) to prevent AI farming
-- ✅ Rewards now based solely on genuine reader engagement and purchases
-- 🛡️ All contracts tested with comprehensive edge cases (990+ lines of test code)
-- 🎯 100% test coverage including zero amounts, overflows, and reentrancy protection
+**Key Changes:**
+- ❌ **Removed RewardsManager.sol** - Eliminated complex reward system prone to farming
+- ❌ **Removed UnifiedRewardsController.sol** - No more automatic creation rewards
+- ✅ **Added HybridRevenueControllerV2** - Permissionless book registration (no admin required)
+- ✅ **Added V2Standalone** - Clean implementation without external dependencies
 
-### Key Optimizations & Production Readiness
-- ✅ **44% fewer contracts** (reduced from 9 to 5)
-- ✅ **Integrated AccessControl** (no standalone AccessControlManager)
-- ✅ **Unified reward logic** (combined 3 reward controllers into 1)
-- ✅ **No code duplication** (removed redundant testnet token)
-- ✅ **Gas optimized** architecture with fewer cross-contract calls
-- ✅ **100% test coverage** with 220+ comprehensive tests
-- ✅ **Production ready** with all critical issues resolved
-- ✅ **OpenZeppelin v5** compatibility implemented
-- 🔒 **Anti-AI farming security** preventing bot exploitation
-- 🎯 **Sustainable economics** based on real user engagement
+**Security & Architecture Improvements:**
+- 🔒 **Eliminated farming vulnerabilities** - Removed automatic creation rewards that were prone to AI/bot farming
+- ✅ **Permissionless book registration** - Authors can register their own books without admin approval
+- 🛡️ **Simplified architecture** - Fewer contracts means reduced attack surface and gas costs
+- 🎯 **Revenue-focused design** - Only genuine chapter purchases generate rewards
+- ⚡ **Gas optimized** - Reduced cross-contract calls and external dependencies
+
+### Key Benefits
+- ✅ **Permissionless**: Anyone can register books and become a curator
+- ✅ **Decentralized**: No admin keys required for book registration
+- ✅ **Fair revenue sharing**: 70% author, 20% curator, 10% platform
+- ✅ **Anti-farming**: No automatic rewards that can be gamed
+- ✅ **Backward compatible**: V2 maintains same interfaces as V1
+- ✅ **Flexible deployment**: Standalone version available without dependencies
+- ✅ **Battle-tested**: Built on proven OpenZeppelin v5 standards
 
 ## 🧪 Testing Standards
 
