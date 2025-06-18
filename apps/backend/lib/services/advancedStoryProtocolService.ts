@@ -88,11 +88,11 @@ export const LICENSE_TIERS: Record<string, LicenseTermsConfig> = {
     displayName: 'Free License',
     description: 'Open access with attribution required',
     transferable: true,
-    royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address, // Zero address for free tier - no royalty policy needed
+    royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address, // Zero address - no Story Protocol royalties
     defaultMintingFee: 0n,
     expiration: 0, // Never expires
     commercialUse: false,
-    commercialAttribution: true,
+    commercialAttribution: false, // Must be false when commercialUse is false
     derivativesAllowed: true,
     derivativesAttribution: true,
     territories: ['Worldwide'],
@@ -109,8 +109,8 @@ export const LICENSE_TIERS: Record<string, LicenseTermsConfig> = {
     displayName: 'Reading License',
     description: 'Personal reading access - non-transferable',
     transferable: false, // 🔒 LOCKED TO WALLET
-    royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address, // Zero address - no royalties for reading tier
-    defaultMintingFee: BigInt(0.5 * 10**18), // 0.5 TIP tokens
+    royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address, // Zero address - no Story Protocol royalties
+    defaultMintingFee: 0n, // All fees handled by HybridRevenueController
     expiration: 0, // Never expires
     commercialUse: false, // Just for reading
     commercialAttribution: false,
@@ -130,11 +130,11 @@ export const LICENSE_TIERS: Record<string, LicenseTermsConfig> = {
     displayName: 'Premium License',
     description: 'Commercial use with royalty sharing',
     transferable: true,
-    royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address, // Zero address - royalties handled by HybridRevenueController
-    defaultMintingFee: BigInt(100 * 10**18), // 100 TIP tokens
+    royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address, // Zero address - no Story Protocol royalties
+    defaultMintingFee: 0n, // All fees handled by HybridRevenueController
     expiration: 0, // Never expires
-    commercialUse: true,
-    commercialAttribution: true,
+    commercialUse: false, // Commercial licensing handled by HybridRevenueController
+    commercialAttribution: false, // Must be false when commercialUse is false
     derivativesAllowed: true,
     derivativesAttribution: true,
     territories: ['Worldwide'],
@@ -151,11 +151,11 @@ export const LICENSE_TIERS: Record<string, LicenseTermsConfig> = {
     displayName: 'Exclusive License',
     description: 'Full commercial rights with high royalties',
     transferable: false,
-    royaltyPolicy: '0x9156e603C949481883B1d3355c6f1132D191fC41' as Address, // LRP royalty policy
-    defaultMintingFee: BigInt(1000 * 10**18), // 1000 TIP tokens
+    royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address, // Zero address - no Story Protocol royalties
+    defaultMintingFee: 0n, // All fees handled by HybridRevenueController
     expiration: 0, // Never expires
-    commercialUse: true,
-    commercialAttribution: true,
+    commercialUse: false, // Commercial licensing handled by HybridRevenueController
+    commercialAttribution: false, // Must be false when commercialUse is false
     derivativesAllowed: true,
     derivativesAttribution: true,
     territories: ['Worldwide'],
@@ -215,14 +215,14 @@ export class AdvancedStoryProtocolService {
 
     return {
       transferable: licenseConfig.transferable,
-      royaltyPolicy: licenseConfig.royaltyPolicy,
+      royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address, // Zero address - no Story Protocol royalties
       defaultMintingFee: licenseConfig.defaultMintingFee,
       expiration: BigInt(licenseConfig.expiration),
       commercialUse: licenseConfig.commercialUse,
       commercialAttribution: licenseConfig.commercialAttribution,
       commercializerChecker: '0x0000000000000000000000000000000000000000' as Address,
       commercializerCheckerData: '0x' as `0x${string}`,
-      commercialRevShare: licenseConfig.royaltyPercentage,
+      commercialRevShare: 0, // Must be 0 when commercialUse is false
       commercialRevCeiling: BigInt(0),
       derivativesAllowed: licenseConfig.derivativesAllowed,
       derivativesAttribution: licenseConfig.derivativesAttribution,

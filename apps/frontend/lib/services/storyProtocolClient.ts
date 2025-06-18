@@ -100,7 +100,7 @@ export class ClientStoryProtocolService {
         derivativesAttribution: true,
         derivativesApproval: false,
         derivativesReciprocal: false,
-        royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address, // Zero address for free tier - no royalty policy needed
+        royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address, // Zero address - no Story Protocol royalties
         defaultMintingFee: 0n,
         currency: '0x0000000000000000000000000000000000000000' as Address // Zero address - payment handled externally with TIP tokens
       },
@@ -113,36 +113,36 @@ export class ClientStoryProtocolService {
         derivativesAttribution: false,
         derivativesApproval: false,
         derivativesReciprocal: false,
-        royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address, // Zero address - no royalties for reading tier
-        defaultMintingFee: 500000000000000000n, // 0.5 TIP
+        royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address, // Zero address - no Story Protocol royalties
+        defaultMintingFee: 0n, // All fees handled by HybridRevenueController
         currency: '0x0000000000000000000000000000000000000000' as Address // Zero address - payment handled externally with TIP tokens
       },
       premium: {
         ...basePilTerms,
         transferable: true,
-        commercialUse: true,
-        commercialAttribution: true,
+        commercialUse: false, // Commercial licensing handled by HybridRevenueController
+        commercialAttribution: false, // Must be false when commercialUse is false
         derivativesAllowed: true,
         derivativesAttribution: true,
         derivativesApproval: true,
         derivativesReciprocal: false,
-        royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address, // Zero address - royalties handled by HybridRevenueController
-        commercialRevShare: 10, // 10% royalty
-        defaultMintingFee: 100000000000000000000n, // 100 TIP
+        royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address, // Zero address - no Story Protocol royalties
+        commercialRevShare: 0, // Must be 0 when commercialUse is false
+        defaultMintingFee: 0n, // All fees handled by HybridRevenueController
         currency: '0x0000000000000000000000000000000000000000' as Address // Zero address - all payments handled by HybridRevenueController
       },
       exclusive: {
         ...basePilTerms,
         transferable: true,
-        commercialUse: true,
+        commercialUse: false, // Commercial licensing handled by HybridRevenueController
         commercialAttribution: false,
         derivativesAllowed: true,
         derivativesAttribution: false,
         derivativesApproval: false,
         derivativesReciprocal: false,
-        royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address, // Zero address - royalties handled by HybridRevenueController
-        commercialRevShare: 25, // 25% royalty
-        defaultMintingFee: 1000000000000000000000n, // 1000 TIP
+        royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address, // Zero address - no Story Protocol royalties
+        commercialRevShare: 0, // Must be 0 when commercialUse is false
+        defaultMintingFee: 0n, // All fees handled by HybridRevenueController
         currency: '0x0000000000000000000000000000000000000000' as Address // Zero address - all payments handled by HybridRevenueController
       }
     }
