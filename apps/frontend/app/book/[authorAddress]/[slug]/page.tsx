@@ -11,6 +11,7 @@ import apiClient, { getApiBaseUrl } from '@/lib/api-client';
 import ShareButton from '@/components/ui/ShareButton';
 import { BookIPInfo } from '@/components/book';
 import { BookRegistrationPrompt } from '@/components/book/BookRegistrationPrompt';
+import { ChapterPricingSetup } from '@/components/book/ChapterPricingSetup';
 
 // Dynamically import WalletConnect to avoid hydration issues
 const WalletConnect = dynamic(() => import('@/components/WalletConnect'), {
@@ -313,6 +314,19 @@ export default function BookPage() {
           chapterNumber={book.totalChapters || 0}
           onRegistrationComplete={() => {
             // Refresh book data after registration
+            fetchBookDetails()
+          }}
+        />
+      )}
+
+      {/* Chapter Pricing Setup - shows for authors after book registration */}
+      {address && book.authorAddress && address.toLowerCase() === book.authorAddress.toLowerCase() && (
+        <ChapterPricingSetup
+          bookId={bookId}
+          authorAddress={book.authorAddress}
+          totalChapters={book.totalChapters || 0}
+          onComplete={() => {
+            // Refresh to update chapter states
             fetchBookDetails()
           }}
         />
