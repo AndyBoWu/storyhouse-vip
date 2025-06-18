@@ -43,7 +43,13 @@ export function useReadingLicense() {
   })
   
   // Hook for HybridRevenueController unlockChapter
-  const { writeContract: writeUnlockChapter, data: unlockHash } = useWriteContract()
+  const { 
+    writeContract: writeUnlockChapter, 
+    data: unlockHash,
+    isError: isUnlockError,
+    error: unlockError,
+    isPending: isUnlockWritePending
+  } = useWriteContract()
   const { isLoading: isUnlockPending } = useWaitForTransactionReceipt({
     hash: unlockHash,
   })
@@ -328,12 +334,37 @@ export function useReadingLicense() {
           
           // Unlock the chapter through HybridRevenueControllerV2
           console.log('📝 Submitting chapter unlock transaction...')
-          writeUnlockChapter({
-            address: HYBRID_REVENUE_CONTROLLER_V2_ADDRESS as Address,
-            abi: HYBRID_V2_ABI,
+          console.log('Transaction params:', {
+            address: HYBRID_REVENUE_CONTROLLER_V2_ADDRESS,
             functionName: 'unlockChapter',
-            args: [bytes32Id, BigInt(chapterNumber)],
+            args: [bytes32Id, BigInt(chapterNumber)]
           })
+          
+          try {
+            // Check if we have a valid signer
+            if (!address) {
+              throw new Error('No wallet connected')
+            }
+            
+            console.log('📤 Calling writeUnlockChapter with params:', {
+              address: HYBRID_REVENUE_CONTROLLER_V2_ADDRESS,
+              functionName: 'unlockChapter',
+              args: [bytes32Id, BigInt(chapterNumber)],
+              signer: address
+            })
+            
+            writeUnlockChapter({
+              address: HYBRID_REVENUE_CONTROLLER_V2_ADDRESS as Address,
+              abi: HYBRID_V2_ABI,
+              functionName: 'unlockChapter',
+              args: [bytes32Id, BigInt(chapterNumber)],
+            })
+            
+            console.log('✅ writeUnlockChapter called successfully')
+          } catch (writeError) {
+            console.error('Error calling writeUnlockChapter:', writeError)
+            throw new Error('Failed to initiate chapter unlock transaction')
+          }
           
           // The writeContract function is async, we need to wait for it to be called
           // Give it a moment to trigger the MetaMask popup
@@ -347,6 +378,18 @@ export function useReadingLicense() {
           // Check more frequently at the beginning
           while (!unlockConfirmed && attempts < 60) {
             await new Promise(resolve => setTimeout(resolve, 500))
+            
+            // Check for errors
+            if (isUnlockError && unlockError) {
+              console.error('❌ Unlock transaction error:', unlockError)
+              throw new Error(`Transaction failed: ${unlockError.message || 'Unknown error'}`)
+            }
+            
+            // Check if transaction is pending
+            if (isUnlockWritePending) {
+              console.log('⏳ Transaction is pending in wallet...')
+            }
+            
             if (unlockHash) {
               console.log('✅ Chapter unlock transaction submitted:', unlockHash)
               unlockConfirmed = true
@@ -356,6 +399,12 @@ export function useReadingLicense() {
             // Log progress every 5 seconds
             if (attempts % 10 === 0) {
               console.log(`⏳ Still waiting for transaction... (${attempts/2}s)`)
+              console.log('Transaction state:', {
+                isUnlockWritePending,
+                isUnlockError,
+                hasHash: !!unlockHash,
+                error: unlockError?.message
+              })
             }
           }
           
