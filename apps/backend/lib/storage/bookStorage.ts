@@ -30,6 +30,11 @@ export class BookStorageService {
     // Store with structure: books/{authorAddress}/{slug}/ (remove leading slash)
     const bookFolder = `${BOOK_SYSTEM_CONSTANTS.BOOKS_ROOT_PATH.replace(/^\//, '')}/${authorAddress.toLowerCase()}/${slug}`
     
+    console.log(`📁 Generated book paths for ${authorAddress}/${slug}:`, {
+      bookFolder,
+      chaptersFolder: `${bookFolder}/${BOOK_SYSTEM_CONSTANTS.CHAPTERS_FOLDER_NAME}`
+    });
+    
     return {
       bookFolder,
       metadataPath: `${bookFolder}/${BOOK_SYSTEM_CONSTANTS.METADATA_FILENAME}`,
@@ -360,12 +365,21 @@ export class BookStorageService {
       const bookPaths = this.generateBookPaths(authorAddress, slug)
       const chapterPaths = this.generateChapterPaths(bookPaths, chapterNumber)
       
+      console.log(`📖 Attempting to fetch chapter content:`, {
+        authorAddress,
+        slug,
+        chapterNumber,
+        contentPath: chapterPaths.contentPath
+      });
+      
       const content = await R2Service.getContent(chapterPaths.contentPath)
       return JSON.parse(content) as ChapterMetadata
       
     } catch (error) {
-      console.error('❌ Failed to get chapter content:', error)
-      throw new Error(`Chapter not found: ${authorAddress}/${slug}/ch${chapterNumber}`)
+      console.error(`❌ Failed to get chapter content for ${authorAddress}/${slug}/ch${chapterNumber}:`, error)
+      // Preserve original error message for better debugging
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      throw new Error(`Failed to retrieve chapter ${chapterNumber}: ${errorMessage}`)
     }
   }
 

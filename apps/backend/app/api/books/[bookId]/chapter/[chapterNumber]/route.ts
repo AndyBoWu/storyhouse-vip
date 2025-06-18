@@ -50,12 +50,21 @@ export async function GET(
         chapterNum
       );
 
+      // Check if chapter data exists
+      if (!chapterData) {
+        console.error(`❌ No chapter data found for chapter ${chapterNum}`);
+        return NextResponse.json(
+          { error: 'Chapter not found' },
+          { status: 404 }
+        );
+      }
+
       // Check access permissions
       const accessResult = await chapterAccessService.checkChapterAccess(
         bookId,
         chapterNum,
         userAddress,
-        chapterData.ipAssetId
+        chapterData?.ipAssetId // Add optional chaining in case ipAssetId is undefined
       );
 
       console.log(`🔐 Access check for chapter ${chapterNum}:`, {
@@ -131,8 +140,15 @@ export async function GET(
         );
       }
       
+      // Provide more detailed error information for debugging
+      const errorMessage = storageError instanceof Error ? storageError.message : 'Unknown error';
+      console.error('Storage error details:', errorMessage);
+      
       return NextResponse.json(
-        { error: 'Failed to retrieve chapter content' },
+        { 
+          error: 'Failed to retrieve chapter content',
+          details: errorMessage // Add error details for debugging
+        },
         { status: 500 }
       );
     }

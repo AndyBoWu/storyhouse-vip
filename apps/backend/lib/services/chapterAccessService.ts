@@ -62,7 +62,7 @@ export class ChapterAccessService {
     }
 
     // Check in-memory storage first (temporary solution)
-    const isUnlocked = chapterUnlockStorage.isChapterUnlocked(
+    const isUnlocked = chapterUnlockStorage.hasUnlocked(
       userAddress,
       bookId,
       chapterNumber
@@ -173,12 +173,13 @@ export class ChapterAccessService {
     chapterNumber: number,
     transactionHash: string
   ): void {
-    chapterUnlockStorage.unlockChapter(
+    chapterUnlockStorage.recordUnlock({
       userAddress,
       bookId,
       chapterNumber,
-      transactionHash
-    )
+      transactionHash,
+      isFree: chapterNumber <= 3
+    })
   }
 }
 
