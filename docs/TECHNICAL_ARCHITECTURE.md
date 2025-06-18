@@ -6,6 +6,13 @@ StoryHouse.vip is a revolutionary Web3 publishing platform built on Story Protoc
 
 **🌳 Collaborative Storytelling System**: Our core innovation enables readers to branch stories from any chapter using Story Protocol licensing, creating infinite story multiverse with automatic royalty distribution through genealogy chains. See [COLLABORATIVE_STORYTELLING.md](./product/COLLABORATIVE_STORYTELLING.md) for complete system specification.
 
+**🆕 Phase 6.4 - Permissionless Publishing Revolution:**
+- **HybridRevenueControllerV2**: Fully decentralized book registration without admin intervention
+- **Anyone Can Publish**: No need for STORY_MANAGER_ROLE or admin approval
+- **Automatic Curator**: Book registrant becomes the curator automatically
+- **Backward Compatible**: Maintains 70/20/10 revenue split model
+- **Enhanced Discovery**: Built-in tracking for all books, curators, and authors
+
 **🔥 Phase 6.3 Architecture Updates:**
 - **Legacy Workflow Removed**: Completely eliminated multi-transaction publishing flow
 - **Unified Registration ONLY**: All IP registration uses `mintAndRegisterIpAssetWithPilTerms`
@@ -78,6 +85,70 @@ StoryHouse.vip is a revolutionary Web3 publishing platform built on Story Protoc
 | Storage | Cloud Storage | - | Global content delivery |
 | Hosting | Vercel | - | Serverless deployment |
 
+## 🆕 HybridRevenueControllerV2 Architecture
+
+### Overview
+HybridRevenueControllerV2 represents a paradigm shift from permissioned to permissionless book registration, democratizing the publishing platform while maintaining the proven revenue distribution model.
+
+### Key Differences from V1
+
+| Feature | V1 | V2 |
+|---------|----|----|
+| Book Registration | Requires STORY_MANAGER_ROLE | **Permissionless** - anyone can register |
+| Curator Assignment | Set by admin | **Automatic** - msg.sender becomes curator |
+| Access Control | Role-based (admin only) | **Open** - no admin required |
+| Book Discovery | Limited view functions | **Enhanced** - getAllBooks(), getCuratorBooks(), getAuthorBooks() |
+| Frontend Integration | Admin wallet required | **MetaMask** - user's own wallet |
+| Deployment Status | ✅ Deployed | 🚧 Ready to Deploy |
+
+### Smart Contract Design
+```solidity
+// V2 Permissionless Registration
+function registerBook(
+    bytes32 _bookId,
+    address _author,
+    uint256 _chapterPrice
+) external {
+    // No role check - anyone can register!
+    // msg.sender automatically becomes curator
+    books[_bookId] = Book({
+        curator: msg.sender,  // Automatic curator assignment
+        author: _author,
+        platformAddress: platformAddress,
+        chapterPrice: _chapterPrice,
+        totalRevenue: 0,
+        isActive: true
+    });
+}
+```
+
+### Frontend Integration
+```typescript
+// useBookRegistration hook for V2
+const { registerBook } = useWriteHybridRevenueControllerV2RegisterBook()
+
+// Direct user wallet interaction
+const handleRegister = async () => {
+  await registerBook({
+    address: HYBRID_REVENUE_CONTROLLER_V2_ADDRESS,
+    args: [bookId, authorAddress, chapterPrice]
+  })
+}
+```
+
+### Backend Fallback Logic
+The backend intelligently routes between V1 and V2:
+1. **Check V2 Deployment**: If V2 is deployed, return message to use frontend
+2. **Fallback to V1**: If V2 not available, use admin key with V1
+3. **Future Migration**: Seamless transition when V2 is deployed
+
+### Benefits
+- **True Decentralization**: No central authority for book registration
+- **Lower Barrier**: Anyone can publish without admin approval
+- **Faster Publishing**: No waiting for admin to register books
+- **Community Growth**: Encourages more authors to join platform
+- **Maintains Economics**: Same 70/20/10 revenue split model
+
 ## Core Components
 
 ### Frontend (`apps/frontend/`)
@@ -110,7 +181,8 @@ StoryHouse.vip is a revolutionary Web3 publishing platform built on Story Protoc
 | Rewards Manager | `0xf5aE031bA92295C2aE86a99e88f09989339707E5` | Central reward orchestration | ✅ Deployed & 100% tested |
 | Unified Rewards Controller | `0x741105d6ee9b25567205f57c0e4f1d293f0d00c5` | Consolidated reward logic (replaced 3 legacy controllers) | ✅ Deployed & 100% tested |
 | Chapter Access Controller | `0x1bd65ad10b1ca3ed67ae75fcdd3aba256a9918e3` | Chapter monetization (0.5 TIP per chapter 4+) | ✅ Deployed & 100% tested |
-| Hybrid Revenue Controller | `0xd1f7e8c6fd77dadbe946ae3e4141189b39ef7b08` | Multi-author revenue sharing (70/20/10 split) | ✅ Deployed & 100% tested |
+| Hybrid Revenue Controller | `0xd1f7e8c6fd77dadbe946ae3e4141189b39ef7b08` | Multi-author revenue sharing (70/20/10 split) - V1 | ✅ Deployed & 100% tested |
+| Hybrid Revenue Controller V2 | `TBD` | **Permissionless** book registration with same revenue split | 🚧 Ready to Deploy |
 | SPG NFT Contract | `0x26b6aa7e7036fc9e8fa2d8184c2cf07ae2e2412d` | IP asset NFTs | ✅ Integrated |
 
 **Key Security Enhancements:**

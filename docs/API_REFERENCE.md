@@ -961,6 +961,58 @@ GET /api/books
 
 ---
 
+## 🆕 Book Registration API (HybridRevenueController)
+
+### Register Book in HybridRevenueController
+
+Register a book for revenue distribution and chapter management.
+
+```http
+POST /api/books/register-hybrid
+```
+
+**Request Body:**
+```json
+{
+  "bookId": "0x1234567890123456789012345678901234567890/detective-portal",
+  "authorAddress": "0x1234567890123456789012345678901234567890",
+  "chapterPrice": 500000000000000000  // 0.5 TIP in wei
+}
+```
+
+**Response (V2 Ready):**
+```json
+{
+  "success": true,
+  "useV2": true,
+  "message": "Please use the frontend to register your book directly with MetaMask",
+  "v2Address": "0xV2ContractAddress",
+  "revenueShare": {
+    "author": "70%",
+    "curator": "20%",
+    "platform": "10%"
+  }
+}
+```
+
+**Response (V2 Not Deployed):**
+```json
+{
+  "success": false,
+  "error": "Revenue controller not deployed yet",
+  "details": "HybridRevenueControllerV2 needs to be deployed. Books can still be published without revenue sharing.",
+  "note": "Run the deployment script to deploy V2"
+}
+```
+
+**Key Features (V2 Only):**
+- **Permissionless**: Anyone can register books directly via frontend
+- **Automatic Curator**: msg.sender becomes the curator automatically
+- **No Admin Required**: Fully decentralized book registration
+- **MetaMask Integration**: Direct wallet interaction for registration
+
+---
+
 ## Chapter Management API
 
 ### Get Chapter Info

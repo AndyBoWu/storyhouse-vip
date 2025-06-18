@@ -1,0 +1,15 @@
+{
+  "name": "storyhouse-scripts",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "register-project-phoenix": "tsx register-project-phoenix.ts"
+  },
+  "dependencies": {
+    "viem": "^2.21.54",
+    "tsx": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0"
+  }
+}

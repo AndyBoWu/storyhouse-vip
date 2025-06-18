@@ -5,11 +5,8 @@ import { custom, parseEther, formatEther, type Address, createWalletClient } fro
 import { apiClient } from '@/lib/api-client'
 import { STORYHOUSE_CONTRACTS, TIP_TOKEN_ABI } from '../lib/contracts/storyhouse'
 import { storyTestnet } from '../lib/config/chains'
-import { 
-  HYBRID_REVENUE_CONTROLLER_ADDRESS, 
-  HYBRID_REVENUE_CONTROLLER_ABI,
-  parseBookId 
-} from '@/lib/contracts/hybridRevenueController'
+import { parseBookId } from '@/lib/contracts/hybridRevenueController'
+import { HYBRID_REVENUE_CONTROLLER_V2_ADDRESS, HYBRID_V2_ABI } from './useBookRegistration'
 
 const TIP_TOKEN_ADDRESS = STORYHOUSE_CONTRACTS.TIP_TOKEN
 
@@ -49,12 +46,6 @@ export function useReadingLicense() {
   const { writeContract: writeUnlockChapter, data: unlockHash } = useWriteContract()
   const { isLoading: isUnlockPending } = useWaitForTransactionReceipt({
     hash: unlockHash,
-  })
-  
-  // Hook for direct TIP token transfer
-  const { writeContract: writeTransfer, data: transferHash } = useWriteContract()
-  const { isLoading: isTransferPending } = useWaitForTransactionReceipt({
-    hash: transferHash,
   })
 
   /**
@@ -280,98 +271,74 @@ export function useReadingLicense() {
           // Parse the book ID to get the bytes32 format
           const { bytes32Id, authorAddress } = parseBookId(bookId)
           
-          // Check if book is registered in HybridRevenueController
-          let useHybridController = false
+          // Check if book is registered in HybridRevenueControllerV2
+          if (!HYBRID_REVENUE_CONTROLLER_V2_ADDRESS || HYBRID_REVENUE_CONTROLLER_V2_ADDRESS === '0x...') {
+            throw new Error('HybridRevenueControllerV2 not deployed yet. Please deploy the contract first.')
+          }
+          
+          let bookIsRegistered = false
           try {
             const bookData = await publicClient.readContract({
-              address: HYBRID_REVENUE_CONTROLLER_ADDRESS,
-              abi: HYBRID_REVENUE_CONTROLLER_ABI,
+              address: HYBRID_REVENUE_CONTROLLER_V2_ADDRESS as Address,
+              abi: HYBRID_V2_ABI,
               functionName: 'books',
               args: [bytes32Id],
             }) as any
             
-            useHybridController = bookData.isActive
-            console.log('HybridRevenueController status:', useHybridController ? '✅ Book registered' : '❌ Book not registered')
+            bookIsRegistered = bookData.isActive
+            if (bookIsRegistered) {
+              console.log('✅ Book registered in HybridRevenueControllerV2')
+            }
           } catch (checkError) {
-            console.warn('Could not check HybridRevenueController status:', checkError)
+            console.error('Failed to check book registration:', checkError)
+            throw new Error('Failed to verify book registration status')
           }
           
-          if (useHybridController) {
-            // Use HybridRevenueController for automatic 70/20/10 revenue split
-            console.log('Using HybridRevenueController for revenue distribution...')
-            
-            // First approve HybridRevenueController to spend TIP tokens
-            const approvalSuccess = await ensureTipApproval(
-              HYBRID_REVENUE_CONTROLLER_ADDRESS,
-              mintingFee
-            )
-            
-            if (!approvalSuccess) {
-              throw new Error('Failed to approve TIP spending for HybridRevenueController')
-            }
-            
-            // Unlock the chapter through HybridRevenueController
-            writeUnlockChapter({
-              address: HYBRID_REVENUE_CONTROLLER_ADDRESS,
-              abi: HYBRID_REVENUE_CONTROLLER_ABI,
-              functionName: 'unlockChapter',
-              args: [bytes32Id, BigInt(chapterNumber)],
-            })
-            
-            // Wait for unlock transaction to be submitted
-            console.log('⏳ Waiting for chapter unlock...')
-            let unlockConfirmed = false
-            let attempts = 0
-            while (!unlockConfirmed && attempts < 30) {
-              await new Promise(resolve => setTimeout(resolve, 1000))
-              if (unlockHash) {
-                console.log('✅ Chapter unlock transaction submitted:', unlockHash)
-                unlockConfirmed = true
-              }
-              attempts++
-            }
-            
-            if (!unlockConfirmed) {
-              throw new Error('Chapter unlock timeout - please try again')
-            }
-            
-            // Wait a bit more for confirmation
-            await new Promise(resolve => setTimeout(resolve, 3000))
-            console.log('✅ Chapter unlocked! Revenue distributed: 70% author, 20% curator, 10% platform')
-            
-          } else {
-            // Fall back to direct TIP transfer to author
-            console.log('Falling back to direct TIP transfer to author...')
-            
-            // Transfer TIP tokens directly to the author
-            writeTransfer({
-              address: TIP_TOKEN_ADDRESS,
-              abi: TIP_TOKEN_ABI,
-              functionName: 'transfer',
-              args: [authorAddress, mintingFee],
-            })
-            
-            // Wait for transfer to complete
-            console.log('⏳ Waiting for TIP transfer...')
-            let transferConfirmed = false
-            let attempts = 0
-            while (!transferConfirmed && attempts < 30) {
-              await new Promise(resolve => setTimeout(resolve, 1000))
-              if (transferHash) {
-                console.log('✅ TIP transfer transaction submitted:', transferHash)
-                transferConfirmed = true
-              }
-              attempts++
-            }
-            
-            if (!transferConfirmed) {
-              throw new Error('TIP transfer timeout - please try again')
-            }
-            
-            // Wait a bit more for confirmation
-            await new Promise(resolve => setTimeout(resolve, 3000))
-            console.log('✅ Chapter unlocked! TIP tokens sent directly to author')
+          if (!bookIsRegistered) {
+            throw new Error('Book is not registered in HybridRevenueController. The author needs to register their book to enable payments.')
           }
+          
+          // Use HybridRevenueControllerV2 for automatic 70/20/10 revenue split
+          console.log('Using HybridRevenueControllerV2 for revenue distribution...')
+          
+          // First approve HybridRevenueControllerV2 to spend TIP tokens
+          const approvalSuccess = await ensureTipApproval(
+            HYBRID_REVENUE_CONTROLLER_V2_ADDRESS as Address,
+            mintingFee
+          )
+          
+          if (!approvalSuccess) {
+            throw new Error('Failed to approve TIP spending for HybridRevenueControllerV2')
+          }
+          
+          // Unlock the chapter through HybridRevenueControllerV2
+          writeUnlockChapter({
+            address: HYBRID_REVENUE_CONTROLLER_V2_ADDRESS as Address,
+            abi: HYBRID_V2_ABI,
+            functionName: 'unlockChapter',
+            args: [bytes32Id, BigInt(chapterNumber)],
+          })
+          
+          // Wait for unlock transaction to be submitted
+          console.log('⏳ Waiting for chapter unlock...')
+          let unlockConfirmed = false
+          let attempts = 0
+          while (!unlockConfirmed && attempts < 30) {
+            await new Promise(resolve => setTimeout(resolve, 1000))
+            if (unlockHash) {
+              console.log('✅ Chapter unlock transaction submitted:', unlockHash)
+              unlockConfirmed = true
+            }
+            attempts++
+          }
+          
+          if (!unlockConfirmed) {
+            throw new Error('Chapter unlock timeout - please try again')
+          }
+          
+          // Wait a bit more for confirmation
+          await new Promise(resolve => setTimeout(resolve, 3000))
+          console.log('✅ Chapter unlocked! Revenue distributed: 70% author, 20% curator, 10% platform')
           
         } catch (unlockError) {
           console.error('Failed to process payment:', unlockError)

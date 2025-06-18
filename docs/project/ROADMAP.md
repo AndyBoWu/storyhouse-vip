@@ -4,9 +4,17 @@
 
 The world's first Web3 storytelling platform with **chapter-level IP assets**, **read-to-earn mechanics**, and **AI-powered remix creation** on Story Protocol.
 
-## 🏗️ Current Phase: 6.3 - Legacy Workflow Removal Complete
+## 🏗️ Current Phase: 6.4 - Permissionless Publishing Revolution
 
-### Recent Achievements (January 2025)
+### Phase 6.4 Ready (Pending Deployment)
+- ✅ **HybridRevenueControllerV2 contract complete**
+- ✅ **Permissionless book registration** - no admin required
+- ✅ **Automatic curator assignment** - msg.sender becomes curator
+- ✅ **Enhanced discovery functions** - getAllBooks(), getCuratorBooks(), getAuthorBooks()
+- ✅ **Frontend integration ready** - useBookRegistration hook prepared
+- 🚧 **Awaiting deployment** to enable fully decentralized publishing
+
+### Phase 6.3 Achievements (January 2025)
 - ✅ **Completely removed legacy multi-transaction workflow**
 - ✅ All IP registration now uses `mintAndRegisterIpAssetWithPilTerms` exclusively
 - ✅ Eliminated ~1,500 lines of legacy code
