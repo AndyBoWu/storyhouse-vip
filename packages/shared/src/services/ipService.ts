@@ -294,7 +294,7 @@ export class IPService {
           derivativesApproval: false,
           derivativesReciprocal: tier.terms.shareAlike,
           derivativeRevCeiling: 0n,
-          currency: '0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E' as Address, // TIP token
+          currency: '0x1514000000000000000000000000000000000000' as Address, // WIP token (whitelisted by Story Protocol)
           uri: '',
           txOptions: {}
         })
