@@ -7,18 +7,18 @@ import "../src/TIPToken.sol";
 import "../src/RewardsManager.sol";
 import "../src/UnifiedRewardsController.sol";
 import "../src/ChapterAccessController.sol";
-import "../src/HybridRevenueController.sol";
+import "../src/HybridRevenueControllerV2.sol";
 
 /**
  * @title Deploy 5-Contract Architecture Script
- * @dev Idempotent deployment script for the optimized StoryHouse 5-contract architecture
+ * @dev Idempotent deployment script for the optimized StoryHouse architecture
  *
  * Architecture:
  * ├── TIPToken (3.7KB) - Platform token with controlled minting
  * ├── RewardsManager (7.5KB) - Central reward orchestrator  
  * ├── UnifiedRewardsController (20.4KB) - Reading/Creation/Remix rewards
  * ├── ChapterAccessController (15.3KB) - Chapter monetization
- * └── HybridRevenueController (16.0KB) - Multi-author revenue sharing
+ * └── HybridRevenueControllerV2 (16.5KB) - Permissionless multi-author revenue sharing
  *
  * Features:
  * - Checks if contracts are already deployed (idempotent)
@@ -26,6 +26,7 @@ import "../src/HybridRevenueController.sol";
  * - Sets up all roles and permissions
  * - Validates all integrations
  * - Can be run multiple times safely
+ * - Permissionless book registration - authors manage their own books
  */
 contract Deploy is Script {
     // Deployment registry for the 5-contract architecture
@@ -34,7 +35,7 @@ contract Deploy is Script {
         address rewardsManager;
         address unifiedRewardsController;
         address chapterAccessController;
-        address hybridRevenueController;
+        address hybridRevenueControllerV2;
         address deployer;
         uint256 deploymentBlock;
         string network;
@@ -121,9 +122,9 @@ contract Deploy is Script {
         );
         console.log("");
 
-        // Step 5: Deploy Hybrid Revenue Controller
-        console.log("Step 5: Hybrid Revenue Controller");
-        registry.hybridRevenueController = deployHybridRevenueController(
+        // Step 5: Deploy Hybrid Revenue Controller V2 (Permissionless)
+        console.log("Step 5: Hybrid Revenue Controller V2 (Permissionless)");
+        registry.hybridRevenueControllerV2 = deployHybridRevenueControllerV2(
             deployer,
             registry.rewardsManager,
             registry.tipToken
@@ -258,15 +259,15 @@ contract Deploy is Script {
         return address(controller);
     }
 
-    function deployHybridRevenueController(
+    function deployHybridRevenueControllerV2(
         address deployer,
         address rewardsManager,
         address tipToken
     ) internal returns (address) {
         uint256 gasStart = gasleft();
-        console.log("[DEPLOY] Deploying Hybrid Revenue Controller...");
+        console.log("[DEPLOY] Deploying Hybrid Revenue Controller V2 (Permissionless)...");
         
-        HybridRevenueController controller = new HybridRevenueController(
+        HybridRevenueControllerV2 controller = new HybridRevenueControllerV2(
             deployer,
             rewardsManager,
             tipToken
@@ -275,9 +276,9 @@ contract Deploy is Script {
         uint256 gasUsed = gasStart - gasleft();
         totalGasUsed += gasUsed;
         
-        console.log("[OK] Hybrid Revenue Controller deployed at:", address(controller));
+        console.log("[OK] Hybrid Revenue Controller V2 deployed at:", address(controller));
         console.log("[GAS] Gas used:", gasUsed);
-        emit ContractDeployed("HybridRevenueController", address(controller), gasUsed);
+        emit ContractDeployed("HybridRevenueControllerV2", address(controller), gasUsed);
         return address(controller);
     }
 
@@ -302,11 +303,11 @@ contract Deploy is Script {
             console.log("[WARN]  Chapter Access Controller already added or failed");
         }
 
-        try rewardsManager.addController(registry.hybridRevenueController, "revenue") {
-            console.log("[OK] Added Hybrid Revenue Controller to RewardsManager");
-            emit PermissionSetupCompleted(registry.hybridRevenueController, "RewardsManager controller registration");
+        try rewardsManager.addController(registry.hybridRevenueControllerV2, "revenue") {
+            console.log("[OK] Added Hybrid Revenue Controller V2 to RewardsManager");
+            emit PermissionSetupCompleted(registry.hybridRevenueControllerV2, "RewardsManager controller registration");
         } catch {
-            console.log("[WARN]  Hybrid Revenue Controller already added or failed");
+            console.log("[WARN]  Hybrid Revenue Controller V2 already added or failed");
         }
 
         // Setup TIP Token minter role for RewardsManager
@@ -357,7 +358,7 @@ contract Deploy is Script {
         validateContract("RewardsManager", registry.rewardsManager);
         validateContract("UnifiedRewardsController", registry.unifiedRewardsController);
         validateContract("ChapterAccessController", registry.chapterAccessController);
-        validateContract("HybridRevenueController", registry.hybridRevenueController);
+        validateContract("HybridRevenueControllerV2", registry.hybridRevenueControllerV2);
 
         // Validate integrations
         validateIntegration(registry);
@@ -411,7 +412,7 @@ contract Deploy is Script {
         console.log("Rewards Manager:            ", registry.rewardsManager);
         console.log("Unified Rewards Controller: ", registry.unifiedRewardsController);
         console.log("Chapter Access Controller:  ", registry.chapterAccessController);
-        console.log("Hybrid Revenue Controller:  ", registry.hybridRevenueController);
+        console.log("Hybrid Revenue Controller V2:", registry.hybridRevenueControllerV2);
         console.log("================================================================================");
     }
 

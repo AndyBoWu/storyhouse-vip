@@ -95,6 +95,9 @@ REWARDS_MANAGER_ADDRESS=0xf5aE031bA92295C2aE86a99e88f09989339707E5
 UNIFIED_REWARDS_CONTROLLER_ADDRESS=0x741105d6ee9b25567205f57c0e4f1d293f0d00c5
 CHAPTER_ACCESS_CONTROLLER_ADDRESS=0x1bd65ad10b1ca3ed67ae75fcdd3aba256a9918e3
 HYBRID_REVENUE_CONTROLLER_ADDRESS=0xd1f7e8c6fd77dadbe946ae3e4141189b39ef7b08
+
+# HybridRevenueControllerV2 (Ready to Deploy)
+HYBRID_REVENUE_CONTROLLER_V2_ADDRESS=  # Set after deployment
 ```
 
 **Backend (.env.local in apps/backend/):**
@@ -343,6 +346,75 @@ npm update
 # Check workspace integrity
 npm ls --depth=0
 ```
+
+---
+
+## 🆕 HybridRevenueControllerV2 Development
+
+### Overview
+HybridRevenueControllerV2 enables permissionless book registration, removing the need for admin intervention and democratizing the publishing platform.
+
+### Key Development Features
+
+#### 1. Smart Contract Integration
+```typescript
+// Frontend hook for V2
+import { useBookRegistration } from '@/hooks/useBookRegistration'
+
+const { registerBook, isLoading } = useBookRegistration()
+
+// Register book directly from user's wallet
+await registerBook({
+  bookId: generateBookId(authorAddress, slug),
+  authorAddress,
+  chapterPrice: parseEther('0.5') // 0.5 TIP
+})
+```
+
+#### 2. Backend Fallback Logic
+```typescript
+// Check if V2 is deployed
+if (process.env.HYBRID_REVENUE_CONTROLLER_V2_ADDRESS) {
+  return {
+    success: true,
+    message: "Use frontend with MetaMask for permissionless registration",
+    v2Address: process.env.HYBRID_REVENUE_CONTROLLER_V2_ADDRESS
+  }
+}
+// Fall back to V1 with admin key
+```
+
+#### 3. Environment Configuration
+```bash
+# Add to .env.local after V2 deployment
+HYBRID_REVENUE_CONTROLLER_V2_ADDRESS=0x... # V2 contract address
+NEXT_PUBLIC_HYBRID_REVENUE_CONTROLLER_V2_ADDRESS=0x... # For frontend
+```
+
+#### 4. Testing V2 Features
+```bash
+# Deploy V2 locally (from contracts directory)
+cd packages/contracts
+forge script script/DeployHybridRevenueControllerV2.s.sol --rpc-url $RPC_URL
+
+# Update environment variables with deployed address
+# Test permissionless registration via frontend
+```
+
+### Migration Path
+1. **Deploy V2 Contract**: Use deployment script
+2. **Update Environment**: Add V2 addresses to .env files
+3. **Test Registration**: Verify permissionless flow works
+4. **Monitor Both Versions**: V1 and V2 can coexist
+5. **Gradual Migration**: New books use V2, existing remain on V1
+
+### Development Checklist
+- [ ] Deploy HybridRevenueControllerV2 to testnet
+- [ ] Update frontend and backend environment variables
+- [ ] Test permissionless registration flow
+- [ ] Verify book discovery functions (getAllBooks, etc.)
+- [ ] Test revenue distribution remains at 70/20/10
+- [ ] Document deployment address in README
 
 ---
 

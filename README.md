@@ -29,6 +29,15 @@ Register individual chapters as IP assets ($50-500 each) vs traditional book-lev
 - Granular licensing control
 - Lower barrier to entry for creators
 
+### 🆕 **Permissionless Book Registration** (HybridRevenueControllerV2)
+Revolutionary democratization of the publishing platform:
+- **No Admin Required**: Anyone can register their books directly through smart contracts
+- **Automatic Curator Assignment**: Book registrant (msg.sender) becomes the curator
+- **Backward Compatible**: Maintains same revenue split model (70% author, 20% curator, 10% platform)
+- **Enhanced Discovery**: Built-in tracking for all books, curator books, and author books
+- **MetaMask Integration**: Direct wallet connection for book registration
+- **Coming Soon**: V2 deployment will enable fully decentralized book publishing
+
 ### 🚀 **Unified IP Registration System** (Legacy Workflow Removed)
 Revolutionary single-transaction IP registration - NOW THE ONLY METHOD:
 - **40% Gas Cost Reduction**: Exclusively using Story Protocol's `mintAndRegisterIpAssetWithPilTerms`
@@ -180,7 +189,8 @@ forge coverage
 | Rewards Manager | `0xf5aE031bA92295C2aE86a99e88f09989339707E5` | Central reward orchestration | ✅ Deployed |
 | Unified Rewards Controller | `0x741105d6ee9b25567205f57c0e4f1d293f0d00c5` | Consolidated reward logic | ✅ Deployed |
 | Chapter Access Controller | `0x1bd65ad10b1ca3ed67ae75fcdd3aba256a9918e3` | Chapter monetization (0.5 TIP/chapter) | ✅ Deployed |
-| Hybrid Revenue Controller | `0xd1f7e8c6fd77dadbe946ae3e4141189b39ef7b08` | Multi-author revenue sharing | ✅ Deployed |
+| Hybrid Revenue Controller | `0xd1f7e8c6fd77dadbe946ae3e4141189b39ef7b08` | Multi-author revenue sharing (V1) | ✅ Deployed |
+| Hybrid Revenue Controller V2 | `TBD` | **Permissionless** book registration | 🚧 Ready to Deploy |
 | SPG NFT Contract | `0x26b6aa7e7036fc9e8fa2d8184c2cf07ae2e2412d` | IP asset NFTs | ✅ Integrated |
 
 **Architecture Benefits:**
@@ -251,6 +261,15 @@ See [Deployment Guide](./docs/project/DEPLOYMENT.md) for detailed instructions.
 7. **Monetize**: Earn from licenses, derivatives, and reader engagement with automated royalty distribution
 
 ## ✅ Current Status
+
+**🚧 Phase 6.4 Ready** - HybridRevenueControllerV2 Deployment Pending:
+
+**🆕 Permissionless Publishing Revolution**:
+- ✅ **V2 Contract Complete**: HybridRevenueControllerV2 fully implemented and tested
+- ✅ **Frontend Integration Ready**: useBookRegistration hook prepared for V2
+- ✅ **Backend Fallback Logic**: Intelligent routing between V1 (admin) and V2 (permissionless)
+- 🚧 **Deployment Pending**: Awaiting testnet deployment for permissionless book registration
+- 🎯 **Migration Path**: Existing V1 books remain functional, new books use V2
 
 **🏗️ Phase 6.1 In Progress** - QA & Production Refinements:
 

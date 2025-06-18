@@ -14,7 +14,9 @@
     "migrate-book": "cp .env.testnet .env.local && tsx scripts/migrate-book-format.ts",
     "list-books": "cp .env.testnet .env.local && tsx scripts/list-r2-books.ts",
     "check-cover": "cp .env.testnet .env.local && tsx scripts/check-book-cover.ts",
-    "migrate:license-terms": "cp .env.testnet .env.local && tsx scripts/add-license-terms-to-chapters.ts"
+    "migrate:license-terms": "cp .env.testnet .env.local && tsx scripts/add-license-terms-to-chapters.ts",
+    "check-book": "tsx scripts/check-book-registration.ts",
+    "register-book": "tsx scripts/register-book-hybrid.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.825.0",

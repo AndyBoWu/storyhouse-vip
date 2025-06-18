@@ -159,6 +159,7 @@ export async function POST(
       console.log('✅ Chapter saved successfully:', contentUrl)
 
       // Update book metadata to include this chapter in the chapter map
+      let totalChapters = 1
       try {
         // Get current book metadata
         const bookMetadata = await BookStorageService.getBookMetadata(bookId)
@@ -167,6 +168,7 @@ export async function POST(
         bookMetadata.chapterMap[`ch${body.chapterNumber}`] = chapterPath
         bookMetadata.totalChapters = Object.keys(bookMetadata.chapterMap).length
         bookMetadata.updatedAt = new Date().toISOString()
+        totalChapters = bookMetadata.totalChapters
         
         // Save updated metadata
         await BookStorageService.storeBookMetadata(authorAddress, slug, bookMetadata)
@@ -175,6 +177,37 @@ export async function POST(
         console.error('⚠️ Failed to update book metadata:', metadataError)
         // Don't fail the whole operation if metadata update fails
         // The chapter is still saved and can be discovered by direct listing
+      }
+      
+      // Register book in HybridRevenueController if blockchain registration is provided
+      if (body.ipAssetId && body.transactionHash) {
+        try {
+          console.log('🔄 Registering book in HybridRevenueController...')
+          // Use internal function call instead of HTTP request
+          const { POST: registerHybrid } = await import('../../register-hybrid/route')
+          const mockRequest = new NextRequest('http://localhost/api/books/register-hybrid', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              bookId,
+              totalChapters,
+              chapterPrices: {
+                [body.chapterNumber]: body.chapterNumber <= 3 ? '0' : '0.5'
+              }
+            })
+          })
+          
+          const hybridResponse = await registerHybrid(mockRequest)
+          const hybridResult = await hybridResponse.json()
+          if (hybridResult.success) {
+            console.log('✅ Book registered in HybridRevenueController')
+          } else {
+            console.warn('⚠️ HybridRevenueController registration failed:', hybridResult.error)
+          }
+        } catch (hybridError) {
+          console.error('⚠️ Failed to register in HybridRevenueController:', hybridError)
+          // Don't fail the whole operation
+        }
       }
       
       return NextResponse.json({
