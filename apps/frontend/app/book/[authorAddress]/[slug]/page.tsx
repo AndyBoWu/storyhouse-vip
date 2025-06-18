@@ -232,7 +232,7 @@ export default function BookPage() {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div className={`grid gap-4 mb-6 ${book.rating ? 'grid-cols-2 md:grid-cols-4' : 'grid-cols-1 md:grid-cols-3'}`}>
               <div className="bg-gray-50 rounded-lg p-3 text-center">
                 <div className="text-2xl font-bold text-blue-600">{book.totalChapters}</div>
                 <div className="text-sm text-gray-600">Chapters</div>

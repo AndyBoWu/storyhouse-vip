@@ -7,6 +7,7 @@ import { STORYHOUSE_CONTRACTS, TIP_TOKEN_ABI } from '../lib/contracts/storyhouse
 import { storyTestnet } from '../lib/config/chains'
 import { parseBookId } from '@/lib/contracts/hybridRevenueController'
 import { HYBRID_REVENUE_CONTROLLER_V2_ADDRESS, HYBRID_V2_ABI } from './useBookRegistration'
+import { useTipApproval } from './useTipApproval'
 
 const TIP_TOKEN_ADDRESS = STORYHOUSE_CONTRACTS.TIP_TOKEN
 
@@ -35,12 +36,7 @@ export function useReadingLicense() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [storyClient, setStoryClient] = useState<StoryClient | null>(null)
-  
-  // Contract hooks for TIP token approval
-  const { writeContract: writeApprove, data: approveHash } = useWriteContract()
-  const { isLoading: isApprovePending } = useWaitForTransactionReceipt({
-    hash: approveHash,
-  })
+  const { checkAllowance, approveTip, isApproving, currentAllowance } = useTipApproval()
   
   // Hook for HybridRevenueController unlockChapter
   const { 
@@ -116,47 +112,6 @@ export function useReadingLicense() {
     }
   }, [address])
 
-  /**
-   * Check and approve TIP token spending if needed
-   */
-  const ensureTipApproval = useCallback(async (
-    spenderAddress: string,
-    amount: bigint
-  ): Promise<boolean> => {
-    if (!address || !publicClient) return false
-
-    try {
-      // Check current allowance
-      const allowance = await publicClient.readContract({
-        address: TIP_TOKEN_ADDRESS,
-        abi: TIP_TOKEN_ABI,
-        functionName: 'allowance',
-        args: [address, spenderAddress],
-      }) as bigint
-
-      console.log('Current TIP allowance:', allowance.toString())
-      
-      if (allowance >= amount) {
-        console.log('Sufficient allowance already exists')
-        return true
-      }
-
-      console.log('🔐 Approving TIP token spending...')
-      writeApprove({
-        address: TIP_TOKEN_ADDRESS,
-        abi: TIP_TOKEN_ABI,
-        functionName: 'approve',
-        args: [spenderAddress, amount],
-      })
-
-      // Wait for approval to complete
-      // In a real implementation, we'd properly wait for the transaction
-      return true
-    } catch (err) {
-      console.error('Error approving TIP tokens:', err)
-      return false
-    }
-  }, [address, publicClient, writeApprove])
 
   /**
    * Mint a reading license for a paid chapter using Story Protocol SDK
@@ -228,17 +183,8 @@ export function useReadingLicense() {
       
       console.log('Licensing module address:', licensingModuleAddress)
       
-      // Ensure TIP token approval
-      const hasApproval = await ensureTipApproval(licensingModuleAddress, mintingFee)
-      if (!hasApproval) {
-        throw new Error('Failed to approve TIP token spending')
-      }
-
-      // Wait a bit for approval to be processed (in production, use proper tx receipt waiting)
-      if (approveHash) {
-        console.log('Waiting for approval transaction...')
-        await new Promise(resolve => setTimeout(resolve, 3000))
-      }
+      // We'll handle approval later when actually making the payment
+      // Skip approval here since we're using a different approach with HybridRevenueControllerV2
 
       // The new atomic flow:
       // 1. First check if AtomicLicensePurchase contract is available
@@ -322,14 +268,27 @@ export function useReadingLicense() {
           // Use HybridRevenueControllerV2 for automatic 70/20/10 revenue split
           console.log('Using HybridRevenueControllerV2 for revenue distribution...')
           
-          // First approve HybridRevenueControllerV2 to spend TIP tokens
-          const approvalSuccess = await ensureTipApproval(
-            HYBRID_REVENUE_CONTROLLER_V2_ADDRESS as Address,
-            mintingFee
-          )
+          // First check if we have sufficient allowance
+          const mintingFeeString = formatEther(mintingFee) // Convert BigInt to string
+          const hasAllowance = checkAllowance(mintingFeeString)
           
-          if (!approvalSuccess) {
-            throw new Error('Failed to approve TIP spending for HybridRevenueControllerV2')
+          if (!hasAllowance) {
+            console.log('🔐 Insufficient allowance, requesting approval...')
+            console.log('Current allowance:', currentAllowance ? formatEther(currentAllowance) : '0', 'TIP')
+            console.log('Required amount:', mintingFeeString, 'TIP')
+            
+            // Request approval with string amount
+            const approvalResult = await approveTip(mintingFeeString)
+            
+            if (!approvalResult?.success) {
+              throw new Error('Failed to approve TIP spending for HybridRevenueControllerV2')
+            }
+            
+            // Wait for approval to be confirmed
+            console.log('⏳ Waiting for approval confirmation...')
+            await new Promise(resolve => setTimeout(resolve, 3000))
+          } else {
+            console.log('✅ Sufficient allowance already exists')
           }
           
           // Unlock the chapter through HybridRevenueControllerV2
@@ -353,17 +312,47 @@ export function useReadingLicense() {
               signer: address
             })
             
+            // Add gas estimation to help with transaction
+            const gasEstimate = await publicClient.estimateContractGas({
+              address: HYBRID_REVENUE_CONTROLLER_V2_ADDRESS as Address,
+              abi: HYBRID_V2_ABI,
+              functionName: 'unlockChapter',
+              args: [bytes32Id, BigInt(chapterNumber)],
+              account: address,
+            })
+            
+            console.log('⛽ Gas estimate:', gasEstimate.toString())
+            
             writeUnlockChapter({
               address: HYBRID_REVENUE_CONTROLLER_V2_ADDRESS as Address,
               abi: HYBRID_V2_ABI,
               functionName: 'unlockChapter',
               args: [bytes32Id, BigInt(chapterNumber)],
+              gas: gasEstimate,
             })
             
             console.log('✅ writeUnlockChapter called successfully')
           } catch (writeError) {
-            console.error('Error calling writeUnlockChapter:', writeError)
-            throw new Error('Failed to initiate chapter unlock transaction')
+            console.error('❌ Error with unlockChapter transaction:', writeError)
+            // Check if it's a specific contract error
+            if (writeError instanceof Error) {
+              if (writeError.message.includes('insufficient funds')) {
+                throw new Error('Insufficient ETH for gas fees')
+              } else if (writeError.message.includes('user rejected')) {
+                throw new Error('Transaction rejected by user')
+              } else if (writeError.message.includes('already unlocked')) {
+                // If chapter is already unlocked, that's actually success!
+                console.log('✅ Chapter already unlocked by this user')
+                onSuccess?.({ 
+                  alreadyUnlocked: true,
+                  message: 'Chapter already unlocked',
+                  chapterNumber,
+                  transactionHash: 'already_unlocked'
+                })
+                return
+              }
+            }
+            throw new Error(`Failed to unlock chapter: ${writeError instanceof Error ? writeError.message : 'Unknown error'}`)
           }
           
           // The writeContract function is async, we need to wait for it to be called
@@ -503,7 +492,7 @@ export function useReadingLicense() {
     } finally {
       setIsLoading(false)
     }
-  }, [address, initializeStoryClient, ensureTipApproval, approveHash, publicClient, writeUnlockChapter, unlockHash])
+  }, [address, initializeStoryClient, publicClient, writeUnlockChapter, unlockHash, checkAllowance, approveTip, currentAllowance])
 
   /**
    * Check if user owns a reading license for a specific chapter
@@ -569,7 +558,7 @@ export function useReadingLicense() {
     mintReadingLicense,
     hasReadingLicense,
     getReadingLicensePricing,
-    isLoading: isLoading || isApprovePending || isUnlockPending,
+    isLoading: isLoading || isUnlockPending || isApproving,
     error,
     setError
   }

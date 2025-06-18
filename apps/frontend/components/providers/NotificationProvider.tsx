@@ -150,11 +150,7 @@ export function NotificationBell({ className = '' }: { className?: string }) {
       title={`Notifications ${unreadCount > 0 ? `(${unreadCount} unread)` : ''}`}
     >
       <Bell className="w-5 h-5" />
-      {unreadCount > 0 && (
-        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 animate-pulse">
-          {unreadCount > 99 ? '99+' : unreadCount}
-        </span>
-      )}
+      {/* Removed notification badge completely */}
     </button>
   )
 }

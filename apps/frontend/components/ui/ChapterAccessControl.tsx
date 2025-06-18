@@ -6,6 +6,7 @@ import { useChapterAccess } from '@/hooks/useChapterAccess'
 import { useChapterUnlock } from '@/hooks/useChapterUnlock'
 import { useReadingLicense } from '@/hooks/useReadingLicense'
 import { apiClient } from '@/lib/api-client'
+import { TIPBalanceDisplay } from './TIPBalanceDisplay'
 
 interface ChapterAccessControlProps {
   bookId: string
@@ -248,6 +249,13 @@ export default function ChapterAccessControl({
         <p className="text-orange-700 mb-4">
           Unlock this chapter for <span className="font-semibold">{pricing.unlockPrice} TIP tokens</span>
         </p>
+        
+        {/* Show TIP balance */}
+        {isConnected && (
+          <div className="mb-4">
+            <TIPBalanceDisplay />
+          </div>
+        )}
         
         {(error || web3Error || licenseError) && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">

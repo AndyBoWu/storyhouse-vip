@@ -98,7 +98,26 @@ export class ChapterAccessService {
       }
     }
 
-    // Check in-memory storage first (temporary solution)
+    // Check HybridRevenueControllerV2 for unlock status
+    if (this.hybridRevenueControllerV2) {
+      try {
+        const { bytes32Id } = parseBookId(bookId)
+        const hasUnlocked = await this.hybridRevenueControllerV2.hasUnlockedChapter(
+          userAddress,
+          bytes32Id,
+          chapterNumber
+        )
+        
+        if (hasUnlocked) {
+          console.log(`✅ User ${userAddress} has unlocked chapter ${chapterNumber} on-chain`)
+          return { hasAccess: true, reason: 'blockchain_unlocked' }
+        }
+      } catch (error) {
+        console.error('Error checking blockchain unlock status:', error)
+      }
+    }
+    
+    // Check in-memory storage (temporary solution)
     const isUnlocked = chapterUnlockStorage.hasUnlocked(
       userAddress,
       bookId,
