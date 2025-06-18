@@ -327,6 +327,7 @@ export function useReadingLicense() {
           }
           
           // Unlock the chapter through HybridRevenueControllerV2
+          console.log('📝 Submitting chapter unlock transaction...')
           writeUnlockChapter({
             address: HYBRID_REVENUE_CONTROLLER_V2_ADDRESS as Address,
             abi: HYBRID_V2_ABI,
@@ -334,17 +335,28 @@ export function useReadingLicense() {
             args: [bytes32Id, BigInt(chapterNumber)],
           })
           
+          // The writeContract function is async, we need to wait for it to be called
+          // Give it a moment to trigger the MetaMask popup
+          await new Promise(resolve => setTimeout(resolve, 500))
+          
           // Wait for unlock transaction to be submitted
-          console.log('⏳ Waiting for chapter unlock...')
+          console.log('⏳ Waiting for chapter unlock transaction...')
           let unlockConfirmed = false
           let attempts = 0
-          while (!unlockConfirmed && attempts < 30) {
-            await new Promise(resolve => setTimeout(resolve, 1000))
+          
+          // Check more frequently at the beginning
+          while (!unlockConfirmed && attempts < 60) {
+            await new Promise(resolve => setTimeout(resolve, 500))
             if (unlockHash) {
               console.log('✅ Chapter unlock transaction submitted:', unlockHash)
               unlockConfirmed = true
             }
             attempts++
+            
+            // Log progress every 5 seconds
+            if (attempts % 10 === 0) {
+              console.log(`⏳ Still waiting for transaction... (${attempts/2}s)`)
+            }
           }
           
           if (!unlockConfirmed) {

@@ -47,6 +47,16 @@ export const HYBRID_V2_ABI = [
       { name: 'ipfsMetadataHash', type: 'string' }
     ],
     stateMutability: 'view'
+  },
+  {
+    name: 'unlockChapter',
+    type: 'function',
+    inputs: [
+      { name: 'bookId', type: 'bytes32' },
+      { name: 'chapterNumber', type: 'uint256' }
+    ],
+    outputs: [],
+    stateMutability: 'nonpayable'
   }
 ] as const
 
