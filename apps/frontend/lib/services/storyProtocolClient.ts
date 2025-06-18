@@ -99,7 +99,7 @@ export class ClientStoryProtocolService {
         derivativesAttribution: true,
         derivativesApproval: false,
         derivativesReciprocal: false,
-        royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address,
+        royaltyPolicy: '0xBe54FB168b3c982b7AaE60dB6CF75Bd8447b390E' as Address, // LAP royalty policy
         defaultMintingFee: 0n,
         currency: '0x1514000000000000000000000000000000000000' as Address // WIP token (whitelisted by Story Protocol)
       },
@@ -112,7 +112,7 @@ export class ClientStoryProtocolService {
         derivativesAttribution: false,
         derivativesApproval: false,
         derivativesReciprocal: false,
-        royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address,
+        royaltyPolicy: '0xBe54FB168b3c982b7AaE60dB6CF75Bd8447b390E' as Address, // LAP royalty policy
         defaultMintingFee: 500000000000000000n, // 0.5 WIP
         currency: '0x1514000000000000000000000000000000000000' as Address // WIP token (whitelisted by Story Protocol)
       },
@@ -125,7 +125,7 @@ export class ClientStoryProtocolService {
         derivativesAttribution: true,
         derivativesApproval: true,
         derivativesReciprocal: false,
-        royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address, // TODO: Set actual royalty policy
+        royaltyPolicy: '0x9156e603C949481883B1d3355c6f1132D191fC41' as Address, // LRP royalty policy
         commercialRevShare: 10, // 10% royalty
         defaultMintingFee: 100000000000000000000n, // 100 WIP
         currency: '0x1514000000000000000000000000000000000000' as Address // WIP token (whitelisted by Story Protocol)
@@ -139,7 +139,7 @@ export class ClientStoryProtocolService {
         derivativesAttribution: false,
         derivativesApproval: false,
         derivativesReciprocal: false,
-        royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address,
+        royaltyPolicy: '0x9156e603C949481883B1d3355c6f1132D191fC41' as Address, // LRP royalty policy
         commercialRevShare: 25, // 25% royalty
         defaultMintingFee: 1000000000000000000000n, // 1000 WIP
         currency: '0x1514000000000000000000000000000000000000' as Address // WIP token (whitelisted by Story Protocol)

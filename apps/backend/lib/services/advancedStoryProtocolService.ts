@@ -87,7 +87,7 @@ export const LICENSE_TIERS: Record<string, LicenseTermsConfig> = {
     displayName: 'Free License',
     description: 'Open access with attribution required',
     transferable: true,
-    royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address, // Will be updated by configureRoyaltyPoliciesFromEnvironment()
+    royaltyPolicy: '0xBe54FB168b3c982b7AaE60dB6CF75Bd8447b390E' as Address, // LAP royalty policy
     defaultMintingFee: 0n,
     expiration: 0, // Never expires
     commercialUse: false,
@@ -108,8 +108,8 @@ export const LICENSE_TIERS: Record<string, LicenseTermsConfig> = {
     displayName: 'Reading License',
     description: 'Personal reading access - non-transferable',
     transferable: false, // 🔒 LOCKED TO WALLET
-    royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address, // Will be updated by configureRoyaltyPoliciesFromEnvironment()
-    defaultMintingFee: BigInt(0.5 * 10**18), // 0.5 TIP tokens
+    royaltyPolicy: '0xBe54FB168b3c982b7AaE60dB6CF75Bd8447b390E' as Address, // LAP royalty policy
+    defaultMintingFee: BigInt(0.5 * 10**18), // 0.5 WIP tokens
     expiration: 0, // Never expires
     commercialUse: false, // Just for reading
     commercialAttribution: false,
@@ -129,8 +129,8 @@ export const LICENSE_TIERS: Record<string, LicenseTermsConfig> = {
     displayName: 'Premium License',
     description: 'Commercial use with royalty sharing',
     transferable: true,
-    royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address, // Will be updated by configureRoyaltyPoliciesFromEnvironment()
-    defaultMintingFee: BigInt(100 * 10**18), // 100 TIP tokens
+    royaltyPolicy: '0x9156e603C949481883B1d3355c6f1132D191fC41' as Address, // LRP royalty policy
+    defaultMintingFee: BigInt(100 * 10**18), // 100 WIP tokens
     expiration: 0, // Never expires
     commercialUse: true,
     commercialAttribution: true,
@@ -150,8 +150,8 @@ export const LICENSE_TIERS: Record<string, LicenseTermsConfig> = {
     displayName: 'Exclusive License',
     description: 'Full commercial rights with high royalties',
     transferable: false,
-    royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address, // Will be updated by configureRoyaltyPoliciesFromEnvironment()
-    defaultMintingFee: BigInt(1000 * 10**18), // 1000 TIP tokens
+    royaltyPolicy: '0x9156e603C949481883B1d3355c6f1132D191fC41' as Address, // LRP royalty policy
+    defaultMintingFee: BigInt(1000 * 10**18), // 1000 WIP tokens
     expiration: 0, // Never expires
     commercialUse: true,
     commercialAttribution: true,
