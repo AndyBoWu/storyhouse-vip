@@ -100,7 +100,7 @@ export class ClientStoryProtocolService {
         distributionChannels: [],
         contentRestrictions: [],
         royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address,
-        mintingFee: 0n,
+        defaultMintingFee: 0n,
         currency: '0x1514000000000000000000000000000000000000' as Address // WIP token (whitelisted by Story Protocol)
       },
       reading: {
@@ -116,7 +116,7 @@ export class ClientStoryProtocolService {
         distributionChannels: [],
         contentRestrictions: [],
         royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address,
-        mintingFee: 500000000000000000n, // 0.5 TIP
+        defaultMintingFee: 500000000000000000n, // 0.5 WIP
         currency: '0x1514000000000000000000000000000000000000' as Address // WIP token (whitelisted by Story Protocol)
       },
       premium: {
@@ -133,7 +133,7 @@ export class ClientStoryProtocolService {
         contentRestrictions: [],
         royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address, // TODO: Set actual royalty policy
         commercialRevShare: 10, // 10% royalty
-        mintingFee: 100000000000000000000n, // 100 TIP
+        defaultMintingFee: 100000000000000000000n, // 100 WIP
         currency: '0x1514000000000000000000000000000000000000' as Address // WIP token (whitelisted by Story Protocol)
       },
       exclusive: {
@@ -150,7 +150,7 @@ export class ClientStoryProtocolService {
         contentRestrictions: [],
         royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address,
         commercialRevShare: 25, // 25% royalty
-        mintingFee: 1000000000000000000000n, // 1000 TIP
+        defaultMintingFee: 1000000000000000000000n, // 1000 WIP
         currency: '0x1514000000000000000000000000000000000000' as Address // WIP token (whitelisted by Story Protocol)
       }
     }
