@@ -232,6 +232,7 @@ export function useUnifiedPublishStory() {
         authorName: `${address!.slice(-4)}`,
         ipAssetId: registeredIPAssetId,
         transactionHash: transactionHash,
+        licenseTermsId: registrationResult.licenseTermsId ? registrationResult.licenseTermsId.toString() : undefined,
         genre: storyData.themes[0] || 'General',
         generationMethod: 'human' as const
       })

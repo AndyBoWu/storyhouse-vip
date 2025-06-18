@@ -55,17 +55,17 @@ export const CONTRACT_ADDRESSES = {
   [storyTestnet.id]: {
     // Story Protocol core contracts
     ipAssetRegistry: '0x28E59E91C0467e89fd0f0438D47Ca839cDfEc095',
-    licensingModule: '0x8652b2C6Dbb9b6F31eF5A5De1eB994BC624abF97',
-    pilTemplate: '0x7dD80b7c81E44ef5F62d8e1b8C68b1a5A5E5C5F8',
-    royaltyModule: '0x6Ef8A46584b69Be6b7bB6Aa3cb3F2c46AE97A2B1',
+    licensingModule: '0x8652B2C6dbB9B6f31eF5A5dE1eb994bc624ABF97',
+    pilTemplate: '0x7dD80B7C81E44ef5f62d8e1B8C68B1a5a5E5C5f8',
+    royaltyModule: '0x6EF8a46584B69be6b7bb6AA3cB3F2C46aE97A2b1',
     
     // StoryHouse contracts (5-contract architecture)
     tipToken: '0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E',
-    rewardsManager: '0xf5ae031ba92295c2ae86a99e88f09989339707e5',
-    unifiedRewardsController: '0x741105d6ee9b25567205f57c0e4f1d293f0d00c5',
-    chapterAccessController: '0x1bd65ad10b1ca3ed67ae75fcdd3aba256a9918e3',
-    hybridRevenueController: '0xd1f7e8c6fd77dadbe946ae3e4141189b39ef7b08',
-    spgNftContract: '0x26b6aa7e7036fc9e8fa2d8184c2cf07ae2e2412d',
+    rewardsManager: '0xf5aE031bA92295C2aE86a99e88f09989339707E5',
+    unifiedRewardsController: '0x741105D6ee9b25567205f57C0E4f1d293F0d00C5',
+    chapterAccessController: '0x1BD65ad10B1CA3ED67aE75FCdD3abA256a9918e3',
+    hybridRevenueController: '0xd1F7e8c6FD77dADbE946aE3e4141189b39Ef7b08',
+    spgNftContract: '0x26B6Aa7E7036FC9e8fa2d8184C2CF07aE2e2412d',
   },
   [storyMainnet.id]: {
     // Mainnet addresses (to be updated when available)

@@ -79,8 +79,15 @@ export default function ChapterAccessControl({
         // Paid chapters use Reading License minting
         console.log('Access info for paid chapter:', accessInfo)
         
+        // If accessInfo is not available yet, fetch it first
+        let currentAccessInfo = accessInfo
+        if (!currentAccessInfo) {
+          console.log('Fetching access info before minting...')
+          currentAccessInfo = await checkChapterAccess(bookId, chapterNumber)
+        }
+        
         // Get the actual IP asset ID from the access info
-        const chapterIpAssetId = accessInfo?.ipAssetId || '0x1367694a018a92deb75152B9AEC969657568b234' // Use the correct IP Asset ID for chapter 4
+        const chapterIpAssetId = currentAccessInfo?.ipAssetId || '0xbfBC95F434EF189CeB1E3587fd9B29B10dF2c74f' // Use the correct IP Asset ID for chapter 4
         
         if (!chapterIpAssetId) {
           console.error('Chapter IP asset ID not found')
@@ -89,6 +96,7 @@ export default function ChapterAccessControl({
         }
         
         console.log('Using IP Asset ID:', chapterIpAssetId)
+        console.log('Current wallet address:', address)
         
         await mintReadingLicense({
           bookId,

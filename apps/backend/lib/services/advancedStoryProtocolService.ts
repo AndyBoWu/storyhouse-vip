@@ -6,6 +6,7 @@
 
 import { StoryConfig, StoryClient } from '@story-protocol/core-sdk'
 import { Address, Hash, WalletClient, custom } from 'viem'
+import { CONTRACT_ADDRESSES } from '../config/blockchain'
 import type { 
   LicenseTermsConfig, 
   EnhancedChapterIPData, 
@@ -109,7 +110,7 @@ export const LICENSE_TIERS: Record<string, LicenseTermsConfig> = {
     description: 'Personal reading access - non-transferable',
     transferable: false, // 🔒 LOCKED TO WALLET
     royaltyPolicy: '0xBe54FB168b3c982b7AaE60dB6CF75Bd8447b390E' as Address, // LAP royalty policy
-    defaultMintingFee: BigInt(0.5 * 10**18), // 0.5 WIP tokens
+    defaultMintingFee: BigInt(0.5 * 10**18), // 0.5 TIP tokens
     expiration: 0, // Never expires
     commercialUse: false, // Just for reading
     commercialAttribution: false,
@@ -129,8 +130,8 @@ export const LICENSE_TIERS: Record<string, LicenseTermsConfig> = {
     displayName: 'Premium License',
     description: 'Commercial use with royalty sharing',
     transferable: true,
-    royaltyPolicy: '0x9156e603C949481883B1d3355c6f1132D191fC41' as Address, // LRP royalty policy
-    defaultMintingFee: BigInt(100 * 10**18), // 100 WIP tokens
+    royaltyPolicy: '0xBe54FB168b3c982b7AaE60dB6CF75Bd8447b390E' as Address, // LAP royalty policy - works with TIP tokens via HybridRevenueController
+    defaultMintingFee: BigInt(100 * 10**18), // 100 TIP tokens
     expiration: 0, // Never expires
     commercialUse: true,
     commercialAttribution: true,
@@ -151,7 +152,7 @@ export const LICENSE_TIERS: Record<string, LicenseTermsConfig> = {
     description: 'Full commercial rights with high royalties',
     transferable: false,
     royaltyPolicy: '0x9156e603C949481883B1d3355c6f1132D191fC41' as Address, // LRP royalty policy
-    defaultMintingFee: BigInt(1000 * 10**18), // 1000 WIP tokens
+    defaultMintingFee: BigInt(1000 * 10**18), // 1000 TIP tokens
     expiration: 0, // Never expires
     commercialUse: true,
     commercialAttribution: true,
@@ -228,7 +229,7 @@ export class AdvancedStoryProtocolService {
       derivativesApproval: false,
       derivativesReciprocal: licenseConfig.derivativesAllowed, // 🔗 CRITICAL: Enable derivative chains for all tiers that allow derivatives
       derivativeRevCeiling: BigInt(0),
-      currency: '0x1514000000000000000000000000000000000000' as Address, // WIP token (whitelisted by Story Protocol)
+      currency: '0x0000000000000000000000000000000000000000' as Address, // Zero address - payment handled externally with TIP tokens
       uri: ''
     }
   }
@@ -314,7 +315,7 @@ export class AdvancedStoryProtocolService {
         derivativesApproval: false, // No approval needed
         derivativesReciprocal: licenseConfig.shareAlike || false,
         derivativeRevCeiling: BigInt(0), // No ceiling
-        currency: '0x1514000000000000000000000000000000000000' as Address, // WIP token (whitelisted by Story Protocol) address
+        currency: '0x0000000000000000000000000000000000000000' as Address, // Zero address - payment handled externally with TIP tokens address
         uri: '', // License metadata URI (can be empty for now)
         txOptions: {}
       }

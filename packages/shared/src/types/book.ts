@@ -70,6 +70,7 @@ export interface ChapterMetadata {
   // IP Registration
   ipAssetId?: string;        // Story Protocol chapter IP asset ID
   parentIpAssetId?: string;  // Book IP asset ID (parent)
+  licenseTermsId?: string;   // Story Protocol license terms ID for this chapter
   
   // Economics
   unlockPrice: number;       // $TIP cost to read

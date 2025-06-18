@@ -200,10 +200,10 @@ export async function GET(
       )
       ipAssetId = chapterData.ipAssetId
       parentIpAssetId = chapterData.parentIpAssetId
+      licenseTermsId = chapterData.licenseTermsId
       
-      // Get book metadata for license terms ID
+      // Get book metadata for additional info
       const bookMetadata = await BookStorageService.getBookMetadata(bookId as any)
-      licenseTermsId = bookMetadata.licenseTermsId
       
       // If chapter doesn't have parent IP, use book's IP asset ID
       if (!parentIpAssetId && bookMetadata.ipAssetId) {

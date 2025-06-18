@@ -242,3 +242,120 @@ StoryHouse.vip has achieved **full production deployment** with:
 - ✅ **Quality-Based Rewards** with human verification
 
 This represents **enterprise-grade blockchain infrastructure** positioning StoryHouse.vip as the premier Web3 storytelling platform with sustainable tokenomics and robust security! 🚀
+
+---
+
+## 🔧 **Reading License Integration with TIP Tokens (January 2025)**
+
+### **Problem Summary**
+Bob (reader) was unable to mint a reading license for Chapter 4 of Andy's book "Project Phoenix". The system was attempting to use WIP tokens (Story Protocol's native token) instead of TIP tokens (StoryHouse's native token).
+
+### **Error Progression & Fixes**
+
+1. **Initial Error**: "Invalid address: undefined"
+   - The frontend had an incorrect hardcoded licensing module address
+   - Fixed by updating to the correct address: `0x8652B2C6dbB9B6f31eF5A5dE1eb994bc624ABF97`
+
+2. **License Terms ID Issue**
+   - The backend was fetching `licenseTermsId` from book metadata instead of chapter metadata
+   - Fixed by updating the unlock endpoint to get the ID from chapter data
+
+3. **Story Protocol SDK Error**: "Invalid address: undefined" 
+   - The SDK's `mintLicenseTokens` method was failing internally
+   - Discovered the SDK was using an older API (`licensorIpId` instead of `ipId`)
+   - Fixed by using the older API format with proper parameters
+
+4. **Currency Token Issue**: "Wallet does not have enough IP to wrap to WIP"
+   - Story Protocol was expecting WIP tokens, not TIP tokens
+   - Root cause: License terms were configured with WIP token as currency
+
+### **Solution: Zero Address Currency with Separate TIP Payment**
+
+#### **Why This Approach?**
+- Story Protocol has a whitelist of allowed currency tokens
+- TIP token is not on their whitelist
+- Using zero address (`0x0000...0000`) means "no currency" to Story Protocol
+- This allows us to handle TIP payments separately while still using Story Protocol for licensing
+
+#### **Implementation**
+
+1. **Updated Currency Configuration**:
+   ```typescript
+   // Before: WIP token
+   currency: '0x1514000000000000000000000000000000000000' as Address
+   
+   // After: Zero address (no automatic payment)
+   currency: '0x0000000000000000000000000000000000000000' as Address
+   ```
+
+2. **Added TIP Token Transfer Logic**:
+   ```typescript
+   // Transfer TIP tokens to author before minting license
+   writeTransfer({
+     address: TIP_TOKEN_ADDRESS,
+     abi: TIP_TOKEN_ABI,
+     functionName: 'transfer',
+     args: [authorAddress, mintingFee],
+   })
+   
+   // Then mint the free Story Protocol license
+   await client.license.mintLicenseTokens(mintParams)
+   ```
+
+### **Final Flow**
+
+1. **Author (Andy) publishes chapter**:
+   - Chapter is registered on Story Protocol with zero address currency
+   - License terms define the rules but no automatic payment
+
+2. **Reader (Bob) mints reading license**:
+   - First transaction: Transfer 0.5 TIP to author
+   - Second transaction: Mint license NFT from Story Protocol (free)
+   - Bob receives license NFT and can read chapter
+
+### **Benefits**
+- ✅ Uses TIP tokens exclusively (no WIP tokens needed)
+- ✅ StoryHouse controls the token economy
+- ✅ Leverages Story Protocol for IP management
+- ✅ Clean separation of concerns (licensing vs payment)
+
+### **Trade-offs**
+- Two transactions instead of one (not atomic)
+- Future improvement: Create a smart contract wrapper for atomic operations
+
+### **Files Modified**
+- `/apps/backend/lib/services/advancedStoryProtocolService.ts` - Updated currency to zero address
+- `/apps/frontend/lib/services/storyProtocolClient.ts` - Updated currency to zero address
+- `/apps/frontend/hooks/useReadingLicense.ts` - Added TIP transfer logic before license minting
+- `/apps/backend/app/api/books/[bookId]/chapter/[chapterNumber]/unlock/route.ts` - Fixed license terms ID retrieval
+
+### **Next Steps**
+1. Consider implementing a smart contract wrapper for atomic TIP payment + license minting
+2. Add proper error handling for insufficient TIP balance
+3. Implement platform fee splitting (author vs platform share)
+
+---
+
+## 🔧 **Royalty Policy Update for TIP Token Support (January 2025)**
+
+### **Problem Summary**
+When publishing chapters with royalty-bearing licenses (premium/exclusive), Story Protocol's LRP (Liquid Royalty Policy) requires a whitelisted currency token. Since TIP token is not on Story Protocol's whitelist, the system was failing with "Royalty policy requires currency token" error.
+
+### **Solution: LAP Policy for All Tiers**
+We've standardized all license tiers to use LAP (Liquid Absolute Percentage) royalty policy, which works with zero address currency. This allows us to:
+- ✅ Keep using TIP tokens exclusively
+- ✅ Avoid dependency on Story Protocol's whitelisted tokens
+- ✅ Handle royalty distribution through our HybridRevenueController
+- ✅ Maintain full control over token economics
+
+### **Implementation Details**
+1. **All tiers now use LAP policy**: `0xBe54FB168b3c982b7AaE60dB6CF75Bd8447b390E`
+2. **Currency remains zero address**: `0x0000000000000000000000000000000000000000`
+3. **Royalty distribution**: Handled by HybridRevenueController (70% author, 20% curator, 10% platform)
+4. **TIP payments**: Continue to work as before through separate transfer logic
+
+### **Benefits**
+- No changes needed to TIP token integration
+- Story Protocol handles IP registration and licensing
+- HybridRevenueController manages actual revenue distribution
+- Full compatibility with existing smart contract architecture

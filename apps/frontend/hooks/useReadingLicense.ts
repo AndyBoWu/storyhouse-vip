@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react'
 import { useAccount, useWriteContract, useWaitForTransactionReceipt, usePublicClient } from 'wagmi'
 import { StoryClient, StoryConfig } from '@story-protocol/core-sdk'
-import { custom, parseEther } from 'viem'
+import { custom, parseEther, formatEther, type Address, createWalletClient } from 'viem'
 import { apiClient } from '@/lib/api-client'
 import { STORYHOUSE_CONTRACTS, TIP_TOKEN_ABI } from '../lib/contracts/storyhouse'
 import { storyTestnet } from '../lib/config/chains'
@@ -39,22 +39,41 @@ export function useReadingLicense() {
   const { isLoading: isApprovePending } = useWaitForTransactionReceipt({
     hash: approveHash,
   })
+  
+  // Hook for TIP token transfer
+  const { writeContract: writeTransfer, data: transferHash } = useWriteContract()
+  const { isLoading: isTransferPending } = useWaitForTransactionReceipt({
+    hash: transferHash,
+  })
 
   /**
    * Initialize Story Protocol SDK with user's wallet
    */
-  const initializeStoryClient = useCallback(async () => {
-    if (!address || storyClient) return storyClient
+  const initializeStoryClient = useCallback(async (forceNew = false) => {
+    if (!address) return null
+    
+    // For minting operations, always create a fresh client to ensure proper wallet connection
+    if (storyClient && !forceNew) {
+      console.log('Using existing Story Protocol client')
+      return storyClient
+    }
 
     try {
+      console.log('Creating new Story Protocol client with address:', address)
+      
+      // Use the same pattern as the publishing flow
       const config: StoryConfig = {
-        account: address,
+        account: address as `0x${string}`,
         transport: custom(window.ethereum!),
-        chainId: storyTestnet.id as 1315
+        chainId: 1315 // Use the numeric value directly
       }
 
       const client = StoryClient.newClient(config)
-      setStoryClient(client)
+      
+      if (forceNew || !storyClient) {
+        setStoryClient(client)
+      }
+      
       return client
     } catch (err) {
       console.error('Failed to initialize Story Protocol SDK:', err)
@@ -160,35 +179,21 @@ export function useReadingLicense() {
         userAddress: address
       })
 
-      // Initialize Story Protocol SDK
-      const client = await initializeStoryClient()
+      // Initialize Story Protocol SDK - force new client for minting
+      console.log('Initializing Story Protocol client for minting...')
+      const client = await initializeStoryClient(true)
       if (!client) {
         throw new Error('Failed to initialize Story Protocol SDK')
       }
+      console.log('Story Protocol client initialized:', !!client)
 
       // Get license terms ID from the chapter access info
       // First, fetch the chapter info to get the license terms ID
-      let chapterInfo: any = null
-      try {
-        chapterInfo = await apiClient.get(`/books/${encodeURIComponent(bookId)}/chapter/${chapterNumber}/info`)
-        console.log('Chapter info response:', chapterInfo)
-      } catch (err) {
-        console.warn('Failed to fetch chapter info, using fallback:', err)
-        // Use fallback for known chapters
-        if (bookId === '0x3873c0d1bcfa245773b13b694a49dac5b3f03ca2' && chapterNumber === 4) {
-          chapterInfo = {
-            ipAssetId: '0x1367694a018a92deb75152B9AEC969657568b234',
-            licenseTermsId: '13'
-          }
-        }
-      }
+      // Fetch chapter info to get the license terms ID
+      const chapterInfo = await apiClient.get(`/books/${encodeURIComponent(bookId)}/chapter/${chapterNumber}/info`)
+      console.log('Chapter info response:', chapterInfo)
       
-      // For chapter 4 of Project Phoenix, use the known license terms ID from the transaction
-      const licenseTermsIdValue = (bookId === '0x3873c0d1bcfa245773b13b694a49dac5b3f03ca2' && chapterNumber === 4) 
-        ? '13' 
-        : chapterInfo?.licenseTermsId
-      
-      if (!chapterInfo || !licenseTermsIdValue) {
+      if (!chapterInfo || !chapterInfo.licenseTermsId) {
         throw new Error('License terms not found for this chapter. The book may not be properly registered with Story Protocol.')
       }
       
@@ -206,11 +211,12 @@ export function useReadingLicense() {
         throw new Error('Chapter is not registered as an IP asset. Cannot mint license.')
       }
       
-      const licenseTermsId = BigInt(licenseTermsIdValue)
+      const licenseTermsId = BigInt(chapterInfo.licenseTermsId)
 
       // Check if we need TIP token approval
       const mintingFee = parseEther('0.5') // 0.5 TIP for reading license
-      const licensingModuleAddress = await client.licensingModuleClient.address
+      // Use the correct licensing module address for Story Protocol Iliad testnet
+      const licensingModuleAddress = '0x8652B2C6dbB9B6f31eF5A5dE1eb994bc624ABF97' as Address
       
       console.log('Licensing module address:', licensingModuleAddress)
       
@@ -228,29 +234,126 @@ export function useReadingLicense() {
 
       // Mint the license token using Story Protocol SDK
       console.log('📝 Minting license token on Story Protocol...')
-      const result = await client.license.mintLicenseTokens({
+      console.log('Mint parameters:', {
         ipId: chapterIpAssetId,
-        licenseTermsId: licenseTermsId,
+        licenseTermsId: licenseTermsId.toString(),
         receiver: address,
-        amount: 1n, // Mint 1 license token
-        txOptions: {}
+        amount: '1'
       })
-
-      if (!result.txHash) {
-        throw new Error('Failed to mint license token - no transaction hash returned')
+      
+      if (!address) {
+        throw new Error('Wallet address is undefined. Please ensure your wallet is connected.')
       }
+      
+      // Ensure address is valid format
+      const receiverAddress = address as `0x${string}`
+      
+      try {
+        console.log('Calling mintLicenseTokens with:', {
+          ipId: chapterIpAssetId,
+          licenseTermsId: licenseTermsId.toString(),
+          receiver: receiverAddress,
+          amount: '1n',
+          client: !!client,
+          clientLicense: !!client.license,
+          clientLicenseMint: !!client.license?.mintLicenseTokens
+        })
+        
+        // Wait a moment to ensure wallet is ready
+        await new Promise(resolve => setTimeout(resolve, 100))
+        
+        // Since Story Protocol uses zero address, we need to handle TIP payment separately
+        // Transfer TIP tokens to the author before minting the license
+        console.log(`💰 Transferring ${formatEther(mintingFee)} TIP to author...`)
+        
+        // Get the author address from chapter info
+        const authorAddress = chapterInfo.authorAddress
+        if (!authorAddress) {
+          throw new Error('Author address not found for this chapter')
+        }
+        
+        try {
+          // Transfer TIP tokens to the author
+          writeTransfer({
+            address: TIP_TOKEN_ADDRESS,
+            abi: TIP_TOKEN_ABI,
+            functionName: 'transfer',
+            args: [authorAddress as `0x${string}`, mintingFee],
+          })
+          
+          // Wait for transfer transaction to be submitted
+          console.log('⏳ Waiting for TIP transfer...')
+          let transferConfirmed = false
+          let attempts = 0
+          while (!transferConfirmed && attempts < 30) {
+            await new Promise(resolve => setTimeout(resolve, 1000))
+            if (transferHash) {
+              console.log('✅ TIP transfer transaction submitted:', transferHash)
+              transferConfirmed = true
+            }
+            attempts++
+          }
+          
+          if (!transferConfirmed) {
+            throw new Error('TIP transfer timeout - please try again')
+          }
+          
+          // Wait a bit more for confirmation
+          await new Promise(resolve => setTimeout(resolve, 3000))
+          console.log('✅ TIP tokens transferred to author:', authorAddress)
+          
+        } catch (tipError) {
+          console.error('Failed to transfer TIP tokens:', tipError)
+          throw new Error('Failed to transfer TIP tokens to author. Please ensure you have sufficient TIP balance.')
+        }
+        
+        // Check if we should use the newer API after all
+        // The backend code might be outdated, let's try the newer SDK API with ipId
+        const mintParams = {
+          ipId: chapterIpAssetId as `0x${string}`,
+          licenseTermsId: licenseTermsId, // Already a BigInt from earlier
+          receiver: receiverAddress as `0x${string}`,
+          amount: 1n,
+          txOptions: {
+            // Try to specify we're using TIP tokens, not IP tokens
+            value: BigInt(0) // No ETH value needed
+          }
+        }
+        
+        console.log('Final mint params (using backend format):', {
+          ...mintParams,
+          licenseTermsId: mintParams.licenseTermsId.toString(),
+          amount: mintParams.amount,
+          maxMintingFee: mintParams.maxMintingFee.toString()
+        })
+        
+        const result = await client.license.mintLicenseTokens(mintParams as any)
+        
+        if (!result.txHash) {
+          throw new Error('Failed to mint license token - no transaction hash returned')
+        }
 
-      console.log('✅ Reading license minted successfully!')
-      console.log('Transaction hash:', result.txHash)
-      console.log('License token ID:', result.licenseTokenIds?.[0])
-
-      const licenseData = {
-        licenseTokenId: result.licenseTokenIds?.[0]?.toString(),
-        transactionHash: result.txHash,
-        ipAssetId: chapterIpAssetId,
-        receiver: address,
-        amount: 1,
-        mintingFee: '0.5'
+        console.log('✅ Reading license minted successfully!')
+        console.log('Transaction hash:', result.txHash)
+        console.log('License token ID:', result.licenseTokenIds?.[0])
+        
+        const licenseData = {
+          licenseTokenId: result.licenseTokenIds?.[0]?.toString(),
+          transactionHash: result.txHash,
+          ipAssetId: chapterIpAssetId,
+          receiver: address,
+          amount: 1,
+          mintingFee: '0.5'
+        }
+        
+        return licenseData
+      } catch (mintError) {
+        console.error('Mint license tokens error details:', {
+          error: mintError,
+          message: mintError instanceof Error ? mintError.message : 'Unknown error',
+          stack: mintError instanceof Error ? mintError.stack : undefined
+        })
+        throw mintError
       }
 
       // Update backend to record the license minting (optional, for tracking)
@@ -306,9 +409,9 @@ export function useReadingLicense() {
       }
 
       // Check license token balance
-      // The license registry contract should have a balanceOf method
-      // This is a simplified check - in production, you'd query the actual license NFT contract
-      const licenseRegistryAddress = await client.licenseRegistryReadOnlyClient.address
+      // For now, we'll skip the ownership check as it requires complex queries
+      // In production, you'd check the license NFT ownership properly
+      console.log('License ownership check not implemented yet')
       
       // For now, return false as we need the actual license token contract address
       // In production, you'd check: licenseToken.balanceOf(address, licenseTokenId) > 0

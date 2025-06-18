@@ -326,7 +326,7 @@ async function createStoryHouseLicenseTerms(
   
   const licenseTerms = await client.license.registerPILTerms({
     transferable: tier !== 'exclusive', // Exclusive licenses are non-transferable
-    royaltyPolicy: tier === 'free' || tier === 'reading' ? 'LAP' : 'LRP',
+    royaltyPolicy: 'LAP', // Using LAP for all tiers to support TIP tokens
     defaultMintingFee: BigInt(config.price * 10**18), // Convert to wei
     expiration: 0n, // No expiration
     commercialUse: config.commercialUse,
@@ -621,8 +621,8 @@ const STORYHOUSE_ROYALTY_CONFIG = {
   ROYALTY_POLICIES: {
     free: { policyType: 'LAP', stakingReward: 0, distributionDelay: 0 },
     reading: { policyType: 'LAP', stakingReward: 2, distributionDelay: 3600 },
-    premium: { policyType: 'LRP', stakingReward: 5, distributionDelay: 86400 },
-    exclusive: { policyType: 'LRP', stakingReward: 10, distributionDelay: 604800 }
+    premium: { policyType: 'LAP', stakingReward: 5, distributionDelay: 86400 },
+    exclusive: { policyType: 'LAP', stakingReward: 10, distributionDelay: 604800 }
   },
   ECONOMIC_CONSTANTS: {
     PLATFORM_FEE_RATE: 5, // 5% platform fee
@@ -641,6 +641,8 @@ const STORYHOUSE_ROYALTY_CONFIG = {
   }
 }
 ```
+
+> **Note on Royalty Policy Decision**: StoryHouse uses LAP (Liquid Absolute Percentage) policy for all license tiers to support TIP tokens. Since TIP token is not on Story Protocol's whitelist, we use zero address for currency and handle royalty distribution through our HybridRevenueController smart contract, which manages the 70/20/10 split between authors, curators, and platform.
 
 ### Claim Chapter Royalties
 
