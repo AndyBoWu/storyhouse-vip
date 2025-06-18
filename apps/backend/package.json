@@ -23,6 +23,7 @@
     "@storyhouse/shared": "file:./shared-bundle",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
+    "ethers": "^6.14.4",
     "next": "^15.3.3",
     "node-fetch": "^3.3.2",
     "openai": "^4.28.0",

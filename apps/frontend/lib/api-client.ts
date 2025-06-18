@@ -48,9 +48,23 @@ export async function apiRequest<T = any>(
     nodeEnv: process.env.NODE_ENV
   })
   
+  // Get user address from window if available
+  let userAddress: string | undefined
+  if (typeof window !== 'undefined' && (window as any).ethereum) {
+    try {
+      const accounts = await (window as any).ethereum.request({ 
+        method: 'eth_accounts' 
+      })
+      userAddress = accounts[0]
+    } catch (error) {
+      console.debug('Could not get user address:', error)
+    }
+  }
+  
   const defaultOptions: RequestInit = {
     headers: {
       'Content-Type': 'application/json',
+      ...(userAddress ? { 'x-user-address': userAddress } : {}),
       ...options.headers,
     },
   }
