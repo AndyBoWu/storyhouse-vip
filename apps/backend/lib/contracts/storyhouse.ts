@@ -5,7 +5,8 @@ import { Address, Hash } from 'viem'
 export const STORYHOUSE_CONTRACTS = {
   TIP_TOKEN: '0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E' as Address,
   CHAPTER_ACCESS_CONTROLLER: '0x1bd65ad10b1ca3ed67ae75fcdd3aba256a9918e3' as Address,
-  HYBRID_REVENUE_CONTROLLER: '0xd1f7e8c6fd77dadbe946ae3e4141189b39ef7b08' as Address,
+  HYBRID_REVENUE_CONTROLLER: '0xd1f7e8c6fd77dadbe946ae3e4141189b39ef7b08' as Address, // V1 - Legacy
+  HYBRID_REVENUE_CONTROLLER_V2: '0x99dA048826Bbb8189FBB6C3e62EaA75d0fB36812' as Address, // V2 - Current
 } as const
 
 // Essential ABI fragments for frontend operations
@@ -272,6 +273,61 @@ export const HYBRID_REVENUE_CONTROLLER_ABI = [
       { name: 'isDerivative', type: 'bool' },
       { name: 'parentBookId', type: 'bytes32' },
       { name: 'isActive', type: 'bool' }
+    ]
+  }
+] as const
+
+// HybridRevenueControllerV2 ABI - Permissionless version
+export const HYBRID_REVENUE_CONTROLLER_V2_ABI = [
+  {
+    name: 'registerBook',
+    type: 'function',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'bookId', type: 'bytes32' },
+      { name: 'isDerivative', type: 'bool' },
+      { name: 'parentBookId', type: 'bytes32' },
+      { name: 'totalChapters', type: 'uint256' },
+      { name: 'ipfsMetadataHash', type: 'string' }
+    ],
+    outputs: []
+  },
+  {
+    name: 'setChapterAttribution',
+    type: 'function',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'bookId', type: 'bytes32' },
+      { name: 'chapterNumber', type: 'uint256' },
+      { name: 'originalAuthor', type: 'address' },
+      { name: 'sourceBookId', type: 'bytes32' },
+      { name: 'unlockPrice', type: 'uint256' },
+      { name: 'isOriginalContent', type: 'bool' }
+    ],
+    outputs: []
+  },
+  {
+    name: 'unlockChapter',
+    type: 'function',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'bookId', type: 'bytes32' },
+      { name: 'chapterNumber', type: 'uint256' }
+    ],
+    outputs: []
+  },
+  {
+    name: 'books',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [{ name: '', type: 'bytes32' }],
+    outputs: [
+      { name: 'curator', type: 'address' },
+      { name: 'isDerivative', type: 'bool' },
+      { name: 'parentBookId', type: 'bytes32' },
+      { name: 'totalChapters', type: 'uint256' },
+      { name: 'isActive', type: 'bool' },
+      { name: 'ipfsMetadataHash', type: 'string' }
     ]
   }
 ] as const

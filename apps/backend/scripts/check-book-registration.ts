@@ -1,8 +1,7 @@
 import { createPublicClient, http, keccak256, toBytes } from 'viem';
 
 const BOOK_ID = '0x3873c0d1bcfa245773b13b694a49dac5b3f03ca2/project-phoenix';
-// NOTE: This address is currently deployed with Standalone version - needs redeployment
-const HYBRID_REVENUE_CONTROLLER_V2_ADDRESS = '0x9c6a3c50e5d77f99d805d8d7c935acb23208fd9f';
+const HYBRID_REVENUE_CONTROLLER_V2_ADDRESS = '0x99dA048826Bbb8189FBB6C3e62EaA75d0fB36812';
 
 const client = createPublicClient({
   transport: http('https://aeneid.storyrpc.io')

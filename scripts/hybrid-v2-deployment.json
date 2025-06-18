@@ -1,6 +1,6 @@
 {
-  "contractName": "HybridRevenueControllerV2 (was Standalone - needs redeployment)",
-  "address": "0x9c6a3c50e5d77f99d805d8d7c935acb23208fd9f",
+  "contractName": "HybridRevenueControllerV2",
+  "address": "0x99dA048826Bbb8189FBB6C3e62EaA75d0fB36812",
   "deployer": "0xD9b6d1bd7D8A90915B905EB801c55bA5De1d4476",
   "tipToken": "0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E",
   "transactionHash": "0xdd4e6011fca674139d4256d86b8099eb171cc9326b200eef5ab9c76bbd2276e2",
@@ -18,7 +18,7 @@
   "contracts": {
     "TIPToken": "0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E",
     "ChapterAccessController": "0x1BD65ad10B1CA3ED67aE75FCdD3abA256a9918e3",
-    "HybridRevenueControllerV2": "0x9c6a3c50e5d77f99d805d8d7c935acb23208fd9f"
+    "HybridRevenueControllerV2": "0x99dA048826Bbb8189FBB6C3e62EaA75d0fB36812"
   },
   "revenueShares": {
     "author": "70%",
@@ -27,31 +27,31 @@
   },
   "configuration": {
     "backend": {
-      "HYBRID_REVENUE_CONTROLLER_V2_ADDRESS": "0x9c6a3c50e5d77f99d805d8d7c935acb23208fd9f",
+      "HYBRID_REVENUE_CONTROLLER_V2_ADDRESS": "0x99dA048826Bbb8189FBB6C3e62EaA75d0fB36812",
       "status": "updated"
     },
     "frontend": {
-      "NEXT_PUBLIC_HYBRID_REVENUE_CONTROLLER_V2_ADDRESS": "0x9c6a3c50e5d77f99d805d8d7c935acb23208fd9f",
+      "NEXT_PUBLIC_HYBRID_REVENUE_CONTROLLER_V2_ADDRESS": "0x99dA048826Bbb8189FBB6C3e62EaA75d0fB36812",
       "status": "updated"
     },
     "blockchain": {
-      "hybridRevenueControllerV2": "0x9c6a3c50e5d77f99d805d8d7c935acb23208fd9f",
+      "hybridRevenueControllerV2": "0x99dA048826Bbb8189FBB6C3e62EaA75d0fB36812",
       "status": "updated"
     }
   },
   "verification": {
     "explorerUrl": "https://aeneid.storyscan.xyz/tx/0xdd4e6011fca674139d4256d86b8099eb171cc9326b200eef5ab9c76bbd2276e2",
-    "contractUrl": "https://aeneid.storyscan.xyz/address/0x9c6a3c50e5d77f99d805d8d7c935acb23208fd9f",
+    "contractUrl": "https://aeneid.storyscan.xyz/address/0x99dA048826Bbb8189FBB6C3e62EaA75d0fB36812",
     "status": "pending"
   },
   "nextSteps": [
-    "🚨 REDEPLOY REQUIRED - This was Standalone version",
-    "🚨 Run: cd packages/contracts && ./deploy.sh v2",
-    "✅ Update backend environment variables",
-    "✅ Update frontend environment variables", 
-    "✅ Update contract configurations in codebase",
+    "✅ Deployment complete",
+    "✅ Backend contract addresses updated",
+    "✅ Frontend contract addresses updated", 
+    "✅ Book registration validation added to backend",
+    "✅ Contract configurations in codebase updated",
+    "⏳ Authors need to register their books for revenue sharing",
     "⏳ Test book registration through frontend",
-    "⏳ Verify revenue distribution works correctly",
-    "⏳ Verify V2 contract on StoryScan"
+    "⏳ Verify revenue distribution works correctly"
   ]
 }

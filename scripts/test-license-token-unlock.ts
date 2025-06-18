@@ -7,7 +7,7 @@ config({ path: path.resolve(__dirname, '../apps/backend/.env.local') })
 
 const STORY_RPC_URL = 'https://aeneid.storyrpc.io'
 const TIP_TOKEN_ADDRESS = '0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E'
-const HYBRID_REVENUE_CONTROLLER_V2_ADDRESS = '0x9c6a3c50e5d77f99d805d8d7c935acb23208fd9f'
+const HYBRID_REVENUE_CONTROLLER_V2_ADDRESS = '0x99dA048826Bbb8189FBB6C3e62EaA75d0fB36812'
 
 // Test parameters
 const TEST_BOOK_ID = 'test-author/sample-book' // Replace with actual book ID

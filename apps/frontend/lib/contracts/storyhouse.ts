@@ -5,7 +5,8 @@ import { Address, Hash } from 'viem'
 export const STORYHOUSE_CONTRACTS = {
   TIP_TOKEN: '0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E' as Address,
   CHAPTER_ACCESS_CONTROLLER: '0x1BD65ad10B1CA3ED67aE75FCdD3abA256a9918e3' as Address,
-  HYBRID_REVENUE_CONTROLLER: '0xd1F7e8c6FD77dADbE946aE3e4141189b39Ef7b08' as Address,
+  HYBRID_REVENUE_CONTROLLER: '0xd1F7e8c6FD77dADbE946aE3e4141189b39Ef7b08' as Address, // V1 - Legacy
+  HYBRID_REVENUE_CONTROLLER_V2: '0x99dA048826Bbb8189FBB6C3e62EaA75d0fB36812' as Address, // V2 - Current
 } as const
 
 // Essential ABI fragments for frontend operations
