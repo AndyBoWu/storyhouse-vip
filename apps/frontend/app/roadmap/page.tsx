@@ -40,8 +40,8 @@ const roadmapData: RoadmapPhase[] = [
     status: 'completed',
     items: [
       'TIP token implementation',
-      'Read-to-earn mechanics',
-      'Creator rewards system',
+      'Chapter pricing system',
+      'Revenue distribution model',
       'Economic model validation'
     ]
   },

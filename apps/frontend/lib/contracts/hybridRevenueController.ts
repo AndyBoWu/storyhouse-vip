@@ -1,11 +1,4 @@
 import { Address } from 'viem'
-import HybridRevenueControllerABI from './HybridRevenueController.abi.json'
-
-// HybridRevenueController contract address from blockchain config
-export const HYBRID_REVENUE_CONTROLLER_ADDRESS = '0xd1F7e8c6FD77dADbE946aE3e4141189b39Ef7b08' as Address
-
-// Export the ABI
-export const HYBRID_REVENUE_CONTROLLER_ABI = HybridRevenueControllerABI as any
 
 // Helper function to convert string to bytes32
 export function stringToBytes32(text: string): `0x${string}` {

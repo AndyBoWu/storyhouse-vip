@@ -156,6 +156,44 @@ Removed unused and test API endpoints to improve security and reduce maintenance
 - Removed 1,438 lines of unused code
 - Improved maintainability
 
+### 🚀 HybridRevenueControllerV2 - Permissionless Revenue Sharing (January 2025)
+
+**Status: Ready for Deployment**
+
+#### Overview
+Replaced centralized HybridRevenueController (V1) with fully permissionless V2. Authors can now register their own books without admin approval, making the platform truly decentralized.
+
+#### Key Changes
+- **Removed HybridRevenueController V1** - No more STORY_MANAGER_ROLE requirement
+- **Permissionless Registration** - Authors register books directly through MetaMask
+- **Automatic Curator Assignment** - Registering address becomes the curator
+- **Same Revenue Model** - 70% author, 20% curator, 10% platform
+- **Frontend-Only Registration** - Backend just directs to frontend for registration
+
+#### Deployment
+```bash
+cd packages/contracts
+forge script script/Deploy.s.sol:Deploy --broadcast --rpc-url $STORY_RPC_URL
+```
+
+#### Updated Files
+- `packages/contracts/src/HybridRevenueControllerV2.sol` - New permissionless contract
+- `packages/contracts/script/Deploy.s.sol` - Updated to deploy only V2
+- `apps/frontend/hooks/useBookRegistration.ts` - Frontend registration hook
+- `apps/frontend/components/BookRegistrationModal.tsx` - Registration UI
+- `apps/backend/app/api/books/register-hybrid/route.ts` - Redirects to frontend
+
+#### Removed Files
+- HybridRevenueController V1 contract and deployment
+- Backend registration scripts (now frontend-only)
+- V1 ABI files and references
+
+#### Results
+- Fully decentralized book registration
+- No admin keys or special roles needed
+- Authors have complete control over their books
+- Simpler architecture with only one revenue controller
+
 ## Memories
 
 - Remember that our mainnet is not integrated yet
@@ -168,11 +206,12 @@ Removed unused and test API endpoints to improve security and reduce maintenance
 - All publishing uses `mintAndRegisterIpAssetWithPilTerms` exclusively
 - IP registration happens client-side with user's wallet
 - **Royalty Policy Decision (January 2025)**: All tiers use zero address (0x0000...0000) for both royalty policy and currency
-- **Revenue Distribution**: 100% handled by HybridRevenueController (70% author, 20% curator, 10% platform)
+- **Revenue Distribution**: 100% handled by HybridRevenueControllerV2 (70% author, 20% curator, 10% platform)
 - **Story Protocol Role**: IP registration and licensing only - no royalty involvement
 - **Token Strategy**: TIP tokens exclusively - no WIP token dependencies
 - **Chapter Access Control (January 2025)**: Server-side enforcement prevents unauthorized access
 - **Two-Step License Purchase**: TIP payment first, then Story Protocol license mint (zero currency)
 - **Transaction Verification**: All paid unlocks require blockchain transaction verification
-- **HybridRevenueController Integration**: Falls back to direct transfers for unregistered books
+- **HybridRevenueControllerV2 (January 2025)**: Permissionless book registration - authors manage their own books
+- **No Admin Keys**: All book registration happens through frontend with user's wallet
 - **Security**: Backend validates all access - frontend cannot bypass access control

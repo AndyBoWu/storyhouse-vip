@@ -24,7 +24,7 @@ export default function Footer() {
             </div>
             <p className="text-gray-400 text-sm">
               Revolutionary Web3 storytelling platform built on Story Protocol. 
-              Read, earn, create, and own your stories.
+              Read, create, and own your stories.
             </p>
             <div className="flex items-center gap-2 text-xs text-gray-500">
               <span>Powered by</span>
@@ -49,11 +49,6 @@ export default function Footer() {
               <li>
                 <Link href="/own" className="text-gray-400 hover:text-white transition-colors">
                   👑 Own Your IP
-                </Link>
-              </li>
-              <li>
-                <Link href="/rewards" className="text-gray-400 hover:text-white transition-colors">
-                  💰 Earn Rewards
                 </Link>
               </li>
             </ul>
