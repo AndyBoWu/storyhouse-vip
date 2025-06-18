@@ -1,4 +1,5 @@
 import { ethers } from 'ethers'
+import { keccak256, toBytes } from 'viem'
 
 const STORY_RPC_URL = 'https://aeneid.storyrpc.io'
 const HYBRID_REVENUE_CONTROLLER_V2_ADDRESS = '0x99dA048826Bbb8189FBB6C3e62EaA75d0fB36812'
@@ -11,12 +12,10 @@ const HYBRID_V2_ABI = [
   'function books(bytes32) view returns (address curator, bool isDerivative, bytes32 parentBookId, uint256 totalChapters, bool isActive, string ipfsMetadataHash)'
 ]
 
-// Helper to convert string to bytes32
-function stringToBytes32(text: string): string {
-  const hex = Buffer.from(text, 'utf8').toString('hex')
-  const truncated = hex.substring(0, 64)
-  const padded = truncated.padEnd(64, '0')
-  return `0x${padded}`
+// Generate bytes32 ID the same way as frontend
+function parseBookId(bookId: string): { bytes32Id: string } {
+  const bytes32Id = keccak256(toBytes(bookId))
+  return { bytes32Id }
 }
 
 async function checkBookRegistration() {
@@ -35,13 +34,13 @@ async function checkBookRegistration() {
   )
 
   try {
-    // Convert book ID to bytes32
-    const bookIdBytes32 = stringToBytes32(BOOK_ID)
-    console.log('Book ID (bytes32):', bookIdBytes32)
+    // Convert book ID to bytes32 using the same method as frontend
+    const { bytes32Id } = parseBookId(BOOK_ID)
+    console.log('Book ID (bytes32):', bytes32Id)
     console.log('')
 
     // Check book registration
-    const bookData = await contract.books(bookIdBytes32)
+    const bookData = await contract.books(bytes32Id)
     
     console.log('📚 Book Registration Data:')
     console.log('Curator:', bookData.curator)
@@ -65,7 +64,7 @@ async function checkBookRegistration() {
       console.log('')
       console.log('Or use this direct registration call:')
       console.log(`registerBook(`)
-      console.log(`  bookId: "${bookIdBytes32}",`)
+      console.log(`  bookId: "${bytes32Id}",`)
       console.log(`  isDerivative: false,`)
       console.log(`  parentBookId: "0x0000000000000000000000000000000000000000000000000000000000000000",`)
       console.log(`  totalChapters: 10, // Adjust as needed`)
