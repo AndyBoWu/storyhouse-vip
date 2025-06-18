@@ -297,6 +297,16 @@ export default function ChapterPage() {
                 <span>{chapter.readingTime} min read</span>
               </div>
               
+              {/* Wallet Address Display */}
+              {address && (
+                <div className="mt-2 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                  <span>Reading as:</span>
+                  <code className="font-mono bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
+                    {address.slice(0, 6)}...{address.slice(-4)}
+                  </code>
+                </div>
+              )}
+              
               {/* IP Asset Registration Info */}
               {chapter.ipAssetId && (
                 <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
