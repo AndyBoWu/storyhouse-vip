@@ -88,7 +88,7 @@ export const LICENSE_TIERS: Record<string, LicenseTermsConfig> = {
     displayName: 'Free License',
     description: 'Open access with attribution required',
     transferable: true,
-    royaltyPolicy: '0xBe54FB168b3c982b7AaE60dB6CF75Bd8447b390E' as Address, // LAP royalty policy
+    royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address, // Zero address for free tier - no royalty policy needed
     defaultMintingFee: 0n,
     expiration: 0, // Never expires
     commercialUse: false,
@@ -109,7 +109,7 @@ export const LICENSE_TIERS: Record<string, LicenseTermsConfig> = {
     displayName: 'Reading License',
     description: 'Personal reading access - non-transferable',
     transferable: false, // 🔒 LOCKED TO WALLET
-    royaltyPolicy: '0xBe54FB168b3c982b7AaE60dB6CF75Bd8447b390E' as Address, // LAP royalty policy
+    royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address, // Zero address - no royalties for reading tier
     defaultMintingFee: BigInt(0.5 * 10**18), // 0.5 TIP tokens
     expiration: 0, // Never expires
     commercialUse: false, // Just for reading
@@ -130,7 +130,7 @@ export const LICENSE_TIERS: Record<string, LicenseTermsConfig> = {
     displayName: 'Premium License',
     description: 'Commercial use with royalty sharing',
     transferable: true,
-    royaltyPolicy: '0xBe54FB168b3c982b7AaE60dB6CF75Bd8447b390E' as Address, // LAP royalty policy - works with TIP tokens via HybridRevenueController
+    royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address, // Zero address - royalties handled by HybridRevenueController
     defaultMintingFee: BigInt(100 * 10**18), // 100 TIP tokens
     expiration: 0, // Never expires
     commercialUse: true,
@@ -229,7 +229,7 @@ export class AdvancedStoryProtocolService {
       derivativesApproval: false,
       derivativesReciprocal: licenseConfig.derivativesAllowed, // 🔗 CRITICAL: Enable derivative chains for all tiers that allow derivatives
       derivativeRevCeiling: BigInt(0),
-      currency: '0x0000000000000000000000000000000000000000' as Address, // Zero address - payment handled externally with TIP tokens
+      currency: '0x0000000000000000000000000000000000000000' as Address, // Zero address - all payments handled by HybridRevenueController
       uri: ''
     }
   }
