@@ -453,3 +453,83 @@ Bob was unable to unlock Chapter 4 of Andy's book "Project Phoenix" despite havi
 - ✅ Import issues resolved
 - ✅ Bob can now unlock Chapter 4 successfully
 - ⏳ "Project Phoenix" awaiting registration in HybridRevenueController (requires admin key)
+
+---
+
+## 🔐 **Chapter Access Control & Licensing Implementation (January 2025)**
+
+### **Problem Summary**
+The system had three critical security and reliability issues:
+1. **Non-Atomic Operations**: Payment and license minting were separate, risking user funds
+2. **No Server-Side Access Control**: Anyone could bypass frontend and access paid content
+3. **License Minting Issues**: Story Protocol license minting wasn't properly integrated
+
+### **Solutions Implemented**
+
+#### **1. Server-Side Access Control**
+- Created `chapterAccessService.ts` for backend chapter access verification
+- Chapter content API (`/api/books/[bookId]/chapter/[chapterNumber]`) now enforces access:
+  - Returns full content (200) for authorized users
+  - Returns limited metadata (403) for unauthorized users
+- Access rules:
+  - Chapters 1-3: FREE for everyone
+  - Book owner: Always has access to their own chapters
+  - Chapters 4+: Require payment verification or license ownership
+
+#### **2. Two-Step License Purchase Flow**
+- **Step 1: Payment Processing**
+  - Try HybridRevenueController first (70/20/10 split)
+  - Fall back to direct TIP transfer if book not registered
+  - 0.5 TIP for chapters 4+
+  
+- **Step 2: License Minting**
+  - Story Protocol license NFT minted after successful payment
+  - Uses zero address currency (free mint)
+  - License serves as proof of payment
+  - Clear error handling if minting fails after payment
+
+#### **3. Transaction Verification**
+- Unlock endpoint verifies blockchain transactions:
+  - Checks transaction exists and is confirmed
+  - Verifies sender address matches user
+  - Validates payment amount (0.5 TIP)
+- Only records unlock after verification
+
+#### **4. Frontend Security Updates**
+- API client automatically includes user address in headers
+- Chapter page relies on backend access decisions
+- Handles 403 responses gracefully
+- No more client-side access control bypass
+
+### **Technical Implementation**
+
+#### **New Files Created**
+- `/apps/backend/lib/services/chapterAccessService.ts` - Access control service
+- `/apps/frontend/lib/contracts/hybridRevenueController.ts` - Contract integration
+- `/packages/contracts/src/AtomicLicensePurchase.sol` - Future atomic solution
+- `/apps/backend/scripts/register-book-in-hybrid-revenue.ts` - Book registration
+
+#### **Modified Files**
+- `/apps/backend/app/api/books/[bookId]/chapter/[chapterNumber]/route.ts` - Added access control
+- `/apps/backend/app/api/books/[bookId]/chapter/[chapterNumber]/unlock/route.ts` - Added verification
+- `/apps/frontend/hooks/useReadingLicense.ts` - Two-step purchase flow
+- `/apps/frontend/lib/api-client.ts` - Auto-include user address
+- `/apps/frontend/app/book/[authorAddress]/[slug]/chapter/[chapterNumber]/page.tsx` - Backend-driven access
+
+### **Security Improvements**
+- ✅ **Backend Enforcement**: Content access controlled server-side
+- ✅ **Transaction Verification**: All payments verified on-chain
+- ✅ **License NFT Tracking**: Story Protocol licenses as proof of purchase
+- ✅ **Error Recovery**: Clear messaging if payment succeeds but license fails
+- ✅ **Audit Trail**: All unlocks recorded with transaction hashes
+
+### **User Experience Flow**
+1. Bob tries to read Chapter 4 → Backend returns 403 (no access)
+2. Bob clicks "Get Reading License" → Initiates two-step process
+3. Step 1: 0.5 TIP payment processed (HybridRevenueController or direct)
+4. Step 2: Story Protocol license NFT minted (free with zero currency)
+5. Success → Bob can now read Chapter 4
+6. Backend verifies license/payment before serving content
+
+### **Future Enhancement**
+Deploy `AtomicLicensePurchase` contract to make payment + license minting atomic in a single transaction, eliminating the two-step process risk.

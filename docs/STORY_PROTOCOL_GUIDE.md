@@ -212,12 +212,12 @@ async function batchRegisterChapters(
 ### StoryHouse 4-Tier License System
 
 ```typescript
-// StoryHouse License Configuration
+// StoryHouse License Configuration (Updated January 2025)
 const STORYHOUSE_LICENSE_CONFIG = {
   TIERS: {
     free: {
       price: 0,
-      currency: 'TIP',
+      currency: '0x0000000000000000000000000000000000000000', // Zero address
       commercialUse: false,
       derivativesAllowed: true,
       derivativesReciprocal: true, // 🔗 CRITICAL: Enables derivative chains
@@ -225,35 +225,39 @@ const STORYHOUSE_LICENSE_CONFIG = {
       description: 'Attribution only, non-commercial use'
     },
     reading: {
-      price: 10, // 10 TIP for reading license
-      currency: 'TIP',
+      price: 0.5, // 0.5 TIP for reading license (handled separately)
+      currency: '0x0000000000000000000000000000000000000000', // Zero address
       commercialUse: false,
       derivativesAllowed: false,
       derivativesReciprocal: false, // No derivatives allowed for reading license
-      royaltyPercentage: 5,
+      royaltyPercentage: 0, // Royalties handled by HybridRevenueController
       description: 'Personal reading license, wallet-locked'
     },
     premium: {
-      price: 100, // 100 TIP for commercial license
-      currency: 'TIP',
-      commercialUse: true,
+      price: 100, // 100 TIP for commercial license (future)
+      currency: '0x0000000000000000000000000000000000000000', // Zero address
+      commercialUse: false, // Set to false to avoid Story Protocol royalty requirements
       derivativesAllowed: true,
       derivativesReciprocal: true, // 🔗 CRITICAL: Enables multi-level remixes
-      royaltyPercentage: 10,
+      royaltyPercentage: 0, // Royalties handled by HybridRevenueController
       description: 'Commercial use with derivatives'
     },
     exclusive: {
-      price: 1000, // 1000 TIP for exclusive rights
-      currency: 'TIP',
-      commercialUse: true,
+      price: 1000, // 1000 TIP for exclusive rights (future)
+      currency: '0x0000000000000000000000000000000000000000', // Zero address
+      commercialUse: false, // Set to false to avoid Story Protocol royalty requirements
       derivativesAllowed: true,
       derivativesReciprocal: true, // 🔗 CRITICAL: Full derivative ecosystem
-      royaltyPercentage: 25,
+      royaltyPercentage: 0, // Royalties handled by HybridRevenueController
       exclusivity: true,
       description: 'Full commercial rights with high royalties'
     }
   }
 }
+
+// 🔥 IMPORTANT: Two-Step License Purchase Flow
+// 1. TIP Payment: Handled by HybridRevenueController or direct transfer
+// 2. License Mint: Story Protocol license NFT with zero currency (free mint)
 ```
 
 ## 🔗 **Critical: `derivativesReciprocal` Field**
@@ -318,7 +322,7 @@ const OPTIMAL_DERIVATIVE_SETTINGS = {
 ### Create License Terms
 
 ```typescript
-// Create PIL license terms for different tiers
+// Create PIL license terms for different tiers (Updated January 2025)
 async function createStoryHouseLicenseTerms(
   tier: 'free' | 'reading' | 'premium' | 'exclusive'
 ) {
@@ -326,29 +330,29 @@ async function createStoryHouseLicenseTerms(
   
   const licenseTerms = await client.license.registerPILTerms({
     transferable: tier !== 'exclusive', // Exclusive licenses are non-transferable
-    royaltyPolicy: '0x0000000000000000000000000000000000000000', // Zero address - royalties handled by HybridRevenueController
-    defaultMintingFee: BigInt(config.price * 10**18), // Convert to wei
+    royaltyPolicy: '0x0000000000000000000000000000000000000000', // Zero address - ALL royalties handled by HybridRevenueController
+    defaultMintingFee: 0n, // All fees handled separately by HybridRevenueController
     expiration: 0n, // No expiration
-    commercialUse: config.commercialUse,
-    commercialAttribution: true,
+    commercialUse: false, // Always false to avoid Story Protocol royalty requirements
+    commercialAttribution: false, // Must be false when commercialUse is false
     commercializerChecker: '0x0000000000000000000000000000000000000000',
     commercializerCheckerData: '0x',
-    commercialRevShare: config.royaltyPercentage * 100, // Convert to basis points
+    commercialRevShare: 0, // Must be 0 when commercialUse is false
     commercialRevCeiling: 0n,
     derivativesAllowed: config.derivativesAllowed,
     derivativesAttribution: true,
     derivativesApproval: false,
-    derivativesReciprocal: true,
+    derivativesReciprocal: config.derivativesReciprocal, // Use tier-specific setting
     derivativeRevCeiling: 0n,
-    currency: '0x1514000000000000000000000000000000000000', // TIP token
+    currency: '0x0000000000000000000000000000000000000000', // Zero address - TIP handled separately
     uri: '' // License metadata URI
   })
 
   return {
     licenseTermsId: licenseTerms.licenseTermsId,
     tier,
-    price: config.price,
-    royaltyPercentage: config.royaltyPercentage
+    price: config.price, // For reference only - actual payment handled separately
+    royaltyPercentage: 0 // All royalties through HybridRevenueController
   }
 }
 ```
@@ -1879,6 +1883,53 @@ console.log("Connection test:", connectionTest)
 
 ---
 
-**Last Updated:** January 15, 2025  
+## 🔐 Chapter Access Control & Two-Step Licensing (January 2025)
+
+### Overview
+StoryHouse implements a secure two-step licensing flow to handle TIP token payments while leveraging Story Protocol for IP licensing:
+
+1. **Payment Step**: TIP tokens handled by HybridRevenueController or direct transfer
+2. **License Step**: Story Protocol license NFT minted with zero currency (free)
+
+### Security Features
+
+#### Server-Side Access Control
+- Chapter content API enforces access control
+- Returns 403 with limited metadata for unauthorized users
+- Validates license ownership or payment verification
+- User address automatically included in API headers
+
+#### Two-Step Purchase Flow
+```typescript
+// Step 1: Process TIP payment
+if (useHybridController) {
+  // 70/20/10 revenue split
+  unlockChapter(bookId, chapterNumber)
+} else {
+  // Direct transfer to author
+  transfer(authorAddress, 0.5 TIP)
+}
+
+// Step 2: Mint Story Protocol license
+const licenseResult = await mintLicenseTokens({
+  ipId: chapterIpAssetId,
+  licenseTermsId: licenseTermsId,
+  receiver: userAddress,
+  amount: 1n // Free mint with zero currency
+})
+```
+
+#### Transaction Verification
+- All payments verified on blockchain
+- Checks transaction status and sender
+- Only records unlock after verification
+- License token ID stored for future verification
+
+### Future Enhancement
+Deploy `AtomicLicensePurchase` contract to make payment + license minting atomic in a single transaction.
+
+---
+
+**Last Updated:** January 18, 2025  
 **Integration Status:** ✅ Complete - Production Ready  
-**Version:** 2.0 - Unified Guide
+**Version:** 2.1 - Unified Guide with Access Control

@@ -171,3 +171,8 @@ Removed unused and test API endpoints to improve security and reduce maintenance
 - **Revenue Distribution**: 100% handled by HybridRevenueController (70% author, 20% curator, 10% platform)
 - **Story Protocol Role**: IP registration and licensing only - no royalty involvement
 - **Token Strategy**: TIP tokens exclusively - no WIP token dependencies
+- **Chapter Access Control (January 2025)**: Server-side enforcement prevents unauthorized access
+- **Two-Step License Purchase**: TIP payment first, then Story Protocol license mint (zero currency)
+- **Transaction Verification**: All paid unlocks require blockchain transaction verification
+- **HybridRevenueController Integration**: Falls back to direct transfers for unregistered books
+- **Security**: Backend validates all access - frontend cannot bypass access control

@@ -2,19 +2,20 @@
 
 ## Overview
 
-This document outlines the implementation plan for integrating StoryHouse's native TIP token with Story Protocol's IP management system. The solution uses LAP (Liquid Absolute Percentage) royalty policy for all license tiers to avoid Story Protocol's currency token whitelist requirements while maintaining full control over TIP token economics.
+This document outlines the implementation plan for integrating StoryHouse's native TIP token with Story Protocol's IP management system. The solution uses zero address for both royalty policy and currency across all license tiers, completely bypassing Story Protocol's royalty system while maintaining full control over TIP token economics.
 
 ## Problem Statement
 
 Story Protocol's LRP (Liquid Royalty Policy) requires whitelisted currency tokens for royalty-bearing licenses. Since TIP token is not on their whitelist, attempting to publish premium/exclusive chapters results in "Royalty policy requires currency token" errors.
 
-## Solution Architecture
+## Solution Architecture (Implemented January 2025)
 
-### Core Approach (Simplified Solution)
+### Core Approach
 1. **Zero address royalty policy for ALL tiers** - Completely bypasses Story Protocol's royalty system
 2. **Zero address currency for ALL tiers** - No token dependencies
 3. **HybridRevenueController manages 100% of revenue** - Complete control over TIP token distribution
 4. **Story Protocol handles IP registration only** - Pure IP management without payment complexity
+5. **Two-Step License Purchase** - TIP payment first, then Story Protocol license mint (free)
 
 ### Key Components
 
