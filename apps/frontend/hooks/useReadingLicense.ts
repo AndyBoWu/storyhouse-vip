@@ -285,7 +285,11 @@ export function useReadingLicense() {
               args: [bytes32Id],
             }) as any
             
-            bookIsRegistered = bookData.isActive
+            // bookData is an array: [curator, isDerivative, parentBookId, totalChapters, isActive, ipfsMetadataHash]
+            const curator = bookData[0] as string
+            const isActive = bookData[4] as boolean
+            bookIsRegistered = curator !== '0x0000000000000000000000000000000000000000' && isActive
+            
             if (bookIsRegistered) {
               console.log('✅ Book registered in HybridRevenueControllerV2')
             }
@@ -295,7 +299,7 @@ export function useReadingLicense() {
           }
           
           if (!bookIsRegistered) {
-            throw new Error('Book is not registered in HybridRevenueController. The author needs to register their book to enable payments.')
+            throw new Error('Book is not registered in HybridRevenueControllerV2. The author needs to register their book to enable payments.')
           }
           
           // Use HybridRevenueControllerV2 for automatic 70/20/10 revenue split
