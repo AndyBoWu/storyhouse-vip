@@ -2,7 +2,31 @@
 
 echo "🚀 StoryHouse Smart Contract Deployment"
 echo "======================================="
-echo "Deploying the optimized 5-contract architecture"
+
+# Show help if requested
+if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+    echo "Usage:"
+    echo "  ./deploy.sh [v2|minimal]    Deploy HybridRevenueControllerV2 only"
+    echo "  ./deploy.sh                 Deploy full 5-contract architecture"
+    echo ""
+    echo "Examples:"
+    echo "  ./deploy.sh v2              Deploy permissionless V2 contract"
+    echo "  ./deploy.sh                 Deploy full architecture"
+    exit 0
+fi
+
+# Deployment mode selection
+if [ "$1" = "v2" ] || [ "$1" = "minimal" ]; then
+    echo "Deploying HybridRevenueControllerV2 (Minimal Architecture)"
+    DEPLOY_MODE="v2"
+    SCRIPT_NAME="DeployMinimal.s.sol"
+    ARCHITECTURE="3-contract-minimal"
+else
+    echo "Deploying the optimized 5-contract architecture"
+    DEPLOY_MODE="full"
+    SCRIPT_NAME="Deploy.s.sol"
+    ARCHITECTURE="5-contract-optimized"
+fi
 echo ""
 
 # Color codes for output
@@ -82,17 +106,59 @@ if [ "$BALANCE" = "0" ]; then
 fi
 
 echo ""
-echo -e "${YELLOW}⚡ Starting 5-Contract Architecture Deployment...${NC}"
+if [ "$DEPLOY_MODE" = "v2" ]; then
+    echo -e "${YELLOW}⚡ Starting HybridRevenueControllerV2 Deployment...${NC}"
+    echo -e "${BLUE}📋 What will be deployed:${NC}"
+    echo "   • TIP Token (already deployed)"
+    echo "   • ChapterAccessController (already deployed)"  
+    echo "   • HybridRevenueControllerV2 (NEW - permissionless)"
+else
+    echo -e "${YELLOW}⚡ Starting 5-Contract Architecture Deployment...${NC}"
+fi
 echo ""
 
 # Run the deployment script
 echo -e "${BLUE}🔨 Running deployment script...${NC}"
-DEPLOY_OUTPUT=$(PRIVATE_KEY=$PRIVATE_KEY forge script script/Deploy.s.sol \
-    --rpc-url $NETWORK \
-    --broadcast \
-    --gas-price $GAS_PRICE \
-    --legacy \
-    --json 2>&1)
+if [ "$DEPLOY_MODE" = "v2" ]; then
+    # Temporarily rename problematic contracts that depend on removed RewardsManager
+    if [ -f "src/HybridRevenueController.sol" ]; then
+        mv src/HybridRevenueController.sol src/HybridRevenueController.sol.bak
+        V1_RENAMED=true
+    fi
+    if [ -f "src/HybridRevenueControllerV2.sol" ]; then
+        mv src/HybridRevenueControllerV2.sol src/HybridRevenueControllerV2.sol.bak
+        V2_ORIG_RENAMED=true
+    fi
+    if [ -f "src/ChapterAccessController.sol" ]; then
+        mv src/ChapterAccessController.sol src/ChapterAccessController.sol.bak
+        CHAPTER_RENAMED=true
+    fi
+    
+    DEPLOY_OUTPUT=$(PRIVATE_KEY=$PRIVATE_KEY forge script script/$SCRIPT_NAME \
+        --rpc-url $NETWORK \
+        --broadcast \
+        --gas-price $GAS_PRICE \
+        --legacy \
+        --json 2>&1)
+    
+    # Restore renamed files
+    if [ "$V1_RENAMED" = true ]; then
+        mv src/HybridRevenueController.sol.bak src/HybridRevenueController.sol
+    fi
+    if [ "$V2_ORIG_RENAMED" = true ]; then
+        mv src/HybridRevenueControllerV2.sol.bak src/HybridRevenueControllerV2.sol
+    fi
+    if [ "$CHAPTER_RENAMED" = true ]; then
+        mv src/ChapterAccessController.sol.bak src/ChapterAccessController.sol
+    fi
+else
+    DEPLOY_OUTPUT=$(PRIVATE_KEY=$PRIVATE_KEY forge script script/$SCRIPT_NAME \
+        --rpc-url $NETWORK \
+        --broadcast \
+        --gas-price $GAS_PRICE \
+        --legacy \
+        --json 2>&1)
+fi
 
 DEPLOY_EXIT_CODE=$?
 
@@ -110,7 +176,11 @@ echo ""
 echo -e "${BLUE}📋 Parsing deployment results...${NC}"
 
 # Try to extract addresses from broadcast file
-BROADCAST_FILE="broadcast/Deploy.s.sol/$CHAIN_ID/run-latest.json"
+if [ "$DEPLOY_MODE" = "v2" ]; then
+    BROADCAST_FILE="broadcast/DeployMinimal.s.sol/$CHAIN_ID/run-latest.json"
+else
+    BROADCAST_FILE="broadcast/Deploy.s.sol/$CHAIN_ID/run-latest.json"
+fi
 
 if [ -f "$BROADCAST_FILE" ]; then
     # Extract contract addresses from the broadcast file
@@ -137,7 +207,7 @@ cat > deployment-result.json << EOF
     "network": "story-protocol-aeneid",
     "chainId": $CHAIN_ID,
     "deployer": "$DEPLOYER_ADDRESS",
-    "architecture": "5-contract-optimized",
+    "architecture": "$ARCHITECTURE",
     "status": "completed"
   },
   "contracts": {
@@ -160,16 +230,27 @@ echo ""
 echo -e "${GREEN}🎉 DEPLOYMENT COMPLETE!${NC}"
 echo ""
 echo -e "${BLUE}📊 Summary:${NC}"
-echo "   Architecture: 5-Contract Optimized"
+echo "   Architecture: $ARCHITECTURE"
 echo "   Network: Story Protocol Aeneid Testnet"
 echo "   Deployer: $DEPLOYER_ADDRESS"
 echo "   Block: $DEPLOYMENT_BLOCK"
 echo ""
 echo -e "${YELLOW}📋 Next Steps:${NC}"
-echo "   1. Check broadcast file for contract addresses:"
-echo "      $BROADCAST_FILE"
-echo "   2. Verify contracts on StoryScan"
-echo "   3. Update application configurations"
-echo "   4. Run integration tests"
+if [ "$DEPLOY_MODE" = "v2" ]; then
+    echo "   1. Check broadcast file for V2 contract address:"
+    echo "      $BROADCAST_FILE"
+    echo "   2. Update apps/backend/.env.local with:"
+    echo "      HYBRID_REVENUE_CONTROLLER_V2_ADDRESS=<address>"
+    echo "   3. Update apps/frontend/.env.local with same address"
+    echo "   4. Update contract configurations in codebase"
+    echo "   5. Test permissionless book registration"
+    echo "   6. Verify V2 contract on StoryScan"
+else
+    echo "   1. Check broadcast file for contract addresses:"
+    echo "      $BROADCAST_FILE"
+    echo "   2. Verify contracts on StoryScan"
+    echo "   3. Update application configurations"
+    echo "   4. Run integration tests"
+fi
 echo ""
 echo -e "${GREEN}✅ Deployment successful! Check deployment-result.json for details.${NC}"

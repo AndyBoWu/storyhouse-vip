@@ -1,11 +1,11 @@
 {
   "deployment": {
-    "timestamp": "2025-06-16 10:35:07",
-    "block": "5633304",
+    "timestamp": "2025-06-18 10:48:04",
+    "block": "5709378",
     "network": "story-protocol-aeneid",
     "chainId": 1315,
     "deployer": "0xD9b6d1bd7D8A90915B905EB801c55bA5De1d4476",
-    "architecture": "5-contract-optimized",
+    "architecture": "3-contract-minimal",
     "status": "completed"
   },
   "contracts": {

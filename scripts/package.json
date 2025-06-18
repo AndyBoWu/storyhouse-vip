@@ -6,8 +6,10 @@
     "register-project-phoenix": "tsx register-project-phoenix.ts"
   },
   "dependencies": {
-    "viem": "^2.21.54",
-    "tsx": "^4.0.0"
+    "dotenv": "^16.5.0",
+    "ethers": "^6.14.4",
+    "tsx": "^4.0.0",
+    "viem": "^2.21.54"
   },
   "devDependencies": {
     "@types/node": "^20.0.0"
