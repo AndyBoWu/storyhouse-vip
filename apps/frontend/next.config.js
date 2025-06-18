@@ -28,10 +28,7 @@ const nextConfig = {
   
   // Enable build caching for faster deployments
   experimental: {
-    // Enable build cache
-    turbotrace: {
-      logLevel: 'info',
-    },
+    // Modern Next.js 15.3.3 build optimizations
   },
   
   // Compiler optimizations
