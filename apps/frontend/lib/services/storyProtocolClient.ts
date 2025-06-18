@@ -81,8 +81,11 @@ export class ClientStoryProtocolService {
     // These values should match the backend's preparePilTermsData
     const basePilTerms = {
       commercializerChecker: '0x0000000000000000000000000000000000000000' as Address,
-      commercializerCheckerData: '0x' as Hash,
+      commercializerCheckerData: '0x0000000000000000000000000000000000000000' as Address, // Must be Address, not Hash
       commercialRevShare: 0,
+      commercialRevCeiling: 0n,
+      derivativeRevCeiling: 0n,
+      expiration: 0n, // Never expires
       uri: ''
     }
 
@@ -96,9 +99,6 @@ export class ClientStoryProtocolService {
         derivativesAttribution: true,
         derivativesApproval: false,
         derivativesReciprocal: false,
-        territoryRights: [],
-        distributionChannels: [],
-        contentRestrictions: [],
         royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address,
         defaultMintingFee: 0n,
         currency: '0x1514000000000000000000000000000000000000' as Address // WIP token (whitelisted by Story Protocol)
@@ -112,9 +112,6 @@ export class ClientStoryProtocolService {
         derivativesAttribution: false,
         derivativesApproval: false,
         derivativesReciprocal: false,
-        territoryRights: [],
-        distributionChannels: [],
-        contentRestrictions: [],
         royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address,
         defaultMintingFee: 500000000000000000n, // 0.5 WIP
         currency: '0x1514000000000000000000000000000000000000' as Address // WIP token (whitelisted by Story Protocol)
@@ -128,9 +125,6 @@ export class ClientStoryProtocolService {
         derivativesAttribution: true,
         derivativesApproval: true,
         derivativesReciprocal: false,
-        territoryRights: [],
-        distributionChannels: [],
-        contentRestrictions: [],
         royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address, // TODO: Set actual royalty policy
         commercialRevShare: 10, // 10% royalty
         defaultMintingFee: 100000000000000000000n, // 100 WIP
@@ -145,9 +139,6 @@ export class ClientStoryProtocolService {
         derivativesAttribution: false,
         derivativesApproval: false,
         derivativesReciprocal: false,
-        territoryRights: [],
-        distributionChannels: [],
-        contentRestrictions: [],
         royaltyPolicy: '0x0000000000000000000000000000000000000000' as Address,
         commercialRevShare: 25, // 25% royalty
         defaultMintingFee: 1000000000000000000000n, // 1000 WIP
@@ -175,6 +166,7 @@ export class ClientStoryProtocolService {
 
       // Prepare PIL terms data
       const pilTermsData = this.preparePilTermsData(params.licenseTier)
+      console.log('📋 PIL Terms Data:', JSON.stringify(pilTermsData, (_, v) => typeof v === 'bigint' ? v.toString() : v, 2))
 
       // Execute unified registration transaction with user's wallet
       const result = await this.storyClient.ipAsset.mintAndRegisterIpAssetWithPilTerms({
