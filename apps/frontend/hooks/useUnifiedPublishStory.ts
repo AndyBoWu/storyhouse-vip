@@ -4,6 +4,7 @@ import { Address, Hash } from 'viem'
 import { apiClient } from '@/lib/api-client'
 import { PublishResult } from '@/lib/contracts/storyProtocol'
 import { createClientStoryProtocolService } from '@/lib/services/storyProtocolClient'
+import { useBookRegistration } from './useBookRegistration'
 
 interface StoryData {
   title: string
@@ -29,6 +30,7 @@ type UnifiedPublishStep =
   | 'generating-metadata'
   | 'blockchain-transaction'
   | 'saving-to-storage'
+  | 'setting-attribution'
   | 'success'
   | 'error'
 
@@ -46,6 +48,7 @@ export function useUnifiedPublishStory() {
   const [ipAssetId, setIPAssetId] = useState<Address | null>(null)
 
   const { address } = useAccount()
+  const { setChapterAttribution, checkBookRegistration, registerBook } = useBookRegistration()
 
   // Check unified registration support on mount
   useEffect(() => {
@@ -238,6 +241,54 @@ export function useUnifiedPublishStory() {
       })
 
       console.log('✅ Chapter content saved to R2:', saveResult.data?.contentUrl)
+
+      // Step 4: Set chapter attribution for revenue sharing (for paid chapters)
+      if (storyData.chapterNumber > 3 && options.chapterPrice > 0) {
+        setCurrentStep('setting-attribution')
+        console.log('💰 Setting chapter attribution for revenue sharing...')
+        
+        try {
+          // First ensure the book is registered
+          const isBookRegistered = await checkBookRegistration(finalBookId)
+          if (!isBookRegistered) {
+            console.log('📚 Book not registered, registering first...')
+            const registerResult = await registerBook({
+              bookId: finalBookId,
+              totalChapters: 10, // Default to 10 chapters, can be updated later
+              isDerivative: false,
+              ipfsMetadataHash: metadataUri || ''
+            })
+            
+            if (!registerResult.success) {
+              console.warn('⚠️ Book registration failed, continuing without attribution:', registerResult.error)
+            } else {
+              // Wait a moment for registration to confirm
+              await new Promise(resolve => setTimeout(resolve, 3000))
+            }
+          }
+          
+          // Set chapter attribution with pricing
+          const attributionResult = await setChapterAttribution({
+            bookId: finalBookId,
+            chapterNumber: storyData.chapterNumber,
+            originalAuthor: address!,
+            unlockPrice: options.chapterPrice.toString(),
+            isOriginalContent: true
+          })
+          
+          if (attributionResult.success) {
+            console.log('✅ Chapter attribution set successfully!')
+          } else {
+            console.warn('⚠️ Failed to set chapter attribution:', attributionResult.error)
+          }
+          
+        } catch (attributionError) {
+          console.warn('⚠️ Attribution setting failed:', attributionError)
+          // Don't fail the entire publish flow for attribution errors
+        }
+      } else {
+        console.log('📝 Free chapter - skipping attribution setting')
+      }
 
       // Success!
       setCurrentStep('success')

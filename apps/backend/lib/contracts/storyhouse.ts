@@ -329,6 +329,17 @@ export const HYBRID_REVENUE_CONTROLLER_V2_ABI = [
       { name: 'isActive', type: 'bool' },
       { name: 'ipfsMetadataHash', type: 'string' }
     ]
+  },
+  {
+    name: 'hasUnlockedChapter',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [
+      { name: 'user', type: 'address' },
+      { name: 'bookId', type: 'bytes32' },
+      { name: 'chapterNumber', type: 'uint256' }
+    ],
+    outputs: [{ name: '', type: 'bool' }]
   }
 ] as const
 

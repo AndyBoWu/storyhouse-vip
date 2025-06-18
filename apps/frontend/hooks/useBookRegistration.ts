@@ -83,12 +83,24 @@ export function useBookRegistration() {
   const [error, setError] = useState<string | null>(null)
   
   // Contract write hooks
-  const { writeContract: writeRegisterBook, data: registerHash } = useWriteContract()
+  const { 
+    writeContract: writeRegisterBook, 
+    data: registerHash,
+    isError: isRegisterError,
+    error: registerError,
+    isPending: isRegisterWritePending
+  } = useWriteContract()
   const { isLoading: isRegisterPending } = useWaitForTransactionReceipt({
     hash: registerHash,
   })
   
-  const { writeContract: writeSetAttribution, data: attributionHash } = useWriteContract()
+  const { 
+    writeContract: writeSetAttribution, 
+    data: attributionHash,
+    isError: isAttributionError,
+    error: attributionError,
+    isPending: isAttributionWritePending
+  } = useWriteContract()
   const { isLoading: isAttributionPending } = useWaitForTransactionReceipt({
     hash: attributionHash,
   })
@@ -208,7 +220,7 @@ export function useBookRegistration() {
   }: SetChapterParams) => {
     if (!address) {
       setError('Please connect your wallet')
-      return
+      return { success: false, error: 'Please connect your wallet' }
     }
     
     setIsLoading(true)
@@ -220,47 +232,62 @@ export function useBookRegistration() {
       
       console.log('📝 Setting chapter attribution:', {
         bookId,
+        bytes32Id,
         chapterNumber,
         originalAuthor,
-        unlockPrice: `${unlockPrice} TIP`
+        unlockPrice: `${unlockPrice} TIP`,
+        priceWei: priceWei.toString(),
+        isOriginalContent,
+        contractAddress: HYBRID_REVENUE_CONTROLLER_V2_ADDRESS
       })
       
-      writeSetAttribution({
-        address: HYBRID_REVENUE_CONTROLLER_V2_ADDRESS as `0x${string}`,
-        abi: HYBRID_V2_ABI,
+      // Log the exact transaction parameters
+      console.log('📋 Transaction parameters:', {
+        address: HYBRID_REVENUE_CONTROLLER_V2_ADDRESS,
         functionName: 'setChapterAttribution',
         args: [
           bytes32Id,
           BigInt(chapterNumber),
-          originalAuthor as `0x${string}`,
-          bytes32Id, // sourceBookId (same as bookId for original content)
+          originalAuthor,
+          bytes32Id,
           priceWei,
           isOriginalContent
-        ],
+        ]
       })
       
-      // Wait for transaction
-      let attempts = 0
-      while (!attributionHash && attempts < 30) {
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        attempts++
+      // Initiate the transaction
+      try {
+        writeSetAttribution({
+          address: HYBRID_REVENUE_CONTROLLER_V2_ADDRESS as `0x${string}`,
+          abi: HYBRID_V2_ABI,
+          functionName: 'setChapterAttribution',
+          args: [
+            bytes32Id,
+            BigInt(chapterNumber),
+            originalAuthor as `0x${string}`,
+            bytes32Id, // sourceBookId (same as bookId for original content)
+            priceWei,
+            isOriginalContent
+          ],
+        })
+        
+        console.log('✅ writeSetAttribution called - check your wallet for transaction prompt')
+      } catch (writeError) {
+        console.error('❌ Error calling writeSetAttribution:', writeError)
+        throw writeError
       }
       
-      if (!attributionHash) {
-        throw new Error('Transaction timeout')
-      }
-      
-      console.log('✅ Chapter attribution set:', attributionHash)
-      return { success: true, transactionHash: attributionHash }
+      // Return early - the transaction will be handled by wagmi hooks
+      // The component should watch for attributionHash to know when it's complete
+      return { success: true, pending: true }
       
     } catch (error) {
       console.error('Failed to set chapter attribution:', error)
       setError(error instanceof Error ? error.message : 'Attribution failed')
-      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
-    } finally {
       setIsLoading(false)
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
     }
-  }, [address, writeSetAttribution, attributionHash])
+  }, [address, writeSetAttribution])
   
   // Check if the service is supported (contract deployed)
   const isSupported = HYBRID_REVENUE_CONTROLLER_V2_ADDRESS && 
@@ -273,6 +300,14 @@ export function useBookRegistration() {
     checkBookRegistration,
     isLoading: isLoading || isRegisterPending || isAttributionPending,
     error,
-    isSupported
+    isSupported,
+    // Expose transaction states for better UI feedback
+    attributionState: {
+      isWritePending: isAttributionWritePending,
+      hash: attributionHash,
+      isError: isAttributionError,
+      error: attributionError,
+      isConfirming: isAttributionPending
+    }
   }
 }

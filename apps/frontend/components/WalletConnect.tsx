@@ -24,6 +24,7 @@ export default function WalletConnect() {
   const [showDetails, setShowDetails] = useState(false)
   const [copied, setCopied] = useState(false)
   const [isConnectingLocal, setIsConnectingLocal] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const connectionTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Get native token balance
@@ -159,6 +160,21 @@ export default function WalletConnect() {
       }
     }
   }, [])
+  
+  // Handle mounting state for SSR
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+  
+  // Don't render until mounted to prevent hydration errors
+  if (!mounted) {
+    return (
+      <button className="flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-sm bg-gray-200 text-gray-400 cursor-not-allowed">
+        <Wallet className="w-5 h-5" />
+        Loading...
+      </button>
+    )
+  }
 
   if (isConnected && address) {
     return (

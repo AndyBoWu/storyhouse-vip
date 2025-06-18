@@ -4,12 +4,13 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAccount } from 'wagmi';
 import Link from 'next/link';
-import { Settings, X, Type, Minus, Plus } from 'lucide-react';
+import { Settings, X, Type, Minus, Plus, Trash2 } from 'lucide-react';
 import apiClient from '@/lib/api-client';
 import ChapterAccessControl from '@/components/ui/ChapterAccessControl';
 import { useChapterAccess } from '@/hooks/useChapterAccess';
 import ReadingProgressBar from '@/components/ui/ReadingProgressBar';
 import ReadingPreferences from '@/components/ui/ReadingPreferences';
+import { ChapterAttributionStatus } from '@/components/book/ChapterAttributionStatus';
 
 
 interface ChapterContent {
@@ -53,6 +54,10 @@ export default function ChapterPage() {
   const [lineHeight, setLineHeight] = useState<'normal' | 'relaxed' | 'loose'>('relaxed');
   const [focusMode, setFocusMode] = useState(false);
   
+  // Delete functionality
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  
   const { getChapterPricing } = useChapterAccess();
 
   // Handle reading preferences change
@@ -65,6 +70,38 @@ export default function ChapterPage() {
   const isBookOwner = (chapter: ChapterContent | null): boolean => {
     if (!address || !chapter) return false;
     return address.toLowerCase() === chapter.authorAddress.toLowerCase();
+  };
+
+  // Helper function to check if chapter can be safely deleted
+  const canDeleteChapter = (chapter: ChapterContent | null): boolean => {
+    if (!chapter || !isBookOwner(chapter)) return false;
+    
+    // Cannot delete chapters that are registered on-chain
+    // If it has an IP Asset ID, it's permanently on the blockchain
+    return !chapter.ipAssetId;
+  };
+
+  // Delete chapter function
+  const deleteChapter = async () => {
+    if (!chapter || !canDeleteChapter(chapter)) return;
+    
+    setIsDeleting(true);
+    try {
+      const response = await apiClient.delete(`/chapters/${encodeURIComponent(bookId)}/${chapterNumber}`);
+      
+      if (response.success) {
+        // Redirect back to book after successful deletion
+        router.push(`/book/${authorAddress}/${slug}`);
+      } else {
+        alert('Failed to delete chapter: ' + (response.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Failed to delete chapter:', error);
+      alert('Failed to delete chapter. Please try again.');
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+    }
   };
 
   useEffect(() => {
@@ -301,18 +338,33 @@ export default function ChapterPage() {
               <h1 className="text-3xl font-bold mb-2">
                 Chapter {chapter.chapterNumber}: {chapter.title}
               </h1>
-              <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-                <span>by {formatAddress(chapter.authorAddress)}</span>
-                {isBookOwner(chapter) && (
-                  <>
-                    <span>•</span>
-                    <span className="text-green-600 font-medium">Your Book</span>
-                  </>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+                  <span>by {formatAddress(chapter.authorAddress)}</span>
+                  {isBookOwner(chapter) && (
+                    <>
+                      <span>•</span>
+                      <span className="text-green-600 font-medium">Your Book</span>
+                    </>
+                  )}
+                  <span>•</span>
+                  <span>{chapter.wordCount} words</span>
+                  <span>•</span>
+                  <span>{chapter.readingTime} min read</span>
+                </div>
+                
+                {/* Author Controls */}
+                {isBookOwner(chapter) && canDeleteChapter(chapter) && (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setShowDeleteConfirm(true)}
+                      className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                      title="Delete Chapter"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 )}
-                <span>•</span>
-                <span>{chapter.wordCount} words</span>
-                <span>•</span>
-                <span>{chapter.readingTime} min read</span>
               </div>
               
               {/* Wallet Address Display */}
@@ -325,10 +377,15 @@ export default function ChapterPage() {
                 </div>
               )}
               
+              {/* Chapter Attribution Status - Always show for debugging */}
+              <div className="mt-4">
+                <ChapterAttributionStatus bookId={bookId} chapterNumber={chapterNumber} />
+              </div>
+              
               {/* IP Asset Registration Info */}
               {chapter.ipAssetId && (
                 <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                  <div className="flex items-center gap-2 text-xs">
+                  <div className="flex items-center gap-2 text-xs mb-2">
                     <span className="text-gray-500 dark:text-gray-400">🔗 IP Asset ID:</span>
                     <code className="font-mono text-gray-700 dark:text-gray-300">{chapter.ipAssetId.slice(0, 10)}...{chapter.ipAssetId.slice(-8)}</code>
                     <button
@@ -578,6 +635,44 @@ export default function ChapterPage() {
           <div className="h-full bg-white opacity-30 animate-pulse"></div>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-900 rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-bold mb-4">Delete Chapter</h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              Are you sure you want to delete Chapter {chapterNumber}: {chapter?.title}? This action cannot be undone.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={isDeleting}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={deleteChapter}
+                disabled={isDeleting}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {isDeleting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4" />
+                    Delete
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

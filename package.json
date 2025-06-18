@@ -36,7 +36,8 @@
     "deploy:backend": "cd apps/backend && vercel --prod",
     "deploy:preview": "cd apps/frontend && vercel",
     "deploy:preview:backend": "cd apps/backend && vercel",
-    "analyze": "npm run build && npx next-bundle-analyzer"
+    "analyze": "npm run build && npx next-bundle-analyzer",
+    "mint-tip": "tsx scripts/mint-tip-tokens.ts"
   },
   "devDependencies": {
     "@cloudflare/next-on-pages": "^1.13.12",
@@ -46,6 +47,7 @@
     "lint-staged": "^15.2.0",
     "prettier": "^3.5.3",
     "prettier-plugin-tailwindcss": "^0.5.14",
+    "tsx": "^4.20.3",
     "typescript": "^5.8.3",
     "vitest": "^1.6.0",
     "wrangler": "^3.78.12"
