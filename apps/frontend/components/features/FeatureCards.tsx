@@ -27,8 +27,8 @@ const features: Feature[] = [
       howItWorks: [
         'Browse our curated collection of stories',
         'Start reading any chapter instantly',
-        'Earn $TIP tokens as you read',
-        'Unlock exclusive content with your rewards'
+        'First 3 chapters are always free',
+        'Unlock premium chapters for just 0.5 TIP'
       ],
       benefits: [
         'Access to thousands of unique stories',
@@ -36,7 +36,7 @@ const features: Feature[] = [
         'Community-driven recommendations',
         'Personalized reading experience'
       ],
-      example: 'Sarah discovered "The Quantum Garden" and earned 50 $TIP tokens while reading the first trilogy, which she used to unlock the exclusive epilogue.',
+      example: 'Sarah discovered "The Quantum Garden" and read the first three chapters for free. She loved it so much that she unlocked the rest of the trilogy for just 5 TIP tokens.',
       cta: 'Start Reading'
     }
   },

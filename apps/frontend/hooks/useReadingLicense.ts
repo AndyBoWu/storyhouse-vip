@@ -427,7 +427,7 @@ export function useReadingLicense() {
     } finally {
       setIsLoading(false)
     }
-  }, [address, initializeStoryClient, ensureTipApproval, approveHash, publicClient, writeUnlockChapter, writeTransfer, unlockHash, transferHash])
+  }, [address, initializeStoryClient, ensureTipApproval, approveHash, publicClient, writeUnlockChapter, unlockHash])
 
   /**
    * Check if user owns a reading license for a specific chapter
@@ -493,7 +493,7 @@ export function useReadingLicense() {
     mintReadingLicense,
     hasReadingLicense,
     getReadingLicensePricing,
-    isLoading: isLoading || isApprovePending || isUnlockPending || isTransferPending,
+    isLoading: isLoading || isApprovePending || isUnlockPending,
     error,
     setError
   }

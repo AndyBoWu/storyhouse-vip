@@ -1,11 +1,9 @@
 import { Address, Hash } from 'viem'
 
-// StoryHouse Contract Addresses - 5-Contract Optimized Architecture
+// StoryHouse Contract Addresses - 3-Contract Optimized Architecture
 // Deployed on 2025-06-16, all contracts operational and configured
 export const STORYHOUSE_CONTRACTS = {
   TIP_TOKEN: '0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E' as Address,
-  REWARDS_MANAGER: '0xf5ae031ba92295c2ae86a99e88f09989339707e5' as Address,
-  UNIFIED_REWARDS_CONTROLLER: '0x741105d6ee9b25567205f57c0e4f1d293f0d00c5' as Address,
   CHAPTER_ACCESS_CONTROLLER: '0x1bd65ad10b1ca3ed67ae75fcdd3aba256a9918e3' as Address,
   HYBRID_REVENUE_CONTROLLER: '0xd1f7e8c6fd77dadbe946ae3e4141189b39ef7b08' as Address,
 } as const
@@ -99,44 +97,6 @@ export const TIP_TOKEN_ABI = [
   }
 ] as const
 
-export const REWARDS_MANAGER_ABI = [
-  {
-    name: 'totalRewardsEarned',
-    type: 'function',
-    stateMutability: 'view',
-    inputs: [{ name: 'account', type: 'address' }],
-    outputs: [{ name: '', type: 'uint256' }]
-  },
-  {
-    name: 'totalRewardsDistributed',
-    type: 'function',
-    stateMutability: 'view',
-    inputs: [],
-    outputs: [{ name: '', type: 'uint256' }]
-  },
-  {
-    name: 'userContextRewards',
-    type: 'function',
-    stateMutability: 'view',
-    inputs: [
-      { name: 'account', type: 'address' },
-      { name: 'contextId', type: 'bytes32' }
-    ],
-    outputs: [{ name: '', type: 'uint256' }]
-  },
-  {
-    name: 'getGlobalStats',
-    type: 'function',
-    stateMutability: 'view',
-    inputs: [],
-    outputs: [
-      { name: 'totalRewards', type: 'uint256' },
-      { name: 'totalRecipients', type: 'uint256' },
-      { name: 'totalControllers', type: 'uint256' }
-    ]
-  }
-] as const
-
 export const CHAPTER_ACCESS_CONTROLLER_ABI = [
   {
     name: 'unlockChapter',
@@ -207,6 +167,8 @@ export const CHAPTER_ACCESS_CONTROLLER_ABI = [
   }
 ] as const
 
+// Removed UNIFIED_REWARDS_CONTROLLER_ABI as rewards are no longer supported
+/*
 export const UNIFIED_REWARDS_CONTROLLER_ABI = [
   {
     name: 'registerStoryCreator',
@@ -263,6 +225,7 @@ export const UNIFIED_REWARDS_CONTROLLER_ABI = [
     ]
   }
 ] as const
+*/
 
 export const HYBRID_REVENUE_CONTROLLER_ABI = [
   {

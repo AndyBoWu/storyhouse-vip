@@ -85,16 +85,6 @@ export const STORYHOUSE_CONTRACT_CONFIG = {
     ] as const,
   },
   
-  // Rewards Manager - Central reward orchestration
-  REWARDS_MANAGER: {
-    address: '0xf5ae031ba92295c2ae86a99e88f09989339707e5' as const,
-  },
-  
-  // Unified Rewards Controller - Consolidates all reward logic
-  UNIFIED_REWARDS_CONTROLLER: {
-    address: '0x741105d6ee9b25567205f57c0e4f1d293f0d00c5' as const,
-  },
-  
   // Chapter Access Controller - Chapter monetization (0.5 TIP per chapter 4+)
   CHAPTER_ACCESS_CONTROLLER: {
     address: '0x1bd65ad10b1ca3ed67ae75fcdd3aba256a9918e3' as const,
@@ -124,7 +114,7 @@ export const NETWORK_INFO = {
   faucetUrl: 'https://aeneid.faucet.story.foundation/',
   deployer: '0xD9b6d1bd7D8A90915B905EB801c55bA5De1d4476',
   deploymentDate: '2025-06-16',
-  architecture: '5-contract-optimized',
+  architecture: '3-contract-optimized',
 } as const
 
 export default config
