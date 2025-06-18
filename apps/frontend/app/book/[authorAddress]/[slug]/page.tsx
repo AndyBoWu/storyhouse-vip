@@ -306,11 +306,11 @@ export default function BookPage() {
         </div>
       </div>
 
-      {/* Book Registration Prompt - shows for authors after publishing first chapter */}
+      {/* Book Registration Prompt - shows for authors after publishing chapters */}
       {address && book.authorAddress && address.toLowerCase() === book.authorAddress.toLowerCase() && (
         <BookRegistrationPrompt 
           bookId={bookId}
-          chapterNumber={book.totalChapters >= 1 ? 1 : 0}
+          chapterNumber={book.totalChapters || 0}
           onRegistrationComplete={() => {
             // Refresh book data after registration
             fetchBookDetails()

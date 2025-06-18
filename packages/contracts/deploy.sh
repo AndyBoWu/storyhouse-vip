@@ -6,21 +6,21 @@ echo "======================================="
 # Show help if requested
 if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     echo "Usage:"
-    echo "  ./deploy.sh [v2|minimal]    Deploy HybridRevenueControllerV2 only"
+    echo "  ./deploy.sh v2              Deploy HybridRevenueControllerV2"
     echo "  ./deploy.sh                 Deploy full 5-contract architecture"
     echo ""
     echo "Examples:"
-    echo "  ./deploy.sh v2              Deploy permissionless V2 contract"
+    echo "  ./deploy.sh v2              Deploy HybridRevenueControllerV2 (permissionless)"
     echo "  ./deploy.sh                 Deploy full architecture"
     exit 0
 fi
 
 # Deployment mode selection
 if [ "$1" = "v2" ] || [ "$1" = "minimal" ]; then
-    echo "Deploying HybridRevenueControllerV2 (Minimal Architecture)"
+    echo "Deploying HybridRevenueControllerV2 (Permissionless Version)"
     DEPLOY_MODE="v2"
     SCRIPT_NAME="DeployMinimal.s.sol"
-    ARCHITECTURE="3-contract-minimal"
+    ARCHITECTURE="3-contract-architecture"
 else
     echo "Deploying the optimized 5-contract architecture"
     DEPLOY_MODE="full"
@@ -111,7 +111,7 @@ if [ "$DEPLOY_MODE" = "v2" ]; then
     echo -e "${BLUE}📋 What will be deployed:${NC}"
     echo "   • TIP Token (already deployed)"
     echo "   • ChapterAccessController (already deployed)"  
-    echo "   • HybridRevenueControllerV2 (NEW - permissionless)"
+    echo "   • HybridRevenueControllerV2 (NEW - permissionless with all features)"
 else
     echo -e "${YELLOW}⚡ Starting 5-Contract Architecture Deployment...${NC}"
 fi
@@ -119,7 +119,7 @@ echo ""
 
 # Run the deployment script
 echo -e "${BLUE}🔨 Running deployment script...${NC}"
-if [ "$DEPLOY_MODE" = "v2" ]; then
+if [ "$DEPLOY_MODE" = "v2" ] || [ "$DEPLOY_MODE" = "v2-full" ]; then
     # Temporarily rename problematic contracts that depend on removed RewardsManager
     if [ -f "src/HybridRevenueController.sol" ]; then
         mv src/HybridRevenueController.sol src/HybridRevenueController.sol.bak
@@ -240,9 +240,10 @@ if [ "$DEPLOY_MODE" = "v2" ]; then
     echo "   1. Check broadcast file for V2 contract address:"
     echo "      $BROADCAST_FILE"
     echo "   2. Update apps/backend/.env.local with:"
-    echo "      HYBRID_REVENUE_CONTROLLER_V2_ADDRESS=<address>"
-    echo "   3. Update apps/frontend/.env.local with same address"
-    echo "   4. Update contract configurations in codebase"
+    echo "      HYBRID_REVENUE_CONTROLLER_V2_ADDRESS=<new_address>"
+    echo "   3. Update apps/frontend/.env.local with:"
+    echo "      NEXT_PUBLIC_HYBRID_REVENUE_CONTROLLER_V2_ADDRESS=<new_address>"
+    echo "   4. Restart frontend development server"
     echo "   5. Test permissionless book registration"
     echo "   6. Verify V2 contract on StoryScan"
 else

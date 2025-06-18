@@ -27,21 +27,12 @@ export function BookRegistrationPrompt({
   
   const [isRegistered, setIsRegistered] = useState<boolean | null>(null)
   const [isRegistering, setIsRegistering] = useState(false)
-  const [showPrompt, setShowPrompt] = useState(false)
-
   // Check if book is already registered
   useEffect(() => {
     if (bookId && isSupported) {
       checkBookRegistration(bookId).then(setIsRegistered)
     }
   }, [bookId, isSupported, checkBookRegistration])
-
-  // Show prompt for first chapter if not registered
-  useEffect(() => {
-    if (chapterNumber === 1 && isRegistered === false && isSupported) {
-      setShowPrompt(true)
-    }
-  }, [chapterNumber, isRegistered, isSupported])
 
   const handleRegisterBook = async () => {
     if (!address || !bookId) return
@@ -58,7 +49,6 @@ export function BookRegistrationPrompt({
       
       if (result?.success) {
         setIsRegistered(true)
-        setShowPrompt(false)
         onRegistrationComplete?.()
       }
     } catch (err) {
@@ -68,14 +58,26 @@ export function BookRegistrationPrompt({
     }
   }
 
-  const handleDismiss = () => {
-    setShowPrompt(false)
-  }
-
-  // Don't show if not supported or already registered
-  if (!isSupported || !showPrompt || isRegistered) {
+  // Debug logging
+  console.log('BookRegistrationPrompt render decision:', {
+    isSupported,
+    isRegistered,
+    chapterNumber,
+    bookId
+  })
+  
+  // Don't show if not supported, already registered, or no chapters yet
+  if (!isSupported || isRegistered === true || chapterNumber < 1) {
+    console.log('❌ Not showing prompt:', { isSupported, isRegistered, chapterNumber })
     return null
   }
+  
+  // Still checking registration status
+  if (isRegistered === null) {
+    return null
+  }
+  
+  console.log('✅ Rendering BookRegistrationPrompt')
 
   return (
     <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-6 mb-6">
@@ -86,12 +88,13 @@ export function BookRegistrationPrompt({
         
         <div className="flex-1">
           <h3 className="text-lg font-semibold text-purple-900 mb-2">
-            📚 Enable Revenue Sharing for Your Book
+            ⚠️ Book Registration Required for Chapter Unlocking
           </h3>
           
           <p className="text-purple-700 mb-4">
-            Great job publishing your first chapter! To enable readers to purchase premium chapters 
-            and earn revenue, register your book for automatic payment processing.
+            <strong>Important:</strong> Your book is not registered for revenue sharing. 
+            Readers cannot purchase or unlock chapters 4+ until you complete registration. 
+            This is a one-time setup that enables automatic payment processing.
           </p>
           
           <div className="bg-white rounded-lg p-4 mb-4">
@@ -129,13 +132,6 @@ export function BookRegistrationPrompt({
                   Register Book for Revenue Sharing
                 </>
               )}
-            </button>
-            
-            <button
-              onClick={handleDismiss}
-              className="px-4 py-2 text-purple-600 hover:text-purple-800 transition-colors"
-            >
-              Maybe Later
             </button>
           </div>
           

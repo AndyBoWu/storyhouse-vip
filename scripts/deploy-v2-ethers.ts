@@ -9,7 +9,7 @@ config({ path: path.resolve(__dirname, '../apps/backend/.env.local') })
 const STORY_RPC_URL = 'https://aeneid.storyrpc.io'
 const TIP_TOKEN_ADDRESS = '0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E'
 
-// HybridRevenueControllerV2Standalone ABI and bytecode
+// HybridRevenueControllerV2 ABI and bytecode
 const ABI = [
   {
     inputs: [
