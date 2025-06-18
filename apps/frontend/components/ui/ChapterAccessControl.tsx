@@ -104,8 +104,15 @@ export default function ChapterAccessControl({
           chapterNumber,
           chapterIpAssetId,
           onSuccess: async (licenseData) => {
-            console.log('✅ Reading license minted successfully:', licenseData)
+            console.log('✅ Transaction response:', licenseData)
             
+            // Handle transaction initiation
+            if (licenseData.transactionInitiated) {
+              alert('🎉 Transaction initiated! Please confirm in your MetaMask wallet, then refresh this page after the transaction confirms.')
+              return
+            }
+            
+            // Handle successful license minting (legacy flow)
             try {
               // Update access info with license token data
               setAccessInfo({

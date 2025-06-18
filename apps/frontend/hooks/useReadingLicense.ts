@@ -355,55 +355,19 @@ export function useReadingLicense() {
             throw new Error(`Failed to unlock chapter: ${writeError instanceof Error ? writeError.message : 'Unknown error'}`)
           }
           
-          // The writeContract function is async, we need to wait for it to be called
-          // Give it a moment to trigger the MetaMask popup
-          await new Promise(resolve => setTimeout(resolve, 500))
+          // Let the user know the transaction was initiated
+          console.log('✅ Transaction initiated! Please check your wallet to confirm.')
           
-          // Wait for unlock transaction to be submitted
-          console.log('⏳ Waiting for chapter unlock transaction...')
-          let unlockConfirmed = false
-          let attempts = 0
+          // Call onSuccess immediately to update the UI
+          onSuccess?.({ 
+            transactionInitiated: true,
+            message: 'Transaction initiated - please confirm in your wallet',
+            chapterNumber,
+            transactionHash: 'pending'
+          })
           
-          // Check more frequently at the beginning
-          while (!unlockConfirmed && attempts < 60) {
-            await new Promise(resolve => setTimeout(resolve, 500))
-            
-            // Check for errors
-            if (isUnlockError && unlockError) {
-              console.error('❌ Unlock transaction error:', unlockError)
-              throw new Error(`Transaction failed: ${unlockError.message || 'Unknown error'}`)
-            }
-            
-            // Check if transaction is pending
-            if (isUnlockWritePending) {
-              console.log('⏳ Transaction is pending in wallet...')
-            }
-            
-            if (unlockHash) {
-              console.log('✅ Chapter unlock transaction submitted:', unlockHash)
-              unlockConfirmed = true
-            }
-            attempts++
-            
-            // Log progress every 5 seconds
-            if (attempts % 10 === 0) {
-              console.log(`⏳ Still waiting for transaction... (${attempts/2}s)`)
-              console.log('Transaction state:', {
-                isUnlockWritePending,
-                isUnlockError,
-                hasHash: !!unlockHash,
-                error: unlockError?.message
-              })
-            }
-          }
-          
-          if (!unlockConfirmed) {
-            throw new Error('Chapter unlock timeout - please try again')
-          }
-          
-          // Wait a bit more for confirmation
-          await new Promise(resolve => setTimeout(resolve, 3000))
-          console.log('✅ Chapter unlocked! Revenue distributed: 70% author, 20% curator, 10% platform')
+          // Return early - the user will need to refresh after transaction confirms
+          return
           
         } catch (unlockError) {
           console.error('Failed to process payment:', unlockError)
