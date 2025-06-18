@@ -288,10 +288,21 @@ export function useReadingLicense() {
             // bookData is an array: [curator, isDerivative, parentBookId, totalChapters, isActive, ipfsMetadataHash]
             const curator = bookData[0] as string
             const isActive = bookData[4] as boolean
+            
+            console.log('📚 Book registration check in useReadingLicense:', {
+              bookId,
+              bytes32Id,
+              curator,
+              isActive,
+              bookData
+            })
+            
             bookIsRegistered = curator !== '0x0000000000000000000000000000000000000000' && isActive
             
             if (bookIsRegistered) {
               console.log('✅ Book registered in HybridRevenueControllerV2')
+            } else {
+              console.log('❌ Book NOT registered:', { curator, isActive })
             }
           } catch (checkError) {
             console.error('Failed to check book registration:', checkError)
