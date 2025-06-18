@@ -290,7 +290,15 @@ export class R2Service {
       return content
     } catch (error) {
       console.error(`❌ R2Service.getContent Failed for key "${key}":`, error)
-      throw new Error('Failed to fetch content')
+      console.error('❌ Error details:', {
+        name: error instanceof Error ? error.name : 'Unknown',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        code: (error as any)?.code || 'N/A',
+        statusCode: (error as any)?.$metadata?.httpStatusCode || 'N/A'
+      })
+      // Preserve original error message for better debugging
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      throw new Error(`Failed to fetch content from R2: ${errorMessage}`)
     }
   }
 
