@@ -3,6 +3,8 @@ import { StoryClient, StoryConfig } from '@story-protocol/core-sdk'
 import { custom } from 'viem'
 import { getStoryProtocolConfig } from '../config/blockchain'
 import { chapterUnlockStorage } from '../storage/chapterUnlockStorage'
+import { STORYHOUSE_CONTRACTS, HYBRID_REVENUE_CONTROLLER_V2_ABI } from '../contracts/storyhouse'
+import { parseBookId } from '@/lib/contracts/hybridRevenueController'
 
 // License Registry ABI for checking license ownership
 const LICENSE_REGISTRY_ABI = [
@@ -14,11 +16,13 @@ interface ChapterAccessResult {
   hasAccess: boolean
   reason: 'free' | 'owner' | 'licensed' | 'unlocked' | 'no_access'
   licenseTokenId?: string
+  error?: string
 }
 
 export class ChapterAccessService {
   private provider: ethers.JsonRpcProvider
   private licenseRegistry: ethers.Contract | null = null
+  private hybridRevenueControllerV2: ethers.Contract | null = null
 
   constructor() {
     const config = getStoryProtocolConfig()
@@ -29,6 +33,15 @@ export class ChapterAccessService {
       this.licenseRegistry = new ethers.Contract(
         config.contracts.licenseRegistry,
         LICENSE_REGISTRY_ABI,
+        this.provider
+      )
+    }
+    
+    // Initialize HybridRevenueControllerV2 contract
+    if (STORYHOUSE_CONTRACTS.HYBRID_REVENUE_CONTROLLER_V2) {
+      this.hybridRevenueControllerV2 = new ethers.Contract(
+        STORYHOUSE_CONTRACTS.HYBRID_REVENUE_CONTROLLER_V2,
+        HYBRID_REVENUE_CONTROLLER_V2_ABI,
         this.provider
       )
     }
@@ -59,6 +72,30 @@ export class ChapterAccessService {
     // Book owner always has access
     if (userAddress.toLowerCase() === authorAddress.toLowerCase()) {
       return { hasAccess: true, reason: 'owner' }
+    }
+
+    // Check if book is registered in HybridRevenueControllerV2
+    // Books must be registered to enable revenue sharing for chapters 4+
+    if (this.hybridRevenueControllerV2) {
+      try {
+        const { bytes32Id } = parseBookId(bookId)
+        const bookData = await this.hybridRevenueControllerV2.books(bytes32Id)
+        
+        // Check if book is active (registered)
+        const isActive = bookData[4] // isActive is the 5th element
+        if (!isActive) {
+          console.error(`❌ Book ${bookId} is not registered in HybridRevenueControllerV2`)
+          return { 
+            hasAccess: false, 
+            reason: 'no_access',
+            // Include a specific error to help frontend show registration prompt
+            error: 'Book is not registered for revenue sharing'
+          }
+        }
+      } catch (error) {
+        console.error('Failed to check book registration:', error)
+        // Continue to other checks if registration check fails
+      }
     }
 
     // Check in-memory storage first (temporary solution)

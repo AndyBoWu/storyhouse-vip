@@ -69,6 +69,7 @@ export const CONTRACT_ADDRESSES = {
     rewardsManager: '0xf5aE031bA92295C2aE86a99e88f09989339707E5', // REMOVED
     unifiedRewardsController: '0x741105D6ee9b25567205f57C0E4f1d293F0d00C5', // REMOVED  
     hybridRevenueController: '0xd1F7e8c6FD77dADbE946aE3e4141189b39Ef7b08', // LEGACY V1
+    hybridRevenueControllerV2: '0x99dA048826Bbb8189FBB6C3e62EaA75d0fB36812', // V2 - CURRENT
   },
   [storyMainnet.id]: {
     // Mainnet addresses (to be updated when available)
@@ -82,6 +83,7 @@ export const CONTRACT_ADDRESSES = {
     unifiedRewardsController: '0x0000000000000000000000000000000000000000',
     chapterAccessController: '0x0000000000000000000000000000000000000000',
     hybridRevenueController: '0x0000000000000000000000000000000000000000',
+    hybridRevenueControllerV2: '0x0000000000000000000000000000000000000000',
     spgNftContract: '0x0000000000000000000000000000000000000000',
   }
 } as const

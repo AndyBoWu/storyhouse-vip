@@ -85,12 +85,14 @@ export async function GET(
           readingTime: chapterData.readingTime || Math.ceil((chapterData.wordCount || 0) / 200),
           hasAccess: false,
           accessReason: accessResult.reason,
-          error: 'Access denied. Please unlock this chapter to read.',
+          error: accessResult.error || 'Access denied. Please unlock this chapter to read.',
           // Metadata needed for unlocking
           ipAssetId: chapterData.ipAssetId,
           licenseTermsId: chapterData.licenseTermsId,
           requiresPayment: chapterNum > 3,
-          price: chapterNum > 3 ? '0.5' : '0'
+          price: chapterNum > 3 ? '0.5' : '0',
+          // Include book registration status in error response
+          bookRegistrationRequired: accessResult.error?.includes('Book is not registered') || false
         }, { status: 403 });
       }
 
