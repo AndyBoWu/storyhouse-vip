@@ -108,7 +108,7 @@ export default function ChapterAccessControl({
             
             // Handle transaction initiation
             if (licenseData.transactionInitiated) {
-              alert('🎉 Transaction initiated! Please confirm in your MetaMask wallet, then refresh this page after the transaction confirms.')
+              console.log('🎉 Transaction initiated! User should confirm in MetaMask and refresh after confirmation.')
               return
             }
             
