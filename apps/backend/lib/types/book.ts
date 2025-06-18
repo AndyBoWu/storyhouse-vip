@@ -88,6 +88,7 @@ export interface ChapterMetadata {
   ipAssetId?: string
   parentIpAssetId?: string
   transactionHash?: string
+  licenseTermsId?: string
   
   // Economics
   unlockPrice: number

@@ -14,6 +14,7 @@ interface SaveChapterRequest {
   // Blockchain registration proof
   ipAssetId?: string
   transactionHash?: string
+  licenseTermsId?: string
   // Chapter metadata
   unlockPrice?: number
   readReward?: number
@@ -110,6 +111,7 @@ export async function POST(
       // IP Registration
       ipAssetId: body.ipAssetId,
       transactionHash: body.transactionHash,
+      licenseTermsId: body.licenseTermsId,
       parentIpAssetId: undefined, // TODO: Get from book metadata
 
       // Economics (based on chapter number and design spec)

@@ -79,7 +79,7 @@ export async function GET(
         // Include IP asset information for license minting
         ipAssetId: chapterData.ipAssetId,
         parentIpAssetId: chapterData.parentIpAssetId || bookMetadata.ipAssetId,
-        licenseTermsId: bookMetadata.licenseTermsId // Reading license terms ID from book
+        licenseTermsId: chapterData.licenseTermsId || bookMetadata.licenseTermsId // Try chapter first, then book
       };
 
       return NextResponse.json(formattedResponse);

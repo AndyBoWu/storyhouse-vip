@@ -3,10 +3,10 @@ import { Address, Hash } from 'viem'
 // Story Protocol Contract Addresses on Aeneid Testnet
 export const STORY_PROTOCOL_CONTRACTS = {
   // Real deployed contract addresses on Story Protocol Aeneid testnet
-  IP_ASSET_REGISTRY: '0x77319B4031e6eF1250907aa00018B8B1c67a244b' as Address,
-  LICENSE_REGISTRY: '0xbe39E1C756e921BD25DF86e7AAa31106d1eb0424' as Address, // Using Registration Workflows
+  IP_ASSET_REGISTRY: '0x77319b4031e6EF1250907aa00018b8b1C67A244B' as Address,
+  LICENSE_REGISTRY: '0xbE39e1c756e921BD25dF86E7aAa31106D1eb0424' as Address, // Using Registration Workflows
   ROYALTY_MODULE: '0x3456789012345678901234567890123456789012' as Address, // TODO: Find real address
-  SPG_NFT: '0xbe39E1C756e921BD25DF86e7AAa31106d1eb0424' as Address, // Registration Workflows contract
+  SPG_NFT: '0xbE39e1c756e921BD25dF86E7aAa31106D1eb0424' as Address, // Registration Workflows contract
 } as const
 
 // Story Protocol ABI fragments for the functions we need
