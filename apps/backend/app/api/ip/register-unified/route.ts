@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createUnifiedIpService, getInitializedUnifiedIpService } from '@/lib/services/unifiedIpService'
 import { BookStorageService } from '@/lib/storage/bookStorage'
+import { ethers } from 'ethers'
 import { z } from 'zod'
 
 // Feature flag for unified registration
@@ -117,6 +118,58 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ Unified IP registration completed successfully!')
     
+    // Auto-register book in HybridRevenueControllerV2 for revenue sharing
+    let revenueControllerRegistered = false
+    const HYBRID_REVENUE_CONTROLLER_V2_ADDRESS = process.env.HYBRID_REVENUE_CONTROLLER_V2_ADDRESS
+    
+    if (HYBRID_REVENUE_CONTROLLER_V2_ADDRESS && HYBRID_REVENUE_CONTROLLER_V2_ADDRESS !== '0x...') {
+      try {
+        console.log('🏦 Auto-registering book for revenue sharing...')
+        
+        // Extract book information from story ID
+        const [authorAddress, ...slugParts] = story.id.split('/')
+        const bookSlug = slugParts.join('/')
+        const bookId = `${authorAddress}/${bookSlug}`
+        
+        // Convert bookId to bytes32 format
+        const bookIdBytes32 = ethers.id(bookId).slice(0, 66) // Take first 32 bytes
+        
+        // Check if book already registered
+        const provider = new ethers.JsonRpcProvider('https://aeneid.storyrpc.io')
+        const hybridContract = new ethers.Contract(
+          HYBRID_REVENUE_CONTROLLER_V2_ADDRESS,
+          [
+            'function books(bytes32) view returns (address curator, bool isDerivative, bytes32 parentBookId, uint256 totalChapters, bool isActive, string ipfsMetadataHash)',
+            'function registerBook(bytes32 bookId, bool isDerivative, bytes32 parentBookId, uint256 totalChapters, string ipfsMetadataHash)'
+          ],
+          provider
+        )
+        
+        try {
+          const bookData = await hybridContract.books(bookIdBytes32)
+          if (bookData.isActive) {
+            console.log('📚 Book already registered in HybridRevenueControllerV2')
+            revenueControllerRegistered = true
+          }
+        } catch (checkError) {
+          // Book not registered, we'll need to register it
+          console.log('📚 Book not yet registered in HybridRevenueControllerV2')
+        }
+        
+        if (!revenueControllerRegistered) {
+          console.log('💡 Book needs to be registered by the author for revenue sharing')
+          console.log(`   Book ID: ${bookId}`)
+          console.log(`   Author should call registerBook() on HybridRevenueControllerV2`)
+        }
+        
+      } catch (revenueError) {
+        console.warn('⚠️ Failed to check/register book for revenue sharing:', revenueError)
+        // Don't fail the IP registration if revenue controller registration fails
+      }
+    } else {
+      console.log('⚠️ HybridRevenueControllerV2 not configured - skipping revenue registration')
+    }
+    
     // Return success response
     return NextResponse.json({
       success: true,
@@ -127,7 +180,15 @@ export async function POST(request: NextRequest) {
         metadataUri,
         metadataHash,
         method: 'unified',
-        gasOptimized: true
+        gasOptimized: true,
+        revenueController: {
+          configured: !!HYBRID_REVENUE_CONTROLLER_V2_ADDRESS,
+          registered: revenueControllerRegistered,
+          address: HYBRID_REVENUE_CONTROLLER_V2_ADDRESS,
+          note: revenueControllerRegistered 
+            ? 'Book already registered for revenue sharing' 
+            : 'Book registration for revenue sharing can be done by the author'
+        }
       }
     })
 

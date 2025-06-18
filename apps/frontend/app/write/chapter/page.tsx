@@ -207,7 +207,14 @@ function ChapterWritingPageContent() {
   const handlePublishingSuccess = (result: any) => {
     console.log('Chapter published successfully:', result)
     setShowPublishingModal(false)
-    router.push('/own')
+    
+    // For first chapter, redirect to book page to show registration prompt
+    if (chapterNumber === 1) {
+      const bookUrl = `/book/${bookId.replace('/', '/')}`
+      router.push(bookUrl)
+    } else {
+      router.push('/own')
+    }
   }
   
   // Convert chapter data to the format expected by PublishingModal

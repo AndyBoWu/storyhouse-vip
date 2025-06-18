@@ -2,8 +2,8 @@ import { useState, useCallback } from 'react'
 import { useAccount, useWriteContract, useWaitForTransactionReceipt, usePublicClient } from 'wagmi'
 import { parseBookId } from '@/lib/contracts/hybridRevenueController'
 
-// TODO: Update this address after deploying V2
-export const HYBRID_REVENUE_CONTROLLER_V2_ADDRESS = '0x...' // UPDATE AFTER DEPLOYMENT
+// HybridRevenueControllerV2 deployed address (2025-01-18)
+export const HYBRID_REVENUE_CONTROLLER_V2_ADDRESS = '0x9c6a3c50e5d77f99d805d8d7c935acb23208fd9f'
 
 // ABI for HybridRevenueControllerV2
 export const HYBRID_V2_ABI = [

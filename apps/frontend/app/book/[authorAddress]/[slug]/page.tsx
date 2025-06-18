@@ -10,6 +10,7 @@ import dynamic from 'next/dynamic';
 import apiClient, { getApiBaseUrl } from '@/lib/api-client';
 import ShareButton from '@/components/ui/ShareButton';
 import { BookIPInfo } from '@/components/book';
+import { BookRegistrationPrompt } from '@/components/book/BookRegistrationPrompt';
 
 // Dynamically import WalletConnect to avoid hydration issues
 const WalletConnect = dynamic(() => import('@/components/WalletConnect'), {
@@ -304,6 +305,18 @@ export default function BookPage() {
           </div>
         </div>
       </div>
+
+      {/* Book Registration Prompt - shows for authors after publishing first chapter */}
+      {address && book.authorAddress && address.toLowerCase() === book.authorAddress.toLowerCase() && (
+        <BookRegistrationPrompt 
+          bookId={bookId}
+          chapterNumber={book.totalChapters >= 1 ? 1 : 0}
+          onRegistrationComplete={() => {
+            // Refresh book data after registration
+            fetchBookDetails()
+          }}
+        />
+      )}
 
       {/* Chapters Section */}
       <div className="bg-white rounded-lg shadow-lg p-6 mt-6">
