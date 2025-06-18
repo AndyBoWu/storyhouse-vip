@@ -91,22 +91,40 @@ export default function ChapterPage() {
         
         console.log('💰 Chapter pricing:', { pricing, userIsOwner, address, authorAddress: chapterInfo.authorAddress });
         
-        // Determine if user should have access
-        if (pricing.isFree || userIsOwner) {
-          // Fetch full content
-          console.log('🔓 User has access, fetching full content...');
+        // Always try to fetch full content - let the backend decide access
+        try {
+          console.log('🔍 Attempting to fetch full chapter content...');
           const fullChapter = await apiClient.get(`/books/${encodeURIComponent(bookId)}/chapter/${chapterNumber}`);
-          console.log('📖 Full chapter loaded:', { title: fullChapter.title, hasContent: !!fullChapter.content });
-          setChapter(fullChapter);
-          setHasAccess(true);
-        } else {
-          // Set info-only chapter (no content)
-          console.log('🔒 User needs to unlock, showing info only');
-          setChapter({
-            ...chapterInfo,
-            content: '' // No content for non-owners of paid chapters
-          });
-          setHasAccess(false);
+          
+          // Check if we got access denied (403) in the response
+          if (fullChapter.hasAccess === false) {
+            console.log('🔒 Backend denied access:', fullChapter.accessReason);
+            setChapter({
+              ...chapterInfo,
+              content: '', // No content
+              error: fullChapter.error,
+              requiresPayment: fullChapter.requiresPayment,
+              price: fullChapter.price
+            });
+            setHasAccess(false);
+          } else {
+            console.log('📖 Full chapter loaded:', { title: fullChapter.title, hasContent: !!fullChapter.content });
+            setChapter(fullChapter);
+            setHasAccess(true);
+          }
+        } catch (fetchError: any) {
+          // If it's a 403, the user doesn't have access
+          if (fetchError.message?.includes('403') || fetchError.message?.includes('Access denied')) {
+            console.log('🔒 Access denied by backend');
+            setChapter({
+              ...chapterInfo,
+              content: '' // No content for unauthorized users
+            });
+            setHasAccess(false);
+          } else {
+            // Re-throw other errors
+            throw fetchError;
+          }
         }
       }
     } catch (err) {

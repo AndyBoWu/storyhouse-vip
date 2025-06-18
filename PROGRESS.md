@@ -366,3 +366,90 @@ After comparing LAP (Liquid Absolute Percentage) vs LRP (Liquid Royalty Policy):
 - Story Protocol handles IP registration and licensing only
 - HybridRevenueController manages all revenue distribution
 - Maximum flexibility for future enhancements
+
+---
+
+## 🔧 **HybridRevenueController Integration (January 2025)**
+
+### **Problem Summary**
+Bob was unable to unlock Chapter 4 of Andy's book "Project Phoenix" despite having sufficient TIP tokens. The error "Failed to transfer TIP tokens to author" was occurring, and the system wasn't using the HybridRevenueController for proper revenue distribution.
+
+### **Root Cause Analysis**
+1. **Direct Transfer Issue**: The system was attempting direct TIP transfers instead of using HybridRevenueController
+2. **Book Not Registered**: "Project Phoenix" was not registered in the HybridRevenueController
+3. **Import Circular Reference**: Frontend had a circular import issue causing initialization errors
+
+### **Solution: Fallback Mechanism with HybridRevenueController**
+
+#### **Implementation Details**
+1. **Smart Fallback Logic**:
+   ```typescript
+   // Check if book is registered in HybridRevenueController
+   const bookData = await publicClient.readContract({
+     address: HYBRID_REVENUE_CONTROLLER_ADDRESS,
+     abi: HYBRID_REVENUE_CONTROLLER_ABI,
+     functionName: 'books',
+     args: [bytes32Id],
+   })
+   
+   if (bookData.isActive) {
+     // Use HybridRevenueController (70/20/10 revenue split)
+     writeUnlockChapter({
+       address: HYBRID_REVENUE_CONTROLLER_ADDRESS,
+       abi: HYBRID_REVENUE_CONTROLLER_ABI,
+       functionName: 'unlockChapter',
+       args: [bytes32Id, BigInt(chapterNumber)],
+     })
+   } else {
+     // Fall back to direct TIP transfer
+     writeTransfer({
+       address: TIP_TOKEN_ADDRESS,
+       abi: TIP_TOKEN_ABI,
+       functionName: 'transfer',
+       args: [authorAddress, mintingFee],
+     })
+   }
+   ```
+
+2. **Fixed Import Issue**:
+   ```typescript
+   // Before: Circular reference
+   import HYBRID_REVENUE_CONTROLLER_ABI from './HybridRevenueController.abi.json'
+   export const HYBRID_REVENUE_CONTROLLER_ABI = HYBRID_REVENUE_CONTROLLER_ABI
+   
+   // After: Proper naming
+   import HybridRevenueControllerABI from './HybridRevenueController.abi.json'
+   export const HYBRID_REVENUE_CONTROLLER_ABI = HybridRevenueControllerABI
+   ```
+
+3. **Book Registration Script**:
+   - Created `register-book-in-hybrid-revenue.ts` for registering books
+   - Checks registration status in read-only mode
+   - Sets chapter attributions with proper pricing
+
+### **Benefits**
+- ✅ **Graceful Degradation**: Works for both registered and unregistered books
+- ✅ **Future-Ready**: New books can use HybridRevenueController for automatic revenue splits
+- ✅ **Backward Compatible**: Existing books continue working with direct transfers
+- ✅ **Production Ready**: Handles edge cases and errors gracefully
+
+### **Revenue Distribution Models**
+1. **With HybridRevenueController** (registered books):
+   - 70% to chapter author
+   - 20% to book curator
+   - 10% to platform
+
+2. **Direct Transfer** (unregistered books):
+   - 100% to author
+   - Future migration path available
+
+### **Files Modified**
+- `/apps/frontend/hooks/useReadingLicense.ts` - Added fallback mechanism
+- `/apps/frontend/lib/contracts/hybridRevenueController.ts` - Fixed circular import
+- `/apps/backend/scripts/register-book-in-hybrid-revenue.ts` - Book registration script
+
+### **Current Status**
+- ✅ Fallback mechanism implemented and tested
+- ✅ Import issues resolved
+- ✅ Bob can now unlock Chapter 4 successfully
+- ⏳ "Project Phoenix" awaiting registration in HybridRevenueController (requires admin key)

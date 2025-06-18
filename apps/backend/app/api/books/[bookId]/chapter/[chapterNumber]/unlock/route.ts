@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { chapterUnlockStorage } from '@/lib/storage/chapterUnlockStorage'
 import { BookStorageService } from '@/lib/storage/bookStorage'
+import { chapterAccessService } from '@/lib/services/chapterAccessService'
 
 interface UnlockChapterRequest {
   userAddress: string
   transactionHash?: string
   readingSessionId?: string
+  licenseTokenId?: string // Story Protocol license NFT ID
 }
 
 interface UnlockChapterResponse {
@@ -98,7 +100,7 @@ export async function POST(
       } as UnlockChapterResponse)
     }
 
-    // For paid chapters (4+), require blockchain transaction
+    // For paid chapters (4+), require blockchain transaction AND license token
     if (!body.transactionHash) {
       return NextResponse.json({
         success: false,
@@ -106,25 +108,53 @@ export async function POST(
       } as UnlockChapterResponse, { status: 400 })
     }
 
-    // TODO: Validate blockchain transaction
-    // - Check if transaction exists and is confirmed
-    // - Verify transaction calls TIP token transfer
-    // - Confirm user paid the correct amount (0.5 TIP)
-
-    console.log('🔗 Blockchain transaction validation needed:', {
+    // Verify the transaction
+    console.log('🔗 Verifying blockchain transaction...', {
       transactionHash: body.transactionHash,
-      expectedPrice: unlockPrice,
+      expectedPrice: '0.5 TIP', // Fixed price for chapters 4+
       userAddress: body.userAddress
     })
 
-    // Record the paid unlock (validation will be implemented later)
-    chapterUnlockStorage.recordUnlock({
-      userAddress: body.userAddress,
-      bookId,
-      chapterNumber: chapterNum,
-      isFree: false,
-      transactionHash: body.transactionHash
-    })
+    try {
+      // Verify the transaction is valid
+      const isValidTransaction = await chapterAccessService.verifyUnlockTransaction(
+        body.transactionHash,
+        body.userAddress,
+        '500000000000000000', // 0.5 TIP in wei
+        bookId,
+        chapterNum
+      )
+
+      if (!isValidTransaction) {
+        return NextResponse.json({
+          success: false,
+          error: 'Invalid or unconfirmed transaction. Please ensure the transaction is confirmed.'
+        } as UnlockChapterResponse, { status: 400 })
+      }
+
+      console.log('✅ Transaction verified successfully')
+      
+      // Record the verified unlock
+      chapterAccessService.recordUnlock(
+        body.userAddress,
+        bookId,
+        chapterNum,
+        body.transactionHash
+      )
+
+      // If license token ID provided, store it for future verification
+      if (body.licenseTokenId) {
+        console.log('📜 License token ID recorded:', body.licenseTokenId)
+        // TODO: Store license token ID for future Story Protocol verification
+      }
+
+    } catch (verifyError) {
+      console.error('❌ Transaction verification failed:', verifyError)
+      return NextResponse.json({
+        success: false,
+        error: 'Failed to verify transaction. Please try again.'
+      } as UnlockChapterResponse, { status: 400 })
+    }
 
     return NextResponse.json({
       success: true,

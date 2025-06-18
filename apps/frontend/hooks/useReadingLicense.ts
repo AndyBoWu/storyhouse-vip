@@ -5,6 +5,11 @@ import { custom, parseEther, formatEther, type Address, createWalletClient } fro
 import { apiClient } from '@/lib/api-client'
 import { STORYHOUSE_CONTRACTS, TIP_TOKEN_ABI } from '../lib/contracts/storyhouse'
 import { storyTestnet } from '../lib/config/chains'
+import { 
+  HYBRID_REVENUE_CONTROLLER_ADDRESS, 
+  HYBRID_REVENUE_CONTROLLER_ABI,
+  parseBookId 
+} from '@/lib/contracts/hybridRevenueController'
 
 const TIP_TOKEN_ADDRESS = STORYHOUSE_CONTRACTS.TIP_TOKEN
 
@@ -40,7 +45,13 @@ export function useReadingLicense() {
     hash: approveHash,
   })
   
-  // Hook for TIP token transfer
+  // Hook for HybridRevenueController unlockChapter
+  const { writeContract: writeUnlockChapter, data: unlockHash } = useWriteContract()
+  const { isLoading: isUnlockPending } = useWaitForTransactionReceipt({
+    hash: unlockHash,
+  })
+  
+  // Hook for direct TIP token transfer
   const { writeContract: writeTransfer, data: transferHash } = useWriteContract()
   const { isLoading: isTransferPending } = useWaitForTransactionReceipt({
     hash: transferHash,
@@ -232,13 +243,19 @@ export function useReadingLicense() {
         await new Promise(resolve => setTimeout(resolve, 3000))
       }
 
-      // Mint the license token using Story Protocol SDK
-      console.log('📝 Minting license token on Story Protocol...')
-      console.log('Mint parameters:', {
-        ipId: chapterIpAssetId,
+      // The new atomic flow:
+      // 1. First check if AtomicLicensePurchase contract is available
+      // 2. If yes, use it for atomic payment + license minting
+      // 3. If no, fall back to current two-step process
+      
+      console.log('📝 Starting atomic license purchase...')
+      console.log('Purchase parameters:', {
+        bookId,
+        chapterNumber,
+        ipAssetId: chapterIpAssetId,
         licenseTermsId: licenseTermsId.toString(),
-        receiver: address,
-        amount: '1'
+        price: formatEther(mintingFee),
+        buyer: address
       })
       
       if (!address) {
@@ -248,129 +265,192 @@ export function useReadingLicense() {
       // Ensure address is valid format
       const receiverAddress = address as `0x${string}`
       
+      // For now, continue with the existing two-step process
+      // TODO: When AtomicLicensePurchase is deployed, use it instead
+      console.log('⚠️ Using two-step process (payment then license). TODO: Deploy AtomicLicensePurchase contract.')
+      
       try {
-        console.log('Calling mintLicenseTokens with:', {
-          ipId: chapterIpAssetId,
-          licenseTermsId: licenseTermsId.toString(),
-          receiver: receiverAddress,
-          amount: '1n',
-          client: !!client,
-          clientLicense: !!client.license,
-          clientLicenseMint: !!client.license?.mintLicenseTokens
-        })
-        
         // Wait a moment to ensure wallet is ready
         await new Promise(resolve => setTimeout(resolve, 100))
         
-        // Since Story Protocol uses zero address, we need to handle TIP payment separately
-        // Transfer TIP tokens to the author before minting the license
-        console.log(`💰 Transferring ${formatEther(mintingFee)} TIP to author...`)
-        
-        // Get the author address from chapter info
-        const authorAddress = chapterInfo.authorAddress
-        if (!authorAddress) {
-          throw new Error('Author address not found for this chapter')
-        }
+        // Step 1: Handle payment (try HybridRevenueController first, fall back to direct transfer)
+        console.log(`💰 Step 1: Processing payment (${formatEther(mintingFee)} TIP)...`)
         
         try {
-          // Transfer TIP tokens to the author
-          writeTransfer({
-            address: TIP_TOKEN_ADDRESS,
-            abi: TIP_TOKEN_ABI,
-            functionName: 'transfer',
-            args: [authorAddress as `0x${string}`, mintingFee],
+          // Parse the book ID to get the bytes32 format
+          const { bytes32Id, authorAddress } = parseBookId(bookId)
+          
+          // Check if book is registered in HybridRevenueController
+          let useHybridController = false
+          try {
+            const bookData = await publicClient.readContract({
+              address: HYBRID_REVENUE_CONTROLLER_ADDRESS,
+              abi: HYBRID_REVENUE_CONTROLLER_ABI,
+              functionName: 'books',
+              args: [bytes32Id],
+            }) as any
+            
+            useHybridController = bookData.isActive
+            console.log('HybridRevenueController status:', useHybridController ? '✅ Book registered' : '❌ Book not registered')
+          } catch (checkError) {
+            console.warn('Could not check HybridRevenueController status:', checkError)
+          }
+          
+          if (useHybridController) {
+            // Use HybridRevenueController for automatic 70/20/10 revenue split
+            console.log('Using HybridRevenueController for revenue distribution...')
+            
+            // First approve HybridRevenueController to spend TIP tokens
+            const approvalSuccess = await ensureTipApproval(
+              HYBRID_REVENUE_CONTROLLER_ADDRESS,
+              mintingFee
+            )
+            
+            if (!approvalSuccess) {
+              throw new Error('Failed to approve TIP spending for HybridRevenueController')
+            }
+            
+            // Unlock the chapter through HybridRevenueController
+            writeUnlockChapter({
+              address: HYBRID_REVENUE_CONTROLLER_ADDRESS,
+              abi: HYBRID_REVENUE_CONTROLLER_ABI,
+              functionName: 'unlockChapter',
+              args: [bytes32Id, BigInt(chapterNumber)],
+            })
+            
+            // Wait for unlock transaction to be submitted
+            console.log('⏳ Waiting for chapter unlock...')
+            let unlockConfirmed = false
+            let attempts = 0
+            while (!unlockConfirmed && attempts < 30) {
+              await new Promise(resolve => setTimeout(resolve, 1000))
+              if (unlockHash) {
+                console.log('✅ Chapter unlock transaction submitted:', unlockHash)
+                unlockConfirmed = true
+              }
+              attempts++
+            }
+            
+            if (!unlockConfirmed) {
+              throw new Error('Chapter unlock timeout - please try again')
+            }
+            
+            // Wait a bit more for confirmation
+            await new Promise(resolve => setTimeout(resolve, 3000))
+            console.log('✅ Chapter unlocked! Revenue distributed: 70% author, 20% curator, 10% platform')
+            
+          } else {
+            // Fall back to direct TIP transfer to author
+            console.log('Falling back to direct TIP transfer to author...')
+            
+            // Transfer TIP tokens directly to the author
+            writeTransfer({
+              address: TIP_TOKEN_ADDRESS,
+              abi: TIP_TOKEN_ABI,
+              functionName: 'transfer',
+              args: [authorAddress, mintingFee],
+            })
+            
+            // Wait for transfer to complete
+            console.log('⏳ Waiting for TIP transfer...')
+            let transferConfirmed = false
+            let attempts = 0
+            while (!transferConfirmed && attempts < 30) {
+              await new Promise(resolve => setTimeout(resolve, 1000))
+              if (transferHash) {
+                console.log('✅ TIP transfer transaction submitted:', transferHash)
+                transferConfirmed = true
+              }
+              attempts++
+            }
+            
+            if (!transferConfirmed) {
+              throw new Error('TIP transfer timeout - please try again')
+            }
+            
+            // Wait a bit more for confirmation
+            await new Promise(resolve => setTimeout(resolve, 3000))
+            console.log('✅ Chapter unlocked! TIP tokens sent directly to author')
+          }
+          
+        } catch (unlockError) {
+          console.error('Failed to process payment:', unlockError)
+          throw new Error('Failed to process payment. Please ensure you have sufficient TIP balance.')
+        }
+        
+        // Step 2: Mint the Story Protocol reading license (should be free since currency is zero address)
+        console.log('📜 Step 2: Minting Story Protocol license token...')
+        
+        try {
+          const mintParams = {
+            ipId: chapterIpAssetId as `0x${string}`,
+            licenseTermsId: licenseTermsId,
+            amount: 1n,
+            receiver: receiverAddress,
+            txOptions: {
+              waitForTransaction: true
+            }
+          }
+          
+          console.log('License mint parameters:', {
+            ipId: mintParams.ipId,
+            licenseTermsId: mintParams.licenseTermsId.toString(),
+            amount: mintParams.amount.toString(),
+            receiver: mintParams.receiver
           })
           
-          // Wait for transfer transaction to be submitted
-          console.log('⏳ Waiting for TIP transfer...')
-          let transferConfirmed = false
-          let attempts = 0
-          while (!transferConfirmed && attempts < 30) {
-            await new Promise(resolve => setTimeout(resolve, 1000))
-            if (transferHash) {
-              console.log('✅ TIP transfer transaction submitted:', transferHash)
-              transferConfirmed = true
-            }
-            attempts++
-          }
+          const result = await client.license.mintLicenseTokens(mintParams)
           
-          if (!transferConfirmed) {
-            throw new Error('TIP transfer timeout - please try again')
+          if (!result.txHash) {
+            throw new Error('Failed to mint license token - no transaction hash returned')
           }
-          
-          // Wait a bit more for confirmation
-          await new Promise(resolve => setTimeout(resolve, 3000))
-          console.log('✅ TIP tokens transferred to author:', authorAddress)
-          
-        } catch (tipError) {
-          console.error('Failed to transfer TIP tokens:', tipError)
-          throw new Error('Failed to transfer TIP tokens to author. Please ensure you have sufficient TIP balance.')
-        }
-        
-        // Check if we should use the newer API after all
-        // The backend code might be outdated, let's try the newer SDK API with ipId
-        const mintParams = {
-          ipId: chapterIpAssetId as `0x${string}`,
-          licenseTermsId: licenseTermsId, // Already a BigInt from earlier
-          receiver: receiverAddress as `0x${string}`,
-          amount: 1n,
-          txOptions: {
-            // Try to specify we're using TIP tokens, not IP tokens
-            value: BigInt(0) // No ETH value needed
-          }
-        }
-        
-        console.log('Final mint params (using backend format):', {
-          ...mintParams,
-          licenseTermsId: mintParams.licenseTermsId.toString(),
-          amount: mintParams.amount,
-          maxMintingFee: mintParams.maxMintingFee.toString()
-        })
-        
-        const result = await client.license.mintLicenseTokens(mintParams as any)
-        
-        if (!result.txHash) {
-          throw new Error('Failed to mint license token - no transaction hash returned')
-        }
 
-        console.log('✅ Reading license minted successfully!')
-        console.log('Transaction hash:', result.txHash)
-        console.log('License token ID:', result.licenseTokenIds?.[0])
-        
-        const licenseData = {
-          licenseTokenId: result.licenseTokenIds?.[0]?.toString(),
-          transactionHash: result.txHash,
-          ipAssetId: chapterIpAssetId,
-          receiver: address,
-          amount: 1,
-          mintingFee: '0.5'
+          console.log('✅ Reading license minted successfully!')
+          console.log('Transaction hash:', result.txHash)
+          console.log('License token ID:', result.licenseTokenIds?.[0])
+          
+          // Store the license token ID for future verification
+          const licenseTokenId = result.licenseTokenIds?.[0]?.toString()
+          
+          const licenseData = {
+            licenseTokenId: licenseTokenId,
+            transactionHash: result.txHash,
+            ipAssetId: chapterIpAssetId,
+            receiver: address,
+            amount: 1,
+            mintingFee: '0.5'
+          }
+          
+          // Update backend to record the license minting (optional, for tracking)
+          try {
+            await apiClient.post(`/books/${bookId}/chapter/${chapterNumber}/mint-reading-license`, {
+              userAddress: address,
+              chapterIpAssetId,
+              licenseTokenId: licenseTokenId,
+              transactionHash: result.txHash
+            })
+          } catch (backendErr) {
+            console.warn('Failed to update backend with license info:', backendErr)
+            // Don't fail the whole operation if backend update fails
+          }
+          
+          onSuccess?.(licenseData)
+          return licenseData
+          
+        } catch (licenseError) {
+          console.error('Failed to mint license token:', licenseError)
+          // If license minting fails after payment, this is critical
+          // The user has paid but didn't get the license
+          throw new Error(
+            'Payment succeeded but license minting failed. Please contact support with your transaction hash. ' +
+            'Do not attempt to purchase again.'
+          )
         }
-        
-        return licenseData
-      } catch (mintError) {
-        console.error('Mint license tokens error details:', {
-          error: mintError,
-          message: mintError instanceof Error ? mintError.message : 'Unknown error',
-          stack: mintError instanceof Error ? mintError.stack : undefined
-        })
-        throw mintError
+      } catch (outerError) {
+        // This catches any errors from the entire two-step process
+        console.error('License purchase process failed:', outerError)
+        throw outerError
       }
-
-      // Update backend to record the license minting (optional, for tracking)
-      try {
-        await apiClient.post(`/books/${bookId}/chapter/${chapterNumber}/mint-reading-license`, {
-          userAddress: address,
-          chapterIpAssetId,
-          licenseTokenId: licenseData.licenseTokenId,
-          transactionHash: result.txHash
-        })
-      } catch (backendErr) {
-        console.warn('Failed to update backend with license info:', backendErr)
-        // Don't fail the whole operation if backend update fails
-      }
-
-      onSuccess?.(licenseData)
-      return licenseData
 
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Unknown error during license minting'
@@ -380,7 +460,7 @@ export function useReadingLicense() {
     } finally {
       setIsLoading(false)
     }
-  }, [address, initializeStoryClient, ensureTipApproval, approveHash])
+  }, [address, initializeStoryClient, ensureTipApproval, approveHash, publicClient, writeUnlockChapter, writeTransfer, unlockHash, transferHash])
 
   /**
    * Check if user owns a reading license for a specific chapter
@@ -446,7 +526,7 @@ export function useReadingLicense() {
     mintReadingLicense,
     hasReadingLicense,
     getReadingLicensePricing,
-    isLoading: isLoading || isApprovePending,
+    isLoading: isLoading || isApprovePending || isUnlockPending || isTransferPending,
     error,
     setError
   }

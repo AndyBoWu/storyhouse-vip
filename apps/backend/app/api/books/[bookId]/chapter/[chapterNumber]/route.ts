@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { BookStorageService } from '@/lib/storage/bookStorage';
+import { chapterAccessService } from '@/lib/services/chapterAccessService';
 
 interface ChapterParams {
   bookId: string;
@@ -35,16 +36,54 @@ export async function GET(
 
     console.log(`📖 Fetching chapter ${chapterNumber} of book ${bookId}`);
 
+    // Get user address from request header (set by frontend)
+    const userAddress = request.headers.get('x-user-address') || undefined;
+
     try {
       // Parse book ID to get author address and slug
       const { authorAddress, slug } = BookStorageService.parseBookId(bookId as any);
       
-      // Get chapter content using the book storage service
+      // First, get chapter metadata to check if it needs access control
       const chapterData = await BookStorageService.getChapterContent(
         authorAddress,
         slug,
         chapterNum
       );
+
+      // Check access permissions
+      const accessResult = await chapterAccessService.checkChapterAccess(
+        bookId,
+        chapterNum,
+        userAddress,
+        chapterData.ipAssetId
+      );
+
+      console.log(`🔐 Access check for chapter ${chapterNum}:`, {
+        userAddress,
+        hasAccess: accessResult.hasAccess,
+        reason: accessResult.reason
+      });
+
+      // If no access, return limited metadata only
+      if (!accessResult.hasAccess) {
+        return NextResponse.json({
+          bookId: bookId,
+          chapterNumber: chapterNum,
+          title: chapterData.title,
+          author: chapterData.authorName || 'Anonymous',
+          authorAddress: chapterData.authorAddress || '',
+          wordCount: chapterData.wordCount || 0,
+          readingTime: chapterData.readingTime || Math.ceil((chapterData.wordCount || 0) / 200),
+          hasAccess: false,
+          accessReason: accessResult.reason,
+          error: 'Access denied. Please unlock this chapter to read.',
+          // Metadata needed for unlocking
+          ipAssetId: chapterData.ipAssetId,
+          licenseTermsId: chapterData.licenseTermsId,
+          requiresPayment: chapterNum > 3,
+          price: chapterNum > 3 ? '0.5' : '0'
+        }, { status: 403 });
+      }
 
       // Get book metadata for additional info
       let bookMetadata: any = {};
