@@ -194,13 +194,152 @@ export default function BookPage() {
 
   if (error || !book) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-red-600 mb-4">Error</h2>
-          <p className="text-gray-600 mb-4">{error || 'Book not found'}</p>
-          <Link href="/own" className="text-blue-600 hover:underline">
-            Back to My Library
-          </Link>
+      <div className="min-h-screen bg-gradient-to-b from-orange-200 via-pink-200 to-blue-300">
+        {/* Navigation Header */}
+        <header className="glass border-b border-white/20">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <Link
+                href="/own"
+                className="flex items-center gap-2 text-gray-700 hover:text-gray-900 transition-colors bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full"
+              >
+                <ArrowLeft className="h-5 w-5" />
+                <span className="font-medium">Back to Library</span>
+              </Link>
+              
+              <WalletConnect />
+            </div>
+          </div>
+        </header>
+
+        {/* Main Content */}
+        <div className="container mx-auto px-4 py-16">
+          <div className="max-w-4xl mx-auto">
+            {/* Hero Section */}
+            <div className="text-center mb-12">
+              <div className="mb-8">
+                <div className="w-32 h-32 mx-auto bg-gradient-to-br from-purple-400 to-blue-500 rounded-full flex items-center justify-center mb-6 shadow-2xl">
+                  <BookOpen className="w-16 h-16 text-white" />
+                </div>
+                <h1 className="text-4xl font-bold text-gray-800 mb-4">
+                  📚 Story Not Found
+                </h1>
+                <p className="text-xl text-gray-600 mb-2">
+                  Oops! The story you're looking for seems to have wandered off into the digital library.
+                </p>
+                <p className="text-gray-500">
+                  It might have been moved, renamed, or is taking a creative break.
+                </p>
+              </div>
+            </div>
+
+            {/* Action Cards Grid */}
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+              {/* Search Stories */}
+              <div className="glass bg-white/10 backdrop-blur-lg rounded-2xl p-6 hover:bg-white/20 transition-all duration-300 hover:shadow-xl border border-white/20">
+                <div className="text-3xl mb-4">🔍</div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-2">Search Stories</h3>
+                <p className="text-gray-600 mb-4">Find the story you're looking for by searching our library</p>
+                <Link
+                  href="/library"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-full hover:from-purple-700 hover:to-blue-700 transition-all"
+                >
+                  Browse Library
+                  <ArrowLeft className="w-4 h-4 rotate-180" />
+                </Link>
+              </div>
+
+              {/* Popular Stories */}
+              <div className="glass bg-white/10 backdrop-blur-lg rounded-2xl p-6 hover:bg-white/20 transition-all duration-300 hover:shadow-xl border border-white/20">
+                <div className="text-3xl mb-4">⭐</div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-2">Popular Stories</h3>
+                <p className="text-gray-600 mb-4">Discover trending stories from our community</p>
+                <Link
+                  href="/discover"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-full hover:from-emerald-700 hover:to-teal-700 transition-all"
+                >
+                  Explore Popular
+                  <ArrowLeft className="w-4 h-4 rotate-180" />
+                </Link>
+              </div>
+
+              {/* Start Writing */}
+              <div className="glass bg-white/10 backdrop-blur-lg rounded-2xl p-6 hover:bg-white/20 transition-all duration-300 hover:shadow-xl border border-white/20">
+                <div className="text-3xl mb-4">✍️</div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-2">Create Your Story</h3>
+                <p className="text-gray-600 mb-4">Start your own Web3 storytelling journey</p>
+                <Link
+                  href="/write"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-full hover:from-violet-700 hover:to-purple-700 transition-all"
+                >
+                  Start Writing
+                  <ArrowLeft className="w-4 h-4 rotate-180" />
+                </Link>
+              </div>
+            </div>
+
+            {/* Platform Features Highlight */}
+            <div className="glass bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
+              <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+                🌟 Why StoryHouse.vip?
+              </h2>
+              <div className="grid md:grid-cols-2 gap-8">
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                      <CheckCircle className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-800">Chapter-Level IP Protection</h3>
+                      <p className="text-gray-600 text-sm">Register individual chapters as IP assets for $50-500 vs $1000+ for full books</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full flex items-center justify-center flex-shrink-0">
+                      <CheckCircle className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-800">Automated Royalties</h3>
+                      <p className="text-gray-600 text-sm">Smart contracts handle licensing and payments automatically</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 bg-gradient-to-r from-violet-500 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
+                      <CheckCircle className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-800">$TIP Token Economy</h3>
+                      <p className="text-gray-600 text-sm">Earn TIP tokens through reading and writing quality content</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
+                      <CheckCircle className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-800">Community Driven</h3>
+                      <p className="text-gray-600 text-sm">Connect with readers and writers in our Web3 storytelling community</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Call to Action */}
+            <div className="text-center mt-12">
+              <div className="inline-flex items-center gap-4 bg-white/20 backdrop-blur-sm rounded-full px-6 py-3 border border-white/30">
+                <span className="text-gray-700">Can't find what you're looking for?</span>
+                <Link
+                  href="/own"
+                  className="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-full hover:from-purple-700 hover:to-blue-700 transition-all text-sm font-medium"
+                >
+                  Return to My Library
+                </Link>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
