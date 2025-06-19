@@ -371,6 +371,15 @@ export function useReadingLicense() {
           
         } catch (unlockError) {
           console.error('Failed to process payment:', unlockError)
+          
+          // Check for specific contract errors
+          const errorMessage = unlockError instanceof Error ? unlockError.message : String(unlockError)
+          
+          // Check for the "chapter not configured" error (0xfb8f41b2)
+          if (errorMessage.includes('0xfb8f41b2') || errorMessage.includes('chapter not configured')) {
+            throw new Error('Chapter attribution not yet configured. Please wait a moment for the blockchain to update and try again.')
+          }
+          
           throw new Error('Failed to process payment. Please ensure you have sufficient TIP balance.')
         }
         

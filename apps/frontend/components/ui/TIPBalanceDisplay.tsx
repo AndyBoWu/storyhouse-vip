@@ -56,9 +56,9 @@ export function TIPBalanceDisplay() {
         </div>
         
         <div className="flex justify-between items-center">
-          <span className="text-gray-600">ETH (for gas):</span>
+          <span className="text-gray-600">IP (for gas):</span>
           <span className="font-mono font-medium text-gray-500">
-            {parseFloat(ethBalanceFormatted).toFixed(4)} ETH
+            {parseFloat(ethBalanceFormatted).toFixed(4)} IP
           </span>
         </div>
       </div>

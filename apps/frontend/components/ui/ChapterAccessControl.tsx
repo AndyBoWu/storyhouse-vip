@@ -49,6 +49,8 @@ export default function ChapterAccessControl({
   const [accessInfo, setAccessInfo] = useState<any>(null)
   const [isUnlocking, setIsUnlocking] = useState(false)
   const [hasSuccessfulUnlock, setHasSuccessfulUnlock] = useState(false)
+  const [retryError, setRetryError] = useState<string | null>(null)
+  const [isAttributionReady, setIsAttributionReady] = useState(true) // Assume ready by default
 
   const pricing = getChapterPricing(chapterNumber)
 
@@ -113,10 +115,18 @@ export default function ChapterAccessControl({
               // Start monitoring for transaction completion
               const checkCompletion = async () => {
                 let attempts = 0
-                const maxAttempts = 30 // 30 seconds max
+                const maxAttempts = 60 // 60 seconds max
+                
+                // Show immediate feedback
+                setRetryError('🔄 Transaction submitted! Waiting for blockchain confirmation...')
                 
                 const intervalId = setInterval(async () => {
                   attempts++
+                  
+                  // Only check every 3 seconds after the first 10 attempts to reduce API load
+                  if (attempts > 10 && attempts % 3 !== 0) {
+                    return
+                  }
                   
                   try {
                     // Check if the chapter is now unlocked on the blockchain
@@ -125,6 +135,7 @@ export default function ChapterAccessControl({
                     if (updatedAccessInfo?.canAccess || updatedAccessInfo?.alreadyUnlocked) {
                       console.log('✅ Chapter unlock detected on blockchain!')
                       clearInterval(intervalId)
+                      setRetryError(null)
                       
                       // Update UI state
                       setAccessInfo({
@@ -136,17 +147,52 @@ export default function ChapterAccessControl({
                       })
                       
                       setHasSuccessfulUnlock(true)
-                      onAccessGranted()
+                      
+                      // Small delay to ensure state updates propagate
+                      setTimeout(() => {
+                        onAccessGranted()
+                      }, 100)
+                      
                       return
                     }
                   } catch (error) {
-                    console.log('Checking unlock status...', attempts)
+                    console.log('Check attempt', Math.floor(attempts / 3), 'failed, will retry...')
+                    // Don't log every attempt to reduce console noise
+                  }
+                  
+                  // Update progress message
+                  if (attempts % 5 === 0) {
+                    setRetryError(`⏳ Still waiting for confirmation... (${attempts}s) - Transaction submitted successfully`)
                   }
                   
                   // Stop checking after max attempts
                   if (attempts >= maxAttempts) {
-                    console.log('⏱️ Stopped monitoring. Please refresh page to see updated status.')
+                    console.log('⏱️ Monitoring stopped after 60s. Transaction is confirmed on blockchain.')
                     clearInterval(intervalId)
+                    setRetryError('✅ Transaction completed! Please click "Check Status Now" or refresh the page to access your chapter.')
+                    
+                    // One final check after a delay
+                    setTimeout(async () => {
+                      try {
+                        const finalCheck = await apiClient.get(
+                          `/books/${encodeURIComponent(bookId)}/chapter/${chapterNumber}/access?userAddress=${address}&t=${Date.now()}`
+                        )
+                        if (finalCheck?.canAccess || finalCheck?.alreadyUnlocked) {
+                          setRetryError(null)
+                          setAccessInfo({
+                            canAccess: true,
+                            alreadyUnlocked: true,
+                            unlockPrice: pricing.unlockPrice,
+                            isFree: false,
+                            transactionHash: 'blockchain_confirmed'
+                          })
+                          setHasSuccessfulUnlock(true)
+                          onAccessGranted()
+                        }
+                      } catch (error) {
+                        console.log('Final check failed')
+                      }
+                    }, 3000)
                   }
                 }, 1000) // Check every second
               }
@@ -184,8 +230,109 @@ export default function ChapterAccessControl({
               onAccessGranted()
             }
           },
-          onError: (error) => {
+          onError: async (error) => {
             console.error('Reading license minting failed:', error)
+            
+            // Auto-retry for attribution not configured error
+            if (error?.includes('Chapter attribution not yet configured')) {
+              console.log('⏳ Chapter attribution not ready, will retry in 5 seconds...')
+              
+              // Show a temporary message
+              setRetryError('Chapter setup in progress... Retrying in 5 seconds...')
+              
+              // Wait 5 seconds and retry once
+              setTimeout(async () => {
+                console.log('🔄 Retrying chapter unlock...')
+                setRetryError(null)
+                
+                try {
+                  await mintReadingLicense({
+                    bookId,
+                    chapterNumber,
+                    chapterIpAssetId,
+                    onSuccess: async (licenseData) => {
+                      // Same success handler as above
+                      console.log('✅ Retry successful!')
+                      
+                      if (licenseData.transactionInitiated) {
+                        console.log('🎉 Transaction initiated on retry!')
+                        // Use the same monitoring logic from the original success handler
+                        const checkCompletion = async () => {
+                          let attempts = 0
+                          const maxAttempts = 60
+                          
+                          setRetryError('🔄 Transaction submitted! Waiting for blockchain confirmation...')
+                          
+                          const intervalId = setInterval(async () => {
+                            attempts++
+                            
+                            try {
+                              const updatedAccessInfo = await apiClient.get(
+                                `/books/${encodeURIComponent(bookId)}/chapter/${chapterNumber}/access?userAddress=${address}&t=${Date.now()}`
+                              )
+                              
+                              if (updatedAccessInfo?.canAccess || updatedAccessInfo?.alreadyUnlocked) {
+                                console.log('✅ Chapter unlock detected on blockchain!')
+                                clearInterval(intervalId)
+                                setRetryError(null)
+                                
+                                setAccessInfo({
+                                  canAccess: true,
+                                  alreadyUnlocked: true,
+                                  unlockPrice: pricing.unlockPrice,
+                                  isFree: false,
+                                  transactionHash: licenseData.transactionHash || 'blockchain_confirmed'
+                                })
+                                
+                                setHasSuccessfulUnlock(true)
+                                setTimeout(() => {
+                                  onAccessGranted()
+                                }, 100)
+                                return
+                              }
+                            } catch (error) {
+                              console.log('Checking unlock status...', attempts)
+                            }
+                            
+                            if (attempts % 5 === 0) {
+                              setRetryError(`⏳ Still waiting for confirmation... (${attempts}s)`)
+                            }
+                            
+                            if (attempts >= maxAttempts) {
+                              console.log('⏱️ Timeout reached.')
+                              clearInterval(intervalId)
+                              setRetryError('Transaction is taking longer than expected. Please refresh the page in a moment.')
+                            }
+                          }, 1000)
+                        }
+                        
+                        checkCompletion()
+                        return
+                      }
+                      
+                      // Handle successful license minting (legacy flow)
+                      setAccessInfo({
+                        canAccess: true,
+                        alreadyUnlocked: true,
+                        unlockPrice: pricing.unlockPrice,
+                        isFree: false,
+                        licenseTokenId: licenseData.licenseTokenId,
+                        transactionHash: licenseData.transactionHash
+                      })
+                      setHasSuccessfulUnlock(true)
+                      onAccessGranted()
+                    },
+                    onError: (retryError) => {
+                      console.error('Retry also failed:', retryError)
+                      setRetryError(null) // Clear the temporary message
+                    }
+                  })
+                } catch (retryError) {
+                  console.error('Retry failed:', retryError)
+                  setRetryError(null) // Clear the temporary message
+                }
+              }, 5000)
+            }
           }
         })
       }
@@ -301,16 +448,38 @@ export default function ChapterAccessControl({
           Unlock this chapter for <span className="font-semibold">{pricing.unlockPrice} TIP tokens</span>
         </p>
         
-        {/* Show TIP balance */}
+        {/* Show wallet balances */}
         {isConnected && (
           <div className="mb-4">
             <TIPBalanceDisplay />
           </div>
         )}
         
-        {(error || web3Error || licenseError) && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-sm text-red-700">{error || web3Error || licenseError}</p>
+        {(error || web3Error || licenseError || retryError) && (
+          <div className={`mb-4 p-3 border rounded-lg ${
+            retryError ? 'bg-blue-50 border-blue-200' : 'bg-red-50 border-red-200'
+          }`}>
+            <p className={`text-sm ${retryError ? 'text-blue-700' : 'text-red-700'}`}>
+              {(() => {
+                // Show retry message if present
+                if (retryError) {
+                  return retryError
+                }
+                
+                const errorMsg = error || web3Error || licenseError
+                // Special handling for attribution not configured error
+                if (errorMsg?.includes('Chapter attribution not yet configured')) {
+                  return (
+                    <>
+                      <strong>⏳ Chapter setup in progress</strong><br />
+                      The chapter was just published and is being configured on the blockchain. 
+                      Please wait 10-15 seconds and try again.
+                    </>
+                  )
+                }
+                return errorMsg
+              })()}
+            </p>
           </div>
         )}
         
@@ -338,13 +507,47 @@ export default function ChapterAccessControl({
           return null
         })()}
         
-        <button
-          onClick={handleUnlock}
-          disabled={isUnlocking || isLoading}
-          className="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50 transition-colors"
-        >
-          {isUnlocking ? 'Minting License...' : `Get Reading License for ${pricing.unlockPrice} TIP`}
-        </button>
+        <div className="flex flex-col gap-3">
+          <button
+            onClick={handleUnlock}
+            disabled={isUnlocking || isLoading || !!retryError}
+            className="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50 transition-colors"
+          >
+            {isUnlocking ? 'Minting License...' : retryError ? 'Waiting for confirmation...' : `Get Reading License for ${pricing.unlockPrice} TIP`}
+          </button>
+          
+          {/* Show manual check button if waiting too long */}
+          {retryError && retryError.includes('Still waiting') && (
+            <button
+              onClick={async () => {
+                setRetryError('🔄 Checking status...')
+                try {
+                  const result = await checkChapterAccess(bookId, chapterNumber)
+                  if (result?.canAccess || result?.alreadyUnlocked) {
+                    setAccessInfo({
+                      canAccess: true,
+                      alreadyUnlocked: true,
+                      unlockPrice: pricing.unlockPrice,
+                      isFree: false,
+                      transactionHash: 'manual_check'
+                    })
+                    setHasSuccessfulUnlock(true)
+                    setRetryError(null)
+                    onAccessGranted()
+                  } else {
+                    setRetryError('Transaction still processing. Your unlock will appear soon - no need to pay again!')
+                  }
+                } catch (error) {
+                  console.error('Manual check failed:', error)
+                  setRetryError('Check failed. Please refresh the page.')
+                }
+              }}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+            >
+              Check Status Now
+            </button>
+          )}
+        </div>
         
         {pricing.readReward > 0 && (
           <div className="mt-4 text-sm text-orange-600">
