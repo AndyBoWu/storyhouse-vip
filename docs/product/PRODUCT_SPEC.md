@@ -67,7 +67,7 @@ storyhouse-vip/
 2. **Minimal Smart Contracts**: Only 2 custom contracts, leverage Story Protocol SDK for everything else
 3. **Author Ownership**: Creators retain 100% IP ownership of their content
 4. **Atomic Operations**: Single-transaction IP registration for 40% gas savings
-5. **Zero-Commission Platform**: 100% creator revenue (platform monetizes through TIP token)
+5. **90% Creator Revenue**: Authors keep 90% of all sales (only 10% platform fee vs Amazon KDP 35-70%)
 6. **Hybrid Approach**: Story Protocol for IP/licensing, custom contracts for TIP payments
 
 ### Technology Stack
@@ -121,7 +121,7 @@ We only need custom contracts for:
 - **Free Access**: First 3 chapters of every story
 - **Chapter Unlocking**: 0.5 TIP per premium chapter (4+)
 - **Revenue Model**: Pay-to-read for premium content
-- **Creator Revenue**: 100% of chapter payments go to creators
+- **Creator Revenue**: 90% of chapter payments go to creators (70% author + 20% curator)
 
 #### Content Discovery
 - AI-powered recommendations based on reading history
@@ -147,13 +147,16 @@ We only need custom contracts for:
 - **Quality Analysis**: Content quality scoring and improvement suggestions
 - **Content Moderation**: Automated safety and appropriateness checks
 
-#### Instant Monetization
-- **Chapter Sales**: 0.5 TIP per chapter (100% to creator)
-- **Licensing Revenue**: 
-  - Reading License: 0.5 TIP
-  - Premium License: 100 TIP (10% royalty)
-  - Exclusive License: 1000 TIP (25% royalty)
-- **No Platform Fees**: 100% creator revenue
+#### Multiple Earning Models
+- **Pay-per-chapter**: Instant monetization from chapter 1 (0.5 TIP/chapter)
+- **Subscription tiers**: Reading, commercial, or exclusive licenses
+- **Translation rights**: Earn from 10+ language versions of your content
+- **Audiobook licensing**: Text-to-speech and professional narration rights
+  - Powered by Poseidon Project storage solution for high-quality audiobook distribution
+  - Direct partnerships with Spotify Audiobooks, Apple Podcasts, and major streaming platforms
+- **Derivative works**: License remixes, adaptations, and parallel universe stories
+- **Format multiplication**: Each format (text, audio, translation) = separate revenue stream
+- **90% Creator Revenue**: Authors keep 90% of all sales (only 10% platform fee)
 - **Real-time Payouts**: Instant settlement on blockchain
 
 #### IP Management System

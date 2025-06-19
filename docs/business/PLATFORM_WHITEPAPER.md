@@ -8,12 +8,13 @@
 
 StoryHouse.vip is a revolutionary Web3 storytelling platform that transforms how stories are created, owned, and monetized. Built on Story Protocol, we enable:
 
-- **Chapter-level IP management** ($50-500 vs $1000+ for full books)
-- **Pay-to-read model** for premium chapters
+- **90% Creator Revenue**: Authors keep 90% of all sales (only 10% platform fee vs Amazon KDP 35-70%)
+- **Permissionless Publishing**: No gatekeepers—anyone can publish directly to the blockchain
+- **Multiple Earning Models**: Revolutionary chapter-level IP registration ($50 vs $1000+ for full books)
+  - Pay-per-chapter, subscription tiers, translation rights, audiobook licensing, derivative works
 - **AI-powered quality assurance** with fraud detection and translation
 - **40% gas savings** through unified IP registration
 - **Complete attribution** with 25+ metadata fields per chapter
-- **Automated licensing** and real-time royalty distribution
 
 ### Platform Status
 
@@ -45,9 +46,10 @@ StoryHouse.vip is a revolutionary Web3 storytelling platform that transforms how
 ### Vision
 
 To democratize storytelling by creating the world's first truly fair content ecosystem where:
-- Readers access premium content with transparent pricing
-- Creators own and monetize their work from day one
-- AI ensures content quality and accessibility
+- **Authors keep 90% of revenue** (vs Amazon KDP 35-70%)
+- **Permissionless publishing** removes gatekeepers and barriers
+- **Multiple earning models** maximize creator benefits through innovative chapter-level IP
+- **AI ensures content quality** and global accessibility through translations and audio
 - Blockchain ensures transparent, immutable ownership
 
 ### Mission

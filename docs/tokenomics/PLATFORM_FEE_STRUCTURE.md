@@ -10,37 +10,39 @@
 - **Reader Cost**: 0 TIP
 - **Platform Fee**: 0%
 - **Author Revenue**: N/A
-- **Read Reward**: 0.05 TIP per completion
+- **Read Reward**: Removed (December 2024)
 
 ### **Paid Chapters (4+)**
 - **Reader Cost**: 0.5 TIP per chapter
-- **Platform Fee**: **20%** (0.1 TIP)
-- **Author Revenue**: **80%** (0.4 TIP)
-- **Read Reward**: 0.05-0.1 TIP per completion
+- **Platform Fee**: **10%** (0.05 TIP)
+- **Creator Revenue**: **90%** (0.45 TIP)
+  - **Author**: 70% (0.35 TIP)
+  - **Curator**: 20% (0.1 TIP)
+- **Read Reward**: Removed (December 2024)
 
 ---
 
 ## 🔧 **Technical Implementation**
 
-### **Smart Contract**: `ChapterAccessController.sol`
+### **Smart Contract**: `HybridRevenueControllerV2.sol`
 ```solidity
-uint256 public authorRevenueShare = 80; // 80% to author
-// Platform gets remaining 20%
+uint256 public constant AUTHOR_SHARE = 70;   // 70% to author
+uint256 public constant CURATOR_SHARE = 20;  // 20% to curator  
+uint256 public constant PLATFORM_SHARE = 10; // 10% to platform
 
-function _distributeRevenue(
-    bytes32 bookId,
+function payForChapter(
+    uint256 bookId,
     uint256 chapterNumber,
-    uint256 amount,
-    address author
-) internal {
-    uint256 authorShare = (amount * authorRevenueShare) / 100; // 0.4 TIP
-    uint256 platformShare = amount - authorShare;             // 0.1 TIP
+    uint256 amount
+) external {
+    uint256 authorShare = (amount * AUTHOR_SHARE) / 100;     // 0.35 TIP
+    uint256 curatorShare = (amount * CURATOR_SHARE) / 100;   // 0.1 TIP
+    uint256 platformShare = (amount * PLATFORM_SHARE) / 100; // 0.05 TIP
     
-    // Transfer to author immediately
-    tipToken.transfer(author, authorShare);
-    
-    // Platform share stays in contract
-    platformTotalEarnings += platformShare;
+    // Transfer to stakeholders immediately
+    tipToken.transferFrom(msg.sender, bookAuthor[bookId], authorShare);
+    tipToken.transferFrom(msg.sender, bookCurator[bookId], curatorShare);
+    tipToken.transferFrom(msg.sender, platformAddress, platformShare);
 }
 ```
 
