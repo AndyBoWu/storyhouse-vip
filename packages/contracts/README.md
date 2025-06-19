@@ -1,14 +1,27 @@
 # StoryHouse Smart Contracts
 
-## 🔨 Foundry Development Environment
+## 🎯 Minimal Architecture (2 Contracts Only)
 
-This project uses **[Foundry](https://book.getfoundry.sh/)** as the primary smart contract development framework for Solidity development, testing, and deployment.
+This repository contains the minimal smart contracts needed for StoryHouse.vip, leveraging Story Protocol SDK for most functionality.
 
-### Why Foundry?
-- ⚡ **Fast**: Written in Rust, significantly faster than Hardhat
-- 🧪 **Advanced Testing**: Built-in fuzzing, invariant testing, and gas profiling
-- 🏗️ **Native Solidity**: Write tests in Solidity, no JavaScript required
-- 📦 **Built-in Tools**: Forge (build/test), Cast (CLI), Anvil (local node)
+### Contracts
+
+1. **TIPToken.sol** - ERC20 platform token (already deployed: `0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E`)
+2. **HybridRevenueControllerV2.sol** - Permissionless revenue distribution (70/20/10 split)
+
+### Why Only 2 Contracts?
+
+Story Protocol SDK handles:
+- ✅ IP Registration (`ipAsset.register`)
+- ✅ NFT Minting (`mintAndRegisterIpAssetWithPilTerms`)
+- ✅ Licensing (`license.attachTerms`)
+- ✅ Derivatives (`ipAsset.registerDerivative`)
+- ✅ Disputes (`dispute.initiateDispute`)
+- ✅ Collections (`group.createGroup`)
+
+We only need custom contracts for:
+- 💰 **TIP Token** - Story Protocol doesn't support custom payment tokens
+- 📊 **Revenue Distribution** - Handle author/curator/platform splits
 
 ## 📋 Prerequisites
 
@@ -39,19 +52,8 @@ forge update
 packages/contracts/
 ├── src/                          # Smart Contracts (Production)
 │   ├── TIPToken.sol             # Platform token with 10B supply cap
-│   ├── ChapterAccessController.sol  # Chapter monetization with tiered pricing
-│   ├── HybridRevenueController.sol  # Legacy revenue controller (V1)
-│   ├── HybridRevenueControllerV2.sol     # PERMISSIONLESS revenue sharing (V2)
-│   └── HybridRevenueControllerV2Standalone.sol # V2 without external dependencies
-├── test/                        # Test Files (Foundry *.t.sol)
-│   ├── TIPToken.t.sol          # Platform token tests
-│   ├── ChapterAccessController.t.sol
-│   ├── HybridRevenueController.t.sol
-│   ├── RewardsManager.t.sol    # Legacy tests (contract removed)
-│   └── UnifiedRewardsController.t.sol # Legacy tests (contract removed)
-├── script/                      # Deployment Scripts (Foundry *.s.sol)
+│   └── HybridRevenueControllerV2.sol     # Permissionless revenue sharing
 ├── lib/                         # Dependencies (git submodules)
-├── out/                         # Compiled artifacts
 ├── foundry.toml                 # Foundry configuration
 └── README.md                    # This file
 ```
@@ -165,35 +167,32 @@ forge fmt --check
 
 ## 📊 Architecture Overview
 
-### Streamlined 4-Contract Architecture
-This repository contains a **streamlined smart contract architecture** focused on core monetization and permissionless book management:
+### Minimal 2-Contract Architecture
 
-1. **TIPToken.sol** - Platform token with 10B supply cap, minting roles, and pausable transfers
-2. **ChapterAccessController.sol** - Chapter monetization with tiered pricing (free chapters 1-3, paid 4+)
-3. **HybridRevenueControllerV2.sol** - **PERMISSIONLESS** multi-author revenue sharing (70/20/10 split)
-4. **HybridRevenueControllerV2Standalone.sol** - Standalone version without RewardsManager dependency
+1. **TIPToken.sol** - Platform token with 10B supply cap
+2. **HybridRevenueControllerV2.sol** - Permissionless revenue sharing (70/20/10 split)
 
-**Key Changes:**
-- ❌ **Removed RewardsManager.sol** - Eliminated complex reward system prone to farming
-- ❌ **Removed UnifiedRewardsController.sol** - No more automatic creation rewards
-- ✅ **Added HybridRevenueControllerV2** - Permissionless book registration (no admin required)
-- ✅ **Added V2Standalone** - Clean implementation without external dependencies
+### Key Features
 
-**Security & Architecture Improvements:**
-- 🔒 **Eliminated farming vulnerabilities** - Removed automatic creation rewards that were prone to AI/bot farming
-- ✅ **Permissionless book registration** - Authors can register their own books without admin approval
-- 🛡️ **Simplified architecture** - Fewer contracts means reduced attack surface and gas costs
-- 🎯 **Revenue-focused design** - Only genuine chapter purchases generate rewards
-- ⚡ **Gas optimized** - Reduced cross-contract calls and external dependencies
+**HybridRevenueControllerV2:**
+- ✅ **Permissionless**: Anyone can register books without admin approval
+- ✅ **Revenue Splits**: 70% author, 20% curator, 10% platform
+- ✅ **Translation Support**: Translators can be set as curators for fair compensation
+- ✅ **Chapter Attribution**: Track different authors per chapter
+- ✅ **Gas Optimized**: Minimal external dependencies
 
-### Key Benefits
-- ✅ **Permissionless**: Anyone can register books and become a curator
-- ✅ **Decentralized**: No admin keys required for book registration
-- ✅ **Fair revenue sharing**: 70% author, 20% curator, 10% platform
-- ✅ **Anti-farming**: No automatic rewards that can be gamed
-- ✅ **Backward compatible**: V2 maintains same interfaces as V1
-- ✅ **Flexible deployment**: Standalone version available without dependencies
-- ✅ **Battle-tested**: Built on proven OpenZeppelin v5 standards
+### Integration with Story Protocol
+
+The frontend directly calls Story Protocol SDK for:
+- IP registration and management
+- NFT minting and transfers
+- License creation and enforcement
+- Derivative registration
+- Dispute resolution
+
+Our contracts only handle:
+- TIP token transfers
+- Revenue distribution logic
 
 ## 🧪 Testing Standards
 
