@@ -18,7 +18,7 @@ Web3 storytelling platform built on Story Protocol Layer 1 blockchain with chapt
 ## Tech Stack
 
 - **Frontend**: Next.js 15, React 18, TypeScript, Tailwind CSS, Framer Motion
-- **AI**: OpenAI GPT-4o for story generation
+- **AI**: OpenAI GPT-4 for content protection, translation, and recommendations
 - **Blockchain**: Story Protocol Layer 1 (planned)
 - **Deployment**: Vercel with custom domain
 - **Icons**: Lucide React
@@ -64,27 +64,24 @@ npm run dev
 
 The following environment variables are required:
 
-- `OPENAI_API_KEY`: Your OpenAI API key for story generation
+- `OPENAI_API_KEY`: Your OpenAI API key for AI services
   - Get it from: [https://platform.openai.com/api-keys](https://platform.openai.com/api-keys)
   - Add billing information to your OpenAI account
-  - The app uses GPT-4o model for high-quality story generation
+  - The app uses GPT-4 for fraud detection, translation, and recommendations
 
 ## API Endpoints
 
-### POST `/api/generate`
+### POST `/api/content/validate`
 
-Generate a story chapter using AI.
+Validate content for fraud detection and quality.
 
 **Request Body:**
 
 ```json
 {
-  "plotDescription": "A young detective discovers a hidden portal...",
-  "genres": ["Mystery", "Fantasy"],
-  "moods": ["Suspenseful", "Epic Adventure"],
-  "emojis": ["🔍", "✨", "🚪"],
-  "chapterNumber": 1,
-  "previousContent": "Previous chapter summary..."
+  "content": "Detective Sarah Chen had always found comfort...",
+  "language": "en",
+  "services": ["fraud", "quality"]
 }
 ```
 
@@ -94,11 +91,14 @@ Generate a story chapter using AI.
 {
   "success": true,
   "data": {
-    "title": "The Discovery",
-    "content": "Detective Sarah Chen had always found comfort...",
-    "wordCount": 1247,
-    "readingTime": 6,
-    "themes": ["mystery", "portal", "adventure", "discovery"]
+    "fraudDetection": {
+      "isPotentialFraud": false,
+      "similarityScore": 0.12,
+      "analysis": "Content appears to be original"
+    },
+    "qualityScore": 85,
+    "readability": "Grade 8",
+    "suggestions": ["Consider adding more dialogue", "Strong opening hook"]
   }
 }
 ```
@@ -138,23 +138,23 @@ In your Vercel dashboard, add:
 
 1. **Plot Input**: Authors describe their story concept (500 char limit)
 2. **Creative Elements**: Optional genre, mood, and emoji selection
-3. **AI Generation**: GPT-4o creates engaging chapters with:
-   - Compelling hooks and cliffhangers
-   - Rich sensory details and character development
+3. **Content Creation**: Authors write original content with:
+   - AI-powered fraud detection for originality
+   - Quality analysis and improvement suggestions
    - Platform-optimized length (800-1500 words)
-   - Monetization-aware structure
+   - Clear monetization structure
 4. **Preview & Edit**: Authors can regenerate, edit, or publish
 5. **Publication**: Stories go live with tokenized access model
 
-## AI Prompt Engineering
+## AI Services
 
-The story generation uses carefully crafted prompts that:
+The platform uses AI to enhance content quality and accessibility:
 
-- Emphasize reader engagement and monetization context
-- Create platform-specific content (free chapters 1-3, paid 4+)
-- Include cliffhangers to drive continued reading
-- Optimize for $TIP token earning mechanics
-- Adapt to user-selected genres, moods, and themes
+- **Fraud Detection**: Verify content originality and prevent plagiarism
+- **Translation Services**: Automatically translate content to multiple languages
+- **Text-to-Audio**: Generate audiobook versions of chapters
+- **Smart Recommendations**: Personalized content suggestions based on reading history
+- **Quality Analysis**: Provide feedback on readability and engagement
 
 ## Future Roadmap
 
@@ -162,7 +162,7 @@ The story generation uses carefully crafted prompts that:
 - [ ] $TIP token smart contracts
 - [ ] MetaMask wallet connection
 - [ ] User authentication and story management
-- [ ] Advanced AI features (image generation, voice narration)
+- [ ] Advanced AI features (enhanced fraud detection, multi-language support)
 - [ ] Community features and story remixing
 - [ ] Revenue sharing and creator analytics
 
