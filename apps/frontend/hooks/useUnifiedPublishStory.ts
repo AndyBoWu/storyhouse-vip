@@ -294,7 +294,7 @@ export function useUnifiedPublishStory() {
             // Poll for attribution to be set on-chain
             let attributionSet = false
             let attempts = 0
-            const maxAttempts = 30 // 30 seconds timeout
+            const maxAttempts = 60 // 60 seconds timeout (increased for blockchain confirmations)
             
             while (!attributionSet && attempts < maxAttempts) {
               attempts++
@@ -324,8 +324,8 @@ export function useUnifiedPublishStory() {
               // For paid chapters, this is critical
               if (storyData.chapterNumber > 3) {
                 throw new Error(
-                  'Chapter pricing setup timed out. The chapter was published but pricing may not be configured. ' +
-                  'Please check the transaction status in your wallet.'
+                  'Chapter pricing setup timed out after 60 seconds. The chapter was published and the pricing transaction may still be pending. ' +
+                  'Please check the transaction status in your wallet and wait for confirmation. You can verify the attribution status later.'
                 )
               } else {
                 console.warn('⚠️ Attribution confirmation timed out for free chapter, continuing...')
