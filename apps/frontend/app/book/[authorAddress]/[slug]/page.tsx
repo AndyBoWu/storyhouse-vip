@@ -270,7 +270,7 @@ export default function BookPage() {
                 </div>
                 <div className="text-sm text-gray-600">Earnings</div>
               </div>
-              {book.rating && (
+              {!!book.rating && (
                 <div className="bg-gray-50 rounded-lg p-3 text-center">
                   <div className="text-2xl font-bold text-yellow-600">
                     {book.rating.toFixed(1)}⭐
@@ -281,7 +281,7 @@ export default function BookPage() {
             </div>
 
             {/* Genres */}
-            {!!(book.genre && book.genre.length > 0) && (
+            {book.genre?.length > 0 && (
               <div className="mb-6">
                 <h3 className="text-sm font-semibold text-gray-700 mb-2">Genres</h3>
                 <div className="flex flex-wrap gap-2">
