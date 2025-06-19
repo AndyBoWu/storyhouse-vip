@@ -1,6 +1,6 @@
 # 📚 StoryHouse.vip
 
-**The Web3 publishing platform where authors own their IP and earn 100% of revenue.** Built on Story Protocol, StoryHouse enables chapter-level IP management, AI-powered story creation, and automated licensing—all with zero platform fees.
+**The Web3 publishing platform where authors own their IP and creators earn 90% of revenue.** Built on Story Protocol, StoryHouse enables chapter-level IP management, AI-powered story creation, and automated licensing—with only 10% platform fee.
 
 [![Live Demo](https://img.shields.io/badge/demo-testnet.storyhouse.vip-blue)](https://testnet.storyhouse.vip)
 [![Story Protocol](https://img.shields.io/badge/built%20on-Story%20Protocol-purple)](https://www.storyprotocol.xyz/)
@@ -8,7 +8,7 @@
 
 ## ✨ Why StoryHouse?
 
-- **💰 100% Creator Revenue**: No platform fees. Authors keep all earnings from chapter sales and licensing
+- **💰 90% Creator Revenue**: Authors get 70% + curators get 20% (only 10% platform fee)
 - **📝 Chapter-Level IP**: Register individual chapters as IP assets ($50 vs $1000+ for full books)
 - **🤖 AI Story Generation**: Create stories with GPT-4 assistance while maintaining full ownership
 - **⚡ 40% Lower Gas Costs**: Single-transaction IP registration saves time and money
@@ -44,7 +44,7 @@ npm install
 - **Quality Content**: AI-verified stories with anti-plagiarism protection
 - **Multiple Languages**: Stories available in 10+ languages through translations
 - **Ownership Options**: Purchase reading licenses or full commercial rights
-- **Direct Support**: 100% of payments go directly to authors
+- **Direct Support**: 90% of payments go to creators (70% author + 20% curator)
 
 ## 🏗️ Architecture
 
