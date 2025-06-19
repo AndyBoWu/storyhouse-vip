@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { R2Service } from '../../../../../lib/r2'
+import { ethers } from 'ethers'
+import { STORYHOUSE_CONTRACTS } from '../../../../../lib/contracts/storyhouse'
+import { advancedStoryProtocolService } from '../../../../../lib/services/advancedStoryProtocolService'
 
 interface ChapterParams {
   storyId: string
@@ -7,7 +10,7 @@ interface ChapterParams {
 }
 
 /**
- * GET /api/chapters/[storyId]/[chapterNumber] - Fetch a specific chapter
+ * GET /api/chapters/[storyId]/[chapterNumber] - Fetch a specific chapter with access control
  */
 export async function GET(
   request: NextRequest,
@@ -34,6 +37,54 @@ export async function GET(
     }
 
     console.log(`📖 Fetching chapter ${chapterNumber} of story ${storyId}`)
+    
+    // Get user address from query params
+    const userAddress = request.nextUrl.searchParams.get('userAddress')
+    
+    // Check access control for paid chapters (4+)
+    if (chapterNum > 3) {
+      if (!userAddress) {
+        return NextResponse.json(
+          { 
+            error: 'Wallet connection required',
+            message: 'Please connect your wallet to access this chapter',
+            requiresWallet: true 
+          },
+          { status: 401 }
+        )
+      }
+      
+      try {
+        // Check if user has access through HybridRevenueControllerV2
+        const hasAccess = await advancedStoryProtocolService.checkChapterAccess(
+          storyId,
+          chapterNum,
+          userAddress
+        )
+        
+        if (!hasAccess) {
+          return NextResponse.json(
+            { 
+              error: 'Chapter locked',
+              message: 'You need to unlock this chapter to read it',
+              requiresUnlock: true,
+              chapterNumber: chapterNum
+            },
+            { status: 403 }
+          )
+        }
+      } catch (accessError) {
+        console.error('Error checking chapter access:', accessError)
+        // If access check fails, deny access for security
+        return NextResponse.json(
+          { 
+            error: 'Access verification failed',
+            message: 'Unable to verify chapter access. Please try again.'
+          },
+          { status: 403 }
+        )
+      }
+    }
 
     try {
       // Check if this is a book ID (contains slash) vs story ID

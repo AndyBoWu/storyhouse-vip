@@ -208,6 +208,26 @@ function ChapterWritingPageContent() {
     console.log('Chapter published successfully:', result)
     setShowPublishingModal(false)
     
+    // For paid chapters, show a confirmation message before redirecting
+    if (chapterNumber > 3) {
+      // Store the result in session storage for the book page to show status
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('publishingResult', JSON.stringify({
+          ...result,
+          chapterNumber,
+          bookId,
+          timestamp: Date.now()
+        }))
+      }
+      
+      // Show a brief message and then redirect
+      alert(
+        `✅ Chapter ${chapterNumber} published successfully!\n\n` +
+        `Your chapter is being configured on the blockchain. ` +
+        `This may take a few moments. You'll be redirected to your book page.`
+      )
+    }
+    
     // Always redirect to book page after publishing to show the new chapter
     // and any follow-up actions (registration, pricing setup, etc.)
     const bookUrl = `/book/${bookId.replace('/', '/')}`

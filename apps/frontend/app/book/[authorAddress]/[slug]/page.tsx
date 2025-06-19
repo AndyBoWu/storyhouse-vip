@@ -65,6 +65,29 @@ export default function BookPage() {
   useEffect(() => {
     if (bookId) {
       fetchBookDetails();
+      
+      // Check for publishing result in session storage
+      if (typeof window !== 'undefined') {
+        const publishingResult = sessionStorage.getItem('publishingResult');
+        if (publishingResult) {
+          const result = JSON.parse(publishingResult);
+          // Only show if it's for this book and recent (within 5 minutes)
+          if (result.bookId === bookId && Date.now() - result.timestamp < 5 * 60 * 1000) {
+            // Show publishing status message
+            if (result.chapterNumber > 3) {
+              alert(
+                `📚 Chapter ${result.chapterNumber} Publishing Status\n\n` +
+                `✅ Chapter content saved successfully\n` +
+                `⏳ Blockchain configuration in progress...\n\n` +
+                `Your chapter may take a few moments to become fully accessible. ` +
+                `If you try to access it immediately and see an error, please wait 30 seconds and try again.`
+              );
+            }
+            // Clear the session storage
+            sessionStorage.removeItem('publishingResult');
+          }
+        }
+      }
     }
   }, [bookId]);
 
