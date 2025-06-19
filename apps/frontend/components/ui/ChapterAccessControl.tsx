@@ -468,12 +468,11 @@ export default function ChapterAccessControl({
                 
                 const errorMsg = error || web3Error || licenseError
                 // Special handling for attribution not configured error
-                if (errorMsg?.includes('Chapter attribution not yet configured')) {
+                if (errorMsg?.includes('Chapter attribution not yet configured') || errorMsg?.includes('chapter pricing has not been configured')) {
                   return (
                     <>
-                      <strong>⏳ Chapter setup in progress</strong><br />
-                      The chapter was just published and is being configured on the blockchain. 
-                      Please wait 10-15 seconds and try again.
+                      <strong>⚠️ Chapter Pricing Not Configured</strong><br />
+                      This chapter's pricing hasn't been set up yet. The book author needs to configure chapter pricing on their book page before readers can unlock paid chapters.
                     </>
                   )
                 }
