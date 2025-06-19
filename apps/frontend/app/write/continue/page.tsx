@@ -69,39 +69,39 @@ function ContinueStoryPageContent() {
         try {
           const data = await apiClient.getStories()
 
-          if (data.success && data.stories && Array.isArray(data.stories)) {
-            // Filter stories by connected wallet address
-            const filteredStories = data.stories.filter((story: any) => 
-              story.authorAddress?.toLowerCase() === connectedAddress.toLowerCase()
+          if (data.success && data.books && Array.isArray(data.books)) {
+            // Filter books by connected wallet address
+            const filteredStories = data.books.filter((book: any) => 
+              book.author?.toLowerCase() === connectedAddress.toLowerCase()
             )
             
-            // Convert R2 story format to ExistingStory format
-            const convertedStories: ExistingStory[] = filteredStories.map((story: any) => ({
-              id: story.id,
-              title: story.title,
-              genre: story.genre,
-              chapters: story.chapters,
-              lastUpdated: story.lastUpdated,
-              earnings: story.earnings,
-              preview: story.preview,
-              authorAddress: story.authorAddress,
-              authorName: story.authorName,
-              // Enhanced metadata
-              contentRating: story.contentRating,
-              unlockPrice: story.unlockPrice,
-              readReward: story.readReward,
-              licensePrice: story.licensePrice,
-              isRemixable: story.isRemixable,
-              totalReads: story.totalReads,
-              averageRating: story.averageRating,
-              wordCount: story.wordCount,
-              readingTime: story.readingTime,
-              mood: story.mood,
-              tags: story.tags,
-              qualityScore: story.qualityScore,
-              originalityScore: story.originalityScore,
-              isRemix: story.isRemix,
-              generationMethod: story.generationMethod
+            // Convert book format to ExistingStory format
+            const convertedStories: ExistingStory[] = filteredStories.map((book: any) => ({
+              id: book.id,
+              title: book.title,
+              genre: book.genres?.[0] || 'Unknown', // Use first genre from array
+              chapters: book.chapters,
+              lastUpdated: new Date(book.createdAt).toLocaleDateString(), // Format creation date
+              earnings: 0, // Not available in book data
+              preview: book.description || 'No description available',
+              authorAddress: book.author,
+              authorName: book.authorName,
+              // Enhanced metadata (not available in current book data)
+              contentRating: undefined,
+              unlockPrice: undefined,
+              readReward: undefined,
+              licensePrice: undefined,
+              isRemixable: undefined,
+              totalReads: undefined,
+              averageRating: undefined,
+              wordCount: undefined,
+              readingTime: undefined,
+              mood: book.moods?.[0],
+              tags: book.genres, // Use genres as tags
+              qualityScore: undefined,
+              originalityScore: undefined,
+              isRemix: undefined,
+              generationMethod: undefined
             }))
             
             setExistingStories(convertedStories)
@@ -234,33 +234,80 @@ function ContinueStoryPageContent() {
                       </Link>
                     </div>
                   ) : (
-                    <div className="space-y-3">
+                    <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
                       {existingStories.map((story) => (
-                        <motion.button
+                        <motion.div
                           key={story.id}
+                          whileHover={{ scale: 1.02, y: -5 }}
                           onClick={() => handleSelectStory(story)}
-                          whileHover={{ scale: 1.01 }}
-                          className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
+                          className={`bg-white rounded-lg shadow-lg overflow-hidden border hover:shadow-xl transition-all cursor-pointer w-full max-w-xs mx-auto ${
                             selectedStory?.id === story.id
-                              ? 'border-purple-400 bg-purple-50'
-                              : 'border-gray-200 hover:border-gray-300'
+                              ? 'border-purple-400 ring-2 ring-purple-200'
+                              : 'border-gray-200'
                           }`}
                         >
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-3 mb-2">
-                                <div className={`w-3 h-3 rounded-full ${
-                                  selectedStory?.id === story.id ? 'bg-purple-600' : 'bg-gray-300'
-                                }`} />
-                                <h4 className="font-semibold text-gray-800">{story.title}</h4>
-                                <span className="text-sm text-gray-500">📊 {story.chapters} chap</span>
-                                <span className="text-sm text-green-600">💰 {story.earnings} $TIP</span>
+                          {/* Book Cover */}
+                          <div className="aspect-[3/4] w-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center relative">
+                            {story.id && story.id.includes('/') ? (
+                              <img 
+                                src={`http://localhost:3002/api/books/${encodeURIComponent(story.id)}/cover`}
+                                alt={`${story.title} cover`} 
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none';
+                                  e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                                }}
+                              />
+                            ) : null}
+                            <div className="hidden w-full h-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center">
+                              <span className="text-white text-4xl font-bold">{story.title.charAt(0)}</span>
+                            </div>
+                            
+                            {/* Selection Indicator */}
+                            {selectedStory?.id === story.id && (
+                              <div className="absolute top-2 right-2 bg-purple-600 text-white w-6 h-6 rounded-full flex items-center justify-center">
+                                <span className="text-sm">✓</span>
                               </div>
-                              <p className="text-sm text-gray-500 mb-1">{story.genre} • Last updated {story.lastUpdated}</p>
-                              <p className="text-sm text-gray-500 italic">"{story.preview}"</p>
+                            )}
+                          </div>
+
+                          <div className="p-4">
+                            <div className="mb-4">
+                              <div className="flex items-start justify-between mb-2">
+                                <h3 className="text-base font-semibold text-gray-800 line-clamp-2 flex-1">
+                                  {story.title}
+                                </h3>
+                              </div>
+                              
+                              <div className="flex items-center gap-2 text-xs text-gray-600 mb-2">
+                                <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
+                                  {story.genre}
+                                </span>
+                                <span>•</span>
+                                <div className="flex items-center gap-1 text-gray-500">
+                                  <span className="mr-1">⏱️</span>
+                                  <span>{story.chapters} chapters</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex gap-2">
+                              <button 
+                                className={`flex-1 px-3 py-2 rounded-lg text-sm font-semibold transition-all ${
+                                  selectedStory?.id === story.id
+                                    ? 'bg-gradient-to-r from-green-600 to-green-700 text-white'
+                                    : 'bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700'
+                                }`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleSelectStory(story);
+                                }}
+                              >
+                                {selectedStory?.id === story.id ? '✅ Selected' : '✍️ Continue Writing'}
+                              </button>
                             </div>
                           </div>
-                        </motion.button>
+                        </motion.div>
                       ))}
                     </div>
                   )}
