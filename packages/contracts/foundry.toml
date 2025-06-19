@@ -18,11 +18,11 @@ optimizer_runs = 200
 verbosity = 2
 gas_reports = ["*"]
 
-# Exclude legacy scripts from compilation
-exclude = ["script/legacy/**/*"]
+# Exclude legacy and removed contracts from compilation
+exclude = ["script/legacy/**/*", "src/HybridRevenueController.sol.bak"]
 
-# V2 deployment profile - excludes contracts with missing dependencies
-[profile.v2]
+# Minimal profile - 2-contract architecture
+[profile.minimal]
 src = "src"
 out = "out"
 libs = ["lib"]
@@ -31,17 +31,6 @@ cache_path = "cache"
 solc = "0.8.20"
 optimizer = true
 optimizer_runs = 200
-# Exclude contracts that depend on removed RewardsManager
-exclude = [
-    "src/HybridRevenueController.sol",
-    "src/ChapterAccessController.sol", 
-    "src/HybridRevenueControllerV2.sol",
-    "script/Deploy.s.sol",
-    "script/DeployChapterAccess.s.sol",
-    "script/DeployHybridRevenueController.s.sol",
-    "script/DeployRewardsManager.s.sol",
-    "test/**/*"
-]
 
 # Remappings for dependencies
 remappings = [

@@ -25,30 +25,6 @@ Core ERC-20 token for the StoryHouse.vip ecosystem with controlled minting and p
 
 ---
 
-## ChapterAccessController.sol
-
-### Purpose
-Manages chapter access control with tiered pricing model and author revenue distribution.
-
-### Key Features
-- **Tiered Access**: Free chapters 1-3, paid chapters 4+ (0.5 TIP each)
-- **IP Integration**: Supports Story Protocol IP asset registration
-- **Author Revenue**: Direct payments to chapter authors
-- **Access Tracking**: Prevents double payments for same chapter
-
-### Functions
-- `registerChapter()` - Register new chapter with metadata
-- `unlockChapter()` - Pay to unlock premium chapter
-- `setChapterPrice()` - Update chapter pricing (admin only)
-- `isChapterUnlocked()` - Check if user has access to chapter
-
-### Events
-- `ChapterRegistered(bytes32 indexed bookId, uint256 chapterNumber, address indexed author, string ipAssetId, bool isFree)`
-- `ChapterUnlocked(address indexed reader, bytes32 indexed bookId, uint256 chapterNumber, uint256 unlockPrice, uint256 timestamp)`
-- `AuthorRevenueDistributed(bytes32 indexed bookId, uint256 chapterNumber, address indexed author, uint256 amount)`
-
----
-
 ## HybridRevenueControllerV2.sol
 
 ### Purpose
@@ -59,6 +35,7 @@ Manages chapter access control with tiered pricing model and author revenue dist
 - **Revenue Splitting**: 70% author, 20% curator, 10% platform
 - **Chapter Attribution**: Track which author wrote each chapter
 - **Derivative Support**: Books can be derivatives of other books
+- **Chapter Access Control**: Built-in chapter monetization (0.5 TIP per chapter)
 
 ### Functions
 - `registerBook()` - Register new book (permissionless, caller becomes curator)
@@ -108,16 +85,16 @@ Original revenue controller that requires `STORY_MANAGER_ROLE` for book registra
 ### Removed Contracts
 - **RewardsManager.sol** - Removed due to farming vulnerability in automatic reward distribution
 - **UnifiedRewardsController.sol** - Removed as automatic creation rewards were prone to bot exploitation
+- **ChapterAccessController.sol** - Functionality merged into HybridRevenueControllerV2
 
 ## Contract Interactions
 
 ### Typical Flow
 1. Author deploys/uses TIPToken for platform currency
 2. Author registers book using HybridRevenueControllerV2 (becomes curator automatically)
-3. Author registers chapters using ChapterAccessController
-4. Author sets chapter attribution in HybridRevenueControllerV2
-5. Readers purchase chapter access through ChapterAccessController
-6. Revenue automatically distributes via HybridRevenueControllerV2
+3. Author sets chapter attribution in HybridRevenueControllerV2
+4. Readers purchase chapter access through HybridRevenueControllerV2.unlockChapter()
+5. Revenue automatically distributes via HybridRevenueControllerV2 (70/20/10 split)
 
 ### Security Considerations
 - All contracts use OpenZeppelin's battle-tested security patterns

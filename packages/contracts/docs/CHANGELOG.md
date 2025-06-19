@@ -19,12 +19,12 @@
 - **Security**: Rewards now only generated from genuine chapter purchases
 - **Security**: No more read-to-earn mechanics that could be gamed
 
-#### ChapterAccessController Updates
-- **Updated**: Removed read-to-earn functionality
-- **Updated**: Simplified to purchase-only model
-- **Updated**: Removed RewardsManager dependency
+#### ChapterAccessController Removal
+- **Removed**: `ChapterAccessController.sol` - Functionality merged into HybridRevenueControllerV2
+- **Benefit**: Simplified architecture with only 2 contracts
+- **Benefit**: Single contract handles both access control and revenue distribution
 - **Maintained**: Same chapter pricing (free 1-3, 0.5 TIP for 4+)
-- **Maintained**: Author revenue distribution
+- **Maintained**: Author revenue distribution in HybridRevenueControllerV2
 
 ### 📊 Architecture Changes
 
@@ -32,14 +32,12 @@
 1. TIPToken.sol
 2. RewardsManager.sol ❌
 3. UnifiedRewardsController.sol ❌
-4. ChapterAccessController.sol
-5. HybridRevenueController.sol
+4. ChapterAccessController.sol ❌
+5. HybridRevenueController.sol ❌
 
-#### After (4 Contracts)
+#### After (2 Contracts)
 1. TIPToken.sol ✅
-2. ChapterAccessController.sol ✅ (updated)
-3. HybridRevenueControllerV2.sol ✅ (new)
-4. HybridRevenueControllerV2Standalone.sol ✅ (new)
+2. HybridRevenueControllerV2.sol ✅ (includes chapter access control)
 
 ### 🔒 Security Enhancements
 
@@ -113,10 +111,11 @@
 #### Removed Contracts
 - `RewardsManager.sol` - No longer deployed
 - `UnifiedRewardsController.sol` - No longer deployed
+- `ChapterAccessController.sol` - Functionality merged into HybridRevenueControllerV2
+- `HybridRevenueController.sol` - V1 replaced by V2
 
 #### Modified Interfaces
-- `ChapterAccessController.sol` - Removed read-to-earn methods
-- `HybridRevenueController.sol` - Now legacy V1, use V2 for new books
+- `HybridRevenueControllerV2.sol` - Includes chapter unlocking functionality
 
 #### Removed Features
 - Automatic story creation rewards

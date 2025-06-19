@@ -12,7 +12,6 @@ import "../src/HybridRevenueControllerV2.sol";
 contract DeployMinimalV2New is Script {
     // Known contract addresses on Story Protocol Aeneid Testnet
     address constant TIP_TOKEN = 0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E;
-    address constant CHAPTER_ACCESS_CONTROLLER = 0x1BD65ad10B1CA3ED67aE75FCdD3abA256a9918e3;
     
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
@@ -25,7 +24,6 @@ contract DeployMinimalV2New is Script {
         
         console.log("Existing contracts:");
         console.log("TIP Token:", TIP_TOKEN);
-        console.log("Chapter Access Controller:", CHAPTER_ACCESS_CONTROLLER);
         console.log("");
         
         vm.startBroadcast(deployerPrivateKey);
@@ -56,7 +54,6 @@ contract DeployMinimalV2New is Script {
         console.log("OLD Standalone Address:         ", "0x9c6a3c50e5d77f99d805d8d7c935acb23208fd9f");
         console.log("NEW V2 Full Address:            ", hybridV2Address);
         console.log("TIP Token:                      ", TIP_TOKEN);
-        console.log("Chapter Access Controller:      ", CHAPTER_ACCESS_CONTROLLER);
         console.log("================================================================================");
         console.log("");
         console.log("Next steps:");

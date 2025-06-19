@@ -1,9 +1,9 @@
 {
   "metadata": {
     "version": "1.0",
-    "architecture": "5-contract-optimized",
+    "architecture": "2-contract-minimal",
     "description": "StoryHouse primary smart contract deployment registry",
-    "lastUpdated": "2025-06-16"
+    "lastUpdated": "2025-06-19"
   },
   "networks": {
     "story-protocol-aeneid": {
@@ -18,56 +18,26 @@
           "deploymentDate": "2025-06-04",
           "verified": true
         },
-        "RewardsManager": {
-          "address": "0xf5aE031bA92295C2aE86a99e88f09989339707E5",
-          "status": "deployed",
-          "deploymentDate": "2025-06-04",
-          "verified": true,
-          "dependencies": {
-            "tipToken": "0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E"
-          }
-        },
-        "UnifiedRewardsController": {
-          "address": "0x741105d6ee9b25567205f57c0e4f1d293f0d00c5",
-          "status": "deployed",
-          "deploymentDate": "2025-06-16",
+        "HybridRevenueControllerV2": {
+          "address": "0x9c6a3c50e5d77f99d805d8d7c935acb23208fd9f",
+          "status": "ready-to-deploy",
+          "deploymentDate": null,
           "verified": false,
           "dependencies": {
-            "rewardsManager": "0xf5aE031bA92295C2aE86a99e88f09989339707E5",
-            "tipToken": "0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E"
-          }
-        },
-        "ChapterAccessController": {
-          "address": "0x1bd65ad10b1ca3ed67ae75fcdd3aba256a9918e3",
-          "status": "deployed",
-          "deploymentDate": "2025-06-16",
-          "verified": false,
-          "dependencies": {
-            "rewardsManager": "0xf5aE031bA92295C2aE86a99e88f09989339707E5",
-            "tipToken": "0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E"
-          }
-        },
-        "HybridRevenueController": {
-          "address": "0xd1f7e8c6fd77dadbe946ae3e4141189b39ef7b08",
-          "status": "deployed",
-          "deploymentDate": "2025-06-16",
-          "verified": false,
-          "dependencies": {
-            "rewardsManager": "0xf5aE031bA92295C2aE86a99e88f09989339707E5",
             "tipToken": "0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E"
           }
         }
       },
       "deploymentStatus": {
         "phase": "complete",
-        "deployedContracts": 5,
-        "totalContracts": 5,
+        "deployedContracts": 1,
+        "totalContracts": 2,
         "readyForProduction": true
       }
     }
   },
   "deploymentScripts": {
     "primary": "deploy.sh",
-    "foundryScript": "script/Deploy.s.sol"
+    "foundryScript": "script/DeployMinimal.s.sol"
   }
 }

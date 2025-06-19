@@ -52,10 +52,10 @@ Complete deployment guide covering:
 ## 🔍 Key Features
 
 ### Current Architecture (V2)
-- **4 Core Contracts**: Streamlined from 5-contract architecture
+- **2 Core Contracts**: Minimal architecture (TIPToken + HybridRevenueControllerV2)
 - **Permissionless**: Anyone can register books without admin approval
 - **Anti-Farming**: Eliminated automatic rewards prone to bot exploitation
-- **Gas Optimized**: Reduced cross-contract calls and dependencies
+- **Gas Optimized**: Unified chapter access and revenue sharing
 
 ### Security Highlights
 - ✅ **OpenZeppelin v5** battle-tested security patterns
@@ -75,10 +75,9 @@ Complete deployment guide covering:
 | Contract | Status | Purpose |
 |----------|--------|---------|
 | TIPToken.sol | ✅ Active | Platform token with controlled minting |
-| ChapterAccessController.sol | ✅ Active | Chapter monetization and access control |
-| HybridRevenueControllerV2.sol | ✅ Active | Permissionless revenue sharing |
-| HybridRevenueControllerV2Standalone.sol | ✅ Active | Dependency-free version |
-| HybridRevenueController.sol | 🔄 Legacy | V1 - maintained for backward compatibility |
+| HybridRevenueControllerV2.sol | ✅ Active | Permissionless revenue sharing + chapter access |
+| HybridRevenueController.sol | ❌ Removed | V1 - replaced by V2 |
+| ChapterAccessController.sol | ❌ Removed | Functionality merged into HybridRevenueControllerV2 |
 | RewardsManager.sol | ❌ Removed | Eliminated due to farming vulnerabilities |
 | UnifiedRewardsController.sol | ❌ Removed | Automatic rewards removed |
 
