@@ -446,7 +446,13 @@ export default function BookPage() {
                           <div className="mt-3 p-2 bg-violet-50 border border-violet-200 rounded-lg">
                             <p className="text-violet-700 text-sm font-medium flex items-center gap-2">
                               <CheckCircle className="w-4 h-4" />
-                              You own this chapter
+                              Premium Access Unlocked
+                            </p>
+                            <p className="text-violet-600 text-xs mt-1">
+                              📄 Personal reading license • Purchased for 0.5 TIP
+                            </p>
+                            <p className="text-violet-500 text-xs mt-1">
+                              👤 Original IP owned by {formatAddress(book.authorAddress || book.author)}
                             </p>
                           </div>
                         )}

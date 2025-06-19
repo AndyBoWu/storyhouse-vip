@@ -224,4 +224,5 @@ forge script script/Deploy.s.sol:Deploy --broadcast --rpc-url $STORY_RPC_URL
 - **Security**: Backend validates all access - frontend cannot bypass access control
 - **Read-to-Earn Removed (December 2024)**: Feature removed to simplify platform focus
 - **AI Story Generation Removed (December 2024)**: No longer generating or remixing stories with AI
-- **AI Role Redefined (December 2024)**: AI now used for: content fraud detection, translation, text-to-audio, and content recommendations
+- **AI Role Redefined (December 2024)**: AI features planned for future implementation (content fraud detection, translation, text-to-audio, and content recommendations)
+- **AI Services Status (December 2024)**: Not currently implemented - platform focuses on core IP/payment functionality first
