@@ -132,6 +132,16 @@ export default function WalletConnect() {
   }
 
   const formatAddress = (addr: string) => {
+    // Show alias for specific wallet addresses
+    if (addr.toLowerCase() === '0x3873c0d1bcfa245773b13b694a49dac5b3f03ca2') {
+      return 'andybowu.ip';
+    }
+    if (addr.toLowerCase() === '0x71b93d154886c297f4b6e6219c47d378f6ac6a70') {
+      return 'bob.ip';
+    }
+    if (addr.toLowerCase() === '0xd49646149734f829c722a547f6be217571a8355d') {
+      return 'royce.ip';
+    }
     // Show only last 4 characters: abcd
     return addr.slice(-4)
   }
