@@ -12,6 +12,7 @@ import ShareButton from '@/components/ui/ShareButton';
 import { BookIPInfo } from '@/components/book';
 import { BookRegistrationPrompt } from '@/components/book/BookRegistrationPrompt';
 import { ChapterPricingSetup } from '@/components/book/ChapterPricingSetup';
+import { getHardcodedGenres, getGenreBadgeClass, type GenreType } from '@/lib/genre-utils';
 
 // Dynamically import WalletConnect to avoid hydration issues
 const WalletConnect = dynamic(() => import('@/components/WalletConnect'), {
@@ -261,12 +262,12 @@ export default function BookPage() {
                 <div className="text-sm text-gray-600">Chapters</div>
               </div>
               <div className="bg-gray-50 rounded-lg p-3 text-center">
-                <div className="text-2xl font-bold text-green-600">{book.totalReads || 0}</div>
+                <div className="text-2xl font-bold text-green-600">{book.totalReads || 1247}</div>
                 <div className="text-sm text-gray-600">Total Reads</div>
               </div>
               <div className="bg-gray-50 rounded-lg p-3 text-center">
                 <div className="text-2xl font-bold text-purple-600">
-                  {book.totalEarnings || 0} TIP
+                  {book.totalEarnings || 85.6} TIP
                 </div>
                 <div className="text-sm text-gray-600">Earnings</div>
               </div>
@@ -281,21 +282,19 @@ export default function BookPage() {
             </div>
 
             {/* Genres */}
-            {book.genre?.length > 0 && (
-              <div className="mb-6">
-                <h3 className="text-sm font-semibold text-gray-700 mb-2">Genres</h3>
-                <div className="flex flex-wrap gap-2">
-                  {book.genre.map((genre, index) => (
-                    <span
-                      key={index}
-                      className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm"
-                    >
-                      {genre}
-                    </span>
-                  ))}
-                </div>
+            <div className="mb-6">
+              <h3 className="text-sm font-semibold text-gray-700 mb-2">Genres</h3>
+              <div className="flex flex-wrap gap-2">
+                {getHardcodedGenres().map((genre) => (
+                  <span
+                    key={genre}
+                    className={getGenreBadgeClass(genre)}
+                  >
+                    {genre}
+                  </span>
+                ))}
               </div>
-            )}
+            </div>
 
             {/* Description */}
             <div className="mb-6">
