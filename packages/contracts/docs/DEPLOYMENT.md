@@ -68,7 +68,7 @@ forge script script/Deploy.s.sol \
     --broadcast
 
 # Check deployment result
-cat deployment-result.json
+cat deployments/latest.json
 ```
 
 ## Testnet Deployment

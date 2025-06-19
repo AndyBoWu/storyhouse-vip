@@ -191,7 +191,7 @@ DEPLOYMENT_BLOCK=$(cast block-number --rpc-url $RPC_URL)
 echo ""
 echo -e "${BLUE}💾 Creating deployment summary...${NC}"
 
-cat > deployment-result.json << EOF
+cat > deployments/latest.json << EOF
 {
   "deployment": {
     "timestamp": "$DEPLOYMENT_DATE",
