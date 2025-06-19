@@ -14,7 +14,7 @@ contract HybridRevenueControllerV2Test is Test {
     address public curator;
     address public reader;
     
-    uint256 public bookId;
+    bytes32 public bookId;
     
     function setUp() public {
         platform = address(this);
@@ -23,15 +23,15 @@ contract HybridRevenueControllerV2Test is Test {
         reader = address(0x3);
         
         // Deploy TIP token
-        tipToken = new TIPToken();
-        tipToken.initialize("TIP Token", "TIP", platform, 1000000 * 10**18);
+        tipToken = new TIPToken(platform);
         
         // Deploy controller
         controller = new HybridRevenueControllerV2(platform, address(tipToken));
         
         // Register a book
+        bookId = keccak256("test-book");
         vm.prank(author);
-        bookId = controller.registerBook("Test Book", "test-book", curator);
+        controller.registerBook(bookId, false, bytes32(0), 5, "ipfs://testbook");
         
         // Fund reader with TIP tokens
         tipToken.mint(reader, 1000 * 10**18);
@@ -40,55 +40,61 @@ contract HybridRevenueControllerV2Test is Test {
     }
     
     function testBookRegistration() public {
-        assertEq(controller.getBookAuthor(bookId), author);
-        assertEq(controller.getBookCurator(bookId), curator);
-        assertEq(controller.getBookTitle(bookId), "Test Book");
+        (address bookCurator,,,,,) = controller.getBookInfo(bookId);
+        assertEq(bookCurator, author); // author becomes curator in this version
     }
     
     function testPermissionlessRegistration() public {
         address newAuthor = address(0x4);
-        vm.prank(newAuthor);
-        uint256 newBookId = controller.registerBook("New Book", "new-book", newAuthor);
+        bytes32 newBookId = keccak256("new-book");
         
-        assertEq(controller.getBookAuthor(newBookId), newAuthor);
-        assertEq(controller.getBookCurator(newBookId), newAuthor);
+        vm.prank(newAuthor);
+        controller.registerBook(newBookId, false, bytes32(0), 3, "ipfs://newbook");
+        
+        (address bookCurator,,,,,) = controller.getBookInfo(newBookId);
+        assertEq(bookCurator, newAuthor); // author becomes curator
     }
     
     function testRevenueDistribution() public {
         uint256 payment = 100 * 10**18;
         
-        uint256 platformBalanceBefore = tipToken.balanceOf(platform);
-        uint256 authorBalanceBefore = tipToken.balanceOf(author);
-        uint256 curatorBalanceBefore = tipToken.balanceOf(curator);
-        
-        vm.prank(reader);
-        controller.payForChapter(bookId, 1, payment);
-        
-        // Check balances after payment
-        assertEq(tipToken.balanceOf(platform), platformBalanceBefore + (payment * 10 / 100));
-        assertEq(tipToken.balanceOf(author), authorBalanceBefore + (payment * 70 / 100));
-        assertEq(tipToken.balanceOf(curator), curatorBalanceBefore + (payment * 20 / 100));
-    }
-    
-    function testCannotRegisterWithEmptyTitle() public {
+        // Set up chapter attribution first
         vm.prank(author);
-        vm.expectRevert();
-        controller.registerBook("", "slug", curator);
-    }
-    
-    function testOnlyAuthorCanUpdateBook() public {
+        controller.setChapterAttribution(bookId, 1, author, bookId, payment, true);
+        
+        uint256 authorBalanceBefore = tipToken.balanceOf(author);
+        
         vm.prank(reader);
-        vm.expectRevert("Only book author can update");
-        controller.updateBookCurator(bookId, reader);
+        controller.unlockChapter(bookId, 1);
+        
+        // Author gets 90% since they're also the curator
+        assertEq(tipToken.balanceOf(author), authorBalanceBefore + (payment * 90 / 100));
     }
     
-    function testChapterPaymentTracking() public {
+    function testCannotRegisterZeroChapters() public {
+        bytes32 invalidBookId = keccak256("invalid");
+        vm.prank(author);
+        vm.expectRevert("HybridRevenueV2: invalid chapter count");
+        controller.registerBook(invalidBookId, false, bytes32(0), 0, "ipfs://invalid");
+    }
+    
+    function testOnlyCuratorCanSetAttribution() public {
+        vm.prank(reader);
+        vm.expectRevert("HybridRevenueV2: not authorized curator");
+        controller.setChapterAttribution(bookId, 1, author, bookId, 100 * 10**18, true);
+    }
+    
+    function testChapterUnlockTracking() public {
         uint256 payment = 50 * 10**18;
         
-        vm.prank(reader);
-        controller.payForChapter(bookId, 1, payment);
+        // Set up chapter attribution first
+        vm.prank(author);
+        controller.setChapterAttribution(bookId, 1, author, bookId, payment, true);
         
-        assertEq(controller.getChapterRevenue(bookId, 1), payment);
-        assertEq(controller.getTotalBookRevenue(bookId), payment);
+        vm.prank(reader);
+        controller.unlockChapter(bookId, 1);
+        
+        assertEq(controller.bookTotalRevenue(bookId), payment);
+        assertEq(controller.hasUnlockedChapter(reader, bookId, 1), true);
     }
 }
