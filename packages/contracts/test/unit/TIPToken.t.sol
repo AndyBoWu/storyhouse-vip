@@ -15,15 +15,14 @@ contract TIPTokenTest is Test {
         user1 = address(0x1);
         user2 = address(0x2);
         
-        token = new TIPToken();
-        token.initialize("TIP Token", "TIP", owner, 1000000 * 10**18);
+        token = new TIPToken(owner);
     }
     
     function testInitialState() public {
         assertEq(token.name(), "TIP Token");
         assertEq(token.symbol(), "TIP");
         assertEq(token.owner(), owner);
-        assertEq(token.supplyCap(), 1000000 * 10**18);
+        assertEq(token.supplyCap(), 10_000_000_000 * 10**18);
     }
     
     function testMint() public {
@@ -34,12 +33,13 @@ contract TIPTokenTest is Test {
     
     function testMintFailsWhenExceedingCap() public {
         uint256 cap = token.supplyCap();
-        vm.expectRevert("TIPToken: Supply cap exceeded");
+        vm.expectRevert("TIPToken: supply cap exceeded");
         token.mint(user1, cap + 1);
     }
     
     function testUpdateSupplyCap() public {
-        uint256 newCap = 2000000 * 10**18;
+        uint256 currentSupply = token.totalSupply();
+        uint256 newCap = currentSupply + 1000000 * 10**18;
         token.updateSupplyCap(newCap);
         assertEq(token.supplyCap(), newCap);
     }
