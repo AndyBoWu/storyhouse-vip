@@ -5,7 +5,7 @@
  */
 
 import { ArrowDown, Globe, DollarSign, Users } from 'lucide-react'
-import type { ChapterIP, RoyaltyFlow } from '@storyhouse/shared-v2/types/ip'
+import type { ChapterIP, RoyaltyFlow } from '@storyhouse/shared/types/ip'
 
 interface RoyaltyFlowDiagramProps {
   originalChapter: ChapterIP

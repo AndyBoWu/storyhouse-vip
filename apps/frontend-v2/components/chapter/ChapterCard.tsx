@@ -5,7 +5,7 @@
  */
 
 import { useState } from 'react'
-import type { ChapterIP } from '@storyhouse/shared-v2/types/ip'
+import type { ChapterIP } from '@storyhouse/shared/types/ip'
 import { Globe, Lock, CheckCircle, AlertCircle } from 'lucide-react'
 
 interface ChapterCardProps {
@@ -165,4 +165,4 @@ export function ChapterCard({
 }
 
 // Re-export language constants
-import { SUPPORTED_LANGUAGES } from '@storyhouse/shared-v2/types/ip'
+import { SUPPORTED_LANGUAGES } from '@storyhouse/shared/types/ip'

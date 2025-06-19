@@ -7,7 +7,7 @@ import { useState, useCallback } from 'react'
 import { useAccount } from 'wagmi'
 import { StoryClient } from '@story-protocol/core-sdk'
 import { parseUnits } from 'viem'
-import type { ChapterIP, TranslationLicenseTier } from '@storyhouse/shared-v2/types/ip'
+import type { ChapterIP, TranslationLicenseTier } from '@storyhouse/shared/types/ip'
 
 // Translation license tiers with proper Story Protocol configuration
 export const TRANSLATION_LICENSE_TIERS: Record<string, TranslationLicenseTier> = {

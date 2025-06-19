@@ -6,7 +6,7 @@
 import { useState, useCallback } from 'react'
 import { useAccount } from 'wagmi'
 import { StoryClient } from '@story-protocol/core-sdk'
-import type { ChapterIP, ServiceProviderRole, ServiceAgreement } from '@storyhouse/shared-v2/types/ip-v3'
+import type { ChapterIP, ServiceProviderRole, ServiceAgreement } from '@storyhouse/shared/types/ip-v3'
 
 export function useAuthorOwnedDerivatives(storyClient: StoryClient) {
   const { address } = useAccount()
