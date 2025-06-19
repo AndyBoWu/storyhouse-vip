@@ -30,13 +30,18 @@
 ┌─────────────────────────┴───────────────────────────────┐
 │                    Backend API (Port 3002)               │
 │              Next.js API Routes | TypeScript            │
-│                 Story Protocol SDK v1.3.2+              │
+│                 AI Verification Only                     │
 └─────────────────────────┬───────────────────────────────┘
                           │
 ┌─────────────────────────┴───────────────────────────────┐
-│                   Smart Contracts (5)                    │
-│  TIP Token | Creator | Rewards | Derivative | Notify   │
-│                  Story Protocol Testnet                  │
+│                 Blockchain Layer                         │
+│                                                         │
+│  Custom Contracts (2)          Story Protocol SDK      │
+│  ├─ TIP Token                  ├─ IP Registration      │
+│  └─ HybridRevenueV2            ├─ NFT Minting         │
+│                                ├─ Licensing            │
+│                                ├─ Derivatives          │
+│                                └─ Disputes             │
 └─────────────────────────┬───────────────────────────────┘
                           │
 ┌─────────────────────────┴───────────────────────────────┐
@@ -61,10 +66,11 @@ storyhouse-vip/
 ### Key Design Principles
 
 1. **Frontend-First Architecture**: Direct blockchain interactions from the browser
-2. **Author Ownership**: Creators retain 100% IP ownership of their content
-3. **Atomic Operations**: Single-transaction IP registration for 40% gas savings
-4. **Modular Smart Contracts**: 5-contract system for flexibility and upgradability
+2. **Minimal Smart Contracts**: Only 2 custom contracts, leverage Story Protocol SDK for everything else
+3. **Author Ownership**: Creators retain 100% IP ownership of their content
+4. **Atomic Operations**: Single-transaction IP registration for 40% gas savings
 5. **Zero-Commission Platform**: 100% creator revenue (platform monetizes through TIP token)
+6. **Hybrid Approach**: Story Protocol for IP/licensing, custom contracts for TIP payments
 
 ### Technology Stack
 
@@ -78,32 +84,34 @@ storyhouse-vip/
 | Storage | Cloudflare R2 | - |
 | Hosting | Vercel | - |
 
-### Smart Contract Architecture (5-Contract System)
+### Smart Contract Architecture (2-Contract System)
 
-1. **TIP Token (`0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E`)**
+1. **TIP Token (`0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E`)** ✅ Already Deployed
    - ERC-20 token with minting controls
    - 10B max supply cap
-   - Deflationary mechanics through burning
+   - Platform's native currency
 
-2. **Rewards Manager (`0xf5aE031bA92295C2aE86a99e88f09989339707E5`)**
-   - Central reward orchestration
-   - Anti-farming protections
-   - Batch distribution capabilities
-
-3. **Unified Rewards Controller (`0x741105d6ee9b25567205f57c0e4f1d293f0d00c5`)**
-   - Consolidated reward logic
-   - Read-to-earn implementation
-   - Creator incentives management
-
-4. **Chapter Access Controller (`0x1bd65ad10b1ca3ed67ae75fcdd3aba256a9918e3`)**
+2. **HybridRevenueControllerV2** (To Deploy)
+   - Permissionless book registration
+   - Revenue distribution (70/20/10 split)
    - Chapter monetization (0.5 TIP/chapter)
-   - Access control and verification
-   - Progress tracking
+   - Translation support via curator mechanism
+   - Chapter-level attribution tracking
 
-5. **Hybrid Revenue Controller (`0xd1f7e8c6fd77dadbe946ae3e4141189b39ef7b08`)**
-   - Multi-author revenue sharing (70/20/10 split)
-   - Book registration system
-   - Derivative work management
+### Why Only 2 Contracts?
+
+Story Protocol SDK handles everything else:
+- **IP Registration**: `ipAsset.mintAndRegisterIpAssetWithPilTerms()`
+- **NFT Minting**: SPG NFT contract at `0x26b6aa7e7036fc9e8fa2d8184c2cf07ae2e2412d`
+- **Licensing**: `license.attachTerms()` and `license.mintLicenseTokens()`
+- **Derivatives**: `ipAsset.registerDerivative()`
+- **Disputes**: `dispute.initiateDispute()`
+- **Collections**: `group.createGroup()`
+- **Batch Operations**: `sdk.batch()` for 70% gas savings
+
+We only need custom contracts for:
+- **TIP Token**: Story Protocol doesn't support custom payment tokens
+- **Revenue Distribution**: Handle complex splits between authors, curators, and platform
 
 ---
 
@@ -111,15 +119,12 @@ storyhouse-vip/
 
 ### For Readers
 
-#### Read-to-Earn System
-- **Base Rewards**: 10 TIP per chapter read (after chapter 3)
-- **Streak Bonuses**: 
-  - 7-day streak: 20 TIP bonus
-  - 30-day streak: 100 TIP bonus
-  - 90-day streak: 500 TIP bonus
+#### Chapter Access System
 - **Free Access**: First 3 chapters of every story
 - **Chapter Unlocking**: 0.5 TIP per premium chapter (4+)
-- **Daily Limits**: Maximum 50 chapters/day to prevent farming
+- **Revenue Model**: Pay-to-read only (no automatic rewards)
+- **Anti-Farming**: Removed read-to-earn to prevent bot exploitation
+- **Creator Revenue**: 100% of chapter payments go to creators
 
 #### Content Discovery
 - AI-powered recommendations based on reading history
@@ -246,7 +251,7 @@ storyhouse-vip/
 - Legacy workflow removal
 
 ### Phase 6.0: Enterprise Features ✅ Complete
-- Smart contract consolidation (9→5 contracts)
+- Smart contract consolidation (9→2 contracts)
 - Full-stack migration
 - Chapter monetization system
 - Multi-author revenue sharing
@@ -583,6 +588,11 @@ const analytics = await sdk.analytics.getIPMetrics({
 - Predictive success modeling
 
 ### Implementation Priority
+
+**Foundation (Current)**:
+- Deploy HybridRevenueControllerV2 
+- Integrate Story Protocol SDK for all IP operations
+- Frontend direct blockchain interactions
 
 1. **Immediate (Phase 7.0)**:
    - Batch Operations (70% gas savings)
@@ -1014,9 +1024,9 @@ Face ID Setup → Secure Key Storage →
 StoryHouse.vip is a production-ready Web3 storytelling platform that revolutionizes content creation and monetization through:
 
 1. **Technical Innovation**: 40% gas savings, unified IP registration, enhanced metadata
-2. **Creator Empowerment**: 100% revenue, instant monetization, IP ownership
-3. **Reader Rewards**: Read-to-earn mechanics with anti-farming protection
-4. **Enterprise Architecture**: 5-contract system, full test coverage, production deployment
+2. **Minimal Architecture**: Only 2 custom contracts, leveraging Story Protocol SDK for everything else
+3. **Creator Empowerment**: 100% revenue, instant monetization, IP ownership
+4. **Sustainable Economics**: Pay-to-read model, removed exploitable rewards
 5. **Future-Ready**: Mobile apps, multi-language, cross-chain compatibility
 6. **Advanced SDK Integration**: 10+ untapped Story Protocol features including:
    - Group collections for series management
