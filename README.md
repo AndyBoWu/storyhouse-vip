@@ -240,15 +240,15 @@ The project uses GitHub Actions for deployment to Vercel:
 - **Selective Deployment**: Choose to deploy frontend, backend, or both
 - **Production Ready**: Automatic project linking and environment configuration
 
-See [Deployment Guide](./docs/project/DEPLOYMENT.md) for detailed instructions.
+See [Deployment Guide](./docs/guides/DEVELOPMENT_GUIDE.md#-deployment) for detailed instructions.
 
 ## 📚 Documentation
 
 - [Technical Architecture](./docs/TECHNICAL_ARCHITECTURE.md)
 - [API Reference](./docs/API_REFERENCE.md) 
-- [Development Guide](./docs/DEVELOPMENT_GUIDE.md)
-- [Testing Strategy](./docs/TESTING_STRATEGY.md)
-- [Deployment Guide](./docs/project/DEPLOYMENT.md)
+- [Development Guide](./docs/guides/DEVELOPMENT_GUIDE.md)
+- [Testing Strategy](./docs/technical/TESTING_STRATEGY.md)
+- [Story Protocol Guide](./docs/guides/STORY_PROTOCOL_GUIDE.md)
 
 ## 🎮 User Flow
 
