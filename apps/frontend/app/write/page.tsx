@@ -190,17 +190,16 @@ function WritePageContent() {
           <Sparkles className="w-8 h-8 text-purple-600" />
           Create Your Story
         </div>
-        <p className="text-gray-600 text-lg">Let AI help you bring imagination to life</p>
       </div>
 
       {/* Scenario Selection */}
       <div className="grid md:grid-cols-3 gap-6 mb-8 max-w-6xl mx-auto">
         <Link href="/write/new">
-          <button className="w-full bg-white rounded-xl shadow-lg p-6 text-left hover:shadow-xl transition-all border-2 border-transparent hover:border-purple-200">
+          <button className="w-full h-52 bg-white rounded-xl shadow-lg p-6 text-left hover:shadow-xl transition-all border-2 border-transparent hover:border-purple-200 group flex flex-col">
             <div className="text-4xl mb-4">📝</div>
             <h3 className="text-xl font-semibold text-gray-800 mb-2">New Story</h3>
-            <p className="text-gray-600 mb-4">Start fresh with AI help</p>
-            <div className="inline-flex items-center gap-2 text-purple-600 font-medium">
+            <p className="text-gray-600 mb-4 flex-1">Start fresh with AI help</p>
+            <div className="inline-flex items-center gap-2 text-purple-600 font-medium group-hover:translate-x-1 transition-transform">
               <span>Start Writing</span>
               <ChevronRight className="w-4 h-4" />
             </div>
@@ -208,11 +207,11 @@ function WritePageContent() {
         </Link>
 
         <Link href="/write/continue">
-          <button className="w-full bg-white rounded-xl shadow-lg p-6 text-left hover:shadow-xl transition-all border-2 border-transparent hover:border-blue-200">
+          <button className="w-full h-52 bg-white rounded-xl shadow-lg p-6 text-left hover:shadow-xl transition-all border-2 border-transparent hover:border-purple-200 group flex flex-col">
             <div className="text-4xl mb-4">➕</div>
             <h3 className="text-xl font-semibold text-gray-800 mb-2">Ongoing Story</h3>
-            <p className="text-gray-600 mb-4">Add next chapter</p>
-            <div className="inline-flex items-center gap-2 text-blue-600 font-medium">
+            <p className="text-gray-600 mb-4 flex-1">Add next chapter</p>
+            <div className="inline-flex items-center gap-2 text-purple-600 font-medium group-hover:translate-x-1 transition-transform">
               <span>Add Chapter</span>
               <ChevronRight className="w-4 h-4" />
             </div>
@@ -220,11 +219,11 @@ function WritePageContent() {
         </Link>
 
         <Link href="/write/branch">
-          <button className="w-full bg-white rounded-xl shadow-lg p-6 text-left hover:shadow-xl transition-all border-2 border-transparent hover:border-green-200">
+          <button className="w-full h-52 bg-white rounded-xl shadow-lg p-6 text-left hover:shadow-xl transition-all border-2 border-transparent hover:border-purple-200 group flex flex-col">
             <div className="text-4xl mb-4">🌿</div>
             <h3 className="text-xl font-semibold text-gray-800 mb-2">Branch & Remix</h3>
-            <p className="text-gray-600 mb-4">Continue any story from any chapter</p>
-            <div className="inline-flex items-center gap-2 text-green-600 font-medium">
+            <p className="text-gray-600 mb-4 flex-1">Continue from any chapter</p>
+            <div className="inline-flex items-center gap-2 text-purple-600 font-medium group-hover:translate-x-1 transition-transform">
               <span>Browse Stories</span>
               <ChevronRight className="w-4 h-4" />
             </div>
