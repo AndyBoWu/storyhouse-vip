@@ -12,6 +12,7 @@
   - Compare: Amazon KDP (35-70%)
 - **🔓 Permissionless Publishing**: No gatekeepers—anyone can publish directly to the blockchain
 - **📝 Revolutionary Chapter-Level IP**: Register individual chapters as IP assets ($50 vs $1000+ for full books)
+  - **Multiple business models** to maximize creator benefits: pay-per-chapter, subscriptions, licensing deals
   - One publication → Multiple revenue streams: translations (10+ languages), audio rights, derivative works
   - Each format (text, audio, translation) generates separate licensable IP assets
   - **Unlimited remixing opportunities**: Build parallel universes where your story branches into countless variations
