@@ -11,11 +11,13 @@
 - **💰 90% Creator Revenue**: Authors keep 90% of all sales (only 10% platform fee)
   - Compare: Amazon KDP (35-70%)
 - **🔓 Permissionless Publishing**: No gatekeepers—anyone can publish directly to the blockchain
-- **📝 Revolutionary Chapter-Level IP**: Register individual chapters as IP assets ($50 vs $1000+ for full books)
-  - **Multiple business models** to maximize creator benefits: pay-per-chapter, subscriptions, licensing deals
-  - One publication → Multiple revenue streams: translations (10+ languages), audio rights, derivative works
-  - Each format (text, audio, translation) generates separate licensable IP assets
-  - **Unlimited remixing opportunities**: Build parallel universes where your story branches into countless variations
+- **📈 Multiple Earning Models**: Revolutionary chapter-level IP registration ($50 vs $1000+ for full books)
+  - **Pay-per-chapter**: Instant monetization from chapter 1 (0.5 TIP/chapter)
+  - **Subscription tiers**: Reading, commercial, or exclusive licenses
+  - **Translation rights**: Earn from 10+ language versions of your content
+  - **Audio licensing**: Text-to-speech and professional narration rights
+  - **Derivative works**: License remixes, adaptations, and parallel universe stories
+  - **Format multiplication**: Each format (text, audio, translation) = separate revenue stream
 - **🤖 AI-Powered Features**: Content fraud detection, translation, text-to-audio, and smart recommendations
 - **⚡ 40% Lower Gas Costs**: Single-transaction IP registration saves time and money
 
