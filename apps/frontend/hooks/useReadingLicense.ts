@@ -223,6 +223,12 @@ export function useReadingLicense() {
           // Parse the book ID to get the bytes32 format
           const { bytes32Id, authorAddress } = parseBookId(bookId)
           
+          console.log('🔍 Book ID parsing:', {
+            bookId,
+            bytes32Id,
+            authorAddress
+          })
+          
           // Check if book is registered in HybridRevenueControllerV2
           if (!HYBRID_REVENUE_CONTROLLER_V2_ADDRESS || HYBRID_REVENUE_CONTROLLER_V2_ADDRESS === '0x...') {
             throw new Error('HybridRevenueControllerV2 not deployed yet. Please deploy the contract first.')
@@ -377,7 +383,36 @@ export function useReadingLicense() {
           
           // Check for the "chapter not configured" error (0xfb8f41b2)
           if (errorMessage.includes('0xfb8f41b2') || errorMessage.includes('chapter not configured')) {
-            throw new Error('This chapter pricing has not been configured yet. The book author needs to set up chapter pricing on their book page before readers can unlock paid chapters.')
+            // Log detailed debugging info
+            console.error('🔴 Chapter not configured error - Debug info:', {
+              bookId,
+              bytes32Id,
+              chapterNumber,
+              contractAddress: HYBRID_REVENUE_CONTROLLER_V2_ADDRESS,
+              senderAddress: address,
+              errorMessage,
+              gasEstimate: 'Check if gas estimation failed',
+              tipAllowance: currentAllowance ? formatEther(currentAllowance) : 'unknown'
+            })
+            
+            // Try to read the attribution directly from the contract
+            try {
+              const attributionData = await publicClient.readContract({
+                address: HYBRID_REVENUE_CONTROLLER_V2_ADDRESS as Address,
+                abi: HYBRID_V2_ABI,
+                functionName: 'chapterAttributions',
+                args: [bytes32Id, BigInt(chapterNumber)],
+              })
+              console.log('📖 Attribution data from contract:', attributionData)
+            } catch (readError) {
+              console.error('Could not read attribution:', readError)
+            }
+            
+            throw new Error(
+              'Unable to unlock chapter. This appears to be a configuration issue. ' +
+              'The chapter shows as configured in the UI but the smart contract disagrees. ' +
+              'Please contact support with the error details from the console.'
+            )
           }
           
           throw new Error('Failed to process payment. Please ensure you have sufficient TIP balance.')
