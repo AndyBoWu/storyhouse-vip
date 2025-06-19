@@ -65,9 +65,9 @@ StoryHouse.vip is a revolutionary Web3 publishing platform built on Story Protoc
            ▼                     ▼                     ▼
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │  User Interface │    │  AI Services    │    │  Economic Flow  │
-│  • Dashboard    │    │  • OpenAI GPT-4 │    │  • Revenue      │
-│  • Notifications│    │  • Similarity   │    │  • Royalties    │
-│  • Analytics    │    │  • Detection    │    │  • TIP Tokens   │
+│  • Dashboard    │    │  • Fraud Detect │    │  • Revenue      │
+│  • Notifications│    │  • Translation  │    │  • Royalties    │
+│  • Analytics    │    │  • Audio/Recs   │    │  • TIP Tokens   │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
@@ -79,7 +79,7 @@ StoryHouse.vip is a revolutionary Web3 publishing platform built on Story Protoc
 | Backend | Next.js API | 15.3.3 | API routes with Story Protocol |
 | Language | TypeScript | 5.8.3 | Full type safety |
 | Blockchain | Story Protocol SDK | 1.3.2 | IP asset management |
-| AI | OpenAI GPT-4 | Latest | Content generation & analysis |
+| AI | OpenAI GPT-4 | Latest | Fraud detection, translation, TTS, recommendations |
 | Analytics | React/D3 | Latest | Derivative tracking dashboard |
 | Notifications | Real-time | - | AI-powered alerts & monitoring |
 | Storage | Cloud Storage | - | Global content delivery |
@@ -164,7 +164,7 @@ The backend intelligently routes between V1 and V2:
 - **Unified IP Service**: Revolutionary single-transaction registration using `mintAndRegisterIpAssetWithPilTerms`
 - **Services**: Story Protocol SDK v1.3.2 integration with derivative registration
 - **R2 Storage**: Enhanced Cloudflare R2 integration with SHA-256 metadata verification
-- **AI Integration**: OpenAI GPT-4 story generation & content similarity analysis
+- **AI Integration**: Content fraud detection, translation, text-to-audio, recommendations
 - **Derivative Registration**: Complete blockchain registration service
 - **Notification Engine**: Real-time alert system with background monitoring
 - **Analytics Engine**: AI-powered content analysis and quality assessment
@@ -370,11 +370,11 @@ Revenue Data ─→ Economic Modeling ─→ Optimization ─→ Recommendations
 5. Automatic distribution via smart contracts with anti-bot protection
 6. Real-time analytics update performance metrics
 
-**Secure Reward Model:**
-- Authors earn through: reader purchases, remix licensing, human-verified quality bonuses
-- Readers earn through: chapter completion rewards, reading streaks, engagement
-- No exploitable automatic rewards for content creation
-- All rewards require genuine user interaction
+**Secure Revenue Model:**
+- Authors earn through: reader purchases, derivative licensing, quality bonuses
+- Readers access premium content through transparent pricing model
+- Platform ensures content quality through AI verification
+- All transactions require genuine user interaction
 
 ## Security & Performance
 
@@ -1086,62 +1086,97 @@ const openai = new OpenAI({
   timeout: 30000 // 30 seconds
 });
 
-// Story generation with safety measures
-async function generateStory(prompt: string, style: string) {
-  const completion = await openai.chat.completions.create({
-    model: "gpt-4-turbo-preview",
-    messages: [
-      {
-        role: "system",
-        content: `You are a creative writing assistant. Generate stories in the ${style} style. 
-                  Ensure content is appropriate and engaging. Avoid harmful content.`
-      },
-      {
-        role: "user",
-        content: prompt
-      }
-    ],
-    temperature: 0.8,
-    max_tokens: 4000,
-    presence_penalty: 0.3,
-    frequency_penalty: 0.3
-  });
-  
-  // Post-process for quality
-  return await postProcessContent(completion.choices[0].message.content);
-}
-```
-
-### Content Similarity Analysis
-```typescript
-// Advanced embedding-based similarity detection
-async function detectDerivatives(content: string) {
-  // Generate embedding for new content
+// Content fraud detection with AI
+async function detectContentFraud(content: string) {
+  // Generate embedding for content analysis
   const embedding = await openai.embeddings.create({
     model: "text-embedding-3-large",
     input: content
   });
   
-  // Vector similarity search
+  // Check similarity against existing content
   const similarities = await vectorDB.search({
     vector: embedding.data[0].embedding,
     topK: 10,
-    threshold: 0.7 // 70% similarity threshold
+    threshold: 0.85 // High similarity threshold for fraud
   });
   
-  // Detailed analysis for high matches
-  const detailedAnalysis = await Promise.all(
-    similarities.map(async (match) => {
-      const analysis = await analyzeRelationship(content, match.content);
-      return {
-        ...match,
-        analysis,
-        isDerivative: analysis.similarity > 0.8 && analysis.hasAttribution
-      };
-    })
-  );
+  // Analyze for plagiarism patterns
+  const fraudAnalysis = await openai.chat.completions.create({
+    model: "gpt-4-turbo-preview",
+    messages: [
+      {
+        role: "system",
+        content: "Analyze content for potential plagiarism, copyright violations, or fraudulent patterns."
+      },
+      {
+        role: "user",
+        content: `Content: ${content}\nSimilar matches: ${JSON.stringify(similarities)}`
+      }
+    ]
+  });
   
-  return detailedAnalysis;
+  return {
+    isPotentialFraud: similarities.length > 0 && similarities[0].score > 0.85,
+    analysis: fraudAnalysis.choices[0].message.content,
+    similarityScore: similarities[0]?.score || 0
+  };
+}
+```
+
+### Multi-Language Translation
+```typescript
+// AI-powered translation services
+async function translateContent(content: string, targetLanguage: string) {
+  const translation = await openai.chat.completions.create({
+    model: "gpt-4-turbo-preview",
+    messages: [
+      {
+        role: "system",
+        content: `Translate the following content to ${targetLanguage}. Maintain the style, tone, and nuances of the original text.`
+      },
+      {
+        role: "user",
+        content: content
+      }
+    ],
+    temperature: 0.3, // Lower temperature for accurate translation
+    max_tokens: 4000
+  });
+  
+  return translation.choices[0].message.content;
+}
+
+// Text-to-Audio Generation
+async function generateAudio(content: string, voiceStyle: string = 'natural') {
+  const audioResponse = await openai.audio.speech.create({
+    model: "tts-1-hd",
+    voice: voiceStyle === 'natural' ? 'alloy' : voiceStyle,
+    input: content,
+    response_format: "mp3"
+  });
+  
+  return audioResponse;
+}
+
+// Content Recommendations
+async function generateRecommendations(userHistory: string[], currentContent: string) {
+  const recommendations = await openai.chat.completions.create({
+    model: "gpt-4-turbo-preview",
+    messages: [
+      {
+        role: "system",
+        content: "Generate personalized content recommendations based on reading history and current content preferences."
+      },
+      {
+        role: "user",
+        content: `User history: ${JSON.stringify(userHistory)}\nCurrent content: ${currentContent}`
+      }
+    ],
+    temperature: 0.7
+  });
+  
+  return JSON.parse(recommendations.choices[0].message.content);
 }
 ```
 

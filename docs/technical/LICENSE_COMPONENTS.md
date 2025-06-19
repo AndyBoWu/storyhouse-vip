@@ -76,10 +76,10 @@ import LicenseDisplay from '@/components/ui/LicenseDisplay'
 **Key Features:**
 - Expandable tier cards with detailed feature lists
 - Revenue projection calculations
-- Read-to-earn economic modeling
+- Economic modeling
 - Chapter-based pricing strategy (free 1-3, paid 4+)
 - Daily/monthly revenue estimates
-- Reader earning vs creator revenue breakdown
+- Creator revenue breakdown
 
 **Usage:**
 ```tsx
@@ -95,8 +95,8 @@ import LicensePricing from '@/components/ui/LicensePricing'
 
 **Economic Model:**
 - **Reader pays:** Chapter unlock price (TIP tokens)
-- **Reader earns:** Read-to-earn rewards while reading
-- **Creator nets:** Price minus reader rewards = revenue
+- **Creator receives:** 80% of revenue
+- **Platform receives:** 20% of revenue
 
 ### 3. LicensePermissions
 
@@ -234,9 +234,9 @@ The license system implements a strategic chapter-based approach:
 ```
 Reader Payment → Chapter Unlock (0.1 TIP)
       ↓
-Reader Earns ← Read-to-Earn Rewards (0.05 TIP)
+Creator Receives ← Revenue Share (0.08 TIP)
       ↓
-Creator Nets ← Revenue Share (0.05 TIP)
+Platform Receives ← Platform Fee (0.02 TIP)
 ```
 
 ### Royalty Distribution

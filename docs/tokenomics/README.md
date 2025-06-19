@@ -68,7 +68,7 @@ This folder contains all documentation related to the **TIP token economics** an
 | **Total Supply**      | 10B TIP (capped)                             |
 | **Initial Supply**    | 1B TIP (10%)                                 |
 | **Emission Model**    | Activity-based rewards                       |
-| **Primary Use Cases** | Chapter unlocks, reading rewards, governance |
+| **Primary Use Cases** | Chapter unlocks, creator rewards, governance |
 | **Network**           | Story Protocol (Aeneid testnet)              |
 | **Standard**          | ERC-20 compatible                            |
 
@@ -76,9 +76,9 @@ This folder contains all documentation related to the **TIP token economics** an
 
 ## 🚀 **Key Innovation**
 
-**StoryHouse.vip is the first Read-to-Earn platform** where:
+**StoryHouse.vip is the first AI-powered storytelling platform** where:
 
-- ✅ **Readers earn tokens** while consuming content
+- ✅ **Readers access quality content** with transparent pricing
 - ✅ **Creators monetize immediately** from Chapter 1
 - ✅ **IP rights are granular** and tradeable
 - ✅ **AI assists creation** while preserving ownership

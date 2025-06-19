@@ -1,20 +1,20 @@
 # 📋 Product Specification
 
-Comprehensive product requirements and specifications for StoryHouse.vip - the revolutionary read-to-earn, AI-powered, chapter-level IP platform.
+Comprehensive product requirements and specifications for StoryHouse.vip - the revolutionary chapter-level IP platform with AI-powered content protection and enhancement.
 
 ## 🎯 **Product Vision**
 
 **"Democratizing intellectual property for the digital age"**
 
-StoryHouse.vip revolutionizes Web3 publishing by combining **chapter-level IP asset management**, **read-to-earn economics**, and **AI-powered content creation** on Story Protocol - creating the first platform where reading is profitable, writing is AI-assisted, and IP rights are granular and tradeable.
+StoryHouse.vip revolutionizes Web3 publishing by combining **chapter-level IP asset management** and **AI-powered content protection** on Story Protocol - creating the first platform where IP rights are granular and tradeable, with AI ensuring content quality and accessibility.
 
 ### **Triple Revolution Value Proposition**
 
 | Traditional Publishing              | StoryHouse.vip                             |
 | ----------------------------------- | ------------------------------------------ |
 | Register entire book as IP ($1000+) | Register individual chapters ($50-500)     |
-| Readers only pay to consume         | **Readers earn $TIP tokens while reading** |
-| Manual content creation             | **AI-assisted story generation**           |
+| Readers only pay to consume         | **Fair pricing with direct creator support** |
+| Manual content creation             | **AI-powered fraud detection & translation** |
 | Complex licensing negotiations      | **Automated remix licensing**              |
 | Wait for complete book to monetize  | Monetize from Chapter 1                    |
 | High barrier to entry               | 3 free chapters, no wallet required        |
@@ -23,66 +23,62 @@ StoryHouse.vip revolutionizes Web3 publishing by combining **chapter-level IP as
 
 ## 🌟 **Core Features**
 
-### **1. Read-to-Earn System**
+### **1. AI-Powered Content Protection & Enhancement**
 
-**Feature**: Readers earn $TIP tokens for chapter completion
-**Innovation**: First platform to pay readers for engagement
-**User Benefit**: Sustainable economic incentive for reading
+**Feature**: Multi-faceted AI system for content quality and accessibility
+**Innovation**: Comprehensive AI integration for fraud detection, translation, audio generation, and recommendations
+**User Benefit**: High-quality, verified content in multiple formats and languages
 
-**User Flow**:
+**AI Capabilities**:
 
-1. Reader discovers platform and stories
-2. Reads 3 chapters completely FREE (no wallet required)
-3. Experiences cliffhanger at chapter 3 end
-4. Connects MetaMask wallet for chapter 4+ access
-5. Unlocks chapters with $TIP, earns $TIP for completion
-6. Reading rewards often exceed chapter costs
+1. **Content Fraud Detection**: Identifies plagiarism and similar content
+2. **Multi-Language Translation**: Auto-translate stories to 10+ languages
+3. **Text-to-Audio Generation**: Convert chapters to audiobook format
+4. **Smart Recommendations**: Personalized content suggestions on /read page
 
 **Technical Requirements**:
 
-- Reading session tracking and verification
-- Automated $TIP token distribution
-- Reading streak bonus calculations
-- Wallet integration with progressive onboarding
-- Chapter completion proof validation
-
-**Economic Model**:
+- AI-powered plagiarism detection algorithm
+- Multi-language translation API integration
+- Text-to-speech synthesis engine
+- Recommendation engine with user preference learning
+- Content similarity analysis tools
 
 - Base reward: 0.05-0.1 $TIP per chapter completion
 - Chapter cost: 0.1-0.5 $TIP per unlock
 - Streak bonuses: Up to 100% reward multipliers
-- Net reader benefit: Positive with consistent engagement
+- Recommendation engine with user preference learning
 
-### **2. AI-Powered Story Creation**
+### **2. Chapter-Level Publishing**
 
-**Feature**: GPT-4 assisted content generation
-**Innovation**: Transform plot ideas into full chapters
-**User Benefit**: Reduce creative barriers, enhance productivity
+**Feature**: Publish and monetize individual chapters
+**Innovation**: Immediate monetization without waiting for full book
+**User Benefit**: Lower barrier to entry, faster revenue generation
 
 **User Flow**:
 
-1. Writer enters plot description and story concept
-2. Selects genre, mood, and style preferences
-3. Adds optional emoji, images, or inspiration content
-4. AI generates complete chapter from inputs
-5. Writer can edit, regenerate, or enhance content
-6. Publishes chapter with IP registration
+1. Writer creates original chapter content
+2. Sets chapter metadata and cover image
+3. Chooses pricing tier (0.5 TIP standard)
+4. Publishes with IP registration
+5. Earns 70% of all chapter sales
+6. Tracks analytics and reader engagement
 
-**AI Capabilities**:
+**Publishing Features**:
 
-- **Plot Transformation**: Convert ideas to complete narratives
-- **Style Customization**: Light, dark, neutral, exciting, peaceful
-- **Multi-modal Input**: Text, images, emojis, mood indicators
-- **Real-time Generation**: Streaming responses for immediate feedback
-- **Content Enhancement**: Grammar, style, and narrative improvements
+- **Chapter Management**: Draft, publish, update chapters
+- **Pricing Control**: Set custom prices or use standard tiers
+- **Analytics Dashboard**: Views, earnings, reader demographics
+- **Sequential Publishing**: Release chapters on schedule
+- **Reader Engagement**: Comments, ratings, favorites
 
 **Technical Requirements**:
 
-- OpenAI GPT-4 API integration
-- Streaming response handling
-- Multi-modal input processing
-- Content validation and quality scoring
-- Rate limiting and abuse prevention
+- Content management system
+- Pricing and payment infrastructure
+- Analytics and reporting tools
+- Reader engagement features
+- Content versioning system
 
 ### **3. Chapter-Level IP Registration**
 
@@ -110,28 +106,28 @@ StoryHouse.vip revolutionizes Web3 publishing by combining **chapter-level IP as
 - Gas fee estimation and transaction monitoring
 - Chapter dependency tracking (sequential validation)
 
-### **4. Remix Economy & Automated Licensing**
+### **4. Derivative Content & Automated Licensing**
 
-**Feature**: AI-assisted derivative content creation with automated licensing
-**Innovation**: Transform existing stories with AI while respecting IP rights
-**User Benefit**: Create derivatives with clear economics and AI assistance
+**Feature**: Create derivative works with automated licensing
+**Innovation**: Clear licensing terms and automatic revenue sharing
+**User Benefit**: Create derivatives with transparent economics
 
-**Remix User Flow**:
+**Derivative User Flow**:
 
-1. Remixer browses content by remix potential and success metrics
-2. Evaluates licensing terms and costs for source content
-3. Purchases remix license via automated smart contract
-4. Uses AI to transform content (sci-fi → fantasy, etc.)
+1. Creator browses content by licensing terms
+2. Evaluates licensing costs for source content
+3. Purchases license via automated smart contract
+4. Creates derivative work based on original
 5. Publishes derivative with automatic revenue sharing
-6. Earns from remix while original creator receives royalties
+6. Earns from derivative while original creator receives royalties
 
-**Remix Features**:
+**Licensing Features**:
 
-- **Content Discovery**: Filter stories by remix popularity and licensing terms
+- **Content Discovery**: Filter stories by licensing terms
 - **Economic Transparency**: Clear licensing costs and revenue projections
-- **AI Transformation**: Style, genre, and narrative modifications
-- **Quality Validation**: Originality scoring and transformation verification
-- **Recursive Licensing**: Enable further remixes of derivatives
+- **Manual Creation**: Authors create their own derivative works
+- **Quality Standards**: Ensure derivative adds value
+- **Recursive Licensing**: Enable further derivatives
 
 ### **5. Enhanced Licensing Marketplace**
 
@@ -177,26 +173,26 @@ StoryHouse.vip revolutionizes Web3 publishing by combining **chapter-level IP as
 
 ### **7. Story Continuation Workflow**
 
-**Feature**: Intelligent story continuation with AI-assisted chapter creation
-**Innovation**: Context-aware chapter generation that maintains story continuity
-**User Benefit**: Effortless multi-chapter story development
+**Feature**: Seamless multi-chapter story development
+**Innovation**: Context-aware chapter management with story continuity
+**User Benefit**: Effortless story progression and chapter organization
 
 **Continuation Features**:
 
 - **Continue Button**: One-click continuation from My Stories page
-- **Context Preservation**: Previous chapter content fed to AI for continuity
+- **Context Preservation**: Previous chapter reference for continuity
 - **Chapter Numbering**: Automatic sequential chapter management
 - **Story Metadata**: Title, genre, and style consistency across chapters
 - **URL Parameters**: Deep linking to continuation workflow
-- **Draft Management**: Auto-save and recovery of continuation drafts
+- **Draft Management**: Auto-save and recovery of drafts
 
 **User Flow**:
 
 1. Creator views existing stories in My Stories dashboard
 2. Clicks "Continue" button on any published story
-3. Automatically navigated to write page with pre-filled context
-4. AI generates next chapter using previous content for continuity
-5. Creator can edit, regenerate, or publish the new chapter
+3. Automatically navigated to write page with story context
+4. Creator writes next chapter with previous content reference
+5. Creator can edit, save drafts, or publish the new chapter
 6. Chapter is automatically linked to existing story with proper numbering
 
 ### **8. Multi-Chapter Story Management**
@@ -218,7 +214,7 @@ StoryHouse.vip revolutionizes Web3 publishing by combining **chapter-level IP as
 
 - **Genre Classification**: Visual genre tags and filtering
 - **Reading Metrics**: Word counts, reading times, and completion rates
-- **Quality Indicators**: AI-generated quality and originality scores
+- **Quality Indicators**: Content quality and originality metrics
 - **Remix Status**: Clear indicators for remix-enabled content
 - **Author Attribution**: Complete authorship tracking with wallet verification
 - **Content Ratings**: Age-appropriate content classification
@@ -254,9 +250,9 @@ StoryHouse.vip revolutionizes Web3 publishing by combining **chapter-level IP as
 
 **Dashboard Components**:
 
-- **Total Earnings**: Reading rewards + chapter sales + remix licensing + royalty distributions
+- **Total Earnings**: Chapter sales + licensing + royalty distributions
 - **Token Balance**: $TIP holdings with conversion options
-- **Reading Progress**: Streaks, completed chapters, earned rewards
+- **Reading Progress**: Completed chapters, reading history
 - **Creator Analytics**: Chapter performance, licensing revenue, remix derivatives, royalty claims
 - **Transaction History**: All blockchain interactions with status tracking
 - **Royalty Analytics**: Claimable amounts, historical claims, optimization insights
@@ -267,22 +263,22 @@ StoryHouse.vip revolutionizes Web3 publishing by combining **chapter-level IP as
 
 ### **Expanded User Personas**
 
-**1. Reader/Earner (New Primary)**
+**1. Reader (Primary)**
 
-- Needs: Engaging content, earning opportunities, no-friction onboarding
-- Pain Points: Expensive content subscriptions, no value for time spent reading
-- Goals: Enjoy stories while earning tokens, discover new content
+- Needs: Engaging content, affordable access, no-friction onboarding
+- Pain Points: Expensive content subscriptions, limited preview options
+- Goals: Enjoy stories affordably, discover new content
 
-**2. AI-Assisted Creator (Evolved Primary)**
+**2. Creator (Primary)**
 
-- Needs: Creative assistance, immediate monetization, low barriers
-- Pain Points: Writer's block, slow traditional publishing, high upfront costs
-- Goals: Build sustainable writing income with AI assistance
+- Needs: Publishing platform, immediate monetization, low barriers
+- Pain Points: Slow traditional publishing, high upfront costs
+- Goals: Build sustainable writing income
 
-**3. Remix Creator (New Secondary)**
+**3. Derivative Creator (Secondary)**
 
-- Needs: Clear licensing, AI transformation tools, revenue potential
-- Pain Points: Complex copyright negotiations, manual content adaptation
+- Needs: Clear licensing, creative freedom, revenue potential
+- Pain Points: Complex copyright negotiations, unclear terms
 - Goals: Create derivatives legally and profitably
 
 **4. Traditional Author (Secondary)**
@@ -293,29 +289,28 @@ StoryHouse.vip revolutionizes Web3 publishing by combining **chapter-level IP as
 
 ### **User Journey Maps**
 
-**Reader Journey (Read-to-Earn)**:
+**Reader Journey**:
 
 ```
 Story Discovery → Table of Contents Review → Free Reading (Chapters 1-3) → 
 Engagement Hook → Wallet Connection → Chapter Navigation → 
-Paid Reading + Earning → Progress Tracking → Streak Building →
-Community Participation → Remix Discovery
+Paid Reading → Progress Tracking →
+Community Participation → Content Discovery
 ```
 
-**Writer Journey (AI-Assisted Creation)**:
+**Writer Journey**:
 
 ```
-Plot Concept → AI Generation → Content Review/Edit →
-Chapter Publishing → Story Management → Continue Story →
+Content Creation → Chapter Publishing → Story Management → Continue Story →
 Multi-Chapter Development → IP Registration → Licensing Setup → 
 Revenue Tracking → Community Building → Series Development
 ```
 
-**Remixer Journey (Derivative Creation)**:
+**Derivative Creator Journey**:
 
 ```
 Content Discovery → License Evaluation → Rights Purchase →
-AI Transformation → Quality Validation → Publishing →
+Content Creation → Quality Validation → Publishing →
 Revenue Sharing → Series Building
 ```
 
@@ -324,14 +319,14 @@ Revenue Sharing → Series Building
 | Page                 | Primary Action     | Secondary Actions                    |
 | -------------------- | ------------------ | ------------------------------------ |
 | **Homepage**         | "Start Reading"    | "Create Story", Browse trending      |
-| **Reader Dashboard** | Continue reading   | View earnings, Track streaks         |
-| **Creator Studio**   | Generate with AI   | Write manually, Manage chapters      |
+| **Reader Dashboard** | Continue reading   | View progress, Track favorites       |
+| **Creator Studio**   | Write content      | Manage chapters, Track analytics     |
 | **My Stories**       | Continue story     | Read chapters, View analytics        |
 | **Table of Contents**| Read chapter       | Navigate chapters, View metadata     |
 | **Chapter Reader**   | Complete chapter   | Navigate prev/next, Track progress   |
-| **Remix Workshop**   | Find content       | Evaluate licenses, Transform with AI |
+| **Derivative Workshop** | Find content    | Evaluate licenses, Create derivatives |
 | **Marketplace**      | Browse chapters    | Purchase licenses, Preview content   |
-| **Earnings Hub**     | View total rewards | Convert tokens, Withdraw earnings    |
+| **Earnings Hub**     | View revenue       | Track sales, Withdraw earnings       |
 
 ---
 
@@ -340,10 +335,10 @@ Revenue Sharing → Series Building
 ### **Frontend Requirements**
 
 **Framework**: Next.js 15.3.3 with App Router and React Server Components
-**Styling**: Tailwind CSS with custom design system for read-to-earn UX
+**Styling**: Tailwind CSS with custom design system for reading UX
 **State Management**: React Query for server state + Zustand for client state
 **Web3 Integration**: Wagmi v2 + Viem for progressive wallet connection
-**AI Integration**: Vercel AI SDK for streaming GPT-4 responses
+**Content Features**: Fraud detection, translation, text-to-audio, recommendations
 
 **Enhanced Component Architecture**:
 
@@ -352,21 +347,21 @@ src/
 ├── app/                    # App router pages
 │   ├── (dashboard)/       # Protected dashboard routes
 │   ├── read/             # Reading interface with earnings
-│   ├── write/            # AI-powered story creation with continuation
+│   ├── write/            # Story creation with continuation
 │   ├── own/              # My Stories dashboard with management
 │   ├── stories/          # Story reading with chapter navigation
 │   │   └── [wallet]/[story]/[chapter]/  # Dynamic chapter routes
 │   │   └── [wallet]/[story]/toc/        # Table of contents
-│   ├── remix/            # Remix discovery and creation
-│   └── earn/             # Read-to-earn tracking
+│   ├── derivatives/      # Derivative discovery and creation
+│   └── library/          # Reading library and history
 ├── components/
 │   ├── ui/              # Design system components
 │   │   ├── StoryContentDisplay.tsx    # Enhanced reading interface
 │   │   ├── ReadingProgressBar.tsx     # Chapter progress tracking
 │   │   └── ContentProtection.tsx      # Anti-scraping measures
 │   ├── web3/            # Wallet and blockchain components
-│   ├── ai/              # AI generation and transformation
-│   ├── reading/         # Reading interface and rewards
+│   ├── content/         # Content management and protection
+│   ├── reading/         # Reading interface and tracking
 │   ├── creator/         # Creation and IP management
 │   └── publishing/      # Story publication workflow
 └── lib/                 # Enhanced utilities and configurations
@@ -377,19 +372,19 @@ src/
 ### **Backend Requirements**
 
 **API Architecture**: Enhanced RESTful endpoints with AI integration
-**Data Layer**: Mock services with realistic read-to-earn simulation
+**Data Layer**: Mock services with realistic payment simulation
 **Blockchain Integration**: Story Protocol SDK with TIP token integration
-**AI Integration**: OpenAI GPT-4 with content validation
+**AI Integration**: Content fraud detection, translation services, TTS, recommendations
 
 **Enhanced API Endpoints**:
 
-- `POST /api/generate` - AI story generation with streaming and continuation
+- `POST /api/content/validate` - Content fraud detection and validation
 - `GET /api/stories` - Fetch all published stories with filtering
 - `GET /api/chapters/[storyId]/[chapterNumber]` - Fetch specific chapter content
 - `GET /api/stories/[wallet]/[slug]/chapters` - Table of contents data
-- `POST /api/rewards/claim` - Claim reading rewards
-- `POST /api/remix/license` - Purchase remix rights
-- `POST /api/remix/generate` - AI content transformation
+- `POST /api/chapters/unlock` - Unlock chapter with payment
+- `POST /api/derivatives/license` - Purchase derivative rights
+- `POST /api/content/translate` - Translate content to other languages
 - `POST /api/ip/register` - Register chapter as IP asset
 - `GET /api/earnings` - Comprehensive earnings data
 - `POST /api/royalties/claim` - Individual chapter royalty claiming with validation
@@ -403,16 +398,16 @@ src/
 **Enhanced Story Protocol Features**:
 
 - Chapter IP registration via `mintAndRegisterIp()`
-- Read-to-earn rewards via custom reward contracts
-- Automated remix licensing via `purchaseRemixLicense()`
+- Chapter payment and unlocking via TIP tokens
+- Automated derivative licensing via `purchaseLicense()`
 - Revenue distribution via `claimAllRevenue()`
 - Token economics via TIP token contracts
 
 **TIP Token Integration**:
 
-- Reading reward distribution
 - Chapter unlock payments
-- Remix licensing fees
+- Chapter unlock payments
+- Derivative licensing fees
 - Creator revenue payouts
 - Streak bonus calculations
 
@@ -423,8 +418,8 @@ src/
 ### **Revenue Streams**
 
 1. **Transaction Fees**: 5% on all licensing and chapter transactions
-2. **Read-to-Earn Pool Management**: Platform fee on token circulation
-3. **AI Generation Credits**: Premium AI features and advanced generation
+2. **Platform Operations**: Transaction fees on chapter sales and licensing
+3. **AI Services**: Content fraud detection, translation, and audio generation
 4. **Analytics Premium**: Advanced creator and reader insights
 5. **Enterprise Solutions**: White-label platform licensing
 
@@ -432,32 +427,32 @@ src/
 
 **$TIP Token Flow**:
 
-- **Readers**: Earn tokens for engagement, spend for premium content
+- **Readers**: Purchase tokens to unlock premium content
 - **Creators**: Receive tokens from sales and licensing
 - **Platform**: Earns fees from transaction volume
 - **Ecosystem**: Self-sustaining circulation with positive sum economics
 
 **Economic Balance**:
 
-- Reading rewards: 0.05-0.1 TIP per chapter
+- Chapter costs: 0.1-0.5 TIP per unlock
 - Chapter costs: 0.1-0.5 TIP per unlock
 - Platform sustainability: 20% transaction fees
 - Creator incentives: Direct sales + licensing royalties
 
 ### **Pricing Strategy**
 
-**Read-to-Earn Onboarding**:
+**Reader Onboarding**:
 
 - 3 chapters completely free (no wallet required)
 - Progressive value demonstration
 - Wallet connection after engagement
-- Positive net earnings for engaged readers
+- Affordable access to quality content
 
 **Creator Incentives**:
 
-- AI-assisted content creation lowers barriers
+- Direct publishing platform lowers barriers
 - Immediate Chapter 1 monetization
-- Multiple revenue streams (sales + licensing + remixes)
+- Multiple revenue streams (sales + licensing + derivatives)
 - Enhanced analytics and audience insights
 
 ---
@@ -468,21 +463,21 @@ src/
 
 - Monthly active readers: Target 100K by Q2 2025
 - Wallet connection rate: 70% after 3 free chapters
-- Average earning per reader: $25/month
+- Average spending per reader: $10/month
 - Reading streak completion: 40% achieve 7+ day streaks
 
 ### **Creator Success**
 
-- AI-assisted content adoption: 80% of new creators
+- Platform adoption: 80% of new creators
 - Chapter IP registration rate: 90% of published chapters
 - Average creator revenue: $100/month per chapter
 - Platform migration rate: 25% from traditional platforms
 
-### **Remix Economy**
+### **Derivative Economy**
 
-- Content remix rate: 30% of popular chapters
-- AI remix success rate: 85% publishable quality
-- Average licensing fee: $50 per remix license
+- Content derivative rate: 30% of popular chapters
+- Derivative success rate: 85% publishable quality
+- Average licensing fee: $50 per derivative license
 - Recursive creation depth: 3+ levels of derivatives
 
 ### **Platform Economics**
@@ -498,9 +493,9 @@ src/
 
 ### **Phase 5.0: Core Platform (Production Ready)**
 
-- ✅ Read-to-earn mechanics with progressive onboarding
-- ✅ AI-powered content generation with GPT-4
-- ✅ Remix economy with automated licensing
+- ✅ Chapter monetization with progressive onboarding
+- ✅ AI-powered content protection and enhancement
+- ✅ Derivative economy with automated licensing
 - ✅ Chapter-level IP registration on Story Protocol
 - ✅ Table of Contents functionality with chapter navigation
 - ✅ Story continuation workflow with "Continue" button

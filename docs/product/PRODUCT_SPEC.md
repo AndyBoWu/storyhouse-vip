@@ -28,7 +28,7 @@
 ┌─────────────────────────┴───────────────────────────────┐
 │                    Backend API (Port 3002)               │
 │              Next.js API Routes | TypeScript            │
-│                 AI Verification Only                     │
+│          AI Services (Fraud Detection, Translation)     │
 └─────────────────────────┬───────────────────────────────┘
                           │
 ┌─────────────────────────┴───────────────────────────────┐
@@ -120,8 +120,7 @@ We only need custom contracts for:
 #### Chapter Access System
 - **Free Access**: First 3 chapters of every story
 - **Chapter Unlocking**: 0.5 TIP per premium chapter (4+)
-- **Revenue Model**: Pay-to-read only (no automatic rewards)
-- **Anti-Farming**: Removed read-to-earn to prevent bot exploitation
+- **Revenue Model**: Pay-to-read for premium content
 - **Creator Revenue**: 100% of chapter payments go to creators
 
 #### Content Discovery
@@ -140,13 +139,13 @@ We only need custom contracts for:
 
 ### For Creators
 
-#### AI-Assisted Story Generation
-- **GPT-4 Integration**: Full story generation with customizable parameters
-- **Style Options**: Descriptive, dialogue-heavy, action-packed, literary
-- **Tone Control**: Serious, humorous, dark, uplifting
-- **Perspective**: First-person, third-person, omniscient
-- **Consistency Mode**: Character and plot continuity tracking
-- **Quality Filters**: Anti-plagiarism and content moderation
+#### AI-Enhanced Platform Services
+- **Content Fraud Detection**: AI-powered plagiarism and originality verification
+- **Translation Services**: Multi-language translation for global reach
+- **Text-to-Audio**: AI voice narration for accessibility
+- **Content Recommendations**: Personalized discovery based on reading history
+- **Quality Analysis**: Content quality scoring and improvement suggestions
+- **Content Moderation**: Automated safety and appropriateness checks
 
 #### Instant Monetization
 - **Chapter Sales**: 0.5 TIP per chapter (100% to creator)
@@ -219,14 +218,13 @@ We only need custom contracts for:
 - Basic wallet integration
 
 ### Phase 2.0: AI Integration ✅ Complete
-- GPT-4 story generation
-- Style and tone customization
-- Quality filters and moderation
-- Consistency tracking
+- AI fraud detection system
+- Multi-language translation
+- Text-to-audio narration
+- Recommendation engine
 
 ### Phase 3.0: Tokenomics ✅ Complete
 - TIP token implementation
-- Read-to-earn mechanics
 - Creator reward system
 - Anti-farming protections
 
@@ -500,26 +498,20 @@ Premium Chapter → "Get Reading License" →
 → Chapter Unlocked → Continue Reading
 ```
 
-#### 3. Read-to-Earn Flow
-```
-Complete Chapter → Earn 10 TIP → Update Progress →
-→ Check Streak Bonus → Claim Rewards →
-→ View Earnings Dashboard
-```
 
 ### Creator Journey
 
 #### 1. Story Creation Flow
 ```
 Dashboard → "Create New Story" → Enter Details →
-→ Choose AI Assistance (Optional) → Configure Parameters →
-→ Generate/Write First Chapter → Preview →
+→ Write/Import Content → AI Quality Check →
+→ Fraud Detection Analysis → Preview →
 → Set License Terms → Publish
 ```
 
 #### 2. Chapter Publishing Flow
 ```
-Story Dashboard → "Add Chapter" → Write/Generate Content →
+Story Dashboard → "Add Chapter" → Write Content →
 → Review → Choose License Tier → 
 → Single Transaction (NFT + IP + License) →
 → Published with IP Registration
@@ -562,7 +554,6 @@ Own Reading License → View Premium Features →
 Attempt Purchase → Balance Check Fails →
 → "Insufficient TIP" Modal → Options:
   - Buy TIP on DEX
-  - Earn TIP by Reading
   - View Rewards History
 ```
 
