@@ -269,6 +269,7 @@ export function useBookRegistration() {
             priceWei,
             isOriginalContent
           ],
+          gas: 500000n, // Add explicit gas limit for complex storage operations
         })
         
         console.log('✅ writeSetAttribution called - check your wallet for transaction prompt')
