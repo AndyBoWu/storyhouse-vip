@@ -9,6 +9,7 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { apiClient } from '@/lib/api-client'
 import { useStoryProtocol } from '@/hooks/useStoryProtocol'
+import { useBookRegistration } from '@/hooks/useBookRegistration'
 
 // Dynamically import WalletConnect to avoid hydration issues
 const WalletConnect = dynamic(() => import('@/components/WalletConnect'), {
@@ -42,6 +43,7 @@ function NewStoryPageContent() {
   const { address: userAddress } = useAccount()
   const router = useRouter()
   const { registerChapterAsIP, isReady, isWalletConnected } = useStoryProtocol()
+  const { registerBook: registerBookForRevenue, isSupported: isRevenueSupported } = useBookRegistration()
   const [plotDescription, setPlotDescription] = useState('A young detective discovers a hidden portal in their grandmother\'s attic that leads to different time periods. Each time they step through, they must solve a historical mystery to return home, but each journey reveals more about a family secret that spans centuries.')
   const [storyTitle, setStoryTitle] = useState('The Detective\'s Portal')
 
@@ -237,7 +239,39 @@ function NewStoryPageContent() {
 
       console.log('✅ Book registration successful!', registrationResult)
 
-      // Step 3: Upload book metadata to R2 using existing book registration endpoint
+      // Step 3: Register book for revenue sharing (HybridRevenueControllerV2)
+      let revenueRegistrationSuccess = false
+      if (isRevenueSupported && userAddress) {
+        try {
+          console.log('💰 Registering book for revenue sharing...')
+          
+          // Create bookId in the proper format: authorAddress/slug
+          const slug = bookMetadata.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+          const revenueBookId = `${userAddress.toLowerCase()}/${slug}`
+          
+          const revenueResult = await registerBookForRevenue({
+            bookId: revenueBookId,
+            totalChapters: 10, // Default to 10 chapters, can be updated later
+            isDerivative: false,
+            ipfsMetadataHash: '' // We don't have IPFS metadata for this flow
+          })
+          
+          if (revenueResult?.success) {
+            console.log('✅ Revenue sharing registration successful!')
+            revenueRegistrationSuccess = true
+          } else {
+            console.warn('⚠️ Revenue sharing registration failed:', revenueResult?.error || 'Unknown error')
+            // Don't fail the entire process - just log the warning
+          }
+        } catch (revenueError) {
+          console.warn('⚠️ Revenue sharing registration error:', revenueError)
+          // Don't fail the entire process - revenue sharing is optional
+        }
+      } else {
+        console.log('ℹ️ Revenue sharing not available (controller not deployed or wallet not connected)')
+      }
+
+      // Step 4: Upload book metadata to R2 using existing book registration endpoint
       try {
         console.log('📝 Preparing book registration form data...')
         const formData = new FormData()
@@ -301,7 +335,7 @@ function NewStoryPageContent() {
         return
       }
 
-      // Step 4: Redirect to /own page
+      // Step 5: Redirect to /own page
       router.push('/own')
 
     } catch (err) {
@@ -585,9 +619,21 @@ function NewStoryPageContent() {
             </motion.button>
 
             {plotDescription.trim() && isWalletConnected && (
-              <p className="text-sm text-gray-500 mt-2">
-                💡 This will register your book on-chain and take you to your library
-              </p>
+              <div className="space-y-1 mt-2">
+                <p className="text-sm text-gray-500">
+                  💡 This will register your book on-chain and take you to your library
+                </p>
+                {isRevenueSupported && (
+                  <p className="text-sm text-green-600">
+                    💰 Revenue sharing will be automatically enabled
+                  </p>
+                )}
+                {!isRevenueSupported && (
+                  <p className="text-sm text-yellow-600">
+                    ⚠️ Revenue sharing not available (controller not deployed)
+                  </p>
+                )}
+              </div>
             )}
             {plotDescription.trim() && !isWalletConnected && (
               <p className="text-sm text-red-500 mt-2">
@@ -665,6 +711,12 @@ function NewStoryPageContent() {
                   <h4 className="font-medium text-purple-800 mb-2">🛡️ What is IP Protection?</h4>
                   <p className="text-sm text-purple-700">Register your story on the blockchain for enhanced copyright protection and licensing control. You can add this later!</p>
                 </div>
+                {isRevenueSupported && (
+                  <div className="bg-green-50 rounded-lg p-4">
+                    <h4 className="font-medium text-green-800 mb-2">💰 Automatic Revenue Sharing</h4>
+                    <p className="text-sm text-green-700">Your book will be automatically registered for revenue sharing: 70% to you as author, 20% to curators, 10% platform fee. No additional setup required!</p>
+                  </div>
+                )}
               </motion.div>
             )}
           </AnimatePresence>
