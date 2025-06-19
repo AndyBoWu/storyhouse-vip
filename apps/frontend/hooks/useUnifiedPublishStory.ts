@@ -243,7 +243,7 @@ export function useUnifiedPublishStory() {
       console.log('✅ Chapter content saved to R2:', saveResult.data?.contentUrl)
 
       // Step 4: Set chapter attribution for revenue sharing (for paid chapters)
-      if (storyData.chapterNumber > 3 && options.chapterPrice > 0) {
+      if (storyData.chapterNumber > 3) {
         setCurrentStep('setting-attribution')
         console.log('💰 Setting chapter attribution for revenue sharing...')
         
@@ -260,34 +260,125 @@ export function useUnifiedPublishStory() {
             })
             
             if (!registerResult.success) {
-              console.warn('⚠️ Book registration failed, continuing without attribution:', registerResult.error)
+              // This is critical for paid chapters - throw error to stop publish
+              throw new Error(`Book registration failed: ${registerResult.error || 'Unknown error'}. Cannot publish paid chapters without revenue registration.`)
             } else {
               // Wait a moment for registration to confirm
+              console.log('⏳ Waiting for book registration to confirm...')
               await new Promise(resolve => setTimeout(resolve, 3000))
             }
           }
           
           // Set chapter attribution with pricing
+          // For chapters 1-3: price is 0, for 4+: use the specified price (default 0.5 TIP)
+          const chapterPrice = storyData.chapterNumber <= 3 ? '0' : (options.chapterPrice || 0.5).toString()
+          
+          console.log('📝 Setting attribution with price:', {
+            bookId: finalBookId,
+            chapterNumber: storyData.chapterNumber,
+            price: `${chapterPrice} TIP`,
+            originalAuthor: address
+          })
+          
           const attributionResult = await setChapterAttribution({
             bookId: finalBookId,
             chapterNumber: storyData.chapterNumber,
             originalAuthor: address!,
-            unlockPrice: options.chapterPrice.toString(),
+            unlockPrice: chapterPrice,
             isOriginalContent: true
           })
           
-          if (attributionResult.success) {
+          if (attributionResult.pending) {
+            console.log('⏳ Attribution transaction initiated, waiting for confirmation...')
+            
+            // Poll for attribution to be set on-chain
+            let attributionSet = false
+            let attempts = 0
+            const maxAttempts = 30 // 30 seconds timeout
+            
+            while (!attributionSet && attempts < maxAttempts) {
+              attempts++
+              
+              try {
+                // Check if attribution is now set by trying to read it from the contract
+                const checkResult = await apiClient.get(
+                  `/books/${encodeURIComponent(finalBookId)}/chapter/${storyData.chapterNumber}/info`
+                )
+                
+                // If we can get the chapter info and it has pricing info, attribution is set
+                if (checkResult && checkResult.unlockPrice !== undefined) {
+                  attributionSet = true
+                  console.log('✅ Chapter attribution confirmed on blockchain!')
+                  break
+                }
+              } catch (checkError) {
+                // Attribution not yet set, continue waiting
+                console.log(`Waiting for attribution confirmation... (${attempts}/${maxAttempts})`)
+              }
+              
+              // Wait 1 second before next check
+              await new Promise(resolve => setTimeout(resolve, 1000))
+            }
+            
+            if (!attributionSet) {
+              // For paid chapters, this is critical
+              if (storyData.chapterNumber > 3) {
+                throw new Error(
+                  'Chapter pricing setup timed out. The chapter was published but pricing may not be configured. ' +
+                  'Please check the transaction status in your wallet.'
+                )
+              } else {
+                console.warn('⚠️ Attribution confirmation timed out for free chapter, continuing...')
+              }
+            }
+          } else if (attributionResult.success) {
             console.log('✅ Chapter attribution set successfully!')
           } else {
-            console.warn('⚠️ Failed to set chapter attribution:', attributionResult.error)
+            // For paid chapters, this is critical - throw error
+            if (storyData.chapterNumber > 3) {
+              throw new Error(`Failed to set chapter pricing: ${attributionResult.error || 'Unknown error'}. Readers won't be able to unlock this chapter.`)
+            } else {
+              // For free chapters, just warn
+              console.warn('⚠️ Failed to set chapter attribution for free chapter:', attributionResult.error)
+            }
           }
           
         } catch (attributionError) {
-          console.warn('⚠️ Attribution setting failed:', attributionError)
-          // Don't fail the entire publish flow for attribution errors
+          console.error('❌ Attribution setting failed:', attributionError)
+          
+          // For paid chapters, this is a critical error that should stop publishing
+          if (storyData.chapterNumber > 3) {
+            // Clean up by trying to remove the saved chapter
+            console.log('🧹 Attempting to clean up saved chapter due to attribution failure...')
+            
+            // Re-throw with user-friendly message
+            throw new Error(
+              `Failed to set chapter pricing in revenue contract. ${attributionError instanceof Error ? attributionError.message : 'Unknown error'}. ` +
+              `Please ensure your book is properly registered for revenue sharing before publishing paid chapters.`
+            )
+          } else {
+            // For free chapters, log but continue
+            console.warn('⚠️ Attribution failed for free chapter, continuing...')
+          }
         }
       } else {
-        console.log('📝 Free chapter - skipping attribution setting')
+        console.log('📝 Free chapter (1-3) - setting attribution with 0 price')
+        // Even for free chapters, we should set attribution to track the author
+        try {
+          const attributionResult = await setChapterAttribution({
+            bookId: finalBookId,
+            chapterNumber: storyData.chapterNumber,
+            originalAuthor: address!,
+            unlockPrice: '0',
+            isOriginalContent: true
+          })
+          
+          if (!attributionResult.success) {
+            console.warn('⚠️ Failed to set attribution for free chapter:', attributionResult.error)
+          }
+        } catch (error) {
+          console.warn('⚠️ Non-critical: Failed to set attribution for free chapter', error)
+        }
       }
 
       // Success!

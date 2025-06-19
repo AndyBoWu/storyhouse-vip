@@ -372,7 +372,7 @@ export default function ChapterPage() {
                 <div className="mt-2 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                   <span>Reading as:</span>
                   <code className="font-mono bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
-                    {address.slice(0, 6)}...{address.slice(-4)}
+                    {address.toLowerCase() === '0x71b93d154886c297f4b6e6219c47d378f6ac6a70' ? 'bob.ip' : `${address.slice(0, 6)}...${address.slice(-4)}`}
                   </code>
                 </div>
               )}
@@ -467,17 +467,6 @@ export default function ChapterPage() {
         )}
       </article>
 
-      {/* Floating Settings Button */}
-      <button
-        onClick={() => {
-          console.log('Settings button clicked, current state:', showSettings);
-          setShowSettings(!showSettings);
-        }}
-        className={`fixed ${showSettings ? 'right-80' : 'right-6'} bottom-20 p-3 bg-purple-600 hover:bg-purple-700 text-white rounded-full shadow-lg transition-all duration-300 z-40`}
-        aria-label="Reading Settings"
-      >
-        <Settings className="h-5 w-5" />
-      </button>
 
       {/* Settings Panel */}
       <div 

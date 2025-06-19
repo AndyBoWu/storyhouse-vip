@@ -189,12 +189,41 @@ function PublishingModal({
         }
       } else {
         console.error('Publishing failed:', result.error)
-        // Don't reset to options, let the user see the error and try again
-        alert(`Publishing failed: ${result.error}`)
+        
+        // Show specific error messages for attribution failures
+        if (result.error?.includes('Failed to set chapter pricing') || 
+            result.error?.includes('revenue registration') ||
+            result.error?.includes('revenue sharing')) {
+          alert(
+            `⚠️ Chapter Pricing Setup Failed\n\n` +
+            `${result.error}\n\n` +
+            `This is required for readers to unlock your chapter. Please try again or contact support if the issue persists.`
+          )
+          // For revenue-related errors, go back to options
+          setCurrentStep('options')
+        } else {
+          alert(`Publishing failed: ${result.error}`)
+        }
       }
     } catch (error) {
       console.error('Publishing error:', error)
-      alert(`Publishing error: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      
+      // Show specific error messages for attribution failures
+      if (errorMessage.includes('Failed to set chapter pricing') || 
+          errorMessage.includes('revenue registration') ||
+          errorMessage.includes('revenue sharing')) {
+        alert(
+          `⚠️ Chapter Pricing Setup Failed\n\n` +
+          `${errorMessage}\n\n` +
+          `This is required for readers to unlock your chapter. Please try again or contact support if the issue persists.`
+        )
+        // For revenue-related errors, go back to options
+        setCurrentStep('options')
+      } else {
+        alert(`Publishing error: ${errorMessage}`)
+      }
     }
     } catch (outerError) {
       console.error('🔥 handlePublish outer error:', outerError)
@@ -221,8 +250,19 @@ function PublishingModal({
             : 'Unified IP registration...', 
           icon: <Shield className="w-5 h-5" /> 
         }
+      case 'generating-metadata':
+        return { text: 'Generating metadata...', icon: <Upload className="w-5 h-5" /> }
+      case 'blockchain-transaction':
+        return { text: 'Executing blockchain transaction...', icon: <Link className="w-5 h-5" /> }
       case 'saving-to-storage':
         return { text: 'Saving to storage...', icon: <Upload className="w-5 h-5" /> }
+      case 'setting-attribution':
+        return { 
+          text: chapterNumber > 3 
+            ? `Setting chapter pricing (${chapterPrice} TIP)...` 
+            : 'Setting chapter attribution...', 
+          icon: <Coins className="w-5 h-5" /> 
+        }
       default:
         return { text: 'Processing...', icon: <CheckCircle className="w-5 h-5" /> }
     }
