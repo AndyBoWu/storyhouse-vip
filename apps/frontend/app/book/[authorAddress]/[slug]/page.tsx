@@ -281,7 +281,7 @@ export default function BookPage() {
             </div>
 
             {/* Genres */}
-            {book.genre && book.genre.length > 0 && (
+            {!!(book.genre && book.genre.length > 0) && (
               <div className="mb-6">
                 <h3 className="text-sm font-semibold text-gray-700 mb-2">Genres</h3>
                 <div className="flex flex-wrap gap-2">
