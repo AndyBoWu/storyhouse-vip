@@ -1,6 +1,6 @@
 # 📚 StoryHouse.vip
 
-**The Web3 publishing platform where authors own their IP and creators earn 90% of revenue.** Built on Story Protocol, StoryHouse enables chapter-level IP management, AI-powered story creation, and automated licensing—with only 10% platform fee.
+**The Web3 publishing platform where authors own their IP and creators earn 90% of revenue.** Built on Story Protocol, StoryHouse enables chapter-level IP management and automated licensing—with only 10% platform fee.
 
 [![Live Demo](https://img.shields.io/badge/demo-testnet.storyhouse.vip-blue)](https://testnet.storyhouse.vip)
 [![Story Protocol](https://img.shields.io/badge/built%20on-Story%20Protocol-purple)](https://www.storyprotocol.xyz/)
@@ -9,8 +9,9 @@
 ## ✨ Why StoryHouse?
 
 - **💰 90% Creator Revenue**: Authors get 70% + curators get 20% (only 10% platform fee)
+  - Compare: Amazon KDP (30-65%), Traditional Publishers (7-15%), Medium (~50%), Substack (90%)
 - **📝 Chapter-Level IP**: Register individual chapters as IP assets ($50 vs $1000+ for full books)
-- **🤖 AI Story Generation**: Create stories with GPT-4 assistance while maintaining full ownership
+- **🤖 AI-Powered Features**: Content fraud detection, translation, text-to-audio, and smart recommendations
 - **⚡ 40% Lower Gas Costs**: Single-transaction IP registration saves time and money
 - **🔓 Permissionless Publishing**: No gatekeepers—anyone can publish directly to the blockchain
 
@@ -33,16 +34,18 @@ npm install
 ## 🎯 Key Features
 
 ### For Authors
-- **AI Writing Assistant**: Generate stories with customizable style, tone, and perspective
 - **Instant Monetization**: Earn from chapter 1 with pay-per-chapter model (0.5 TIP/chapter)
 - **Flexible Licensing**: Choose from reading, commercial, or exclusive licenses
 - **Real-Time Analytics**: Track earnings, readers, and derivative works
 - **Direct Wallet Payments**: Receive payments instantly to your wallet
+- **Content Protection**: AI-powered fraud detection prevents plagiarism
 
 ### For Readers  
 - **Try Before You Buy**: First 3 chapters free for every story
 - **Quality Content**: AI-verified stories with anti-plagiarism protection
-- **Multiple Languages**: Stories available in 10+ languages through translations
+- **Multiple Languages**: Stories available in 10+ languages through AI translation
+- **Audio Experience**: Text-to-audio generation for listening on the go
+- **Smart Recommendations**: AI-powered content suggestions based on your reading
 - **Ownership Options**: Purchase reading licenses or full commercial rights
 - **Direct Support**: 90% of payments go to creators (70% author + 20% curator)
 
