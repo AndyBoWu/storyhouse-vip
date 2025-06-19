@@ -1,7 +1,7 @@
 # StoryHouse.vip Product Specification
 
 **Version 1.0** - Production-Ready Implementation
-**Last Updated**: January 2025
+**Last Updated**: June 2025
 
 ## Table of Contents
 
@@ -280,14 +280,14 @@ storyhouse-vip/
 
 ## 4. Technical Roadmap
 
-### Q1 2025: Mainnet Launch
+### Q3 2025: Mainnet Launch
 - [ ] Security audit completion
 - [ ] Mainnet smart contract deployment
 - [ ] TIP token public launch
 - [ ] Marketing campaign kickoff
 - [ ] Creator onboarding program
 
-### Q2 2025: Mobile & Ecosystem
+### Q4 2025: Mobile & Ecosystem
 - [ ] Native iOS application
   - Full reading experience
   - Offline support
@@ -302,7 +302,7 @@ storyhouse-vip/
 - [ ] Translation system
 - [ ] AI voice narration
 
-### Q3-Q4 2025: Global Scale
+### 2026: Global Scale
 - [ ] Multi-language support (10+ languages)
 - [ ] Regional content hubs
 - [ ] Enterprise API solutions
