@@ -8,7 +8,7 @@
 
 ## ✨ Why StoryHouse?
 
-- **💰 90% Creator Revenue**: Authors get 70% + curators get 20% (only 10% platform fee)
+- **💰 90% Creator Revenue**: Authors keep 90% of all sales (only 10% platform fee)
   - Compare: Amazon KDP (35-70%)
 - **📝 Revolutionary Chapter-Level IP**: Register individual chapters as IP assets ($50 vs $1000+ for full books)
   - One publication → Multiple revenue streams: translations (10+ languages), audio rights, derivative works
