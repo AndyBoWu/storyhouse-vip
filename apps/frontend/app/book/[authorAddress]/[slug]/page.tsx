@@ -266,10 +266,8 @@ export default function BookPage() {
                 <div className="text-sm text-gray-600">Total Reads</div>
               </div>
               <div className="bg-gray-50 rounded-lg p-3 text-center">
-                <div className="text-2xl font-bold text-purple-600">
-                  {book.totalEarnings || 85.6} TIP
-                </div>
-                <div className="text-sm text-gray-600">Earnings</div>
+                <div className="text-2xl font-bold text-purple-600">{book.totalEarnings || 85.6}</div>
+                <div className="text-sm text-gray-600">TIP Earnings</div>
               </div>
               {!!book.rating && (
                 <div className="bg-gray-50 rounded-lg p-3 text-center">
