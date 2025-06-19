@@ -161,9 +161,15 @@ export default function BookPage() {
 
   const formatAddress = (address: string) => {
     if (!address) return 'Address not available';
-    // Show alias for specific wallet address
+    // Show alias for specific wallet addresses
     if (address.toLowerCase() === '0x3873c0d1bcfa245773b13b694a49dac5b3f03ca2') {
       return 'andybowu.ip';
+    }
+    if (address.toLowerCase() === '0x71b93d154886c297f4b6e6219c47d378f6ac6a70') {
+      return 'bob.ip';
+    }
+    if (address.toLowerCase() === '0xd49646149734f829c722a547f6be217571a8355d') {
+      return 'royce.ip';
     }
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
