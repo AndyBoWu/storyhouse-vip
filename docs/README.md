@@ -1,6 +1,7 @@
 # 📚 StoryHouse.vip Documentation
 
-> Web3 publishing platform with chapter-level IP monetization on Story Protocol
+> **The Web3 publishing platform where authors own their IP and creators earn 90% of revenue.**  
+> Built on Story Protocol with revolutionary chapter-level IP management and multiple earning models.
 
 ## 🚀 Quick Start
 
@@ -50,6 +51,21 @@
 **Stack**: Next.js 15.3.3, TypeScript, Story Protocol SDK v1.3.2  
 **Deployment**: Vercel (dual architecture)  
 **Network**: Story Protocol Aeneid Testnet
+
+## ✨ Key Features
+
+- **💰 90% Creator Revenue**: Authors keep 90% of all sales (only 10% platform fee)
+  - Compare: Amazon KDP (35-70%)
+- **🔓 Permissionless Publishing**: No gatekeepers—anyone can publish directly to the blockchain
+- **📈 Multiple Earning Models**: Revolutionary chapter-level IP registration ($50 vs $1000+ for full books)
+  - Pay-per-chapter: Instant monetization from chapter 1 (0.5 TIP/chapter)
+  - Subscription tiers: Reading, commercial, or exclusive licenses
+  - Translation rights: Earn from 10+ language versions of your content
+  - Audiobook licensing: Text-to-speech and professional narration rights
+  - Derivative works: License remixes, adaptations, and parallel universe stories
+  - Format multiplication: Each format (text, audio, translation) = separate revenue stream
+- **🤖 AI-Powered Features**: Content fraud detection, translation, text-to-audio, and smart recommendations
+- **⚡ 40% Lower Gas Costs**: Single-transaction IP registration saves time and money
 
 ---
 
