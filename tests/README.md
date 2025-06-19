@@ -7,14 +7,15 @@ Comprehensive testing infrastructure for the Web3 storytelling platform.
 ```
 tests/
 ├── integration/          # End-to-end integration tests
+├── test-cases/          # Test case documentation
 ├── utils/               # Test utilities and helpers
 └── scripts/             # Test execution scripts
 ```
 
-Note: Frontend, backend, and contract tests are located in their respective package directories:
-- Frontend tests: `apps/frontend/__tests__/` (if implemented)
-- Backend tests: `apps/backend/tests/`
+Note: Other test resources are organized as follows:
+- Frontend tests: `apps/frontend/__tests__/` (to be implemented)
 - Contract tests: `packages/contracts/test/` (to be implemented)
+- QA Documentation: `docs/testing/` (includes onboarding guides)
 
 ## 🚀 Quick Start
 
@@ -25,6 +26,9 @@ npm run test:integration
 
 # Run API endpoint tests
 node tests/integration/api-endpoints.test.js
+
+# Run all tests
+./tests/scripts/run-all-tests.sh
 
 # Run local service health checks
 ./tests/scripts/test-local-services.sh
@@ -52,10 +56,14 @@ TEST_ENV=production node tests/integration/api-endpoints.test.js
 - **Story Protocol** - Blockchain integration tests
 - **User Workflows** - End-to-end user journeys
 
+### Test Cases (`test-cases/`)
+- **Royalty Test Cases** - Comprehensive test scenarios for royalty distribution
+- **Feature Test Cases** - Detailed test plans for major features
+- **User Journey Tests** - End-to-end workflow validations
+
 ### Unit Tests
 - Located in respective package directories
 - Frontend: `apps/frontend/__tests__/` (React components, hooks)
-- Backend: `apps/backend/tests/` (API endpoints, services)
 - Contracts: `packages/contracts/test/` (Solidity contracts - to be implemented)
 
 ## 🛠️ Test Utilities

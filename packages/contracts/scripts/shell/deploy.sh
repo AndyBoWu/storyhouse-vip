@@ -246,4 +246,4 @@ else
     echo "   4. Run integration tests"
 fi
 echo ""
-echo -e "${GREEN}✅ Deployment successful! Check deployment-result.json for details.${NC}"
+echo -e "${GREEN}✅ Deployment successful! Check deployments/latest.json for details.${NC}"

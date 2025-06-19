@@ -33,6 +33,8 @@ Tech Stack: Next.js 15.3.3, TypeScript, Story Protocol SDK, OpenAI GPT-4, Smart 
 - **DO NOT use placeholder dates** like "June 2025" or "January 2025"
 - **Update dates to actual date** when modifying documentation
 - **Format**: Use ISO format (YYYY-MM-DD) or Month DD, YYYY
+- **IMPORTANT**: The current date is available in the environment context. Always check `Today's date:` in the env block
+- **When in doubt**: Use the date from the environment context, not from memory or previous documents
 
 ### Git Commits
 - **DO NOT include Claude as a co-author** in commit messages

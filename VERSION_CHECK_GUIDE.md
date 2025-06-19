@@ -105,7 +105,7 @@ curl https://your-backend-url.vercel.app/api/version
 
 ### **If Smart Contract Addresses Don't Match:**
 1. Check environment variables in Vercel dashboard
-2. Verify contract addresses in `packages/contracts/deployments.json`
+2. Verify contract addresses in `packages/contracts/deployments/networks/story-testnet.json`
 3. Ensure environment variables are properly set in GitHub Actions
 
 ### **If Version API Returns Error:**
