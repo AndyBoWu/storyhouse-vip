@@ -200,7 +200,7 @@ Emma browses StoryHouse.vip and finds:
    - Skip to Cecilia's romance branch
    - Explore Daisy's dark path
 3. **Payment Decision**: Emma chooses which path to unlock with $TIP
-4. **Reading Rewards**: Emma earns $TIP for completing paid chapters
+4. **Reading Experience**: Emma enjoys quality content at fair prices
 
 ### **Emma's Payment Flows**
 
@@ -212,8 +212,7 @@ Emma browses StoryHouse.vip and finds:
   chapter9_choice: "Cecilia_Romance", // 0.5 $TIP to Cecilia
 
   totalSpent: 1.5, // $TIP
-  tokensEarned: 0.8, // Read-to-earn rewards
-  netCost: 0.7 // $TIP
+  totalSpent: 1.5 // $TIP
 }
 ```
 
@@ -250,12 +249,12 @@ interface ChapterInheritance {
 - Daisy pays Andy because she's remixing Andy's version
 - No recursive payments up the chain
 
-### **Q3: What happens to reading rewards in derivative works?**
+### **Q3: What happens to revenue in derivative works?**
 
-**Answer: Standard read-to-earn applies to all versions** 🎁
+**Answer: Authors earn from chapter unlocks** 💰
 
-- Emma earns $TIP for reading any version
 - Authors earn from chapter unlocks in their versions
+- Original authors receive licensing fees
 - Platform fee (5%) applies to all transactions
 
 ---

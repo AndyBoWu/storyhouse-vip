@@ -39,7 +39,7 @@
 - **Complex IP management** - expensive and inaccessible
 
 **The Vision Born:**
-A platform where **any creator can start earning from Chapter 1**, readers are **rewarded for discovery**, and **every chapter becomes a tradeable IP asset**.
+A platform where **any creator can start earning from Chapter 1**, readers get **affordable access to quality content**, and **every chapter becomes a tradeable IP asset**.
 
 ---
 
@@ -659,7 +659,7 @@ timeline
 **📅 Q1 2024 - Foundation** *(CURRENT)*
 - ✅ MVP platform launch
 - ✅ Story Protocol integration
-- ✅ Basic read-to-earn mechanics
+- ✅ Basic chapter monetization
 - 🎯 1,000 active users
 - 🎯 100 creators onboarded
 

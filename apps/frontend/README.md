@@ -1,12 +1,12 @@
 # StoryHouse.vip
 
-AI-powered storytelling platform built on Story Protocol Layer 1 blockchain with read-to-earn tokenomics.
+Web3 storytelling platform built on Story Protocol Layer 1 blockchain with chapter-level IP management.
 
 ## Features
 
-- **Read & Earn**: Earn $TIP tokens for every chapter you read
-- **AI-Powered Writing**: Create stories with GPT-4o assistance and multi-modal inputs
-- **Remix & Earn**: Remix existing stories and earn licensing fees through recursive creativity
+- **Chapter Access**: Unlock premium chapters with $TIP tokens
+- **Content Protection**: AI-powered fraud detection and quality assurance
+- **Derivative Works**: Create licensed derivatives and earn through revenue sharing
 - **Progressive Paywall**: First 3 chapters free, chapter 4+ require $TIP tokens
 - **MetaMask Integration**: Seamless Web3 wallet connection for token transactions
 

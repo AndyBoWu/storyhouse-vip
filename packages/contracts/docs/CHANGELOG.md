@@ -17,7 +17,6 @@
 - **Removed**: `UnifiedRewardsController.sol` - Removed automatic creation rewards
 - **Security**: Eliminated 50 TIP/story and 20 TIP/chapter automatic rewards
 - **Security**: Rewards now only generated from genuine chapter purchases
-- **Security**: No more read-to-earn mechanics that could be gamed
 
 #### ChapterAccessController Removal
 - **Removed**: `ChapterAccessController.sol` - Functionality merged into HybridRevenueControllerV2
@@ -43,7 +42,6 @@
 
 #### Removed Attack Vectors
 - **Automatic Creation Rewards**: Prevented AI/bot farming of story creation
-- **Read-to-Earn Gaming**: Eliminated fake reading completion rewards
 - **Complex Reward Logic**: Simplified architecture reduces potential exploits
 
 #### Enhanced Access Control
@@ -120,7 +118,6 @@
 #### Removed Features
 - Automatic story creation rewards
 - Automatic chapter creation rewards
-- Read-to-earn reward mechanics
 - Complex reward distribution logic
 
 ### 🎯 Future Roadmap

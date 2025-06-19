@@ -9,8 +9,8 @@
 StoryHouse.vip is a revolutionary Web3 storytelling platform that transforms how stories are created, owned, and monetized. Built on Story Protocol, we enable:
 
 - **Chapter-level IP management** ($50-500 vs $1000+ for full books)
-- **Read-to-earn mechanics** where readers earn $TIP tokens
-- **AI-powered creation** with GPT-4 story generation
+- **Pay-to-read model** for premium chapters
+- **AI-powered quality assurance** with fraud detection and translation
 - **40% gas savings** through unified IP registration
 - **Complete attribution** with 25+ metadata fields per chapter
 - **Automated licensing** and real-time royalty distribution
@@ -33,8 +33,8 @@ StoryHouse.vip is a revolutionary Web3 storytelling platform that transforms how
 4. [Smart Contract System](#smart-contract-system)
 5. [Unified IP Registration](#unified-ip-registration)
 6. [Metadata & Attribution](#metadata-attribution)
-7. [Read-to-Earn Mechanics](#read-to-earn)
-8. [AI Integration](#ai-integration)
+7. [Payment & Access Model](#payment-access)
+8. [AI Services](#ai-services)
 9. [Security & Performance](#security-performance)
 10. [Roadmap & Future](#roadmap-future)
 
@@ -45,9 +45,9 @@ StoryHouse.vip is a revolutionary Web3 storytelling platform that transforms how
 ### Vision
 
 To democratize storytelling by creating the world's first truly fair content ecosystem where:
-- Readers are rewarded for their engagement
+- Readers access premium content with transparent pricing
 - Creators own and monetize their work from day one
-- AI augments human creativity without replacing it
+- AI ensures content quality and accessibility
 - Blockchain ensures transparent, immutable ownership
 
 ### Mission
@@ -126,11 +126,11 @@ storyhouse-vip/
 
 ### For Readers
 
-1. **Read-to-Earn**
-   - Earn 10 TIP per chapter read
-   - Daily streak bonuses (20 TIP)
-   - Quality feedback rewards (5 TIP)
+1. **Chapter Access Model**
    - Free first 3 chapters of every story
+   - 0.5 TIP per premium chapter (4+)
+   - Quality content guaranteed by AI verification
+   - Transparent pricing model
 
 2. **Content Discovery**
    - AI-powered recommendations
@@ -146,11 +146,11 @@ storyhouse-vip/
 
 ### For Creators
 
-1. **AI-Assisted Creation**
-   - GPT-4 powered story generation
-   - Style and tone customization
-   - Plot development assistance
-   - Character consistency tracking
+1. **AI-Enhanced Quality**
+   - Content fraud detection and plagiarism checks
+   - Multi-language translation services
+   - Text-to-audio narration capabilities
+   - Quality scoring and improvement suggestions
 
 2. **Instant Monetization**
    - 80% revenue share on purchases
@@ -207,9 +207,9 @@ contract StoryHouseCreator {
 #### 3. StoryHouseRewards
 ```solidity
 contract StoryHouseRewards {
-    // Read-to-earn distribution
-    // Creator reward calculations
-    // Anti-farming protections
+    // Creator reward distribution
+    // Revenue calculations
+    // Payment processing
     // Reward pool management
 }
 ```
@@ -415,64 +415,63 @@ interface ChapterMetadata {
 
 ---
 
-## 💰 7. Read-to-Earn Mechanics {#read-to-earn}
+## 💰 7. Revenue Model {#revenue-model}
 
-### Earning Structure
+### Revenue Structure
 
 ```typescript
-const EARNING_RULES = {
-  // Reading Rewards
-  chapterRead: 10,        // TIP per chapter
-  firstThreeChapters: 0,  // Free to encourage discovery
-  dailyStreak: {
-    7: 20,   // 7-day streak bonus
-    30: 100, // 30-day streak bonus
-    90: 500  // 90-day streak bonus
-  },
+const REVENUE_MODEL = {
+  // Chapter Pricing
+  freeChapters: [1, 2, 3],  // First 3 chapters free
+  chapterPrice: 0.5,        // TIP per premium chapter
   
-  // Quality Rewards
-  qualityFeedback: 5,     // For helpful reviews
-  reportingReward: 10,    // For reporting issues
+  // Creator Revenue
+  creatorShare: 1.0,        // 100% to creators
+  platformFee: 0,           // No platform fees
   
-  // Creator Rewards
-  chapterPublished: 20,   // Per chapter (human verified)
-  storyCompleted: 100,    // Full story bonus
-  readerEngagement: 0.1,  // TIP per read after 1000
+  // Quality Incentives
+  qualityBonus: 25,         // TIP for verified quality
+  translationBonus: 10,     // TIP per translation
+  audioBonus: 15,           // TIP for audio version
   
-  // Anti-Farming
-  maxDailyReads: 50,      // Cap daily earnings
-  minReadTime: 30,        // Seconds per chapter
-  humanVerification: true  // Required for creator rewards
+  // Licensing Revenue
+  standardLicense: 0.5,     // TIP for basic license
+  premiumLicense: 100,      // TIP for commercial use
+  exclusiveLicense: 1000,   // TIP for exclusive rights
+  
+  // AI Services
+  fraudDetection: 'included',     // Free for all content
+  translationService: 'included', // Platform covers cost
+  audioGeneration: 'optional'     // Creator can enable
 };
 ```
 
-### Smart Distribution
+### Chapter Access Control
 
 ```solidity
-function distributeReadingReward(
+function unlockChapter(
     address reader,
     uint256 chapterId,
-    uint256 timeSpent
+    uint256 payment
 ) external {
-    require(timeSpent >= MIN_READ_TIME, "Too fast");
-    require(dailyReads[reader] < MAX_DAILY_READS, "Daily limit");
+    require(payment >= CHAPTER_PRICE, "Insufficient payment");
     
-    uint256 reward = BASE_READING_REWARD;
-    
-    // Apply streak multiplier
-    uint256 streak = getReadingStreak(reader);
-    if (streak >= 7) reward += STREAK_BONUS;
-    
-    // Check chapter eligibility
     ChapterData memory chapter = chapters[chapterId];
-    require(!hasReadChapter[reader][chapterId], "Already read");
+    require(chapter.exists, "Chapter not found");
+    require(!hasAccess[reader][chapterId], "Already unlocked");
     
-    // Distribute reward
-    tipToken.mint(reader, reward);
-    hasReadChapter[reader][chapterId] = true;
-    dailyReads[reader]++;
+    // Free chapters (1-3)
+    if (chapter.number <= 3) {
+        hasAccess[reader][chapterId] = true;
+        emit ChapterUnlocked(reader, chapterId, 0);
+        return;
+    }
     
-    emit ReadingRewardDistributed(reader, chapterId, reward);
+    // Premium chapters (4+)
+    tipToken.transferFrom(reader, chapter.author, payment);
+    hasAccess[reader][chapterId] = true;
+    
+    emit ChapterUnlocked(reader, chapterId, payment);
 }
 ```
 
@@ -480,55 +479,58 @@ function distributeReadingReward(
 
 ## 🤖 8. AI Integration {#ai-integration}
 
-### GPT-4 Story Generation
+### AI Quality Services
 
 ```typescript
-interface StoryGenerationParams {
-  // Required
-  prompt: string;
-  genre: string;
+interface AIQualityParams {
+  // Content Analysis
+  content: string;
+  language: string;
   
-  // Optional customization
-  style?: 'descriptive' | 'dialogue-heavy' | 'action-packed' | 'literary';
-  tone?: 'serious' | 'humorous' | 'dark' | 'uplifting';
-  perspective?: 'first-person' | 'third-person' | 'omniscient';
+  // Service Types
+  services: ('fraud' | 'translation' | 'audio' | 'recommendation')[];
   
   // Advanced options
-  temperature?: number;        // 0.7 default
-  maxTokens?: number;         // 4000 default
-  avoidCliches?: boolean;     // true default
-  consistencyMode?: boolean;  // true default
+  targetLanguages?: string[];  // For translation
+  voiceStyle?: string;         // For audio narration
+  similarityThreshold?: number; // For fraud detection
 }
 
-class AIStoryService {
-  async generateChapter(params: StoryGenerationParams): Promise<Chapter> {
-    // Construct optimized prompt
-    const systemPrompt = this.buildSystemPrompt(params);
+class AIQualityService {
+  async analyzeContent(params: AIQualityParams): Promise<QualityReport> {
+    const results = {};
     
-    // Generate with GPT-4
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4-turbo',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: params.prompt }
-      ],
-      temperature: params.temperature || 0.7,
-      max_tokens: params.maxTokens || 4000
-    });
+    // Fraud Detection
+    if (params.services.includes('fraud')) {
+      results.fraud = await this.detectPlagiarism(params.content);
+    }
     
-    // Post-process for quality
-    const content = this.postProcess(response.choices[0].message.content);
+    // Translation
+    if (params.services.includes('translation')) {
+      results.translations = await this.translateContent(
+        params.content,
+        params.targetLanguages
+      );
+    }
     
-    // Verify consistency
-    if (params.consistencyMode) {
-      await this.verifyConsistency(content, params);
+    // Audio Generation
+    if (params.services.includes('audio')) {
+      results.audio = await this.generateAudio(
+        params.content,
+        params.voiceStyle
+      );
+    }
+    
+    // Recommendations
+    if (params.services.includes('recommendation')) {
+      results.recommendations = await this.generateRecommendations(
+        params.content
+      );
     }
     
     return {
-      content,
-      metadata: this.extractMetadata(content),
-      aiGenerated: true,
-      model: 'gpt-4-turbo',
+      results,
+      qualityScore: this.calculateQualityScore(results),
       timestamp: new Date().toISOString()
     };
   }
@@ -538,10 +540,10 @@ class AIStoryService {
 ### AI Safety & Quality
 
 - **Content filtering** for inappropriate material
-- **Plagiarism detection** against known works
-- **Style consistency** across chapters
-- **Character tracking** for continuity
-- **Plot coherence** verification
+- **Advanced plagiarism detection** using embeddings
+- **Quality scoring** with actionable feedback
+- **Translation accuracy** verification
+- **Audio quality** optimization
 
 ---
 
@@ -641,8 +643,8 @@ const monitoring = {
 
 #### ✅ Phase 3.0: Tokenomics
 - TIP token implementation
-- Read-to-earn mechanics
-- Creator rewards
+- Pay-to-read mechanics
+- Creator revenue system
 
 #### ✅ Phase 4.0: IP Management
 - Story Protocol integration

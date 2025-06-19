@@ -15,12 +15,11 @@ This is a monorepo containing three main components:
 
 StoryHouse.vip is a revolutionary Web3 storytelling platform built on Story Protocol that enables:
 - Chapter-level IP asset management ($50-500 vs $1000+ for full books)
-- Read-to-earn mechanics where readers earn $TIP tokens while reading
-- AI-powered story generation and remix creation
 - Automated licensing and royalty distribution
 - **Enhanced metadata system** with 25+ tracked fields per chapter
 - **Complete user attribution** with wallet integration
 - **Advanced caching** and performance optimization
+- **AI-powered features**: content fraud detection, translation, text-to-audio, and content recommendations
 
 Tech Stack: Next.js 15.3.3, TypeScript, Story Protocol SDK, OpenAI GPT-4, Smart Contracts (Solidity)
 
@@ -223,3 +222,6 @@ forge script script/Deploy.s.sol:Deploy --broadcast --rpc-url $STORY_RPC_URL
 - **HybridRevenueControllerV2 (December 2024)**: Permissionless book registration - authors manage their own books
 - **No Admin Keys**: All book registration happens through frontend with user's wallet
 - **Security**: Backend validates all access - frontend cannot bypass access control
+- **Read-to-Earn Removed (December 2024)**: Feature removed to simplify platform focus
+- **AI Story Generation Removed (December 2024)**: No longer generating or remixing stories with AI
+- **AI Role Redefined (December 2024)**: AI now used for: content fraud detection, translation, text-to-audio, and content recommendations
