@@ -377,7 +377,7 @@ export function useReadingLicense() {
           
           // Check for the "chapter not configured" error (0xfb8f41b2)
           if (errorMessage.includes('0xfb8f41b2') || errorMessage.includes('chapter not configured')) {
-            throw new Error('Chapter attribution not yet configured. Please wait a moment for the blockchain to update and try again.')
+            throw new Error('This chapter pricing has not been configured yet. The book author needs to set up chapter pricing on their book page before readers can unlock paid chapters.')
           }
           
           throw new Error('Failed to process payment. Please ensure you have sufficient TIP balance.')
