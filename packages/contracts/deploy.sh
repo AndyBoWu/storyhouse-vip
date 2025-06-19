@@ -7,7 +7,7 @@ echo "======================================="
 if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     echo "Usage:"
     echo "  ./deploy.sh v2              Deploy HybridRevenueControllerV2"
-    echo "  ./deploy.sh                 Deploy full 5-contract architecture"
+    echo "  ./deploy.sh                 Deploy minimal 2-contract architecture"
     echo ""
     echo "Examples:"
     echo "  ./deploy.sh v2              Deploy HybridRevenueControllerV2 (permissionless)"
@@ -20,12 +20,12 @@ if [ "$1" = "v2" ] || [ "$1" = "minimal" ]; then
     echo "Deploying HybridRevenueControllerV2 (Permissionless Version)"
     DEPLOY_MODE="v2"
     SCRIPT_NAME="DeployMinimal.s.sol"
-    ARCHITECTURE="3-contract-architecture"
+    ARCHITECTURE="2-contract-minimal"
 else
-    echo "Deploying the optimized 5-contract architecture"
-    DEPLOY_MODE="full"
-    SCRIPT_NAME="Deploy.s.sol"
-    ARCHITECTURE="5-contract-optimized"
+    echo "Deploying the minimal 2-contract architecture"
+    DEPLOY_MODE="minimal"
+    SCRIPT_NAME="DeployMinimal.s.sol"
+    ARCHITECTURE="2-contract-minimal"
 fi
 echo ""
 
@@ -110,10 +110,9 @@ if [ "$DEPLOY_MODE" = "v2" ]; then
     echo -e "${YELLOW}⚡ Starting HybridRevenueControllerV2 Deployment...${NC}"
     echo -e "${BLUE}📋 What will be deployed:${NC}"
     echo "   • TIP Token (already deployed)"
-    echo "   • ChapterAccessController (already deployed)"  
     echo "   • HybridRevenueControllerV2 (NEW - permissionless with all features)"
 else
-    echo -e "${YELLOW}⚡ Starting 5-Contract Architecture Deployment...${NC}"
+    echo -e "${YELLOW}⚡ Starting 2-Contract Architecture Deployment...${NC}"
 fi
 echo ""
 
@@ -129,10 +128,6 @@ if [ "$DEPLOY_MODE" = "v2" ] || [ "$DEPLOY_MODE" = "v2-full" ]; then
         mv src/HybridRevenueControllerV2.sol src/HybridRevenueControllerV2.sol.bak
         V2_ORIG_RENAMED=true
     fi
-    if [ -f "src/ChapterAccessController.sol" ]; then
-        mv src/ChapterAccessController.sol src/ChapterAccessController.sol.bak
-        CHAPTER_RENAMED=true
-    fi
     
     DEPLOY_OUTPUT=$(PRIVATE_KEY=$PRIVATE_KEY forge script script/$SCRIPT_NAME \
         --rpc-url $NETWORK \
@@ -147,9 +142,6 @@ if [ "$DEPLOY_MODE" = "v2" ] || [ "$DEPLOY_MODE" = "v2-full" ]; then
     fi
     if [ "$V2_ORIG_RENAMED" = true ]; then
         mv src/HybridRevenueControllerV2.sol.bak src/HybridRevenueControllerV2.sol
-    fi
-    if [ "$CHAPTER_RENAMED" = true ]; then
-        mv src/ChapterAccessController.sol.bak src/ChapterAccessController.sol
     fi
 else
     DEPLOY_OUTPUT=$(PRIVATE_KEY=$PRIVATE_KEY forge script script/$SCRIPT_NAME \

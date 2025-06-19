@@ -39,16 +39,10 @@ forge update
 packages/contracts/
 ├── src/                          # Smart Contracts (Production)
 │   ├── TIPToken.sol             # Platform token with 10B supply cap
-│   ├── ChapterAccessController.sol  # Chapter monetization with tiered pricing
-│   ├── HybridRevenueController.sol  # Legacy revenue controller (V1)
-│   ├── HybridRevenueControllerV2.sol     # PERMISSIONLESS revenue sharing (V2)
-│   └── HybridRevenueControllerV2Standalone.sol # V2 without external dependencies
+│   └── HybridRevenueControllerV2.sol     # PERMISSIONLESS revenue sharing + chapter access (V2)
 ├── test/                        # Test Files (Foundry *.t.sol)
 │   ├── TIPToken.t.sol          # Platform token tests
-│   ├── ChapterAccessController.t.sol
-│   ├── HybridRevenueController.t.sol
-│   ├── RewardsManager.t.sol    # Legacy tests (contract removed)
-│   └── UnifiedRewardsController.t.sol # Legacy tests (contract removed)
+│   └── HybridRevenueControllerV2.t.sol  # V2 tests
 ├── script/                      # Deployment Scripts (Foundry *.s.sol)
 ├── lib/                         # Dependencies (git submodules)
 ├── out/                         # Compiled artifacts
@@ -165,19 +159,18 @@ forge fmt --check
 
 ## 📊 Architecture Overview
 
-### Streamlined 4-Contract Architecture
-This repository contains a **streamlined smart contract architecture** focused on core monetization and permissionless book management:
+### Minimal 2-Contract Architecture
+This repository contains a **minimal smart contract architecture** focused on core monetization and permissionless book management:
 
 1. **TIPToken.sol** - Platform token with 10B supply cap, minting roles, and pausable transfers
-2. **ChapterAccessController.sol** - Chapter monetization with tiered pricing (free chapters 1-3, paid 4+)
-3. **HybridRevenueControllerV2.sol** - **PERMISSIONLESS** multi-author revenue sharing (70/20/10 split)
-4. **HybridRevenueControllerV2Standalone.sol** - Standalone version without RewardsManager dependency
+2. **HybridRevenueControllerV2.sol** - **PERMISSIONLESS** multi-author revenue sharing (70/20/10 split) with integrated chapter access control
 
 **Key Changes:**
 - ❌ **Removed RewardsManager.sol** - Eliminated complex reward system prone to farming
 - ❌ **Removed UnifiedRewardsController.sol** - No more automatic creation rewards
-- ✅ **Added HybridRevenueControllerV2** - Permissionless book registration (no admin required)
-- ✅ **Added V2Standalone** - Clean implementation without external dependencies
+- ❌ **Removed ChapterAccessController.sol** - Functionality merged into HybridRevenueControllerV2
+- ❌ **Removed HybridRevenueController.sol** - V1 replaced by V2
+- ✅ **Added HybridRevenueControllerV2** - Permissionless book registration with integrated chapter access
 
 **Security & Architecture Improvements:**
 - 🔒 **Eliminated farming vulnerabilities** - Removed automatic creation rewards that were prone to AI/bot farming
@@ -203,8 +196,8 @@ This repository contains a **streamlined smart contract architecture** focused o
 - Test functions start with **`test`** (e.g., `testMinting`)
 
 ### Test Coverage Achievements ✅
-- **Structural Coverage**: 100% (5/5 contracts have test files)
-- **Functional Coverage**: 100% line coverage achieved (220+ comprehensive tests)
+- **Structural Coverage**: 100% (2/2 contracts have test files)
+- **Functional Coverage**: Comprehensive testing for all functions
 - **Edge Cases**: All revert conditions and boundary cases thoroughly tested
 - **Integration**: Cross-contract interactions verified
 - **Security**: Reentrancy protection and access control fully tested

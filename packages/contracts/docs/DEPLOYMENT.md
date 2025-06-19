@@ -6,17 +6,10 @@ This guide covers deployment of the StoryHouse.vip smart contract architecture, 
 
 ## Contract Deployment Order
 
-### Recommended V2 Deployment
+### V2 Deployment (2-Contract Architecture)
 
-1. **TIPToken.sol** - Platform token (required by other contracts)
-2. **HybridRevenueControllerV2Standalone.sol** - Revenue sharing (standalone version)
-3. **ChapterAccessController.sol** - Chapter access control
-
-### Alternative V2 Deployment
-
-1. **TIPToken.sol** - Platform token
-2. **HybridRevenueControllerV2.sol** - Revenue sharing (with potential dependencies)
-3. **ChapterAccessController.sol** - Chapter access control
+1. **TIPToken.sol** - Platform token (already deployed on testnet)
+2. **HybridRevenueControllerV2.sol** - Permissionless revenue sharing with integrated chapter access
 
 ## Environment Setup
 
@@ -147,17 +140,10 @@ forge verify-contract \
 ### 2. Initial Configuration
 
 ```bash
-# Add ChapterAccessController as TIP minter
+# Add HybridRevenueControllerV2 as TIP minter  
 cast send $TIP_TOKEN_ADDRESS \
     "addMinter(address)" \
-    $CHAPTER_ACCESS_CONTROLLER_ADDRESS \
-    --private-key $PRIVATE_KEY \
-    --rpc-url $RPC_URL
-
-# Add HybridRevenueController as TIP minter  
-cast send $TIP_TOKEN_ADDRESS \
-    "addMinter(address)" \
-    $HYBRID_REVENUE_CONTROLLER_ADDRESS \
+    $HYBRID_REVENUE_CONTROLLER_V2_ADDRESS \
     --private-key $PRIVATE_KEY \
     --rpc-url $RPC_URL
 
@@ -177,11 +163,8 @@ Update frontend configuration with deployed addresses:
 ```typescript
 // contracts.config.ts
 export const CONTRACTS = {
-  TIP_TOKEN: "0x...",
-  CHAPTER_ACCESS_CONTROLLER: "0x...", 
-  HYBRID_REVENUE_CONTROLLER_V2: "0x...",
-  // Optional V1 for backward compatibility
-  HYBRID_REVENUE_CONTROLLER_V1: "0x...",
+  TIP_TOKEN: "0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E",
+  HYBRID_REVENUE_CONTROLLER_V2: "0x...", // Deploy and update
 };
 ```
 
@@ -193,10 +176,9 @@ Main deployment script that deploys all contracts in correct order with proper c
 
 ```solidity
 // Deploys:
-// 1. TIPToken
+// 1. TIPToken (if not already deployed)
 // 2. HybridRevenueControllerV2
-// 3. ChapterAccessController
-// 4. Configures permissions and roles
+// 3. Configures permissions and roles
 ```
 
 ### script/DeployMinimal.s.sol
@@ -205,8 +187,7 @@ Minimal deployment for testing or specific use cases.
 
 ```solidity
 // Deploys:
-// 1. TIPToken
-// 2. HybridRevenueControllerV2Standalone
+// 1. HybridRevenueControllerV2 (using existing TIP token)
 ```
 
 ### script/DeployTIPToken.s.sol
@@ -261,7 +242,7 @@ cast call $TIP_TOKEN "totalSupply()" --rpc-url $RPC_URL
 cast call $TIP_TOKEN "supplyCap()" --rpc-url $RPC_URL
 
 # Check permissions
-cast call $TIP_TOKEN "minters(address)" $CHAPTER_ACCESS_CONTROLLER --rpc-url $RPC_URL
+cast call $TIP_TOKEN "minters(address)" $HYBRID_REVENUE_CONTROLLER_V2 --rpc-url $RPC_URL
 
 # Check contract balances
 cast balance $TIP_TOKEN --rpc-url $RPC_URL
@@ -272,11 +253,11 @@ cast balance $TIP_TOKEN --rpc-url $RPC_URL
 ```bash
 # Pause contracts in emergency
 cast send $TIP_TOKEN "pause()" --private-key $ADMIN_PRIVATE_KEY --rpc-url $RPC_URL
-cast send $CHAPTER_ACCESS_CONTROLLER "pause()" --private-key $ADMIN_PRIVATE_KEY --rpc-url $RPC_URL
+cast send $HYBRID_REVENUE_CONTROLLER_V2 "pause()" --private-key $ADMIN_PRIVATE_KEY --rpc-url $RPC_URL
 
 # Unpause when resolved
 cast send $TIP_TOKEN "unpause()" --private-key $ADMIN_PRIVATE_KEY --rpc-url $RPC_URL
-cast send $CHAPTER_ACCESS_CONTROLLER "unpause()" --private-key $ADMIN_PRIVATE_KEY --rpc-url $RPC_URL
+cast send $HYBRID_REVENUE_CONTROLLER_V2 "unpause()" --private-key $ADMIN_PRIVATE_KEY --rpc-url $RPC_URL
 ```
 
 ## Troubleshooting

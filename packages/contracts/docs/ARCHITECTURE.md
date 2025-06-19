@@ -2,25 +2,22 @@
 
 ## Overview
 
-StoryHouse.vip has evolved to a streamlined 4-contract architecture focused on core monetization features and permissionless book management. This document outlines the current contract design and recent architectural changes.
+StoryHouse.vip has evolved to a minimal 2-contract architecture focused on core monetization features and permissionless book management. This document outlines the current contract design and recent architectural changes.
 
 ## Current Architecture (V2)
 
 ### Core Contracts
 
-1. **TIPToken.sol** - Platform token
-2. **ChapterAccessController.sol** - Chapter access and monetization
-3. **HybridRevenueControllerV2.sol** - Permissionless revenue sharing
-4. **HybridRevenueControllerV2Standalone.sol** - Dependency-free version
+1. **TIPToken.sol** - Platform token (ERC-20)
+2. **HybridRevenueControllerV2.sol** - Permissionless revenue sharing with built-in chapter access control
 
 ### Contract Relationships
 
 ```
 TIPToken.sol
     ↓ (token transfers)
-ChapterAccessController.sol
-    ↓ (revenue sharing)
 HybridRevenueControllerV2.sol
+    (handles both chapter access and revenue sharing)
 ```
 
 ## Key Architectural Changes
@@ -29,16 +26,18 @@ HybridRevenueControllerV2.sol
 
 1. **RewardsManager.sol** - Complex reward orchestrator removed due to farming vulnerabilities
 2. **UnifiedRewardsController.sol** - Automatic creation rewards removed to prevent bot exploitation
+3. **ChapterAccessController.sol** - Functionality merged into HybridRevenueControllerV2
+4. **HybridRevenueController.sol** (V1) - Legacy version requiring admin permissions
 
 ### ✅ Added Contracts
 
-1. **HybridRevenueControllerV2.sol** - Permissionless version of revenue controller
-2. **HybridRevenueControllerV2Standalone.sol** - Clean implementation without external dependencies
+1. **HybridRevenueControllerV2.sol** - Permissionless version with integrated chapter access control
 
-### 🔄 Updated Contracts
+### 🔄 Architecture Benefits
 
-1. **ChapterAccessController.sol** - Removed read-to-earn features, simplified to purchase-only model
-2. **HybridRevenueController.sol** - Kept as V1 for backward compatibility
+1. **Simplified Design** - Only 2 contracts instead of 5+
+2. **Gas Savings** - Fewer cross-contract calls
+3. **Unified Logic** - Chapter access and revenue sharing in one contract
 
 ## Design Principles
 

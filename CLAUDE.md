@@ -28,6 +28,12 @@ Tech Stack: Next.js 15.3.3, TypeScript, Story Protocol SDK, OpenAI GPT-4, Smart 
 
 ## Development Practices
 
+### Documentation Dates
+- **ALWAYS use the actual current date** in all documentation
+- **DO NOT use placeholder dates** like "June 2025" or "January 2025"
+- **Update dates to actual date** when modifying documentation
+- **Format**: Use ISO format (YYYY-MM-DD) or Month DD, YYYY
+
 ### Git Commits
 - **DO NOT include Claude as a co-author** in commit messages
 - **DO NOT add "Generated with Claude Code" or similar attributions** to commits
@@ -101,7 +107,7 @@ UNIFIED_REGISTRATION_ENABLED=true  # Always enabled, legacy removed
 3. Client-side execution with user's wallet (MetaMask)
 4. Backend only handles metadata generation
 
-### 🔥 Legacy Workflow Removal (January 2025)
+### 🔥 Legacy Workflow Removal (December 2024)
 
 **Status: Completed**
 
@@ -156,7 +162,7 @@ Removed unused and test API endpoints to improve security and reduce maintenance
 - Removed 1,438 lines of unused code
 - Improved maintainability
 
-### 🚀 HybridRevenueControllerV2 - Permissionless Revenue Sharing (January 2025)
+### 🚀 HybridRevenueControllerV2 - Permissionless Revenue Sharing (December 2024)
 
 **Status: Ready for Deployment**
 
@@ -205,13 +211,13 @@ forge script script/Deploy.s.sol:Deploy --broadcast --rpc-url $STORY_RPC_URL
 - Legacy multi-transaction workflow completely removed - only unified registration exists
 - All publishing uses `mintAndRegisterIpAssetWithPilTerms` exclusively
 - IP registration happens client-side with user's wallet
-- **Royalty Policy Decision (January 2025)**: All tiers use zero address (0x0000...0000) for both royalty policy and currency
+- **Royalty Policy Decision (December 2024)**: All tiers use zero address (0x0000...0000) for both royalty policy and currency
 - **Revenue Distribution**: 100% handled by HybridRevenueControllerV2 (70% author, 20% curator, 10% platform)
 - **Story Protocol Role**: IP registration and licensing only - no royalty involvement
 - **Token Strategy**: TIP tokens exclusively - no WIP token dependencies
-- **Chapter Access Control (January 2025)**: Server-side enforcement prevents unauthorized access
+- **Chapter Access Control (December 2024)**: Server-side enforcement prevents unauthorized access
 - **Two-Step License Purchase**: TIP payment first, then Story Protocol license mint (zero currency)
 - **Transaction Verification**: All paid unlocks require blockchain transaction verification
-- **HybridRevenueControllerV2 (January 2025)**: Permissionless book registration - authors manage their own books
+- **HybridRevenueControllerV2 (December 2024)**: Permissionless book registration - authors manage their own books
 - **No Admin Keys**: All book registration happens through frontend with user's wallet
 - **Security**: Backend validates all access - frontend cannot bypass access control
