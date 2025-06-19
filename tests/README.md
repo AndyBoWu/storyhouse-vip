@@ -7,12 +7,14 @@ Comprehensive testing infrastructure for the Web3 storytelling platform.
 ```
 tests/
 ├── integration/          # End-to-end integration tests
-├── frontend/            # Frontend-specific tests
-├── backend/             # Backend API tests
-├── contracts/           # Smart contract tests (symlinked)
 ├── utils/               # Test utilities and helpers
 └── scripts/             # Test execution scripts
 ```
+
+Note: Frontend, backend, and contract tests are located in their respective package directories:
+- Frontend tests: `apps/frontend/__tests__/` (if implemented)
+- Backend tests: `apps/backend/tests/`
+- Contract tests: `packages/contracts/test/` (to be implemented)
 
 ## 🚀 Quick Start
 
@@ -50,20 +52,11 @@ TEST_ENV=production node tests/integration/api-endpoints.test.js
 - **Story Protocol** - Blockchain integration tests
 - **User Workflows** - End-to-end user journeys
 
-### Frontend Tests (`frontend/`)
-- **Components** - React component testing
-- **Hooks** - Custom hook functionality
-- **UI Workflows** - User interface interactions
-
-### Backend Tests (`backend/`)
-- **Books API** - Book registration and management
-- **Stories API** - Story creation and retrieval
-- **IP Registration** - Story Protocol integration
-
-### Contract Tests (`contracts/`)
-- **Smart Contracts** - Solidity contract testing
-- **Gas Optimization** - Performance testing
-- **Security** - Vulnerability scanning
+### Unit Tests
+- Located in respective package directories
+- Frontend: `apps/frontend/__tests__/` (React components, hooks)
+- Backend: `apps/backend/tests/` (API endpoints, services)
+- Contracts: `packages/contracts/test/` (Solidity contracts - to be implemented)
 
 ## 🛠️ Test Utilities
 
@@ -134,9 +127,10 @@ STORY_RPC_URL=https://aeneid.storyrpc.io
 - ✅ Response format verification
 
 ### Frontend Coverage
-- 🔄 Component functionality
-- 🔄 User interaction flows
-- 🔄 State management
+- ⚠️ Tests to be implemented in `apps/frontend/__tests__/`
+- Component functionality
+- User interaction flows
+- State management
 
 ### Backend Coverage
 - ✅ Database operations
@@ -144,9 +138,10 @@ STORY_RPC_URL=https://aeneid.storyrpc.io
 - ✅ External API integration
 
 ### Blockchain Coverage
-- ✅ Contract deployment
-- ✅ Transaction verification
-- ✅ Gas optimization
+- ⚠️ Contract tests needed in `packages/contracts/test/`
+- Contract deployment verification (via scripts)
+- Transaction verification
+- Gas optimization
 
 ## 🚨 Continuous Integration
 

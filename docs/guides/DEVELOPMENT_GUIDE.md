@@ -753,4 +753,111 @@ The platform seamlessly bridges AI analysis with blockchain registration:
 - **AI Thresholds**: Configure similarity detection sensitivity (default: 0.7)
 - **Caching**: AI analysis results cached for 24 hours for performance
 - **Error Handling**: Graceful fallback for both AI and blockchain failures
+
+---
+
+## 🚀 Deployment
+
+### Architecture
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│  Frontend       │    │  Backend        │    │  License        │
+│  (Vercel)       │◄──►│  (Vercel)       │◄──►│  Management     │
+│  Next.js SPA    │    │  API Routes     │    │  System         │
+│  + License UI   │    │  + Story Proto  │    │  (Integrated)   │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+```
+
+### Deployment Methods
+
+#### Option 1: GitHub Actions (Recommended)
+
+1. **Configure GitHub Secrets** (Settings → Secrets → Actions):
+   - `STORYHOUSE_GHA_VERCEL`: Vercel authentication token
+   - `VERCEL_ORG_ID`: Vercel organization ID
+   - `VERCEL_PROJECT_ID_FRONTEND`: Frontend project ID
+   - `VERCEL_PROJECT_ID_BACKEND`: Backend project ID
+
+2. **Deploy via GitHub Actions**:
+   - Navigate to Actions tab
+   - Select "🚀 Deploy to Vercel (Manual)"
+   - Choose apps to deploy (frontend/backend/both)
+   - Click "Run workflow"
+
+#### Option 2: Manual CLI Deployment
+
+```bash
+# Frontend deployment
+cd apps/frontend
+npm run build
+vercel --prod
+
+# Backend deployment
+cd apps/backend
+npm run build
+vercel --prod
+```
+
+### Environment Variables
+
+#### Frontend (.env.local)
+```bash
+NEXT_PUBLIC_API_BASE_URL=https://api-testnet.storyhouse.vip
+NEXT_PUBLIC_ENABLE_TESTNET=true
+NEXT_PUBLIC_STORY_SPG_NFT_CONTRACT=0x26b6aa7e7036fc9e8fa2d8184c2cf07ae2e2412d
+NEXT_PUBLIC_CHAIN_ID=1315
+NEXT_PUBLIC_RPC_URL=https://aeneid.storyrpc.io
+```
+
+#### Backend (.env)
+```bash
+ENVIRONMENT=production
+API_BASE_URL=https://api-testnet.storyhouse.vip
+STORY_RPC_URL=https://aeneid.storyrpc.io
+OPENAI_API_KEY=[your-key]
+R2_ACCOUNT_ID=[your-account-id]
+R2_ACCESS_KEY_ID=[your-access-key]
+R2_SECRET_ACCESS_KEY=[your-secret-key]
+```
+
+### Domain Configuration
+
+1. **Add domains in Vercel**:
+   - Frontend: `storyhouse.vip`, `testnet.storyhouse.vip`
+   - Backend: `api.storyhouse.vip`, `api-testnet.storyhouse.vip`
+
+2. **Configure DNS**:
+   ```
+   A     @               76.76.19.61
+   CNAME testnet         frontend-testnet.vercel.app
+   CNAME api             backend-prod.vercel.app
+   CNAME api-testnet     backend-testnet.vercel.app
+   ```
+
+### Post-Deployment Verification
+
+```bash
+# Frontend health check
+curl -I https://testnet.storyhouse.vip/
+
+# Backend API health check
+curl https://api-testnet.storyhouse.vip/api/test
+
+# Test Story Protocol integration
+curl https://api-testnet.storyhouse.vip/api/test
+```
+
+### Deployment Checklist
+
+- [ ] Frontend loads at both domains
+- [ ] Backend API responds at `/api/test`
+- [ ] Environment variables configured
+- [ ] DNS records propagated
+- [ ] SSL certificates active
+- [ ] License management UI functional
+- [ ] Story Protocol integration working
+- [ ] AI story generation operational
+- [ ] R2 storage connected
+- [ ] Wallet connection working
 - **Type Safety**: Full TypeScript coverage across all operations

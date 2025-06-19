@@ -22,31 +22,9 @@ console.log(`🧪 Testing API Endpoints (${TEST_ENV.toUpperCase()})`);
 console.log(`Base URL: ${BASE_URL}`);
 console.log('='.repeat(50));
 
-/**
- * Test health check endpoint
- */
-async function testHealthCheck() {
-  const result = await testApiEndpoint(`${BASE_URL}/test`);
-  
-  const success = result.ok && result.status === 200;
-  logResult('Health Check', success, 
-    success ? `Status: ${result.status}` : `Error: ${result.error || result.status}`);
-  
-  return success;
-}
+// Health check endpoint removed - /api/test was a debug endpoint
 
-/**
- * Test stories endpoint
- */
-async function testStoriesEndpoint() {
-  const result = await testApiEndpoint(`${BASE_URL}/stories`);
-  
-  const success = result.ok && result.data && Array.isArray(result.data.stories);
-  logResult('Stories Endpoint', success,
-    success ? `Found ${result.data.stories.length} stories` : `Error: ${result.error || result.status}`);
-  
-  return success;
-}
+// Stories endpoint deprecated - use /api/books instead
 
 /**
  * Test books endpoint
@@ -61,44 +39,11 @@ async function testBooksEndpoint() {
   return success;
 }
 
-/**
- * Test debug environment endpoint
- */
-async function testDebugEnv() {
-  const result = await testApiEndpoint(`${BASE_URL}/debug-env`);
-  
-  const success = result.ok && result.data;
-  logResult('Debug Environment', success,
-    success ? 'Environment info retrieved' : `Error: ${result.error || result.status}`);
-  
-  return success;
-}
+// Debug environment endpoint removed - was exposing sensitive data
 
-/**
- * Test R2 storage endpoint
- */
-async function testR2Storage() {
-  const result = await testApiEndpoint(`${BASE_URL}/test-r2`);
-  
-  const success = result.ok;
-  logResult('R2 Storage', success,
-    success ? 'R2 connection verified' : `Error: ${result.error || result.status}`);
-  
-  return success;
-}
+// R2 test endpoint removed - was a debug endpoint
 
-/**
- * Test collections endpoint
- */
-async function testCollections() {
-  const result = await testApiEndpoint(`${BASE_URL}/collections`);
-  
-  const success = result.ok && result.data;
-  logResult('Collections Endpoint', success,
-    success ? 'Collections retrieved' : `Error: ${result.error || result.status}`);
-  
-  return success;
-}
+// Collections endpoint removed - feature not implemented
 
 /**
  * Test discovery endpoint
@@ -118,12 +63,7 @@ async function testDiscovery() {
  */
 async function runApiTests() {
   const tests = [
-    { name: 'Health Check', fn: testHealthCheck },
-    { name: 'Stories', fn: testStoriesEndpoint },
     { name: 'Books', fn: testBooksEndpoint },
-    { name: 'Debug Env', fn: testDebugEnv },
-    { name: 'R2 Storage', fn: testR2Storage },
-    { name: 'Collections', fn: testCollections },
     { name: 'Discovery', fn: testDiscovery },
   ];
 
