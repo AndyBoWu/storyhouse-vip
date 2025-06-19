@@ -1,111 +1,61 @@
-# 📚 StoryHouse.vip Documentation
+# StoryHouse V2 Documentation
 
-**Quick-start navigation for developers, product teams, and stakeholders**
+Welcome to StoryHouse V2 - A Story Protocol native multi-language publishing platform.
 
-> Revolutionary Web3 storytelling platform with chapter-level IP monetization, read-to-earn mechanics, and AI-powered content creation on Story Protocol.
+## 🌍 What's New in V2
 
----
+StoryHouse V2 is a complete reimagining of our platform, built from the ground up to fully embrace Story Protocol's parent-child IP architecture:
 
-## 🚀 **Getting Started** *(Start Here)*
+- **Chapter-Level IPs**: Each chapter is its own intellectual property
+- **Multi-Language Support**: Translations as derivative IPs with automatic royalty flows
+- **Author-Owned Translations**: Authors retain ownership of all language versions
+- **AI-Powered Quality**: Fraud detection and translation verification
+- **Story Protocol Native**: No custom contracts - pure Story Protocol implementation
 
-| Document | What's Inside | For Who |
-|----------|---------------|---------|
-| [**Development Guide**](./DEVELOPMENT_GUIDE.md) | Setup, installation, testing | **Developers** |
-| [**API Reference**](./API_REFERENCE.md) | Complete API documentation | **Frontend/Backend Devs** |
-| [**Story Protocol Guide**](./STORY_PROTOCOL_GUIDE.md) | IP assets, licensing, royalties | **Blockchain Devs** |
+## 📚 Documentation Structure
 
----
+- [Architecture Overview](./architecture/README.md) - System design and technical decisions
+- [Getting Started](./getting-started/README.md) - Setup and development guide
+- [API Reference](./api/README.md) - Backend API documentation
+- [Smart Contracts](./contracts/README.md) - Story Protocol integration
+- [Translation System](./translation/README.md) - Multi-language implementation
+- [Royalty Flows](./royalties/README.md) - Revenue distribution model
 
-## 📋 **Core Documentation**
+## 🚀 Quick Start
 
-### For Developers
-- [**Technical Architecture**](./TECHNICAL_ARCHITECTURE.md) - System design and technology stack
-- [**Testing Strategy**](./TESTING_STRATEGY.md) - Testing approach and quality assurance
-- [**Deployment Guide**](./project/DEPLOYMENT.md) - Production deployment on Vercel
+```bash
+# Clone the repository
+git clone https://github.com/AndyBoWu/storyhouse-vip.git
+cd storyhouse-vip
+git checkout v2-story-protocol-native
 
-### For Product Teams  
-- [**Product Specification**](./product/SPECIFICATION.md) - Feature requirements and user flows
-- [**Design Guidelines**](./product/DESIGN.md) - UI/UX design system
-- [**Pitch Deck**](./PITCH_DECK.md) - Business presentation and vision
+# Install dependencies
+npm install
 
-### For Business Stakeholders
-- [**Project Overview**](./project/OVERVIEW.md) - High-level project summary
-- [**Tokenomics Guide**](./tokenomics/) - Economic model and $TIP token mechanics
-- [**Roadmap**](./project/ROADMAP.md) - Development timeline and milestones
+# Start development
+npm run dev
+```
 
----
+## 🎯 Key Concepts
 
-## 🔧 **Technical Deep Dives**
+### IP Hierarchy
+```
+📚 Book (Metadata Collection)
+  └── 📄 Chapter IP (Original Language)
+      ├── 🌍 Translation IP (Owned by Author)
+      ├── 🌍 Translation IP (Owned by Author)
+      └── 🎧 Audio Version IP (Sub-derivative)
+```
 
-| Topic | Documentation | Description |
-|-------|---------------|-------------|
-| **IP & Licensing** | [Licensing System](./technical/LICENSING_SYSTEM.md) | PIL implementation details |
-| **UI Components** | [License Components](./technical/LICENSE_COMPONENTS.md) | Frontend component docs |
-| **Advanced Features** | [Story Protocol Guide](./STORY_PROTOCOL_GUIDE.md#advanced-derivative-system) | AI-blockchain derivative system |
+### Revenue Model
+- **Original Author**: Receives 100% of original chapter revenue + 25% from all translations
+- **Translators**: Receive 75% of their translation's revenue (as service providers)
+- **Sub-derivatives**: Pay 20% to their parent translation
 
----
+## 🤝 Contributing
 
-## 📅 **Implementation Plans** *(Active Development)*
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for development guidelines.
 
-### Current Phase
-- [**Phase 3 Derivative Tracking**](./plan/phase-3-derivative-remix-tracking-plan.md) - AI-powered remix system
-- [**Phase 3.2 Analytics Dashboard**](./plan/phase-3.2-analytics-dashboard-completion.md) - Advanced analytics
-- [**Phase 3.3 Advanced Features**](./plan/phase-3.3-advanced-features-implementation-plan.md) - Enterprise features
+## 📄 License
 
-### Long-term Roadmap
-- [**Story Protocol SDK Enhancement**](./plan/story-protocol-sdk-enhancement-plan.md) - 16-week enhancement plan
-- [**Implementation Tickets**](./plan/phase-3-implementation-tickets.md) - Detailed development tasks
-
-### Completed *(Archive)*
-- [**Completed Plans**](./plan/completed/) - Phase 2 royalty system, SDK migrations
-
----
-
-## 📊 **Current Status**
-
-**🏗️ Phase 6.1 In Progress** - QA & Production Refinements
-
-**✅ Latest Updates:**
-- Fixed unified IP registration to use client-side transactions
-- Removed server-side blockchain operation requirements
-- Metadata-only backend API for cleaner architecture
-- Successfully registered Chapter 6 with unified flow
-- Clear separation of concerns between client and server
-
-**🚀 Production Ready:**
-- 5-contract architecture with 44% gas optimization
-- 97.3% test coverage across all smart contracts
-- Enterprise-grade security with 182 comprehensive tests
-- Dual Vercel deployment (frontend + backend)
-- Story Protocol integration with full licensing system
-- Real-time chapter-level claiming and analytics
-
----
-
-## 🎯 **Quick Find** *(What You're Probably Looking For)*
-
-**Setting up development?** → [Development Guide](./DEVELOPMENT_GUIDE.md)  
-**API integration?** → [API Reference](./API_REFERENCE.md)  
-**Story Protocol help?** → [Story Protocol Guide](./STORY_PROTOCOL_GUIDE.md)  
-**Understanding the product?** → [Product Specification](./product/SPECIFICATION.md)  
-**Deployment issues?** → [Deployment Guide](./project/DEPLOYMENT.md)  
-**Business overview?** → [Pitch Deck](./PITCH_DECK.md)  
-
----
-
-## 🏗️ **Project Essentials**
-
-**Tech Stack:** 
-- **Frontend:** Next.js 15.3.3 (App Router), TypeScript 5.0, React 18.2, Tailwind CSS
-- **Backend:** Next.js 15.3.3 (API Routes), TypeScript 5.0, Story Protocol SDK 1.3.2
-- **Blockchain:** Story Protocol, viem 2.30.6, wagmi 2.12.17, Smart Contracts (Solidity)
-- **AI:** OpenAI GPT-4 (content generation), AI-powered similarity detection
-- **Storage:** Cloudflare R2, IPFS integration, metadata management
-
-**Deployment:** Dual Vercel architecture (frontend + backend)  
-**Status:** Phase 6.1 In Progress - QA & Production Refinements  
-**Last Updated:** June 17, 2025
-
----
-
-*💡 **New to the project?** Start with [Development Guide](./DEVELOPMENT_GUIDE.md) → [API Reference](./API_REFERENCE.md) → [Story Protocol Guide](./STORY_PROTOCOL_GUIDE.md)*
+This project is licensed under the MIT License - see [LICENSE](../LICENSE) for details.
