@@ -185,7 +185,7 @@ export class ClientStoryProtocolService {
         }
       })
 
-      console.log('✅ Unified registration completed:', result)
+      console.log('✅ Unified registration completed:', JSON.stringify(result, (_, v) => typeof v === 'bigint' ? v.toString() : v, 2))
 
       return {
         success: true,
