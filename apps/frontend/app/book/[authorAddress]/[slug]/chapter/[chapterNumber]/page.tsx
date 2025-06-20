@@ -325,6 +325,7 @@ export default function ChapterPage() {
               bookId={bookId}
               chapterNumber={chapterNumber}
               chapterTitle={chapter.title}
+              authorAddress={chapter.authorAddress}
               onAccessGranted={handleAccessGranted}
               className="mb-6"
             />

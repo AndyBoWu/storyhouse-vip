@@ -12,6 +12,7 @@ interface ChapterAccessControlProps {
   bookId: string
   chapterNumber: number
   chapterTitle: string
+  authorAddress?: string
   onAccessGranted: () => void
   className?: string
 }
@@ -20,6 +21,7 @@ export default function ChapterAccessControl({
   bookId,
   chapterNumber,
   chapterTitle,
+  authorAddress,
   onAccessGranted,
   className = ''
 }: ChapterAccessControlProps) {
@@ -346,6 +348,29 @@ export default function ChapterAccessControl({
     if (metamaskConnector) {
       connect({ connector: metamaskConnector })
     }
+  }
+
+  // Check if current user is the author - authors have full access
+  const isAuthor = address && authorAddress && address.toLowerCase() === authorAddress.toLowerCase()
+  
+  if (isAuthor) {
+    return (
+      <div className={`p-4 bg-purple-50 border border-purple-200 rounded-lg ${className}`}>
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+            <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div>
+            <h3 className="font-medium text-purple-900">Chapter {chapterNumber}: {chapterTitle}</h3>
+            <p className="text-sm text-purple-700">
+              Author Access - You have full access to your own content
+            </p>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   // Already unlocked or free and can access

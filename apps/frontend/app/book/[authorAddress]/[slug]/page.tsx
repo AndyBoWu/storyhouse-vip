@@ -528,9 +528,12 @@ export default function BookPage() {
         ) : (
           <div className="space-y-4">
             {chapters.map((chapter) => {
+              // Check if current user is the author
+              const isAuthor = address && book.authorAddress && address.toLowerCase() === book.authorAddress.toLowerCase();
+              
               const isFree = chapter.number <= 3;
               const isPaid = chapter.number >= 4;
-              const isUnlocked = chapter.unlocked || false; // Assuming we have this data
+              const isUnlocked = isAuthor || chapter.unlocked || false; // Authors always have access
               const unlockPrice = isPaid ? 0.5 : 0; // Updated to match our pricing
               
               // Enhanced visual design with better unlock indication
@@ -562,7 +565,7 @@ export default function BookPage() {
                 statusBadge = (
                   <span className="px-3 py-1 bg-violet-100 text-violet-700 rounded-full text-xs font-semibold flex items-center gap-1">
                     <CheckCircle className="w-3 h-3" />
-                    UNLOCKED
+                    {isAuthor ? 'AUTHOR ACCESS' : 'UNLOCKED'}
                   </span>
                 );
               }
@@ -598,7 +601,7 @@ export default function BookPage() {
                             </p>
                           </div>
                         )}
-                        {isPaid && isUnlocked && (
+                        {isPaid && isUnlocked && !isAuthor && (
                           <div className="mt-3 p-2 bg-violet-50 border border-violet-200 rounded-lg">
                             <p className="text-violet-700 text-sm font-medium flex items-center gap-2">
                               <CheckCircle className="w-4 h-4" />
@@ -612,12 +615,28 @@ export default function BookPage() {
                             </p>
                           </div>
                         )}
+                        {isPaid && isAuthor && (
+                          <div className="mt-3 p-2 bg-purple-50 border border-purple-200 rounded-lg">
+                            <p className="text-purple-700 text-sm font-medium flex items-center gap-2">
+                              <CheckCircle className="w-4 h-4" />
+                              Author Access
+                            </p>
+                            <p className="text-purple-600 text-xs mt-1">
+                              You have full access to all chapters as the author
+                            </p>
+                          </div>
+                        )}
                       </div>
                       <div className="ml-4 flex flex-col items-end gap-2">
                         {statusBadge}
-                        {isPaid && isUnlocked && (
+                        {isPaid && isUnlocked && !isAuthor && (
                           <span className="text-xs text-violet-600 font-medium">
                             ✨ Premium Access
+                          </span>
+                        )}
+                        {isPaid && isAuthor && (
+                          <span className="text-xs text-purple-600 font-medium">
+                            👑 Author
                           </span>
                         )}
                       </div>
