@@ -261,7 +261,7 @@ export function useUnifiedPublishStory() {
             console.log('📚 Book not registered, registering first...')
             const registerResult = await registerBook({
               bookId: finalBookId,
-              totalChapters: 1000000, // Very high limit to avoid restrictions
+              totalChapters: 100, // Current contract maximum (will be increased when contract is redeployed)
               isDerivative: false,
               ipfsMetadataHash: metadataUri || ''
             })

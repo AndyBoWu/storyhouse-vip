@@ -41,7 +41,7 @@ export function BookRegistrationPrompt({
     try {
       const result = await registerBook({
         bookId,
-        totalChapters: 1000000, // Very high limit to avoid restrictions
+        totalChapters: 100, // Current contract maximum (will be increased when contract is redeployed)
         isDerivative: false,
         parentBookId: '0x0000000000000000000000000000000000000000000000000000000000000000',
         ipfsMetadataHash: ''
