@@ -75,13 +75,7 @@ export default function BookPage() {
           if (result.bookId === bookId && Date.now() - result.timestamp < 5 * 60 * 1000) {
             // Show publishing status message
             if (result.chapterNumber > 3) {
-              alert(
-                `📚 Chapter ${result.chapterNumber} Publishing Status\n\n` +
-                `✅ Chapter content saved successfully\n` +
-                `⏳ Blockchain configuration in progress...\n\n` +
-                `Your chapter may take a few moments to become fully accessible. ` +
-                `If you try to access it immediately and see an error, please wait 30 seconds and try again.`
-              );
+              alert(`📚 Chapter ${result.chapterNumber} published successfully!`);
             }
             // Clear the session storage
             sessionStorage.removeItem('publishingResult');
