@@ -251,7 +251,7 @@ function NewStoryPageContent() {
           
           const revenueResult = await registerBookForRevenue({
             bookId: revenueBookId,
-            totalChapters: 10, // Default to 10 chapters, can be updated later
+            totalChapters: 1000000, // Very high limit to avoid restrictions
             isDerivative: false,
             ipfsMetadataHash: '' // We don't have IPFS metadata for this flow
           })

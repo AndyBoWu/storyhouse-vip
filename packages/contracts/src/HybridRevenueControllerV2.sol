@@ -156,7 +156,7 @@ contract HybridRevenueControllerV2 is AccessControl, Pausable, ReentrancyGuard {
         string memory ipfsMetadataHash
     ) external {
         require(!books[bookId].isActive, "HybridRevenueV2: book already registered");
-        require(totalChapters > 0 && totalChapters <= 100, "HybridRevenueV2: invalid chapter count");
+        require(totalChapters > 0 && totalChapters <= 1000000, "HybridRevenueV2: invalid chapter count");
         
         // msg.sender becomes the curator automatically
         books[bookId] = BookMetadata({

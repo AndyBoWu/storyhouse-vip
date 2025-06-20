@@ -126,7 +126,7 @@ async function testBackendAPIs() {
       },
       body: JSON.stringify({
         bookId: TEST_BOOK_ID,
-        totalChapters: 10
+        totalChapters: 1000000
       })
     })
     const data = await response.json()

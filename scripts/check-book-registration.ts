@@ -67,7 +67,7 @@ async function checkBookRegistration() {
       console.log(`  bookId: "${bytes32Id}",`)
       console.log(`  isDerivative: false,`)
       console.log(`  parentBookId: "0x0000000000000000000000000000000000000000000000000000000000000000",`)
-      console.log(`  totalChapters: 10, // Adjust as needed`)
+      console.log(`  totalChapters: 1000000, // Very high limit to avoid restrictions`)
       console.log(`  ipfsMetadataHash: ""`)
       console.log(`)`)
     }
