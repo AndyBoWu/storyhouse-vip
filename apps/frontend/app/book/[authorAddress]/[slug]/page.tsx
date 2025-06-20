@@ -73,10 +73,7 @@ export default function BookPage() {
           const result = JSON.parse(publishingResult);
           // Only show if it's for this book and recent (within 5 minutes)
           if (result.bookId === bookId && Date.now() - result.timestamp < 5 * 60 * 1000) {
-            // Show publishing status message
-            if (result.chapterNumber > 3) {
-              alert(`📚 Chapter ${result.chapterNumber} published successfully!`);
-            }
+            // No alert needed - user can see chapter in the list
             // Clear the session storage
             sessionStorage.removeItem('publishingResult');
           }

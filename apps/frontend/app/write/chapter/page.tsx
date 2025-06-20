@@ -220,8 +220,7 @@ function ChapterWritingPageContent() {
         }))
       }
       
-      // Show a brief message and then redirect
-      alert(`✅ Chapter ${chapterNumber} published successfully!`)
+      // Redirect without showing alert
     }
     
     // Always redirect to book page after publishing to show the new chapter
