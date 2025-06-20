@@ -206,13 +206,29 @@ export async function GET(
     
     // Check if user has already unlocked this chapter
     let alreadyUnlocked = false
-    if (userAddress) {
-      alreadyUnlocked = chapterUnlockStorage.hasUnlocked(userAddress, bookId, chapterNum)
-    }
+    let canAccess = false
     
-    // For free chapters, always allow access
-    // For paid chapters, only allow if unlocked or if it's actually free
-    const canAccess = isFree || alreadyUnlocked
+    // Use chapterAccessService to check both local storage AND blockchain
+    if (userAddress || isFree) {
+      const accessResult = await chapterAccessService.checkChapterAccess(
+        bookId,
+        chapterNum,
+        userAddress
+      )
+      
+      canAccess = accessResult.hasAccess
+      // Mark as already unlocked if reason is 'unlocked', 'blockchain_unlocked', or 'licensed'
+      alreadyUnlocked = ['unlocked', 'blockchain_unlocked', 'licensed'].includes(accessResult.reason)
+      
+      console.log('🔍 Access check result:', {
+        bookId,
+        chapterNumber: chapterNum,
+        userAddress,
+        hasAccess: accessResult.hasAccess,
+        reason: accessResult.reason,
+        alreadyUnlocked
+      })
+    }
     
     // Fetch chapter and book metadata to get IP asset information
     let ipAssetId: string | undefined

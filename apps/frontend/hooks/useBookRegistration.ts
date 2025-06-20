@@ -101,7 +101,11 @@ export function useBookRegistration() {
     error: attributionError,
     isPending: isAttributionWritePending
   } = useWriteContract()
-  const { isLoading: isAttributionPending } = useWaitForTransactionReceipt({
+  const { 
+    isLoading: isAttributionPending,
+    isSuccess: isAttributionSuccess,
+    error: attributionTxError
+  } = useWaitForTransactionReceipt({
     hash: attributionHash,
   })
   
@@ -241,6 +245,38 @@ export function useBookRegistration() {
         contractAddress: HYBRID_REVENUE_CONTROLLER_V2_ADDRESS
       })
       
+      // Estimate gas first to avoid failures
+      let estimatedGas = 800000n // Default fallback
+      try {
+        if (publicClient) {
+          estimatedGas = await publicClient.estimateContractGas({
+            address: HYBRID_REVENUE_CONTROLLER_V2_ADDRESS as `0x${string}`,
+            abi: HYBRID_V2_ABI,
+            functionName: 'setChapterAttribution',
+            args: [
+              bytes32Id,
+              BigInt(chapterNumber),
+              originalAuthor as `0x${string}`,
+              bytes32Id,
+              priceWei,
+              isOriginalContent
+            ],
+            account: address as `0x${string}`,
+          })
+          
+          // Add 20% buffer for safety
+          estimatedGas = (estimatedGas * 120n) / 100n
+          console.log('⛽ Estimated gas with buffer:', estimatedGas.toString())
+        }
+      } catch (gasError) {
+        console.warn('⚠️ Gas estimation failed, using default:', gasError)
+        // Check if it's a specific error
+        const errorMessage = gasError instanceof Error ? gasError.message : String(gasError)
+        if (errorMessage.includes('curator') || errorMessage.includes('not registered')) {
+          throw new Error('Book must be registered before setting chapter pricing. Please ensure the book is registered first.')
+        }
+      }
+      
       // Log the exact transaction parameters
       console.log('📋 Transaction parameters:', {
         address: HYBRID_REVENUE_CONTROLLER_V2_ADDRESS,
@@ -252,11 +288,26 @@ export function useBookRegistration() {
           bytes32Id,
           priceWei,
           isOriginalContent
-        ]
+        ],
+        gas: estimatedGas.toString()
       })
       
       // Initiate the transaction
       try {
+        console.log('🚀 Calling writeSetAttribution with params:', {
+          address: HYBRID_REVENUE_CONTROLLER_V2_ADDRESS,
+          functionName: 'setChapterAttribution',
+          gas: estimatedGas.toString(),
+          args: {
+            bookId: bytes32Id,
+            chapterNumber: BigInt(chapterNumber).toString(),
+            originalAuthor,
+            sourceBookId: bytes32Id,
+            priceWei: priceWei.toString(),
+            isOriginalContent
+          }
+        })
+        
         writeSetAttribution({
           address: HYBRID_REVENUE_CONTROLLER_V2_ADDRESS as `0x${string}`,
           abi: HYBRID_V2_ABI,
@@ -269,18 +320,47 @@ export function useBookRegistration() {
             priceWei,
             isOriginalContent
           ],
-          gas: 500000n, // Add explicit gas limit for complex storage operations
+          gas: estimatedGas, // Use dynamically estimated gas with buffer
         })
         
         console.log('✅ writeSetAttribution called - check your wallet for transaction prompt')
+        
+        // Small delay to ensure the transaction is properly initiated
+        await new Promise(resolve => setTimeout(resolve, 100))
+        
+        console.log('📊 Current hook state:', {
+          isAttributionWritePending,
+          isAttributionError,
+          attributionError: attributionError?.message,
+          attributionHash
+        })
+        
+        // Return immediately - the transaction will be handled by wagmi hooks
+        // The parent component should monitor attributionHash and transaction states
+        return { 
+          success: true, 
+          pending: true,
+          message: 'Transaction initiated. Please check your wallet and approve the transaction.'
+        }
+        
       } catch (writeError) {
         console.error('❌ Error calling writeSetAttribution:', writeError)
+        
+        // Parse specific error types
+        const errorMessage = writeError instanceof Error ? writeError.message : String(writeError)
+        
+        if (errorMessage.includes('rejected') || errorMessage.includes('denied')) {
+          throw new Error('You rejected the transaction. Chapter pricing must be set for readers to unlock this chapter.')
+        } else if (errorMessage.includes('insufficient funds')) {
+          throw new Error('Insufficient funds for gas. Please add more funds to your wallet.')
+        } else if (errorMessage.includes('gas')) {
+          throw new Error('Transaction failed due to gas estimation. The contract might be in an unexpected state.')
+        } else if (errorMessage.includes('user rejected') || errorMessage.includes('User denied')) {
+          throw new Error('You cancelled the transaction. Chapter pricing must be set for readers to unlock this chapter.')
+        }
+        
         throw writeError
       }
-      
-      // Return early - the transaction will be handled by wagmi hooks
-      // The component should watch for attributionHash to know when it's complete
-      return { success: true, pending: true }
       
     } catch (error) {
       console.error('Failed to set chapter attribution:', error)
@@ -308,7 +388,10 @@ export function useBookRegistration() {
       hash: attributionHash,
       isError: isAttributionError,
       error: attributionError,
-      isConfirming: isAttributionPending
-    }
+      isConfirming: isAttributionPending,
+      isSuccess: isAttributionSuccess
+    },
+    // Expose write contract function for direct use if needed
+    writeSetAttribution
   }
 }

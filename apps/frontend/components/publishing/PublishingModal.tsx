@@ -253,13 +253,13 @@ function PublishingModal({
       case 'generating-metadata':
         return { text: 'Generating metadata...', icon: <Upload className="w-5 h-5" /> }
       case 'blockchain-transaction':
-        return { text: 'Executing blockchain transaction...', icon: <Link className="w-5 h-5" /> }
+        return { text: 'Step 1/2: Registering IP Asset - Check MetaMask...', icon: <Link className="w-5 h-5" /> }
       case 'saving-to-storage':
         return { text: 'Saving to storage...', icon: <Upload className="w-5 h-5" /> }
       case 'setting-attribution':
         return { 
           text: chapterNumber > 3 
-            ? `Setting chapter pricing (${chapterPrice} TIP)...` 
+            ? `Step 2/2: Setting chapter pricing (${chapterPrice} TIP) - Check MetaMask...` 
             : 'Setting chapter attribution...', 
           icon: <Coins className="w-5 h-5" /> 
         }
@@ -897,6 +897,17 @@ function PublishingModal({
                           <span className="text-blue-800">{getPublishingStepDisplay().text}</span>
                         </div>
 
+                        {/* Show transaction steps for paid chapters */}
+                        {chapterNumber > 3 && (
+                          <div className="text-xs text-gray-600 space-y-1">
+                            <div className={`flex items-center gap-2 ${publishStep === 'blockchain-transaction' || publishStep === 'setting-attribution' ? 'font-semibold' : ''}`}>
+                              {publishStep === 'setting-attribution' ? '✅' : publishStep === 'blockchain-transaction' ? '⏳' : '⭕'} Transaction 1: IP Asset Registration
+                            </div>
+                            <div className={`flex items-center gap-2 ${publishStep === 'setting-attribution' ? 'font-semibold' : ''}`}>
+                              {publishStep === 'setting-attribution' ? '⏳' : '⭕'} Transaction 2: Chapter Pricing Setup
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </>
                   ) : publishResult && !publishResult.success ? (

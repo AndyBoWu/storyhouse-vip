@@ -1,7 +1,7 @@
 import { createPublicClient, http, keccak256, toBytes } from 'viem';
 
-const BOOK_ID = '0x3873c0d1bcfa245773b13b694a49dac5b3f03ca2/project-phoenix';
-const CHAPTER_NUMBER = 6;
+const BOOK_ID = '0x3873c0d1bcfa245773b13b694a49dac5b3f03ca2/the-detectives-portal';
+const CHAPTER_NUMBER = 7;
 const HYBRID_REVENUE_CONTROLLER_V2_ADDRESS = '0x99dA048826Bbb8189FBB6C3e62EaA75d0fB36812';
 
 const client = createPublicClient({
@@ -29,7 +29,7 @@ const CHAPTER_ATTRIBUTION_ABI = [
 
 async function main() {
   try {
-    console.log('🔍 Checking Chapter 6 attribution status for Project Phoenix');
+    console.log('🔍 Checking Chapter 7 attribution status for The Detective\'s Portal');
     console.log('📘 Book:', BOOK_ID);
     console.log('📖 Chapter:', CHAPTER_NUMBER);
     console.log('');
@@ -47,7 +47,7 @@ async function main() {
     const [originalAuthor, sourceBookId, unlockPrice, isOriginalContent] = result;
     const isSet = originalAuthor !== '0x0000000000000000000000000000000000000000';
     
-    console.log('📊 Chapter 6 Attribution Status:');
+    console.log('📊 Chapter 7 Attribution Status:');
     console.log('  Original Author:', originalAuthor);
     console.log('  Source Book ID:', sourceBookId);
     console.log('  Unlock Price:', unlockPrice.toString(), 'wei');
@@ -58,7 +58,7 @@ async function main() {
     
     if (!isSet) {
       console.log('🚨 PROBLEM IDENTIFIED:');
-      console.log('   Chapter 6 has NO ATTRIBUTION set (originalAuthor is zero address)');
+      console.log('   Chapter 5 has NO ATTRIBUTION set (originalAuthor is zero address)');
       console.log('   This is why Bob\'s unlock transaction is failing with error 0xfb8f41b2');
       console.log('   The contract requires: attribution.originalAuthor != address(0)');
       console.log('');

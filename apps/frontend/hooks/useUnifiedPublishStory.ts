@@ -259,6 +259,10 @@ export function useUnifiedPublishStory() {
           const isBookRegistered = await checkBookRegistration(finalBookId)
           if (!isBookRegistered) {
             console.log('📚 Book not registered, registering first...')
+            
+            // Show alert to user about book registration
+            alert('📚 Book Registration Required\n\nYour book needs to be registered for revenue sharing. You will see a MetaMask transaction request.')
+            
             const registerResult = await registerBook({
               bookId: finalBookId,
               totalChapters: 100, // Current contract maximum (will be increased when contract is redeployed)
@@ -287,6 +291,9 @@ export function useUnifiedPublishStory() {
             originalAuthor: address
           })
           
+          // Alert user about the second transaction
+          alert(`💰 Chapter Pricing Setup\n\nNow you need to set the unlock price (${chapterPrice} TIP) for this chapter. You will see another MetaMask transaction request.`)
+          
           const attributionResult = await setChapterAttribution({
             bookId: finalBookId,
             chapterNumber: storyData.chapterNumber,
@@ -296,58 +303,66 @@ export function useUnifiedPublishStory() {
           })
           
           if (attributionResult.pending) {
-            console.log('⏳ Attribution transaction initiated, waiting for confirmation...')
+            console.log('⏳ Attribution transaction initiated:', attributionResult.message)
             
-            // Poll for attribution to be set on-chain
-            let attributionSet = false
-            let attempts = 0
-            const maxAttempts = 30 // 30 seconds timeout for faster error feedback
-            
-            while (!attributionSet && attempts < maxAttempts) {
-              attempts++
-              
-              try {
-                // Check attribution directly from blockchain
-                const checkResult = await apiClient.get(
-                  `/books/${encodeURIComponent(finalBookId)}/chapter/${storyData.chapterNumber}/attribution`
-                )
-                
-                // Check if attribution is set on blockchain
-                if (checkResult && checkResult.attribution && checkResult.attribution.isSet) {
-                  attributionSet = true
-                  console.log('✅ Chapter attribution confirmed on blockchain!', checkResult.attribution)
-                  break
-                }
-              } catch (checkError) {
-                // Attribution not yet set, continue waiting
-                console.log(`Waiting for attribution confirmation... (${attempts}/${maxAttempts})`)
-              }
-              
-              // Wait 1 second before next check
-              await new Promise(resolve => setTimeout(resolve, 1000))
-            }
-            
-            if (!attributionSet) {
-              // For paid chapters, this is critical
-              if (storyData.chapterNumber > 3) {
-                throw new Error(
-                  'Chapter pricing setup timed out after 30 seconds. The chapter was published and the pricing transaction may still be pending. ' +
-                  'Please check the transaction status in your wallet and wait for confirmation. You can verify the attribution status later.'
-                )
-              } else {
-                console.warn('⚠️ Attribution confirmation timed out for free chapter, continuing...')
-              }
-            }
-          } else if (attributionResult.success) {
-            console.log('✅ Chapter attribution set successfully!')
-          } else {
-            // For paid chapters, this is critical - throw error
+            // For paid chapters, give user a chance to complete the transaction
             if (storyData.chapterNumber > 3) {
-              throw new Error(`Failed to set chapter pricing: ${attributionResult.error || 'Unknown error'}. Readers won't be able to unlock this chapter.`)
+              // Wait a bit for user to interact with wallet
+              console.log('⏳ Waiting for user to approve transaction in wallet...')
+              await new Promise(resolve => setTimeout(resolve, 5000)) // Give user 5 seconds to approve
+              
+              // Then start polling for confirmation
+              let attributionSet = false
+              let attempts = 0
+              const maxAttempts = 25 // 25 seconds additional wait
+              
+              console.log('🔍 Checking if attribution was set on blockchain...')
+              
+              while (!attributionSet && attempts < maxAttempts) {
+                attempts++
+                
+                try {
+                  // Check attribution directly from blockchain
+                  const checkResult = await apiClient.get(
+                    `/books/${encodeURIComponent(finalBookId)}/chapter/${storyData.chapterNumber}/attribution`
+                  )
+                  
+                  // Check if attribution is set on blockchain
+                  if (checkResult && checkResult.attribution && checkResult.attribution.isSet) {
+                    attributionSet = true
+                    console.log('✅ Chapter attribution confirmed on blockchain!', checkResult.attribution)
+                    break
+                  }
+                } catch (checkError) {
+                  // Attribution not yet set, continue waiting
+                  if (attempts % 5 === 0) {
+                    console.log(`Still waiting for attribution confirmation... (${attempts}/${maxAttempts})`)
+                  }
+                }
+                
+                // Wait 1 second before next check
+                await new Promise(resolve => setTimeout(resolve, 1000))
+              }
+              
+              if (!attributionSet) {
+                // Attribution not confirmed yet, but don't fail the publish
+                console.warn('⚠️ Attribution transaction may still be pending')
+                alert(
+                  '⚠️ Chapter Pricing Transaction Pending\n\n' +
+                  'Your chapter has been published, but the pricing transaction may still be processing.\n\n' +
+                  'Please check your wallet to ensure the transaction was submitted. ' +
+                  'Readers will not be able to unlock this chapter until the pricing is confirmed on the blockchain.'
+                )
+              }
             } else {
-              // For free chapters, just warn
-              console.warn('⚠️ Failed to set chapter attribution for free chapter:', attributionResult.error)
+              // For free chapters, just continue
+              console.log('📝 Free chapter - attribution transaction initiated, continuing...')
             }
+          } else if (attributionResult.success && !attributionResult.pending) {
+            console.log('✅ Chapter attribution set successfully!')
+          } else if (!attributionResult.success) {
+            // Failed to initiate transaction
+            throw new Error(`Failed to set chapter pricing: ${attributionResult.error || 'Unknown error'}. The transaction could not be initiated.`)
           }
           
         } catch (attributionError) {
@@ -358,10 +373,18 @@ export function useUnifiedPublishStory() {
             // Clean up by trying to remove the saved chapter
             console.log('🧹 Attempting to clean up saved chapter due to attribution failure...')
             
+            try {
+              // Delete the chapter from backend
+              await apiClient.delete(`/chapters/${encodeURIComponent(finalBookId)}/${storyData.chapterNumber}`)
+              console.log('✅ Chapter cleaned up successfully')
+            } catch (cleanupError) {
+              console.error('❌ Failed to clean up chapter:', cleanupError)
+            }
+            
             // Re-throw with user-friendly message
             throw new Error(
-              `Failed to set chapter pricing in revenue contract. ${attributionError instanceof Error ? attributionError.message : 'Unknown error'}. ` +
-              `Please ensure your book is properly registered for revenue sharing before publishing paid chapters.`
+              `Failed to set chapter pricing. The chapter was not published. ${attributionError instanceof Error ? attributionError.message : 'Unknown error'}. ` +
+              `Please try again or contact support if the issue persists.`
             )
           } else {
             // For free chapters, log but continue
