@@ -300,15 +300,15 @@ export function useUnifiedPublishStory() {
               attempts++
               
               try {
-                // Check if attribution is now set by trying to read it from the contract
+                // Check attribution directly from blockchain
                 const checkResult = await apiClient.get(
-                  `/books/${encodeURIComponent(finalBookId)}/chapter/${storyData.chapterNumber}/info`
+                  `/books/${encodeURIComponent(finalBookId)}/chapter/${storyData.chapterNumber}/attribution`
                 )
                 
-                // If we can get the chapter info and it has pricing info, attribution is set
-                if (checkResult && checkResult.unlockPrice !== undefined) {
+                // Check if attribution is set on blockchain
+                if (checkResult && checkResult.attribution && checkResult.attribution.isSet) {
                   attributionSet = true
-                  console.log('✅ Chapter attribution confirmed on blockchain!')
+                  console.log('✅ Chapter attribution confirmed on blockchain!', checkResult.attribution)
                   break
                 }
               } catch (checkError) {
