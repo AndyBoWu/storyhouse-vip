@@ -180,7 +180,9 @@ export class ClientStoryProtocolService {
           nftMetadataHash: params.metadata.nftMetadataHash || ('0x0000000000000000000000000000000000000000000000000000000000000000' as Hash)
         },
         recipient: params.recipient,
-        txOptions: {}
+        txOptions: {
+          gas: 800000n // Sufficient gas for minting + IP registration + license attachment
+        }
       })
 
       console.log('✅ Unified registration completed:', result)
