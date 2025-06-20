@@ -35,8 +35,8 @@ export async function GET(
       attribution: {
         originalAuthor: attribution.originalAuthor,
         sourceBookId: attribution.sourceBookId,
-        unlockPrice: attribution.unlockPrice.toString(),
-        unlockPriceTIP: ethers.formatEther(attribution.unlockPrice),
+        unlockPrice: attribution.unlockPrice.toString(), // Convert BigInt to string
+        unlockPriceTIP: parseFloat(ethers.formatEther(attribution.unlockPrice)), // Convert to number
         isOriginalContent: attribution.isOriginalContent,
         isSet
       }
