@@ -124,6 +124,8 @@ export function useReadingLicense() {
     onError
   }: MintReadingLicenseParams) => {
     let chapterIpAssetId = passedChapterIpAssetId
+    let bytes32Id: string | undefined // Declare here so it's accessible in all scopes
+    
     if (!address) {
       const errorMsg = 'Wallet not connected'
       setError(errorMsg)
@@ -221,7 +223,9 @@ export function useReadingLicense() {
         
         try {
           // Parse the book ID to get the bytes32 format
-          const { bytes32Id, authorAddress } = parseBookId(bookId)
+          const parsed = parseBookId(bookId)
+          bytes32Id = parsed.bytes32Id // Now assigning to the outer scope variable
+          const authorAddress = parsed.authorAddress
           
           console.log('🔍 Book ID parsing:', {
             bookId,
@@ -302,8 +306,18 @@ export function useReadingLicense() {
           console.log('Transaction params:', {
             address: HYBRID_REVENUE_CONTROLLER_V2_ADDRESS,
             functionName: 'unlockChapter',
-            args: [bytes32Id, BigInt(chapterNumber)]
+            args: [bytes32Id, BigInt(chapterNumber)],
+            bookId: bookId,
+            parsedBookId: parseBookId(bookId)
           })
+          
+          // Extra debugging
+          console.log('🔍 Debug Info:')
+          console.log('  Raw bookId:', bookId)
+          console.log('  Bytes32 ID:', bytes32Id)
+          console.log('  Chapter:', chapterNumber)
+          console.log('  Contract:', HYBRID_REVENUE_CONTROLLER_V2_ADDRESS)
+          console.log('  User:', address)
           
           try {
             // Check if we have a valid signer
@@ -318,6 +332,17 @@ export function useReadingLicense() {
               signer: address
             })
             
+            // CRITICAL DEBUG - Check values BEFORE gas estimation
+            console.log('🔍 PRE-GAS ESTIMATION DEBUG:')
+            console.log('  HYBRID_REVENUE_CONTROLLER_V2_ADDRESS:', HYBRID_REVENUE_CONTROLLER_V2_ADDRESS)
+            console.log('  bytes32Id:', bytes32Id)
+            console.log('  bytes32Id is undefined?', bytes32Id === undefined)
+            console.log('  bytes32Id is null?', bytes32Id === null)
+            console.log('  bytes32Id is empty string?', bytes32Id === '')
+            console.log('  chapterNumber:', chapterNumber)
+            console.log('  BigInt(chapterNumber):', BigInt(chapterNumber).toString())
+            console.log('  address (user):', address)
+            
             // Add gas estimation to help with transaction
             const gasEstimate = await publicClient.estimateContractGas({
               address: HYBRID_REVENUE_CONTROLLER_V2_ADDRESS as Address,
@@ -328,6 +353,17 @@ export function useReadingLicense() {
             })
             
             console.log('⛽ Gas estimate:', gasEstimate.toString())
+            
+            // Add extra debugging to see exact parameters
+            console.log('🔍 CRITICAL DEBUG - Exact writeContract params:')
+            console.log('  address type:', typeof HYBRID_REVENUE_CONTROLLER_V2_ADDRESS)
+            console.log('  address value:', HYBRID_REVENUE_CONTROLLER_V2_ADDRESS)
+            console.log('  bytes32Id type:', typeof bytes32Id)
+            console.log('  bytes32Id value:', bytes32Id)
+            console.log('  chapterNumber type:', typeof chapterNumber)
+            console.log('  chapterNumber value:', chapterNumber)
+            console.log('  BigInt(chapterNumber):', BigInt(chapterNumber))
+            console.log('  gas:', gasEstimate)
             
             writeUnlockChapter({
               address: HYBRID_REVENUE_CONTROLLER_V2_ADDRESS as Address,
@@ -386,7 +422,7 @@ export function useReadingLicense() {
             // Log detailed debugging info
             console.error('🔴 Chapter not configured error - Debug info:', {
               bookId,
-              bytes32Id,
+              bytes32Id: bytes32Id || 'not_parsed',
               chapterNumber,
               contractAddress: HYBRID_REVENUE_CONTROLLER_V2_ADDRESS,
               senderAddress: address,
@@ -401,7 +437,7 @@ export function useReadingLicense() {
                 address: HYBRID_REVENUE_CONTROLLER_V2_ADDRESS as Address,
                 abi: HYBRID_V2_ABI,
                 functionName: 'chapterAttributions',
-                args: [bytes32Id, BigInt(chapterNumber)],
+                args: [bytes32Id || '0x0000000000000000000000000000000000000000000000000000000000000000', BigInt(chapterNumber)],
               })
               console.log('📖 Attribution data from contract:', attributionData)
             } catch (readError) {
@@ -438,6 +474,11 @@ export function useReadingLicense() {
             amount: mintParams.amount.toString(),
             receiver: mintParams.receiver
           })
+          
+          console.log('🔍 Story Protocol Debug:')
+          console.log('  Chapter IP Asset:', chapterIpAssetId)
+          console.log('  License Terms ID:', licenseTermsId)
+          console.log('  This is Step 2 - AFTER payment unlock')
           
           const result = await client.license.mintLicenseTokens(mintParams)
           

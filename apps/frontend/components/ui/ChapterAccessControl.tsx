@@ -53,13 +53,17 @@ export default function ChapterAccessControl({
   const [hasSuccessfulUnlock, setHasSuccessfulUnlock] = useState(false)
   const [retryError, setRetryError] = useState<string | null>(null)
   const [isAttributionReady, setIsAttributionReady] = useState(true) // Assume ready by default
+  const [isCheckingAccess, setIsCheckingAccess] = useState(true) // New loading state
 
   const pricing = getChapterPricing(chapterNumber)
 
   // Check access when component mounts or wallet connects (but don't override successful unlocks)
   useEffect(() => {
     if (bookId && chapterNumber && !hasSuccessfulUnlock) {
-      checkChapterAccess(bookId, chapterNumber).then(setAccessInfo)
+      setIsCheckingAccess(true)
+      checkChapterAccess(bookId, chapterNumber)
+        .then(setAccessInfo)
+        .finally(() => setIsCheckingAccess(false))
     }
   }, [bookId, chapterNumber, address, checkChapterAccess, hasSuccessfulUnlock])
 
@@ -117,10 +121,10 @@ export default function ChapterAccessControl({
               // Start monitoring for transaction completion
               const checkCompletion = async () => {
                 let attempts = 0
-                const maxAttempts = 60 // 60 seconds max
+                const maxAttempts = 30 // 30 seconds max - transactions usually confirm within 15-20s
                 
                 // Show immediate feedback
-                setRetryError('🔄 Transaction submitted! Waiting for blockchain confirmation...')
+                setRetryError('🔄 Transaction submitted! This usually takes 15-20 seconds...')
                 
                 const intervalId = setInterval(async () => {
                   attempts++
@@ -137,7 +141,7 @@ export default function ChapterAccessControl({
                     if (updatedAccessInfo?.canAccess || updatedAccessInfo?.alreadyUnlocked) {
                       console.log('✅ Chapter unlock detected on blockchain!')
                       clearInterval(intervalId)
-                      setRetryError(null)
+                      setRetryError('✨ Success! Loading your chapter...')
                       
                       // Update UI state
                       setAccessInfo({
@@ -164,37 +168,46 @@ export default function ChapterAccessControl({
                   
                   // Update progress message
                   if (attempts % 5 === 0) {
-                    setRetryError(`⏳ Still waiting for confirmation... (${attempts}s) - Transaction submitted successfully`)
+                    setRetryError(`⏳ Still confirming... (${attempts}s elapsed) - Your transaction is being processed`)
                   }
                   
                   // Stop checking after max attempts
                   if (attempts >= maxAttempts) {
-                    console.log('⏱️ Monitoring stopped after 60s. Transaction is confirmed on blockchain.')
+                    console.log(`⏱️ Monitoring stopped after ${maxAttempts}s.`)
                     clearInterval(intervalId)
-                    setRetryError('✅ Transaction completed! Please click "Check Status Now" or refresh the page to access your chapter.')
                     
-                    // One final check after a delay
-                    setTimeout(async () => {
-                      try {
-                        const finalCheck = await apiClient.get(
-                          `/books/${encodeURIComponent(bookId)}/chapter/${chapterNumber}/access?userAddress=${address}&t=${Date.now()}`
-                        )
-                        if (finalCheck?.canAccess || finalCheck?.alreadyUnlocked) {
-                          setRetryError(null)
-                          setAccessInfo({
-                            canAccess: true,
-                            alreadyUnlocked: true,
-                            unlockPrice: pricing.unlockPrice,
-                            isFree: false,
-                            transactionHash: 'blockchain_confirmed'
-                          })
-                          setHasSuccessfulUnlock(true)
+                    // Do a final check and auto-refresh if transaction was successful
+                    setRetryError('🔄 Finalizing unlock...')
+                    
+                    try {
+                      const finalCheck = await apiClient.get(
+                        `/books/${bookId}/chapter/${chapterNumber}/access?userAddress=${address}&t=${Date.now()}`
+                      )
+                      
+                      if (finalCheck?.canAccess || finalCheck?.alreadyUnlocked) {
+                        console.log('✅ Transaction confirmed! Auto-refreshing chapter...')
+                        setRetryError('✨ Success! Loading your chapter...')
+                        setAccessInfo({
+                          canAccess: true,
+                          alreadyUnlocked: true,
+                          unlockPrice: pricing.unlockPrice,
+                          isFree: false,
+                          transactionHash: 'blockchain_confirmed'
+                        })
+                        setHasSuccessfulUnlock(true)
+                        
+                        // Auto-refresh the chapter content
+                        setTimeout(() => {
                           onAccessGranted()
-                        }
-                      } catch (error) {
-                        console.log('Final check failed')
+                        }, 500)
+                      } else {
+                        // Transaction might still be pending
+                        setRetryError('⚠️ Transaction is taking longer than expected. Please refresh the page in a moment.')
                       }
-                    }, 3000)
+                    } catch (error) {
+                      console.log('Final check failed:', error)
+                      setRetryError('⚠️ Could not verify transaction status. Please refresh the page.')
+                    }
                   }
                 }, 1000) // Check every second
               }
@@ -261,7 +274,7 @@ export default function ChapterAccessControl({
                         // Use the same monitoring logic from the original success handler
                         const checkCompletion = async () => {
                           let attempts = 0
-                          const maxAttempts = 60
+                          const maxAttempts = 30
                           
                           setRetryError('🔄 Transaction submitted! Waiting for blockchain confirmation...')
                           
@@ -270,7 +283,7 @@ export default function ChapterAccessControl({
                             
                             try {
                               const updatedAccessInfo = await apiClient.get(
-                                `/books/${encodeURIComponent(bookId)}/chapter/${chapterNumber}/access?userAddress=${address}&t=${Date.now()}`
+                                `/books/${bookId}/chapter/${chapterNumber}/access?userAddress=${address}&t=${Date.now()}`
                               )
                               
                               if (updatedAccessInfo?.canAccess || updatedAccessInfo?.alreadyUnlocked) {
@@ -350,24 +363,67 @@ export default function ChapterAccessControl({
     }
   }
 
+  // Show loading state while checking access
+  if (isCheckingAccess && !hasSuccessfulUnlock) {
+    return (
+      <div className={`p-6 bg-gray-50 border border-gray-200 rounded-xl animate-pulse ${className}`}>
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
+            <svg className="w-6 h-6 text-gray-400 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 className="text-lg font-medium text-gray-700">Chapter {chapterNumber}: {chapterTitle}</h3>
+            <p className="text-sm text-gray-500 mt-1">Checking access status...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   // Check if current user is the author - authors have full access
   const isAuthor = address && authorAddress && address.toLowerCase() === authorAddress.toLowerCase()
   
   if (isAuthor) {
     return (
-      <div className={`p-4 bg-purple-50 border border-purple-200 rounded-lg ${className}`}>
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-            <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+      <div className={`p-6 bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-xl shadow-sm ${className}`}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center shadow-lg">
+              <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Chapter {chapterNumber}: {chapterTitle}</h3>
+              <div className="mt-1">
+                <p className="text-sm text-purple-700 font-medium">
+                  👑 Author Access
+                </p>
+                <p className="text-xs text-purple-600 mt-1">
+                  You have full access to all your chapters
+                </p>
+              </div>
+            </div>
           </div>
-          <div>
-            <h3 className="font-medium text-purple-900">Chapter {chapterNumber}: {chapterTitle}</h3>
-            <p className="text-sm text-purple-700">
-              Author Access - You have full access to your own content
-            </p>
+          <div className="flex flex-col items-end">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-100 text-purple-700 rounded-full text-xs font-semibold">
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+              Author
+            </span>
           </div>
+        </div>
+        <div className="mt-4 flex justify-center">
+          <button
+            onClick={onAccessGranted}
+            className="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105"
+          >
+            Start Reading →
+          </button>
         </div>
       </div>
     )
@@ -376,19 +432,61 @@ export default function ChapterAccessControl({
   // Already unlocked or free and can access
   if (accessInfo?.canAccess && (accessInfo.alreadyUnlocked || accessInfo.isFree)) {
     return (
-      <div className={`p-4 bg-green-50 border border-green-200 rounded-lg ${className}`}>
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-            <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+      <div className={`p-6 bg-gradient-to-r from-violet-50 to-purple-50 border border-violet-200 rounded-xl shadow-sm ${className}`}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-violet-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+              <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Chapter {chapterNumber}: {chapterTitle}</h3>
+              {pricing.isFree ? (
+                <p className="text-sm text-emerald-700 font-medium mt-1">
+                  ✨ Free Chapter - Enjoy your reading!
+                </p>
+              ) : (
+                <div className="mt-1">
+                  <p className="text-sm text-violet-700 font-medium">
+                    🎉 Premium Access Unlocked
+                  </p>
+                  <p className="text-xs text-violet-600 mt-1">
+                    📄 You own a personal reading license for this chapter
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
-          <div>
-            <h3 className="font-medium text-green-900">Chapter {chapterNumber}: {chapterTitle}</h3>
-            <p className="text-sm text-green-700">
-              {pricing.isFree ? 'Free to read!' : 'Unlocked - Ready to read'}
+          {!pricing.isFree && (
+            <div className="flex flex-col items-end">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-violet-100 text-violet-700 rounded-full text-xs font-semibold">
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                Licensed
+              </span>
+              <span className="text-xs text-violet-600 mt-1">0.5 TIP paid</span>
+            </div>
+          )}
+        </div>
+        {pricing.readReward > 0 && (
+          <div className="mt-3 p-2 bg-amber-50 border border-amber-200 rounded-lg">
+            <p className="text-xs text-amber-700 flex items-center gap-1">
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+              </svg>
+              Complete this chapter to earn {pricing.readReward} TIP tokens
             </p>
           </div>
+        )}
+        <div className="mt-4 flex justify-center">
+          <button
+            onClick={onAccessGranted}
+            className="px-6 py-2.5 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-lg hover:from-violet-700 hover:to-purple-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105"
+          >
+            Start Reading →
+          </button>
         </div>
       </div>
     )
@@ -541,7 +639,7 @@ export default function ChapterAccessControl({
           </button>
           
           {/* Show manual check button if waiting too long */}
-          {retryError && retryError.includes('Still waiting') && (
+          {retryError && (retryError.includes('Still') || retryError.includes('taking longer') || retryError.includes('verify')) && (
             <button
               onClick={async () => {
                 setRetryError('🔄 Checking status...')

@@ -498,18 +498,6 @@ export default function BookPage() {
         />
       )}
 
-      {/* Chapter Pricing Setup - shows for authors after book registration */}
-      {address && book.authorAddress && address.toLowerCase() === book.authorAddress.toLowerCase() && (
-        <ChapterPricingSetup
-          bookId={bookId}
-          authorAddress={book.authorAddress}
-          totalChapters={book.totalChapters || 0}
-          onComplete={() => {
-            // Refresh to update chapter states
-            fetchBookDetails()
-          }}
-        />
-      )}
 
       {/* Chapters Section */}
       <div className="bg-white rounded-lg shadow-lg p-6 mt-6">
@@ -542,30 +530,42 @@ export default function BookPage() {
               let statusBadge = null;
               
               if (isFree) {
-                chapterStyle = 'border-emerald-200 bg-emerald-50 border-l-4 border-l-emerald-500 shadow-sm';
-                iconComponent = <BookOpen className="w-5 h-5 text-emerald-600" />;
+                chapterStyle = 'border-emerald-200 bg-gradient-to-r from-emerald-50 to-green-50 border-l-4 border-l-emerald-500 shadow-sm hover:shadow-md transform hover:scale-[1.01] transition-all duration-200';
+                iconComponent = (
+                  <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-green-600 rounded-full flex items-center justify-center shadow-md">
+                    <BookOpen className="w-6 h-6 text-white" />
+                  </div>
+                );
                 statusBadge = (
-                  <span className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-semibold flex items-center gap-1">
-                    <CheckCircle className="w-3 h-3" />
+                  <span className="px-3 py-1.5 bg-gradient-to-r from-emerald-100 to-green-100 text-emerald-700 rounded-full text-xs font-semibold flex items-center gap-1.5 shadow-sm">
+                    <CheckCircle className="w-3.5 h-3.5" />
                     FREE
                   </span>
                 );
               } else if (isPaid && !isUnlocked) {
-                chapterStyle = 'border-slate-200 bg-slate-50 border-l-4 border-l-slate-400 shadow-sm';
-                iconComponent = <Lock className="w-5 h-5 text-slate-500" />;
+                chapterStyle = 'border-slate-200 bg-gradient-to-r from-slate-50 to-gray-50 border-l-4 border-l-slate-400 shadow-sm opacity-90 hover:opacity-100 hover:shadow-md transition-all duration-200';
+                iconComponent = (
+                  <div className="w-10 h-10 bg-gradient-to-br from-slate-400 to-gray-500 rounded-full flex items-center justify-center shadow-md">
+                    <Lock className="w-5 h-5 text-white" />
+                  </div>
+                );
                 statusBadge = (
-                  <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-semibold flex items-center gap-1">
-                    <Lock className="w-3 h-3" />
+                  <span className="px-3 py-1.5 bg-gradient-to-r from-slate-100 to-gray-100 text-slate-600 rounded-full text-xs font-semibold flex items-center gap-1.5 shadow-sm">
+                    <Lock className="w-3.5 h-3.5" />
                     LOCKED
                   </span>
                 );
               } else if (isPaid && isUnlocked) {
-                chapterStyle = 'border-violet-200 bg-violet-50 border-l-4 border-l-violet-500 shadow-sm ring-1 ring-violet-200/50';
-                iconComponent = <Unlock className="w-5 h-5 text-violet-600" />;
+                chapterStyle = 'border-violet-200 bg-gradient-to-r from-violet-50 to-purple-50 border-l-4 border-l-violet-500 shadow-md hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200';
+                iconComponent = (
+                  <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                    <CheckCircle className="w-6 h-6 text-white" />
+                  </div>
+                );
                 statusBadge = (
-                  <span className="px-3 py-1 bg-violet-100 text-violet-700 rounded-full text-xs font-semibold flex items-center gap-1">
-                    <CheckCircle className="w-3 h-3" />
-                    {isAuthor ? 'AUTHOR ACCESS' : 'UNLOCKED'}
+                  <span className="px-3 py-1.5 bg-gradient-to-r from-violet-100 to-purple-100 text-violet-700 rounded-full text-xs font-semibold flex items-center gap-1.5 shadow-sm">
+                    <CheckCircle className="w-3.5 h-3.5" />
+                    {isAuthor ? 'AUTHOR' : 'LICENSED'}
                   </span>
                 );
               }
@@ -576,17 +576,24 @@ export default function BookPage() {
                   href={`/book/${authorAddress}/${slug}/chapter/${chapter.number}`}
                   className="block"
                 >
-                  <div className={`border rounded-xl p-5 hover:shadow-lg transition-all duration-200 cursor-pointer ${chapterStyle}`}>
+                  <div className={`border rounded-xl p-6 hover:shadow-lg transition-all duration-200 cursor-pointer ${chapterStyle}`}>
                     <div className="flex justify-between items-start mb-3">
                       <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
+                        <div className="flex items-center gap-4 mb-3">
                           {iconComponent}
-                          <h3 className={`text-lg font-semibold ${
-                            isFree ? 'text-emerald-800' : 
-                            isPaid && isUnlocked ? 'text-violet-800' : 'text-slate-700'
-                          }`}>
-                            Chapter {chapter.number}: {chapter.title}
-                          </h3>
+                          <div className="flex-1">
+                            <h3 className={`text-xl font-semibold ${
+                              isFree ? 'text-emerald-800' : 
+                              isPaid && isUnlocked ? 'text-violet-800' : 'text-slate-700'
+                            }`}>
+                              Chapter {chapter.number}: {chapter.title}
+                            </h3>
+                            {isPaid && isUnlocked && !isAuthor && (
+                              <p className="text-sm text-violet-600 mt-1 font-medium">
+                                ✨ You own a reading license for this chapter
+                              </p>
+                            )}
+                          </div>
                         </div>
                         <p className={`text-sm leading-relaxed ${
                           isPaid && !isUnlocked ? 'text-slate-500' : 'text-slate-600'
@@ -602,17 +609,36 @@ export default function BookPage() {
                           </div>
                         )}
                         {isPaid && isUnlocked && !isAuthor && (
-                          <div className="mt-3 p-2 bg-violet-50 border border-violet-200 rounded-lg">
-                            <p className="text-violet-700 text-sm font-medium flex items-center gap-2">
-                              <CheckCircle className="w-4 h-4" />
-                              Premium Access Unlocked
-                            </p>
-                            <p className="text-violet-600 text-xs mt-1">
-                              📄 Personal reading license • Purchased for 0.5 TIP
-                            </p>
-                            <p className="text-violet-500 text-xs mt-1">
-                              👤 Original IP owned by {formatAddress(book.authorAddress || book.author)}
-                            </p>
+                          <div className="mt-4 p-3 bg-gradient-to-r from-violet-50 to-purple-50 border border-violet-200 rounded-lg">
+                            <div className="flex items-start gap-3">
+                              <div className="w-8 h-8 bg-gradient-to-br from-violet-400 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                <CheckCircle className="w-5 h-5 text-white" />
+                              </div>
+                              <div className="flex-1">
+                                <p className="text-violet-700 text-sm font-semibold">
+                                  Premium Access Unlocked
+                                </p>
+                                <div className="mt-2 space-y-1">
+                                  <p className="text-violet-600 text-xs flex items-center gap-1">
+                                    <span className="inline-block w-4 h-4 text-center">📄</span>
+                                    Personal reading license
+                                  </p>
+                                  <p className="text-violet-600 text-xs flex items-center gap-1">
+                                    <span className="inline-block w-4 h-4 text-center">💎</span>
+                                    Purchased for 0.5 TIP
+                                  </p>
+                                  <p className="text-violet-500 text-xs flex items-center gap-1">
+                                    <span className="inline-block w-4 h-4 text-center">👤</span>
+                                    Original IP by {formatAddress(book.authorAddress || book.author)}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="mt-3 pt-3 border-t border-violet-100">
+                              <p className="text-violet-600 text-xs font-medium text-center">
+                                Click to continue reading →
+                              </p>
+                            </div>
                           </div>
                         )}
                         {isPaid && isAuthor && (
