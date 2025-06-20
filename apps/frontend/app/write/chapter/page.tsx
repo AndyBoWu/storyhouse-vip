@@ -221,11 +221,7 @@ function ChapterWritingPageContent() {
       }
       
       // Show a brief message and then redirect
-      alert(
-        `✅ Chapter ${chapterNumber} published successfully!\n\n` +
-        `Your chapter is being configured on the blockchain. ` +
-        `This may take a few moments. You'll be redirected to your book page.`
-      )
+      alert(`✅ Chapter ${chapterNumber} published successfully!`)
     }
     
     // Always redirect to book page after publishing to show the new chapter
