@@ -1,4 +1,11 @@
 import { useState, useEffect } from 'react'
+
+// Fix BigInt serialization globally for this module
+if (typeof BigInt !== 'undefined' && !BigInt.prototype.toJSON) {
+  BigInt.prototype.toJSON = function() {
+    return this.toString()
+  }
+}
 import { useAccount } from 'wagmi'
 import { Address, Hash } from 'viem'
 import { apiClient } from '@/lib/api-client'
@@ -399,7 +406,7 @@ export function useUnifiedPublishStory() {
       }
 
       setPublishResult(unifiedResult)
-      console.log('🎉 Unified publishing complete!', unifiedResult)
+      console.log('🎉 Unified publishing complete!', JSON.stringify(unifiedResult, (_, v) => typeof v === 'bigint' ? v.toString() : v, 2))
       return unifiedResult
     } catch (error) {
       console.error('❌ Unified registration failed:', error)
