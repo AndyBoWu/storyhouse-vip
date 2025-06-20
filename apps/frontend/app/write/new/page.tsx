@@ -251,7 +251,7 @@ function NewStoryPageContent() {
           
           const revenueResult = await registerBookForRevenue({
             bookId: revenueBookId,
-            totalChapters: 1000000, // Very high limit to avoid restrictions
+            totalChapters: 100, // Current contract maximum (will be increased when contract is redeployed)
             isDerivative: false,
             ipfsMetadataHash: '' // We don't have IPFS metadata for this flow
           })
