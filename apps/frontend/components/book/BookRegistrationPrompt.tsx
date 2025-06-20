@@ -41,7 +41,7 @@ export function BookRegistrationPrompt({
     try {
       const result = await registerBook({
         bookId,
-        totalChapters: 10, // Default estimate
+        totalChapters: 1000000, // Very high limit to avoid restrictions
         isDerivative: false,
         parentBookId: '0x0000000000000000000000000000000000000000000000000000000000000000',
         ipfsMetadataHash: ''
