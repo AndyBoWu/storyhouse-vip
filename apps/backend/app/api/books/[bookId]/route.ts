@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getBookById } from '@/lib/storage/bookStorage';
-import { getR2Client } from '@/lib/r2';
+import { r2Client } from '@/lib/r2';
 
 export async function GET(
   request: Request,
@@ -82,7 +82,7 @@ export async function DELETE(
     }
 
     // Delete book and all its content from R2
-    const r2 = getR2Client();
+    const r2 = r2Client;
     
     // Delete all files under the book directory
     const bookPrefix = `books/${authorAddress}/${slug}/`;

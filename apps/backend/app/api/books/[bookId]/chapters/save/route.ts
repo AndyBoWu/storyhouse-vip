@@ -184,7 +184,7 @@ export async function POST(
         try {
           console.log('🔄 Registering book in HybridRevenueController...')
           // Use internal function call instead of HTTP request
-          const { POST: registerHybrid } = await import('../../register-hybrid/route')
+          const { POST: registerHybrid } = await import('../../../register-hybrid/route')
           const mockRequest = new NextRequest('http://localhost/api/books/register-hybrid', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
