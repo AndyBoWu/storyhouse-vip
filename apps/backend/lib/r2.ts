@@ -2,7 +2,7 @@ import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, List
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
 // Initialize R2 client with proper configuration for Cloudflare R2
-let r2ClientInstance: S3Client
+let r2ClientInstance: S3Client | null = null
 
 function initializeR2Client(): S3Client {
   // Validate environment variables
@@ -74,6 +74,15 @@ function initializeR2Client(): S3Client {
 
 // Lazy initialization of R2 client
 function getR2Client(): S3Client {
+  // Check if environment variables are available
+  const hasRequiredEnvVars = process.env.R2_ENDPOINT && process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY
+  
+  if (!hasRequiredEnvVars) {
+    // During build time, environment variables might not be available
+    // Throw a more descriptive error only when actually trying to use R2
+    throw new Error('R2 environment variables not configured. Please set R2_ENDPOINT, R2_ACCESS_KEY_ID, and R2_SECRET_ACCESS_KEY.')
+  }
+  
   if (!r2ClientInstance) {
     r2ClientInstance = initializeR2Client()
   }
@@ -117,9 +126,9 @@ export const r2Client = {
   }
 }
 
-// Clean environment variables for bucket configuration
-const BUCKET_NAME = (process.env.R2_BUCKET_NAME || '').trim().replace(/^["']|["']$/g, '').replace(/[\r\n]/g, '')
-const PUBLIC_URL = (process.env.R2_PUBLIC_URL || '').trim().replace(/^["']|["']$/g, '').replace(/[\r\n]/g, '')
+// Clean environment variables for bucket configuration (handle missing env vars gracefully during build)
+const BUCKET_NAME = process.env.R2_BUCKET_NAME ? process.env.R2_BUCKET_NAME.trim().replace(/^["']|["']$/g, '').replace(/[\r\n]/g, '') : ''
+const PUBLIC_URL = process.env.R2_PUBLIC_URL ? process.env.R2_PUBLIC_URL.trim().replace(/^["']|["']$/g, '').replace(/[\r\n]/g, '') : ''
 
 export interface UploadOptions {
   contentType?: string
@@ -522,6 +531,17 @@ export class R2Service {
       const cleanAccessKeyId = (process.env.R2_ACCESS_KEY_ID || '').replace(/[^a-zA-Z0-9]/g, '')
       const cleanSecretAccessKey = (process.env.R2_SECRET_ACCESS_KEY || '').replace(/[^a-zA-Z0-9]/g, '')
       const cleanEndpoint = (process.env.R2_ENDPOINT || '').replace(/[^a-zA-Z0-9.-]/g, '')
+      
+      // Check if we have the required credentials
+      if (!cleanAccessKeyId || !cleanSecretAccessKey || !cleanEndpoint) {
+        console.warn('⚠️ R2 credentials not available for list operation')
+        return {
+          Contents: [],
+          CommonPrefixes: [],
+          KeyCount: 0,
+          IsTruncated: false
+        }
+      }
 
       console.log('🔧 Creating fresh S3 client for list operation...')
       
