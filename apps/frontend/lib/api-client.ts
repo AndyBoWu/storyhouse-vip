@@ -129,8 +129,9 @@ export const apiClient = {
     return apiRequest(`/api/stories/${walletAddress}/${storySlug}/chapters`)
   },
   
-  async getChapter(storyId: string, chapterNumber: number) {
-    return apiRequest(`/api/chapters/${encodeURIComponent(storyId)}/${chapterNumber}`)
+  async getChapter(storyId: string, chapterNumber: number, userAddress?: string) {
+    const params = userAddress ? `?userAddress=${userAddress}` : ''
+    return apiRequest(`/api/chapters/${encodeURIComponent(storyId)}/${chapterNumber}${params}`)
   },
   
   // Upload operations

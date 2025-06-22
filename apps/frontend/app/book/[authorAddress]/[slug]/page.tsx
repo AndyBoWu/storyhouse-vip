@@ -100,37 +100,32 @@ export default function BookPage() {
       if (chaptersResponse.success && chaptersResponse.data) {
         // Load actual chapter details and check unlock status
         const chapterPromises = chaptersResponse.data.chapters.map(async (chapterNum: number) => {
-          try {
-            const chapterResponse = await apiClient.getChapter(bookId, chapterNum);
-            
-            // Check if user has unlocked this chapter
-            let isUnlocked = false;
-            
-            // TEMPORARY: Simulate Bob having unlocked chapters 4-10 for demonstration
-            const isBob = address && address.toLowerCase() === '0x71b93d154886c297f4b6e6219c47d378f6ac6a70';
-            if (isBob && chapterNum >= 4 && chapterNum <= 10) {
-              console.log(`🎭 DEMO: Simulating Bob has unlocked chapter ${chapterNum}`);
-              isUnlocked = true;
-            } else if (address && chapterNum >= 4) {
-              try {
-                console.log(`🔍 Checking access for chapter ${chapterNum} with address:`, address);
-                // Use the unlock endpoint to check access status
-                const params = new URLSearchParams();
-                params.append('userAddress', address);
-                
-                const accessResponse = await apiClient.get(`/books/${encodeURIComponent(bookId)}/chapter/${chapterNum}/unlock?${params}`);
-                console.log(`📊 Chapter ${chapterNum} access check response:`, accessResponse);
-                
-                if (accessResponse.success && accessResponse.data) {
-                  isUnlocked = accessResponse.data.alreadyUnlocked || accessResponse.data.canAccess;
-                }
-              } catch (accessError) {
-                console.log(`Could not check access for chapter ${chapterNum}:`, accessError);
-                isUnlocked = false;
+          // First, check unlock status (this should always work)
+          let isUnlocked = false;
+          if (address && chapterNum >= 4) {
+            try {
+              console.log(`🔍 Checking access for chapter ${chapterNum} with address:`, address);
+              const params = new URLSearchParams();
+              params.append('userAddress', address);
+              params.append('t', Date.now().toString()); // Cache buster
+              
+              const accessResponse = await apiClient.get(`/books/${encodeURIComponent(bookId)}/chapter/${chapterNum}/unlock?${params}`);
+              console.log(`📊 Chapter ${chapterNum} access check response:`, accessResponse);
+              
+              if (accessResponse.success && accessResponse.data) {
+                isUnlocked = accessResponse.data.alreadyUnlocked || accessResponse.data.canAccess;
               }
-            } else if (chapterNum <= 3) {
-              isUnlocked = true; // Free chapters are always unlocked
+            } catch (accessError) {
+              console.log(`Could not check access for chapter ${chapterNum}:`, accessError);
+              isUnlocked = false;
             }
+          } else if (chapterNum <= 3) {
+            isUnlocked = true; // Free chapters are always unlocked
+          }
+
+          // Then try to load chapter content
+          try {
+            const chapterResponse = await apiClient.getChapter(bookId, chapterNum, address);
             
             return {
               number: chapterNum,
@@ -144,8 +139,8 @@ export default function BookPage() {
               unlocked: isUnlocked
             };
           } catch (error) {
-            console.error(`Failed to load chapter ${chapterNum}:`, error);
-            // Fallback to placeholder data if chapter fails to load
+            console.error(`Failed to load chapter ${chapterNum} content:`, error);
+            // Return placeholder with unlock status
             return {
               number: chapterNum,
               title: `Chapter ${chapterNum}`,
@@ -154,7 +149,8 @@ export default function BookPage() {
               earnings: 0,
               wordCount: 0,
               status: 'published' as const,
-              createdAt: new Date().toISOString()
+              createdAt: new Date().toISOString(),
+              unlocked: isUnlocked // Always include unlock status
             };
           }
         });

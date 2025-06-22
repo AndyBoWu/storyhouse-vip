@@ -3,6 +3,7 @@ import { StoryClient, StoryConfig } from '@story-protocol/core-sdk'
 import { custom } from 'viem'
 import { getStoryProtocolConfig } from '../config/blockchain'
 import { chapterUnlockStorage } from '../storage/chapterUnlockStorage'
+import { persistentChapterUnlockStorage } from '../storage/persistentChapterUnlockStorage'
 import { STORYHOUSE_CONTRACTS, HYBRID_REVENUE_CONTROLLER_V2_ABI } from '../contracts/storyhouse'
 import { parseBookId } from '@/lib/contracts/hybridRevenueController'
 
@@ -102,22 +103,56 @@ export class ChapterAccessService {
     if (this.hybridRevenueControllerV2) {
       try {
         const { bytes32Id } = parseBookId(bookId)
+        
+        console.log('🔍 Checking HybridRevenueControllerV2 unlock status:', {
+          contract: STORYHOUSE_CONTRACTS.HYBRID_REVENUE_CONTROLLER_V2,
+          userAddress,
+          bookId,
+          bytes32Id,
+          chapterNumber,
+          provider: this.provider.connection.url
+        })
+        
         const hasUnlocked = await this.hybridRevenueControllerV2.hasUnlockedChapter(
           userAddress,
           bytes32Id,
           chapterNumber
         )
         
+        console.log(`📊 Contract hasUnlockedChapter result: ${hasUnlocked}`, {
+          userAddress,
+          bytes32Id,
+          chapterNumber,
+          result: hasUnlocked
+        })
+        
         if (hasUnlocked) {
           console.log(`✅ User ${userAddress} has unlocked chapter ${chapterNumber} on-chain`)
           return { hasAccess: true, reason: 'blockchain_unlocked' }
+        } else {
+          console.log(`❌ User ${userAddress} has NOT unlocked chapter ${chapterNumber} according to contract`)
         }
       } catch (error) {
         console.error('Error checking blockchain unlock status:', error)
+        console.error('Stack trace:', error instanceof Error ? error.stack : 'No stack trace')
       }
+    } else {
+      console.warn('⚠️ HybridRevenueControllerV2 not initialized')
     }
     
-    // Check in-memory storage (temporary solution)
+    // Check persistent storage first
+    const isPersistentUnlocked = persistentChapterUnlockStorage.hasUnlocked(
+      userAddress,
+      bookId,
+      chapterNumber
+    )
+    
+    if (isPersistentUnlocked) {
+      console.log(`✅ User ${userAddress} has unlocked chapter ${chapterNumber} (from persistent storage)`)
+      return { hasAccess: true, reason: 'unlocked' }
+    }
+    
+    // Check in-memory storage as fallback
     const isUnlocked = chapterUnlockStorage.hasUnlocked(
       userAddress,
       bookId,
@@ -125,6 +160,7 @@ export class ChapterAccessService {
     )
     
     if (isUnlocked) {
+      console.log(`✅ User ${userAddress} has unlocked chapter ${chapterNumber} (from memory storage)`)
       return { hasAccess: true, reason: 'unlocked' }
     }
 
@@ -223,19 +259,25 @@ export class ChapterAccessService {
   /**
    * Record a verified chapter unlock
    */
-  recordUnlock(
+  async recordUnlock(
     userAddress: string,
     bookId: string,
     chapterNumber: number,
-    transactionHash: string
-  ): void {
-    chapterUnlockStorage.recordUnlock({
+    transactionHash: string,
+    licenseTokenId?: string
+  ): Promise<void> {
+    const unlockData = {
       userAddress,
       bookId,
       chapterNumber,
       transactionHash,
+      licenseTokenId,
       isFree: chapterNumber <= 3
-    })
+    }
+    
+    // Record in both storages
+    chapterUnlockStorage.recordUnlock(unlockData)
+    await persistentChapterUnlockStorage.recordUnlock(unlockData)
   }
 }
 

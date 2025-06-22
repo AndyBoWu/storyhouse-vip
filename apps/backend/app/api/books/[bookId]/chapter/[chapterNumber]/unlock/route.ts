@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { chapterUnlockStorage } from '@/lib/storage/chapterUnlockStorage'
 import { BookStorageService } from '@/lib/storage/bookStorage'
 import { chapterAccessService } from '@/lib/services/chapterAccessService'
 
@@ -78,13 +77,13 @@ export async function POST(
     // For free chapters, grant immediate access
     if (isFree) {
       // Record the free unlock
-      chapterUnlockStorage.recordUnlock({
-        userAddress: body.userAddress,
+      await chapterAccessService.recordUnlock(
+        body.userAddress,
         bookId,
-        chapterNumber: chapterNum,
-        isFree: true,
-        transactionHash: undefined
-      })
+        chapterNum,
+        undefined, // No transaction hash for free chapters
+        undefined  // No license token for free chapters
+      )
       
       return NextResponse.json({
         success: true,
@@ -134,12 +133,13 @@ export async function POST(
 
       console.log('✅ Transaction verified successfully')
       
-      // Record the verified unlock
-      chapterAccessService.recordUnlock(
+      // Record the verified unlock with license token ID
+      await chapterAccessService.recordUnlock(
         body.userAddress,
         bookId,
         chapterNum,
-        body.transactionHash
+        body.transactionHash,
+        body.licenseTokenId
       )
 
       // If license token ID provided, store it for future verification
