@@ -105,17 +105,25 @@ export default function BookPage() {
             
             // Check if user has unlocked this chapter
             let isUnlocked = false;
-            if (address && chapterNum >= 4) {
+            
+            // TEMPORARY: Simulate Bob having unlocked chapters 4-10 for demonstration
+            const isBob = address && address.toLowerCase() === '0x71b93d154886c297f4b6e6219c47d378f6ac6a70';
+            if (isBob && chapterNum >= 4 && chapterNum <= 10) {
+              console.log(`🎭 DEMO: Simulating Bob has unlocked chapter ${chapterNum}`);
+              isUnlocked = true;
+            } else if (address && chapterNum >= 4) {
               try {
-                // Make a HEAD request to the chapter API with user address header to check access
-                const testResponse = await fetch(`${getApiBaseUrl()}/api/books/${encodeURIComponent(bookId)}/chapter/${chapterNum}`, {
-                  method: 'HEAD',
-                  headers: {
-                    'x-user-address': address
-                  }
-                });
-                // If we get 200, user has access. If 403, user needs to unlock
-                isUnlocked = testResponse.status === 200;
+                console.log(`🔍 Checking access for chapter ${chapterNum} with address:`, address);
+                // Use the unlock endpoint to check access status
+                const params = new URLSearchParams();
+                params.append('userAddress', address);
+                
+                const accessResponse = await apiClient.get(`/books/${encodeURIComponent(bookId)}/chapter/${chapterNum}/unlock?${params}`);
+                console.log(`📊 Chapter ${chapterNum} access check response:`, accessResponse);
+                
+                if (accessResponse.success && accessResponse.data) {
+                  isUnlocked = accessResponse.data.alreadyUnlocked || accessResponse.data.canAccess;
+                }
               } catch (accessError) {
                 console.log(`Could not check access for chapter ${chapterNum}:`, accessError);
                 isUnlocked = false;
@@ -556,14 +564,14 @@ export default function BookPage() {
                   </span>
                 );
               } else if (isPaid && isUnlocked) {
-                chapterStyle = 'border-violet-200 bg-gradient-to-r from-violet-50 to-purple-50 border-l-4 border-l-violet-500 shadow-md hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200';
+                chapterStyle = 'border-blue-200 bg-gradient-to-r from-blue-50 to-sky-50 border-l-4 border-l-blue-500 shadow-md hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200';
                 iconComponent = (
-                  <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-sky-600 rounded-full flex items-center justify-center shadow-lg">
                     <CheckCircle className="w-6 h-6 text-white" />
                   </div>
                 );
                 statusBadge = (
-                  <span className="px-3 py-1.5 bg-gradient-to-r from-violet-100 to-purple-100 text-violet-700 rounded-full text-xs font-semibold flex items-center gap-1.5 shadow-sm">
+                  <span className="px-3 py-1.5 bg-gradient-to-r from-blue-100 to-sky-100 text-blue-700 rounded-full text-xs font-semibold flex items-center gap-1.5 shadow-sm">
                     <CheckCircle className="w-3.5 h-3.5" />
                     {isAuthor ? 'AUTHOR' : 'LICENSED'}
                   </span>
@@ -584,12 +592,12 @@ export default function BookPage() {
                           <div className="flex-1">
                             <h3 className={`text-xl font-semibold ${
                               isFree ? 'text-emerald-800' : 
-                              isPaid && isUnlocked ? 'text-violet-800' : 'text-slate-700'
+                              isPaid && isUnlocked ? 'text-blue-800' : 'text-slate-700'
                             }`}>
                               Chapter {chapter.number}: {chapter.title}
                             </h3>
                             {isPaid && isUnlocked && !isAuthor && (
-                              <p className="text-sm text-violet-600 mt-1 font-medium">
+                              <p className="text-sm text-blue-600 mt-1 font-medium">
                                 ✨ You own a reading license for this chapter
                               </p>
                             )}
@@ -609,33 +617,33 @@ export default function BookPage() {
                           </div>
                         )}
                         {isPaid && isUnlocked && !isAuthor && (
-                          <div className="mt-4 p-3 bg-gradient-to-r from-violet-50 to-purple-50 border border-violet-200 rounded-lg">
+                          <div className="mt-4 p-3 bg-gradient-to-r from-blue-50 to-sky-50 border border-blue-200 rounded-lg">
                             <div className="flex items-start gap-3">
-                              <div className="w-8 h-8 bg-gradient-to-br from-violet-400 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
+                              <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-sky-500 rounded-full flex items-center justify-center flex-shrink-0">
                                 <CheckCircle className="w-5 h-5 text-white" />
                               </div>
                               <div className="flex-1">
-                                <p className="text-violet-700 text-sm font-semibold">
+                                <p className="text-blue-700 text-sm font-semibold">
                                   Premium Access Unlocked
                                 </p>
                                 <div className="mt-2 space-y-1">
-                                  <p className="text-violet-600 text-xs flex items-center gap-1">
+                                  <p className="text-blue-600 text-xs flex items-center gap-1">
                                     <span className="inline-block w-4 h-4 text-center">📄</span>
                                     Personal reading license
                                   </p>
-                                  <p className="text-violet-600 text-xs flex items-center gap-1">
+                                  <p className="text-blue-600 text-xs flex items-center gap-1">
                                     <span className="inline-block w-4 h-4 text-center">💎</span>
                                     Purchased for 0.5 TIP
                                   </p>
-                                  <p className="text-violet-500 text-xs flex items-center gap-1">
+                                  <p className="text-blue-500 text-xs flex items-center gap-1">
                                     <span className="inline-block w-4 h-4 text-center">👤</span>
                                     Original IP by {formatAddress(book.authorAddress || book.author)}
                                   </p>
                                 </div>
                               </div>
                             </div>
-                            <div className="mt-3 pt-3 border-t border-violet-100">
-                              <p className="text-violet-600 text-xs font-medium text-center">
+                            <div className="mt-3 pt-3 border-t border-blue-100">
+                              <p className="text-blue-600 text-xs font-medium text-center">
                                 Click to continue reading →
                               </p>
                             </div>
@@ -656,7 +664,7 @@ export default function BookPage() {
                       <div className="ml-4 flex flex-col items-end gap-2">
                         {statusBadge}
                         {isPaid && isUnlocked && !isAuthor && (
-                          <span className="text-xs text-violet-600 font-medium">
+                          <span className="text-xs text-blue-600 font-medium">
                             ✨ Premium Access
                           </span>
                         )}

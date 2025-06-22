@@ -142,14 +142,21 @@ export class BookIndexService {
             // Count chapters efficiently
             const chapterCount = await this.getChapterCount(authorAddress, bookSlug)
             
+            // Generate the correct cover URL using the API endpoint
+            const bookId = `${authorAddress}/${bookSlug}`
+            // For local development, use localhost:3002
+            const isDev = process.env.NODE_ENV === 'development'
+            const baseUrl = isDev ? 'http://localhost:3002' : (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api-testnet.storyhouse.vip')
+            const coverUrl = `${baseUrl}/api/books/${encodeURIComponent(bookId)}/cover`
+            
             const bookEntry: BookIndexEntry = {
-              id: `${authorAddress}/${bookSlug}`,
+              id: bookId,
               title: metadata.title || 'Untitled',
               author: metadata.author || 'Unknown',
               authorAddress,
               slug: bookSlug,
               chapterCount,
-              coverUrl: metadata.coverUrl,
+              coverUrl,
               description: metadata.description,
               tags: metadata.tags || [],
               status: metadata.status || 'published',
