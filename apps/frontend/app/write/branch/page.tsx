@@ -277,8 +277,14 @@ function BranchStoryPageContent() {
             animate={{ opacity: 1, y: 0 }}
             className="mb-8"
           >
-            <div className="flex items-center gap-4 mb-8">
-              <h2 className="text-2xl font-bold text-gray-800">🌿 Branch & Remix Stories</h2>
+            <div className="text-center mb-8">
+              <h1 className="text-4xl font-bold text-gray-800 mb-4">
+                🌿 Branch & Remix Stories
+              </h1>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                Choose a story to branch from and create your own unique continuation. 
+                Revenue is automatically shared with original authors.
+              </p>
             </div>
 
             {/* Info Box */}
@@ -372,7 +378,6 @@ function BranchStoryPageContent() {
 
                 {/* Story Selection with Book Cards */}
                 <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4">📚 Select a story to branch:</h3>
 
                   {isLoadingStories ? (
                     <div className="text-center py-12">
@@ -386,7 +391,7 @@ function BranchStoryPageContent() {
                       <p className="text-gray-500 mb-8 text-lg">Stories must be marked as remixable by their authors.</p>
                     </div>
                   ) : (
-                    <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                       {filteredStories.map((story) => (
                         <motion.div
                           key={story.id}
@@ -432,7 +437,9 @@ function BranchStoryPageContent() {
                               <h3 className="text-base font-semibold text-gray-800 line-clamp-2 mb-1">
                                 {story.title}
                               </h3>
-                              <p className="text-sm text-gray-600 mb-2">by {story.authorName}</p>
+                              <p className="text-sm text-gray-600 mb-2">
+                                <span className="text-gray-500">by</span> {story.authorName}
+                              </p>
                               
                               <div className="flex items-center gap-2 text-xs text-gray-600">
                                 <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
@@ -473,10 +480,28 @@ function BranchStoryPageContent() {
                 {/* Chapter Selection */}
                 {selectedStory && branchingInfo && (
                   <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    className="bg-white rounded-xl shadow-lg p-6 mb-6"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl shadow-lg p-6 mb-6 border-2 border-green-200"
                   >
+                    <div className="flex items-start gap-4 mb-6">
+                      <div className="w-20 h-28 bg-gradient-to-br from-green-500 to-emerald-600 rounded flex items-center justify-center shadow-md flex-shrink-0">
+                        {selectedStory.coverUrl ? (
+                          <img
+                            src={selectedStory.coverUrl}
+                            alt={selectedStory.title}
+                            className="w-full h-full object-cover rounded"
+                          />
+                        ) : (
+                          <span className="text-white text-2xl font-bold">{selectedStory.title.charAt(0)}</span>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-xl font-bold text-gray-800 mb-1">{selectedStory.title}</h3>
+                        <p className="text-sm text-gray-600 mb-2">by {selectedStory.authorName}</p>
+                        <p className="text-sm text-gray-500">{selectedStory.preview}</p>
+                      </div>
+                    </div>
                     <h3 className="text-lg font-semibold text-gray-800 mb-4">
                       📍 Choose your branching point:
                     </h3>
@@ -506,8 +531,8 @@ function BranchStoryPageContent() {
                 {/* Branch Details */}
                 {selectedStory && selectedChapter && (
                   <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
                     className="bg-white rounded-xl shadow-lg p-6"
                   >
                     <h3 className="text-lg font-semibold text-gray-800 mb-4">
