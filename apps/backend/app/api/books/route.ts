@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { ListObjectsV2Command, GetObjectCommand } from '@aws-sdk/client-s3'
 import { S3Client } from '@aws-sdk/client-s3'
+import { bookIndexService } from '@/lib/services/bookIndexService'
 
 // Use the cleaned R2 client initialization with header sanitization
 let r2Client: S3Client
@@ -154,9 +155,101 @@ export interface RegisteredBook {
 }
 
 /**
- * GET /api/books - Fetch all registered books from R2
+ * GET /api/books - Fetch all registered books from R2 using index
  */
 export async function GET(request: NextRequest) {
+  // Check if index mode is disabled (for testing/comparison)
+  const useIndex = request.nextUrl.searchParams.get('useIndex') !== 'false'
+  
+  if (useIndex) {
+    return getFromIndex(request)
+  } else {
+    return getFromR2Direct(request)
+  }
+}
+
+/**
+ * Optimized GET using book index
+ */
+async function getFromIndex(request: NextRequest) {
+  try {
+    console.log('📚 Fetching books from index...')
+    const startTime = Date.now()
+    
+    const { searchParams } = new URL(request.url)
+    const authorAddress = searchParams.get('author')
+    
+    // Try to get the index
+    let index = await bookIndexService.getBookIndex()
+    
+    // If no index exists or it's stale, rebuild it
+    if (!index || bookIndexService.isIndexStale(index)) {
+      console.log('🔄 Index is stale or missing, rebuilding...')
+      await bookIndexService.updateBookIndex()
+      index = await bookIndexService.getBookIndex()
+    }
+    
+    if (!index) {
+      console.error('❌ Failed to create or retrieve book index')
+      return getFromR2Direct(request) // Fallback to direct R2
+    }
+    
+    // Filter books if author is specified
+    let books = index.books
+    if (authorAddress) {
+      books = books.filter(book => 
+        book.authorAddress.toLowerCase() === authorAddress.toLowerCase()
+      )
+    }
+    
+    // Map to RegisteredBook format for compatibility
+    const registeredBooks: RegisteredBook[] = books.map(book => ({
+      id: book.id,
+      title: book.title,
+      description: book.description || '',
+      author: book.authorAddress,
+      authorName: book.authorAddress.slice(-4) || 'Unknown',
+      genres: book.tags || [],
+      moods: [],
+      emojis: [],
+      coverUrl: book.coverUrl || `${process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api-testnet.storyhouse.vip'}/api/books/${encodeURIComponent(book.id)}/cover`,
+      createdAt: book.createdAt,
+      registeredAt: book.createdAt,
+      ipAssetId: undefined,
+      tokenId: undefined,
+      transactionHash: undefined,
+      chapters: book.chapterCount,
+      slug: book.slug
+    }))
+    
+    const duration = Date.now() - startTime
+    console.log(`✅ Loaded ${registeredBooks.length} books from index in ${duration}ms`)
+    
+    const response = NextResponse.json({
+      success: true,
+      books: registeredBooks,
+      count: registeredBooks.length,
+      loadTime: duration,
+      source: 'index',
+      indexVersion: index.version,
+      indexLastUpdated: index.lastUpdated
+    })
+    
+    // Set cache headers for R2 edge caching
+    response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=300, stale-while-revalidate=600')
+    
+    return response
+    
+  } catch (error) {
+    console.error('❌ Error fetching from index, falling back to direct R2:', error)
+    return getFromR2Direct(request)
+  }
+}
+
+/**
+ * Original GET implementation - direct from R2
+ */
+async function getFromR2Direct(request: NextRequest) {
   try {
     console.log('📚 Fetching registered books from R2...')
     
