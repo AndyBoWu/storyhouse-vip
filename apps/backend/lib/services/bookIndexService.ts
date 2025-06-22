@@ -62,6 +62,14 @@ function initializeR2Client(): S3Client {
 }
 
 function getR2Client(): S3Client {
+  // Check if environment variables are available
+  const hasRequiredEnvVars = process.env.R2_ENDPOINT && process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY && process.env.R2_BUCKET_NAME
+  
+  if (!hasRequiredEnvVars) {
+    // During build time, environment variables might not be available
+    throw new Error('R2 environment variables not configured. Please set R2_ENDPOINT, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, and R2_BUCKET_NAME.')
+  }
+  
   if (!r2ClientInstance) {
     r2ClientInstance = initializeR2Client()
   }
@@ -69,30 +77,38 @@ function getR2Client(): S3Client {
 }
 
 export class BookIndexService {
-  private client: S3Client
-  private bucketName: string
+  private client: S3Client | null = null
+  private bucketName: string | null = null
   private indexKey = 'books/index.json'
 
   constructor() {
-    this.client = getR2Client()
-    this.bucketName = process.env.R2_BUCKET_NAME!
+    // Lazy initialization - don't initialize R2 client in constructor
+    // This allows the module to load during build time
+  }
+  
+  private ensureInitialized() {
+    if (!this.client || !this.bucketName) {
+      this.client = getR2Client()
+      this.bucketName = process.env.R2_BUCKET_NAME!
+    }
   }
 
   /**
    * Fetches all books metadata from R2 and builds a comprehensive index
    */
   async fetchAllBooksMetadata(): Promise<BookIndexEntry[]> {
+    this.ensureInitialized()
     const books: BookIndexEntry[] = []
     
     try {
       // List all author directories
       const listCommand = new ListObjectsV2Command({
-        Bucket: this.bucketName,
+        Bucket: this.bucketName!,
         Prefix: 'books/',
         Delimiter: '/'
       })
       
-      const listResponse = await this.client.send(listCommand)
+      const listResponse = await this.client!.send(listCommand)
       
       if (!listResponse.CommonPrefixes) {
         return books
@@ -106,12 +122,12 @@ export class BookIndexService {
         
         // List all books for this author
         const authorBooksCommand = new ListObjectsV2Command({
-          Bucket: this.bucketName,
+          Bucket: this.bucketName!,
           Prefix: `books/${authorAddress}/`,
           Delimiter: '/'
         })
         
-        const authorBooksResponse = await this.client.send(authorBooksCommand)
+        const authorBooksResponse = await this.client!.send(authorBooksCommand)
         
         if (!authorBooksResponse.CommonPrefixes) {
           return []
@@ -128,11 +144,11 @@ export class BookIndexService {
           try {
             // Fetch book metadata
             const metadataCommand = new GetObjectCommand({
-              Bucket: this.bucketName,
+              Bucket: this.bucketName!,
               Key: `books/${authorAddress}/${bookSlug}/metadata.json`
             })
             
-            const metadataResponse = await this.client.send(metadataCommand)
+            const metadataResponse = await this.client!.send(metadataCommand)
             const metadataString = await metadataResponse.Body?.transformToString()
             
             if (!metadataString) return null
@@ -190,12 +206,12 @@ export class BookIndexService {
   private async getChapterCount(authorAddress: string, bookSlug: string): Promise<number> {
     try {
       const listCommand = new ListObjectsV2Command({
-        Bucket: this.bucketName,
+        Bucket: this.bucketName!,
         Prefix: `books/${authorAddress}/${bookSlug}/chapters/`,
         Delimiter: '/'
       })
       
-      const response = await this.client.send(listCommand)
+      const response = await this.client!.send(listCommand)
       return response.CommonPrefixes?.length || 0
       
     } catch (error) {
@@ -208,6 +224,7 @@ export class BookIndexService {
    * Updates the book index in R2
    */
   async updateBookIndex(): Promise<void> {
+    this.ensureInitialized()
     try {
       console.log('Starting book index update...')
       const startTime = Date.now()
@@ -230,14 +247,14 @@ export class BookIndexService {
       
       // Save to R2
       const putCommand = new PutObjectCommand({
-        Bucket: this.bucketName,
+        Bucket: this.bucketName!,
         Key: this.indexKey,
         Body: JSON.stringify(index, null, 2),
         ContentType: 'application/json',
         CacheControl: 'public, max-age=300, s-maxage=300, stale-while-revalidate=600'
       })
       
-      await this.client.send(putCommand)
+      await this.client!.send(putCommand)
       
       const duration = Date.now() - startTime
       console.log(`Book index updated successfully. ${books.length} books indexed in ${duration}ms`)
@@ -252,13 +269,14 @@ export class BookIndexService {
    * Retrieves the current book index from R2
    */
   async getBookIndex(): Promise<BookIndex | null> {
+    this.ensureInitialized()
     try {
       const getCommand = new GetObjectCommand({
-        Bucket: this.bucketName,
+        Bucket: this.bucketName!,
         Key: this.indexKey
       })
       
-      const response = await this.client.send(getCommand)
+      const response = await this.client!.send(getCommand)
       const indexString = await response.Body?.transformToString()
       
       if (!indexString) return null
