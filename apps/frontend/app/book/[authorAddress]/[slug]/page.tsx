@@ -613,36 +613,11 @@ export default function BookPage() {
                           </div>
                         )}
                         {isPaid && isUnlocked && !isAuthor && (
-                          <div className="mt-4 p-3 bg-gradient-to-r from-blue-50 to-sky-50 border border-blue-200 rounded-lg">
-                            <div className="flex items-start gap-3">
-                              <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-sky-500 rounded-full flex items-center justify-center flex-shrink-0">
-                                <CheckCircle className="w-5 h-5 text-white" />
-                              </div>
-                              <div className="flex-1">
-                                <p className="text-blue-700 text-sm font-semibold">
-                                  Premium Access Unlocked
-                                </p>
-                                <div className="mt-2 space-y-1">
-                                  <p className="text-blue-600 text-xs flex items-center gap-1">
-                                    <span className="inline-block w-4 h-4 text-center">📄</span>
-                                    Personal reading license
-                                  </p>
-                                  <p className="text-blue-600 text-xs flex items-center gap-1">
-                                    <span className="inline-block w-4 h-4 text-center">💎</span>
-                                    Purchased for 0.5 TIP
-                                  </p>
-                                  <p className="text-blue-500 text-xs flex items-center gap-1">
-                                    <span className="inline-block w-4 h-4 text-center">👤</span>
-                                    Original IP by {formatAddress(book.authorAddress || book.author)}
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-                            <div className="mt-3 pt-3 border-t border-blue-100">
-                              <p className="text-blue-600 text-xs font-medium text-center">
-                                Click to continue reading →
-                              </p>
-                            </div>
+                          <div className="mt-3 flex items-center justify-between">
+                            <p className="text-sm text-blue-600 font-medium flex items-center gap-2">
+                              <CheckCircle className="w-4 h-4" />
+                              Licensed • Click to read
+                            </p>
                           </div>
                         )}
                         {isPaid && isAuthor && (
@@ -659,11 +634,6 @@ export default function BookPage() {
                       </div>
                       <div className="ml-4 flex flex-col items-end gap-2">
                         {statusBadge}
-                        {isPaid && isUnlocked && !isAuthor && (
-                          <span className="text-xs text-blue-600 font-medium">
-                            ✨ Premium Access
-                          </span>
-                        )}
                         {isPaid && isAuthor && (
                           <span className="text-xs text-purple-600 font-medium">
                             👑 Author
