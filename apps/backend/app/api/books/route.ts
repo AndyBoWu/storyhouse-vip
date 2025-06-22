@@ -141,17 +141,26 @@ export interface RegisteredBook {
   description: string
   author: string
   authorName: string
+  authorAddress?: string
   genres: string[]
+  genre?: string
   moods?: string[]
   emojis?: string[]
   coverUrl?: string
   createdAt: string
+  lastUpdated?: string
   registeredAt?: string
   ipAssetId?: string
   tokenId?: string
   transactionHash?: string
   chapters: number
   slug: string
+  isRemixable?: boolean
+  totalReads?: number
+  averageRating?: number
+  contentRating?: string
+  tags?: string[]
+  preview?: string
 }
 
 /**
@@ -208,18 +217,27 @@ async function getFromIndex(request: NextRequest) {
       title: book.title,
       description: book.description || '',
       author: book.authorAddress,
+      authorAddress: book.authorAddress,
       authorName: book.authorAddress.slice(-4) || 'Unknown',
       genres: book.tags || [],
+      genre: book.tags?.[0] || 'General',
       moods: [],
       emojis: [],
       coverUrl: book.coverUrl || `${process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api-testnet.storyhouse.vip'}/api/books/${encodeURIComponent(book.id)}/cover`,
       createdAt: book.createdAt,
+      lastUpdated: book.updatedAt || book.createdAt,
       registeredAt: book.createdAt,
       ipAssetId: undefined,
       tokenId: undefined,
       transactionHash: undefined,
       chapters: book.chapterCount,
-      slug: book.slug
+      slug: book.slug,
+      isRemixable: true, // Default to true for now
+      totalReads: 0,
+      averageRating: 0,
+      contentRating: 'G',
+      tags: book.tags || [],
+      preview: book.description?.slice(0, 150) + '...' || ''
     }))
     
     const duration = Date.now() - startTime
@@ -228,6 +246,7 @@ async function getFromIndex(request: NextRequest) {
     const response = NextResponse.json({
       success: true,
       books: registeredBooks,
+      stories: registeredBooks, // Add stories field for backward compatibility
       count: registeredBooks.length,
       loadTime: duration,
       source: 'index',
@@ -282,7 +301,8 @@ async function getFromR2Direct(request: NextRequest) {
         success: false,
         error: 'Failed to connect to R2 storage for books',
         details: r2Error instanceof Error ? r2Error.message : 'Unknown R2 error',
-        books: []
+        books: [],
+        stories: [] // Add stories field for backward compatibility
       }, { status: 500 })
     }
 
@@ -316,6 +336,7 @@ async function getFromR2Direct(request: NextRequest) {
       return NextResponse.json({
         success: true,
         books: [],
+        stories: [], // Add stories field for backward compatibility
         message: 'No books found in R2 storage',
         debug: {
           bucket: BUCKET_NAME,
@@ -406,18 +427,27 @@ async function getFromR2Direct(request: NextRequest) {
               title: bookData.title || 'Untitled Book',
               description: bookData.description || '',
               author: bookData.authorAddress || authorFromPrefix,
-              authorName: bookData.authorAddress?.slice(-4) || 'Unknown',
+              authorAddress: bookData.authorAddress || authorFromPrefix,
+              authorName: bookData.authorName || bookData.authorAddress?.slice(-4) || 'Unknown',
               genres: bookData.genres || [],
+              genre: bookData.genres?.[0] || 'General',
               moods: bookData.moods,
               emojis: bookData.emojis,
               coverUrl: coverUrl, // Use API endpoint instead of direct R2 URL
               createdAt: bookData.createdAt || bookData.registeredAt || new Date().toISOString(),
+              lastUpdated: bookData.updatedAt || bookData.createdAt || new Date().toISOString(),
               registeredAt: bookData.registeredAt,
               ipAssetId: bookData.ipAssetId,
               tokenId: bookData.tokenId,
               transactionHash: bookData.transactionHash,
               chapters: chapterCount, // Real chapter count from R2
-              slug: bookSlug
+              slug: bookSlug,
+              isRemixable: bookData.isRemixable !== false, // Default to true if not specified
+              totalReads: bookData.totalReads || 0,
+              averageRating: bookData.averageRating || 0,
+              contentRating: bookData.contentRating || 'G',
+              tags: bookData.tags || [],
+              preview: bookData.description?.slice(0, 150) + '...' || ''
             }
 
             books.push(book)
@@ -442,6 +472,7 @@ async function getFromR2Direct(request: NextRequest) {
     const response = NextResponse.json({
       success: true,
       books,
+      stories: books, // Add stories field for backward compatibility
       count: books.length,
       debug: {
         bucket: BUCKET_NAME,
