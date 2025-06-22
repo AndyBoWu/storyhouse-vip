@@ -1,13 +1,14 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
-import { ArrowLeft, BookOpen, Users, GitBranch, Upload, AlertCircle, Sparkles } from 'lucide-react'
+import { useState, useEffect, Suspense, useMemo } from 'react'
+import { ArrowLeft, BookOpen, Users, GitBranch, Upload, AlertCircle, Sparkles, Search, Filter, Clock, Star } from 'lucide-react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { useAccount } from 'wagmi'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { apiClient } from '@/lib/api-client'
+import Fuse from 'fuse.js'
 
 // Dynamically import WalletConnect to avoid hydration issues
 const WalletConnect = dynamic(() => import('@/components/WalletConnect'), {
@@ -29,6 +30,7 @@ interface Story {
   averageRating?: number
   contentRating?: string
   tags?: string[]
+  coverUrl?: string
 }
 
 interface BranchingInfo {
@@ -66,8 +68,12 @@ function BranchStoryPageContent() {
   const [isCreatingBranch, setIsCreatingBranch] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedGenre, setSelectedGenre] = useState<string>('all')
+  const [sortBy, setSortBy] = useState<'recent' | 'popular' | 'rating'>('recent')
 
   const availableGenres = ['Fantasy', 'Romance', 'Mystery', 'Sci-Fi', 'Horror', 'Comedy', 'Drama', 'Adventure']
+  const filterGenres = ['all', 'Fantasy', 'Romance', 'Mystery', 'Sci-Fi', 'Horror', 'Comedy', 'Drama', 'Adventure']
 
   // Prevent hydration mismatch
   useEffect(() => {
@@ -100,10 +106,11 @@ function BranchStoryPageContent() {
                 authorAddress: story.authorAddress,
                 authorName: story.authorName,
                 isRemixable: story.isRemixable,
-                totalReads: story.totalReads,
-                averageRating: story.averageRating,
+                totalReads: story.totalReads || 0,
+                averageRating: story.averageRating || 0,
                 contentRating: story.contentRating,
-                tags: story.tags
+                tags: story.tags || [],
+                coverUrl: story.coverUrl
               }))
             
             setAllStories(remixableStories)
@@ -121,6 +128,48 @@ function BranchStoryPageContent() {
       loadStories()
     }
   }, [mounted, connectedAddress])
+
+  // Create Fuse instance for fuzzy search
+  const fuse = useMemo(() => new Fuse(allStories, {
+    keys: [
+      { name: 'title', weight: 0.7 },
+      { name: 'authorName', weight: 0.3 },
+      { name: 'genre', weight: 0.2 },
+      { name: 'tags', weight: 0.1 }
+    ],
+    threshold: 0.4,
+    includeScore: true,
+    minMatchCharLength: 2
+  }), [allStories])
+
+  // Filter and sort stories
+  const filteredStories = useMemo(() => {
+    let filtered = allStories
+
+    // Apply fuzzy search if there's a search query
+    if (searchQuery.trim()) {
+      const results = fuse.search(searchQuery)
+      filtered = results.map(result => result.item)
+    }
+
+    // Apply genre filter
+    if (selectedGenre !== 'all') {
+      filtered = filtered.filter(story => story.genre === selectedGenre)
+    }
+
+    // Sort results
+    return filtered.sort((a, b) => {
+      switch (sortBy) {
+        case 'popular':
+          return (b.totalReads || 0) - (a.totalReads || 0)
+        case 'rating':
+          return (b.averageRating || 0) - (a.averageRating || 0)
+        case 'recent':
+        default:
+          return new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime()
+      }
+    })
+  }, [allStories, searchQuery, selectedGenre, sortBy, fuse])
 
   const handleSelectStory = async (story: Story) => {
     setSelectedStory(story)
@@ -280,8 +329,49 @@ function BranchStoryPageContent() {
                   </motion.div>
                 )}
 
-                {/* Story Selection */}
-                <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+                {/* Search and Filters */}
+                <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+                  <div className="flex flex-col md:flex-row gap-4">
+                    {/* Search */}
+                    <div className="flex-1 relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                      <input
+                        type="text"
+                        placeholder="Search books or authors..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      />
+                    </div>
+
+                    {/* Genre Filter */}
+                    <select
+                      value={selectedGenre}
+                      onChange={(e) => setSelectedGenre(e.target.value)}
+                      className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    >
+                      {filterGenres.map(genre => (
+                        <option key={genre} value={genre}>
+                          {genre === 'all' ? 'All Genres' : genre}
+                        </option>
+                      ))}
+                    </select>
+
+                    {/* Sort */}
+                    <select
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value as any)}
+                      className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    >
+                      <option value="recent">Most Recent</option>
+                      <option value="popular">Most Popular</option>
+                      <option value="rating">Highest Rated</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Story Selection with Book Cards */}
+                <div className="mb-6">
                   <h3 className="text-lg font-semibold text-gray-800 mb-4">📚 Select a story to branch:</h3>
 
                   {isLoadingStories ? (
@@ -289,40 +379,92 @@ function BranchStoryPageContent() {
                       <div className="w-8 h-8 border-3 border-green-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
                       <h3 className="text-lg font-semibold text-gray-700 mb-2">Loading remixable stories...</h3>
                     </div>
-                  ) : allStories.length === 0 ? (
-                    <div className="text-center py-16">
+                  ) : filteredStories.length === 0 ? (
+                    <div className="text-center py-16 bg-white rounded-xl shadow-lg">
                       <div className="text-8xl mb-6">🌿</div>
                       <h3 className="text-2xl font-semibold text-gray-700 mb-4">No stories available for branching</h3>
                       <p className="text-gray-500 mb-8 text-lg">Stories must be marked as remixable by their authors.</p>
                     </div>
                   ) : (
-                    <div className="space-y-3">
-                      {allStories.map((story) => (
-                        <motion.button
+                    <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-4">
+                      {filteredStories.map((story) => (
+                        <motion.div
                           key={story.id}
                           onClick={() => handleSelectStory(story)}
-                          whileHover={{ scale: 1.01 }}
-                          className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
+                          whileHover={{ scale: 1.02, y: -5 }}
+                          className={`bg-white rounded-lg shadow-lg overflow-hidden border-2 hover:shadow-xl transition-all cursor-pointer ${
                             selectedStory?.id === story.id
-                              ? 'border-green-400 bg-green-50'
-                              : 'border-gray-200 hover:border-gray-300'
+                              ? 'border-green-400 ring-2 ring-green-200'
+                              : 'border-gray-200'
                           }`}
                         >
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-3 mb-2">
-                                <div className={`w-3 h-3 rounded-full ${
-                                  selectedStory?.id === story.id ? 'bg-green-600' : 'bg-gray-300'
-                                }`} />
-                                <h4 className="font-semibold text-gray-800">{story.title}</h4>
-                                <span className="text-sm text-gray-500">📊 {story.chapters} chap</span>
-                                <span className="text-sm text-blue-600">👤 {story.authorName}</span>
+                          {/* Book Cover */}
+                          <div className="aspect-[3/4] w-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center relative">
+                            {story.coverUrl && (
+                              <img
+                                src={story.coverUrl}
+                                alt={`${story.title} cover`}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.style.display = 'none';
+                                  const parent = target.parentElement;
+                                  if (parent) {
+                                    parent.innerHTML = `<span class="text-white text-4xl font-bold">${story.title.charAt(0)}</span>`;
+                                  }
+                                }}
+                              />
+                            )}
+                            {!story.coverUrl && (
+                              <span className="text-white text-4xl font-bold">{story.title.charAt(0)}</span>
+                            )}
+                            {selectedStory?.id === story.id && (
+                              <div className="absolute inset-0 bg-green-600 bg-opacity-20 flex items-center justify-center">
+                                <div className="bg-white rounded-full p-3">
+                                  <GitBranch className="w-8 h-8 text-green-600" />
+                                </div>
                               </div>
-                              <p className="text-sm text-gray-500 mb-1">{story.genre} • {story.totalReads || 0} reads</p>
-                              <p className="text-sm text-gray-500 italic">"{story.preview}"</p>
+                            )}
+                          </div>
+
+                          <div className="p-4">
+                            <div className="mb-3">
+                              <h3 className="text-base font-semibold text-gray-800 line-clamp-2 mb-1">
+                                {story.title}
+                              </h3>
+                              <p className="text-sm text-gray-600 mb-2">by {story.authorName}</p>
+                              
+                              <div className="flex items-center gap-2 text-xs text-gray-600">
+                                <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                                  {story.genre}
+                                </span>
+                                <span>•</span>
+                                <div className="flex items-center gap-1">
+                                  <Clock className="w-3 h-3" />
+                                  <span>{story.chapters} ch</span>
+                                </div>
+                                {story.totalReads > 0 && (
+                                  <>
+                                    <span>•</span>
+                                    <span>{story.totalReads} reads</span>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs text-gray-500">
+                                {selectedStory?.id === story.id ? '✅ Selected' : 'Click to select'}
+                              </span>
+                              {story.averageRating > 0 && (
+                                <div className="flex items-center gap-1 text-yellow-500">
+                                  <Star className="w-3 h-3 fill-current" />
+                                  <span className="text-xs font-medium text-gray-700">{story.averageRating.toFixed(1)}</span>
+                                </div>
+                              )}
                             </div>
                           </div>
-                        </motion.button>
+                        </motion.div>
                       ))}
                     </div>
                   )}
