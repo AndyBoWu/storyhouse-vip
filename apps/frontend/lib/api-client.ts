@@ -212,8 +212,8 @@ export const apiClient = {
   },
 
   // Branching operations
-  async getBranchingInfo(storyId: string) {
-    return apiRequest(`/api/stories/${storyId}/branching`)
+  async getBranchingInfo(bookId: string) {
+    return apiRequest(`/api/books/branch?parentBookId=${encodeURIComponent(bookId)}`)
   },
 
   async branchBook(formData: FormData) {

@@ -11,6 +11,7 @@ import { useChapterAccess } from '@/hooks/useChapterAccess';
 import ReadingProgressBar from '@/components/ui/ReadingProgressBar';
 import ReadingPreferences from '@/components/ui/ReadingPreferences';
 import { ChapterAttributionStatus } from '@/components/book/ChapterAttributionStatus';
+import BranchChoiceModal from '@/components/book/BranchChoiceModal';
 
 
 interface ChapterContent {
@@ -57,6 +58,10 @@ export default function ChapterPage() {
   // Delete functionality
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  
+  // Branch modal state
+  const [showBranchModal, setShowBranchModal] = useState(false);
+  const [hasBranches, setHasBranches] = useState(false);
   
   const { getChapterPricing } = useChapterAccess();
 
@@ -110,6 +115,35 @@ export default function ChapterPage() {
     }
   }, [bookId, chapterNumber, address]); // Include address to re-run when wallet connects
 
+  const checkForBranches = async () => {
+    try {
+      console.log(`🌿 Checking for branches at chapter ${chapterNumber}`);
+      const bookData = await apiClient.getBookById(bookId);
+      
+      if (bookData && bookData.derivativeBooks && bookData.derivativeBooks.length > 0) {
+        // Check if any derivatives branch from the current chapter
+        for (const derivativeId of bookData.derivativeBooks) {
+          try {
+            const derivativeData = await apiClient.getBookById(derivativeId);
+            if (derivativeData && derivativeData.branchPoint === `ch${chapterNumber}`) {
+              console.log('✅ Found branches at this chapter');
+              setHasBranches(true);
+              return;
+            }
+          } catch (error) {
+            console.warn('Failed to load derivative:', derivativeId);
+          }
+        }
+      }
+      
+      setHasBranches(false);
+      console.log('ℹ️ No branches found at this chapter');
+    } catch (error) {
+      console.error('Failed to check for branches:', error);
+      setHasBranches(false);
+    }
+  };
+
   const initializeChapter = async () => {
     try {
       setLoading(true);
@@ -127,6 +161,9 @@ export default function ChapterPage() {
         const userIsOwner = address && address.toLowerCase() === chapterInfo.authorAddress.toLowerCase();
         
         console.log('💰 Chapter pricing:', { pricing, userIsOwner, address, authorAddress: chapterInfo.authorAddress });
+        
+        // Check for branches at this chapter
+        await checkForBranches();
         
         // Always try to fetch full content - let the backend decide access
         try {
@@ -214,6 +251,28 @@ export default function ChapterPage() {
     } catch (err) {
       console.error('Failed to fetch chapter content after unlock:', err);
       setError('Failed to load chapter content');
+    }
+  };
+
+  const handleNextChapterNavigation = () => {
+    if (hasBranches) {
+      // Show branch choice modal instead of navigating directly
+      setShowBranchModal(true);
+    } else if (chapter?.nextChapter && chapter.nextChapter <= chapter.totalChapters) {
+      // Navigate to next chapter directly
+      router.push(`/book/${authorAddress}/${slug}/chapter/${chapter.nextChapter}`);
+    }
+  };
+
+  const handleBranchChoice = (selectedBookId: string, selectedChapterNumber: number) => {
+    // Navigate to the selected branch/chapter
+    if (selectedBookId === bookId) {
+      // Same book, just navigate to next chapter
+      router.push(`/book/${authorAddress}/${slug}/chapter/${selectedChapterNumber}`);
+    } else {
+      // Different book (branch), navigate there
+      const [branchAuthor, branchSlug] = selectedBookId.split('/');
+      router.push(`/book/${branchAuthor}/${branchSlug}/chapter/${selectedChapterNumber}`);
     }
   };
 
@@ -448,13 +507,17 @@ export default function ChapterPage() {
                 Table of Contents
               </Link>
 
-              {chapter.nextChapter && chapter.nextChapter <= chapter.totalChapters ? (
-                <Link
-                  href={`/book/${authorAddress}/${slug}/chapter/${chapter.nextChapter}`}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+              {(chapter.nextChapter && chapter.nextChapter <= chapter.totalChapters) || hasBranches ? (
+                <button
+                  onClick={handleNextChapterNavigation}
+                  className={`flex items-center gap-2 px-4 py-2 text-white rounded-lg transition-colors ${
+                    hasBranches 
+                      ? 'bg-green-600 hover:bg-green-700' 
+                      : 'bg-blue-600 hover:bg-blue-700'
+                  }`}
                 >
-                  Next Chapter →
-                </Link>
+                  {hasBranches ? '🌿 Choose Path →' : 'Next Chapter →'}
+                </button>
               ) : (
                 <button
                   onClick={() => router.push(`/write/chapter?bookId=${encodeURIComponent(bookId)}&chapterNumber=${chapter.chapterNumber + 1}`)}
@@ -663,6 +726,15 @@ export default function ChapterPage() {
           </div>
         </div>
       )}
+
+      {/* Branch Choice Modal */}
+      <BranchChoiceModal
+        isOpen={showBranchModal}
+        onClose={() => setShowBranchModal(false)}
+        currentBookId={bookId}
+        chapterNumber={chapterNumber}
+        onContinue={handleBranchChoice}
+      />
     </div>
   );
 }

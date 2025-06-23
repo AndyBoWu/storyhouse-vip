@@ -7,7 +7,10 @@ import {
   BookId,
   BOOK_SYSTEM_CONSTANTS 
 } from '@/lib/types/book'
-import { BookStorageService } from '@/lib/storage'
+import { BookStorageService } from '@/lib/storage/bookStorage'
+import { UnifiedIpService } from '@/lib/services/unifiedIpService'
+import type { Address } from 'viem'
+import type { StoryWithIP } from '@/lib/types/ip'
 
 /**
  * POST /api/books/branch
@@ -98,13 +101,15 @@ export async function POST(request: NextRequest) {
     
     let parentBook: BookMetadata
     try {
+      console.log(`🔍 Looking up parent book: ${parentBookId}`)
       parentBook = await BookStorageService.getBookMetadata(parentBookId)
       console.log('📖 Parent book loaded:', parentBook.title)
     } catch (error) {
       console.error('❌ Parent book not found:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       return NextResponse.json({
         success: false,
-        error: `Parent book not found: ${parentBookId}`
+        error: `Parent book not found: ${parentBookId}. Error: ${errorMessage}`
       } as BookBranchingResponse, { status: 404 })
     }
 
@@ -113,6 +118,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: false,
         error: `Branch point ${branchPoint} does not exist in parent book`
+      } as BookBranchingResponse, { status: 400 })
+    }
+
+    // Validate branch point is chapter 3 or later (business rule)
+    const branchChapterNum = parseInt(branchPoint.replace('ch', ''))
+    if (branchChapterNum < 3) {
+      return NextResponse.json({
+        success: false,
+        error: 'Branching is only allowed from chapter 3 onwards. Chapters 1-2 are protected.'
       } as BookBranchingResponse, { status: 400 })
     }
 
@@ -127,7 +141,7 @@ export async function POST(request: NextRequest) {
     // ===== GENERATE NEW BOOK DETAILS =====
     
     const newSlug = BookStorageService.generateSlug(newTitle)
-    const newBookId = `${authorAddress.toLowerCase()}-${newSlug}` as BookId
+    const newBookId = `${authorAddress.toLowerCase()}/${newSlug}` as BookId
     
     console.log('🆔 Generated new book ID:', newBookId)
 
@@ -146,14 +160,14 @@ export async function POST(request: NextRequest) {
     
     console.log('🗺️ Creating hybrid chapter map...')
     
-    // Extract branch point chapter number
-    const branchChapterNum = parseInt(branchPoint.replace('ch', ''))
+    // Extract branch point chapter number for chapter map creation
+    const branchPointChapterNum = parseInt(branchPoint.replace('ch', ''))
     
     // Create chapter map that references original chapters up to branch point
     const hybridChapterMap: { [chapterNumber: string]: string } = {}
     
     // Copy original chapters up to and including branch point
-    for (let i = 1; i <= branchChapterNum; i++) {
+    for (let i = 1; i <= branchPointChapterNum; i++) {
       const chapterKey = `ch${i}`
       if (parentBook.chapterMap[chapterKey]) {
         hybridChapterMap[chapterKey] = parentBook.chapterMap[chapterKey]
@@ -254,12 +268,74 @@ export async function POST(request: NextRequest) {
       derivativeBookMetadata.totalChapters = originalChapters.length // Will be updated as new chapters are added
       derivativeBookMetadata.derivativeBooks = [] // This derivative has no children yet
 
-      // Add new cover URL if uploaded
+      // Set cover URL: use new cover if uploaded, otherwise inherit from parent
       if (newCoverUrl) {
         derivativeBookMetadata.coverUrl = newCoverUrl
+        console.log('✅ Using new uploaded cover:', newCoverUrl)
+      } else if (parentBook.coverUrl) {
+        derivativeBookMetadata.coverUrl = parentBook.coverUrl
+        console.log('📸 Inheriting parent book cover:', parentBook.coverUrl)
       }
 
-      // Store derivative book metadata
+      // ===== STORY PROTOCOL DERIVATIVE REGISTRATION =====
+      
+      let derivativeIpAssetId: string | undefined
+      let derivativeTransactionHash: string | undefined
+      
+      // Check if parent book has Story Protocol registration
+      if (parentBook.ipAssetId && parentBook.licenseTermsId) {
+        console.log('🔗 Parent book has Story Protocol registration, registering derivative...')
+        console.log('👨‍👧 Parent IP:', parentBook.ipAssetId)
+        console.log('📜 Parent License Terms:', parentBook.licenseTermsId)
+        
+        try {
+          // Initialize unified IP service
+          const ipService = new UnifiedIpService()
+          
+          // Prepare derivative story data
+          const derivativeStory: StoryWithIP = {
+            id: newBookId,
+            title: newTitle,
+            ipAssetId: undefined,
+            licenseTokens: [],
+            isRegistered: false
+          }
+          
+          // Register as derivative on Story Protocol
+          const ipResult = await ipService.mintAndRegisterDerivative({
+            parentIpId: parentBook.ipAssetId as Address,
+            parentLicenseTermsId: parentBook.licenseTermsId,
+            derivativeStory,
+            nftContract: (process.env.STORY_NFT_CONTRACT || '0x8B0a63eb35eD607805E3c09C99281cFAd09d6fD5') as Address,
+            account: authorAddress as Address,
+            metadataUri: derivativeBookMetadata.coverUrl // Use cover URL as metadata for now
+          })
+          
+          if (ipResult.success && ipResult.ipAsset) {
+            console.log('✅ Derivative registered on Story Protocol!')
+            console.log('🆔 Derivative IP ID:', ipResult.ipAsset.id)
+            console.log('📝 Transaction Hash:', ipResult.transactionHash)
+            
+            derivativeIpAssetId = ipResult.ipAsset.id
+            derivativeTransactionHash = ipResult.transactionHash
+            
+            // Update metadata with Story Protocol info
+            derivativeBookMetadata.ipAssetId = derivativeIpAssetId
+            derivativeBookMetadata.transactionHash = derivativeTransactionHash
+            derivativeBookMetadata.licenseTermsId = parentBook.licenseTermsId // Inherits parent's license terms
+          } else {
+            console.warn('⚠️ Derivative registration failed:', ipResult.error)
+            console.warn('📝 Continuing without blockchain registration')
+          }
+        } catch (ipError) {
+          console.error('❌ Story Protocol registration error:', ipError)
+          console.warn('📝 Continuing without blockchain registration')
+        }
+      } else {
+        console.log('ℹ️ Parent book not registered on Story Protocol, skipping derivative registration')
+      }
+      
+      // Store derivative book metadata (with or without IP registration)
       await BookStorageService.storeBookMetadata(
         authorAddress,
         newSlug,
@@ -299,13 +375,13 @@ export async function POST(request: NextRequest) {
         book: {
           bookId: newBookId,
           parentBookId,
-          ipAssetId: undefined, // Will be set when Story Protocol is integrated
+          ipAssetId: derivativeIpAssetId,
           branchPoint,
-          coverUrl: newCoverUrl,
+          coverUrl: derivativeBookMetadata.coverUrl, // Use the final cover URL (new or inherited)
           chapterMap: hybridChapterMap,
           originalAuthors
         },
-        transactionHash: undefined // Will be set when Story Protocol is integrated
+        transactionHash: derivativeTransactionHash
       }
 
       console.log('🎉 Book branching completed successfully:', {
@@ -313,7 +389,10 @@ export async function POST(request: NextRequest) {
         parentBookId,
         branchPoint,
         hybridChapters: Object.keys(hybridChapterMap).length,
-        hasCover: !!newCoverUrl
+        inheritedChapters: Object.keys(hybridChapterMap),
+        finalCoverUrl: derivativeBookMetadata.coverUrl,
+        coverSource: newCoverUrl ? 'uploaded' : 'inherited',
+        authorAddress
       })
 
       return NextResponse.json(response, { status: 201 })
@@ -353,24 +432,58 @@ export async function POST(request: NextRequest) {
  */
 export async function GET(request: NextRequest) {
   try {
+    console.log('🌿 [GET] Branch API called')
     const { searchParams } = new URL(request.url)
     const parentBookId = searchParams.get('parentBookId') as BookId
 
+    console.log(`📥 [GET] Raw parentBookId: ${parentBookId}`)
+    console.log(`📥 [GET] Decoded parentBookId: ${decodeURIComponent(parentBookId || '')}`)
+
     if (!parentBookId) {
+      console.error('❌ [GET] Missing parentBookId parameter')
       return NextResponse.json({
         success: false,
         error: 'parentBookId parameter is required'
       }, { status: 400 })
     }
 
+    // Test book ID validation
+    try {
+      console.log(`🔍 [GET] Testing book ID validation for: ${parentBookId}`)
+      const isValid = BookStorageService.isValidBookId(parentBookId)
+      console.log(`✅ [GET] Book ID validation result: ${isValid}`)
+    } catch (validationError) {
+      console.error('❌ [GET] Book ID validation failed:', validationError)
+    }
+
+    // Test book ID parsing
+    try {
+      console.log(`🔍 [GET] Testing book ID parsing for: ${parentBookId}`)
+      const parsed = BookStorageService.parseBookId(parentBookId)
+      console.log(`✅ [GET] Book ID parsed successfully:`, parsed)
+    } catch (parseError) {
+      console.error('❌ [GET] Book ID parsing failed:', parseError)
+      return NextResponse.json({
+        success: false,
+        error: `Invalid book ID format: ${parentBookId}. Parse error: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`
+      }, { status: 400 })
+    }
+
     // Load parent book
     let parentBook: BookMetadata
     try {
+      console.log(`🔍 [GET] Looking up parent book: ${parentBookId}`)
       parentBook = await BookStorageService.getBookMetadata(parentBookId)
+      console.log(`📖 [GET] Parent book loaded: ${parentBook.title}`)
+      console.log(`📊 [GET] Parent book chapters:`, Object.keys(parentBook.chapterMap))
     } catch (error) {
+      console.error('❌ [GET] Parent book not found:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      const errorStack = error instanceof Error ? error.stack : 'No stack trace'
+      console.error('❌ [GET] Error stack:', errorStack)
       return NextResponse.json({
         success: false,
-        error: `Parent book not found: ${parentBookId}`
+        error: `Parent book not found: ${parentBookId}. Error: ${errorMessage}`
       }, { status: 404 })
     }
 
@@ -386,22 +499,28 @@ export async function GET(request: NextRequest) {
         genres: parentBook.genres,
         contentRating: parentBook.contentRating
       },
-      availableBranchPoints: Object.keys(parentBook.chapterMap).map(chapterKey => ({
-        chapterKey,
-        chapterNumber: parseInt(chapterKey.replace('ch', '')),
-        chapterPath: parentBook.chapterMap[chapterKey]
-      })),
+      availableBranchPoints: Object.keys(parentBook.chapterMap)
+        .map(chapterKey => ({
+          chapterKey,
+          chapterNumber: parseInt(chapterKey.replace('ch', '')),
+          chapterPath: parentBook.chapterMap[chapterKey]
+        }))
+        .filter(point => point.chapterNumber >= 3), // Only allow branching from chapter 3 onwards
       existingDerivatives: parentBook.derivativeBooks.length,
       derivativeBooks: parentBook.derivativeBooks
     }
 
+    console.log(`✅ [GET] Successfully returning branching info with ${branchingInfo.availableBranchPoints.length} branch points`)
     return NextResponse.json(branchingInfo)
 
   } catch (error) {
-    console.error('Error getting branching info:', error)
+    console.error('❌ [GET] Critical error in branch API:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    const errorStack = error instanceof Error ? error.stack : 'No stack trace'
+    console.error('❌ [GET] Critical error stack:', errorStack)
     return NextResponse.json({
       success: false,
-      error: 'Failed to get branching information'
+      error: `Failed to get branching information: ${errorMessage}`
     }, { status: 500 })
   }
 }

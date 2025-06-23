@@ -58,28 +58,43 @@ export class BookStorageService {
   
   /**
    * Parse book ID to extract author address and slug
+   * Standard format: authorAddress/slug
+   * Temporarily supports dash format for backward compatibility
    */
   static parseBookId(bookId: BookId): { authorAddress: AuthorAddress; slug: string } {
     // Handle URL-encoded slashes
     const decodedBookId = decodeURIComponent(bookId)
     
-    // Split by first slash to separate address and slug
+    // Standard format: address/slug  
     const slashIndex = decodedBookId.indexOf('/')
-    if (slashIndex === -1) {
-      throw new Error(`Invalid book ID format: ${bookId}. Expected format: authorAddress/slug`)
+    if (slashIndex !== -1) {
+      const authorAddress = decodedBookId.substring(0, slashIndex)
+      const slug = decodedBookId.substring(slashIndex + 1)
+      
+      if (authorAddress && slug) {
+        return { 
+          authorAddress: authorAddress as AuthorAddress, 
+          slug: slug 
+        }
+      }
     }
     
-    const authorAddress = decodedBookId.substring(0, slashIndex)
-    const slug = decodedBookId.substring(slashIndex + 1)
-    
-    if (!authorAddress || !slug) {
-      throw new Error(`Invalid book ID format: ${bookId}. Both author address and slug are required`)
+    // Temporary backward compatibility for incorrectly formatted book IDs
+    const dashIndex = decodedBookId.indexOf('-')
+    if (dashIndex !== -1) {
+      const authorAddress = decodedBookId.substring(0, dashIndex)
+      const slug = decodedBookId.substring(dashIndex + 1)
+      
+      if (authorAddress && slug) {
+        console.warn(`⚠️ Book ID uses deprecated dash format: ${bookId}. Should be: ${authorAddress}/${slug}`)
+        return { 
+          authorAddress: authorAddress as AuthorAddress, 
+          slug: slug 
+        }
+      }
     }
     
-    return { 
-      authorAddress: authorAddress as AuthorAddress, 
-      slug: slug 
-    }
+    throw new Error(`Invalid book ID format: ${bookId}. Expected format: authorAddress/slug`)
   }
   
   // ===== BOOK OPERATIONS =====

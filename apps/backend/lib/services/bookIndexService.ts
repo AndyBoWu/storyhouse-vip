@@ -158,12 +158,26 @@ export class BookIndexService {
             // Count chapters efficiently
             const chapterCount = await this.getChapterCount(authorAddress, bookSlug)
             
-            // Generate the correct cover URL using the API endpoint
+            // Handle cover URL - convert relative paths to API endpoints
             const bookId = `${authorAddress}/${bookSlug}`
-            // For local development, use localhost:3002
             const isDev = process.env.NODE_ENV === 'development'
-            const baseUrl = isDev ? 'http://localhost:3002' : (process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api-testnet.storyhouse.vip')
-            const coverUrl = `${baseUrl}/api/books/${encodeURIComponent(bookId)}/cover`
+            const baseUrl = isDev ? 'http://localhost:3002' : (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3002')
+            let coverUrl = metadata.coverUrl
+            
+            if (coverUrl && coverUrl.startsWith('/books/')) {
+              // Extract book ID from the cover path
+              const match = coverUrl.match(/\/books\/([^\/]+\/[^\/]+)\/cover\.(jpg|png|webp)/)
+              if (match) {
+                const coverBookId = match[1]
+                coverUrl = `${baseUrl}/api/books/${encodeURIComponent(coverBookId)}/cover`
+              } else {
+                // Fallback if pattern doesn't match
+                coverUrl = `${baseUrl}/api/books/${encodeURIComponent(bookId)}/cover`
+              }
+            } else if (!coverUrl || !(coverUrl.startsWith('http://') || coverUrl.startsWith('https://'))) {
+              // No cover URL or not absolute - use API endpoint
+              coverUrl = `${baseUrl}/api/books/${encodeURIComponent(bookId)}/cover`
+            }
             
             const bookEntry: BookIndexEntry = {
               id: bookId,

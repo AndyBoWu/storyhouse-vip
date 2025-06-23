@@ -39,6 +39,25 @@ export interface UnifiedRegistrationResponse extends RegisterIPAssetResponse {
   licenseTermsId?: string
 }
 
+export interface DerivativeRegistrationRequest {
+  parentIpId: Address
+  parentLicenseTermsId: string
+  derivativeStory: StoryWithIP
+  nftContract: Address
+  account: Address
+  metadataUri?: string
+  metadataHash?: Hash
+}
+
+export interface DerivativeRegistrationResponse {
+  success: boolean
+  error?: string
+  ipAsset?: IPAsset
+  transactionHash?: string
+  parentIpId?: string
+  licenseTermsId?: string
+}
+
 export class UnifiedIpService extends IPService {
   constructor(config?: StoryProtocolConfig) {
     super(config)
@@ -146,6 +165,110 @@ export class UnifiedIpService extends IPService {
     } catch (error: any) {
       const blockchainError = parseBlockchainError(error)
       console.error('❌ Unified IP registration failed:', formatErrorForLogging(blockchainError))
+
+      return {
+        success: false,
+        error: blockchainError.userMessage
+      }
+    }
+  }
+
+  /**
+   * Mint NFT, register as IP Asset, and make it a derivative in a single transaction
+   * Uses Story Protocol's atomic derivative registration method
+   */
+  async mintAndRegisterDerivative(
+    request: DerivativeRegistrationRequest
+  ): Promise<DerivativeRegistrationResponse> {
+    console.log('🌿 UnifiedIpService.mintAndRegisterDerivative called')
+    console.log('📊 Derivative registration request:', {
+      parentIpId: request.parentIpId,
+      parentLicenseTermsId: request.parentLicenseTermsId,
+      storyTitle: request.derivativeStory.title,
+      account: request.account
+    })
+    
+    // Ensure parent class is initialized
+    await this.ensureInitialized()
+    console.log('✅ Parent class initialization ensured')
+    
+    const storyClient = this.getStoryClient()
+    const isAvailable = this.isAvailable()
+    
+    if (!isAvailable || !storyClient) {
+      console.error('❌ Service not available for derivative registration')
+      return {
+        success: false,
+        error: 'Story Protocol SDK not initialized'
+      }
+    }
+
+    try {
+      const operation = async () => {
+        logBlockchainOperation('MINT_AND_REGISTER_DERIVATIVE', {
+          parentIpId: request.parentIpId,
+          parentLicenseTermsId: request.parentLicenseTermsId,
+          derivativeTitle: request.derivativeStory.title,
+          account: request.account
+        }, this.getConfig())
+
+        // Execute atomic derivative registration
+        const registrationResult = await storyClient.ipAsset.mintAndRegisterIpAndMakeDerivative({
+          spgNftContract: request.nftContract,
+          derivData: {
+            parentIpIds: [request.parentIpId],
+            licenseTermsIds: [request.parentLicenseTermsId]
+          },
+          ipMetadata: {
+            ipMetadataURI: request.metadataUri || '',
+            ipMetadataHash: request.metadataHash || '0x0' as Hash,
+            nftMetadataURI: request.metadataUri || '',
+            nftMetadataHash: request.metadataHash || '0x0' as Hash
+          },
+          recipient: request.account,
+          txOptions: {}
+        })
+
+        console.log('✅ Derivative registration successful:', {
+          ipId: registrationResult.ipId,
+          tokenId: registrationResult.tokenId,
+          txHash: registrationResult.txHash
+        })
+
+        // Create IP Asset object for response
+        const ipAsset: IPAsset = {
+          id: registrationResult.ipId || `derivative_${request.derivativeStory.id}_${Date.now()}`,
+          address: request.nftContract,
+          tokenId: registrationResult.tokenId?.toString() || '0',
+          metadata: {
+            mediaType: 'text/story' as const,
+            title: request.derivativeStory.title,
+            description: request.derivativeStory.content.substring(0, 200) + '...',
+            genre: request.derivativeStory.genre,
+            wordCount: request.derivativeStory.content.length,
+            language: 'en',
+            tags: [request.derivativeStory.genre, request.derivativeStory.mood, 'derivative'],
+            createdAt: request.derivativeStory.createdAt,
+            author: request.derivativeStory.author,
+            parentIpId: request.parentIpId
+          },
+          licenseTermsIds: [request.parentLicenseTermsId]
+        }
+
+        return {
+          success: true,
+          ipAsset,
+          transactionHash: registrationResult.txHash as Hash,
+          parentIpId: request.parentIpId,
+          licenseTermsId: request.parentLicenseTermsId
+        }
+      }
+
+      return await this.executeWithRetry(operation, 'MINT_AND_REGISTER_DERIVATIVE')
+
+    } catch (error: any) {
+      const blockchainError = parseBlockchainError(error)
+      console.error('❌ Derivative registration failed:', formatErrorForLogging(blockchainError))
 
       return {
         success: false,
