@@ -26,6 +26,8 @@ interface PublishingModalProps {
   storyTitle?: string
   bookId?: string
   onSuccess?: (result: any) => void
+  isDerivative?: boolean
+  parentBookTitle?: string
 }
 
 type PublishingStep = 'options' | 'wallet' | 'license' | 'pricing' | 'ip-setup' | 'publishing' | 'success'
@@ -37,7 +39,9 @@ function PublishingModal({
   chapterNumber,
   storyTitle,
   bookId,
-  onSuccess
+  onSuccess,
+  isDerivative,
+  parentBookTitle
 }: PublishingModalProps) {
   const [currentStep, setCurrentStep] = useState<PublishingStep>('options')
   const [publishingOption, setPublishingOption] = useState<'simple' | 'protected' | null>(null)
@@ -253,7 +257,12 @@ function PublishingModal({
       case 'generating-metadata':
         return { text: 'Generating metadata...', icon: <Upload className="w-5 h-5" /> }
       case 'blockchain-transaction':
-        return { text: 'Step 1/2: Registering IP Asset - Check MetaMask...', icon: <Link className="w-5 h-5" /> }
+        return { 
+          text: isDerivative && chapterNumber === 4
+            ? 'Registering derivative IP Asset - Check MetaMask...' 
+            : 'Step 1/2: Registering IP Asset - Check MetaMask...', 
+          icon: <Link className="w-5 h-5" /> 
+        }
       case 'saving-to-storage':
         return { text: 'Saving to storage...', icon: <Upload className="w-5 h-5" /> }
       case 'setting-attribution':
@@ -327,6 +336,29 @@ function PublishingModal({
                   animate={{ opacity: 1, y: 0 }}
                   className="space-y-6"
                 >
+                  {/* Derivative Book Special Message */}
+                  {isDerivative && chapterNumber === 4 && (
+                    <div className="p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200">
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 bg-purple-100 rounded-lg">
+                          <TrendingUp className="w-5 h-5 text-purple-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-purple-900 mb-1">🌿 First Original Chapter in Your Remix</h4>
+                          <p className="text-sm text-purple-800 mb-2">
+                            Publishing Chapter 4 will automatically register your remix of "{parentBookTitle || 'the original book'}" as a derivative IP Asset on Story Protocol.
+                          </p>
+                          <div className="space-y-1 text-xs text-purple-700">
+                            <div>✅ Inherits licensing terms from the original</div>
+                            <div>✅ Establishes your IP rights for new chapters</div>
+                            <div>✅ Enables 70/30 revenue sharing with original author</div>
+                            <div>✅ Single transaction for both registration and publishing</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
                   {/* Chapter 1-3: Free chapters with simplified publishing */}
                   {chapterNumber <= 3 ? (
                     <div>
@@ -447,7 +479,9 @@ function PublishingModal({
                     </div>
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">Connect Your Wallet</h3>
                     <p className="text-gray-600">
-                      {chapterNumber > 3 
+                      {isDerivative && chapterNumber === 4
+                        ? `Connect to register your remix of "${parentBookTitle || 'the original book'}" as a derivative IP Asset.`
+                        : chapterNumber > 3 
                         ? 'Connect to publish your premium chapter with full IP protection and monetization.'
                         : 'Connect to Aeneid testnet to register your chapter as an IP Asset on Story Protocol.'
                       }
@@ -875,9 +909,15 @@ function PublishingModal({
                       </div>
 
                       <div>
-                        <h3 className="text-xl font-semibold text-gray-900 mb-2">🚀 Publishing Your Chapter</h3>
+                        <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                          {isDerivative && chapterNumber === 4 
+                            ? '🌿 Publishing Your First Original Chapter' 
+                            : '🚀 Publishing Your Chapter'}
+                        </h3>
                         <p className="text-gray-600">
-                          {publishingOption === 'protected'
+                          {isDerivative && chapterNumber === 4
+                            ? `Registering your remix of "${parentBookTitle || 'parent book'}" as a derivative IP Asset...`
+                            : publishingOption === 'protected'
                             ? 'Using R2 storage and registering IP Asset with custom license terms...'
                             : 'Using R2 storage and registering as IP Asset on Story Protocol...'
                           }
@@ -885,7 +925,11 @@ function PublishingModal({
                         {isUnifiedSupported && publishingOption === 'protected' && (
                           <div className="mt-2 flex items-center justify-center gap-2 text-green-600">
                             <TrendingUp className="w-4 h-4" />
-                            <span className="text-sm font-medium">Gas Optimized: Single-transaction flow enabled</span>
+                            <span className="text-sm font-medium">
+                              {isDerivative && chapterNumber === 4 
+                                ? 'Derivative registration: Single-transaction flow' 
+                                : 'Gas Optimized: Single-transaction flow enabled'}
+                            </span>
                           </div>
                         )}
                       </div>
@@ -901,7 +945,8 @@ function PublishingModal({
                         {chapterNumber > 3 && (
                           <div className="text-xs text-gray-600 space-y-1">
                             <div className={`flex items-center gap-2 ${publishStep === 'blockchain-transaction' || publishStep === 'setting-attribution' ? 'font-semibold' : ''}`}>
-                              {publishStep === 'setting-attribution' ? '✅' : publishStep === 'blockchain-transaction' ? '⏳' : '⭕'} Transaction 1: IP Asset Registration
+                              {publishStep === 'setting-attribution' ? '✅' : publishStep === 'blockchain-transaction' ? '⏳' : '⭕'} 
+                              Transaction 1: {isDerivative && chapterNumber === 4 ? 'Derivative IP Registration' : 'IP Asset Registration'}
                             </div>
                             <div className={`flex items-center gap-2 ${publishStep === 'setting-attribution' ? 'font-semibold' : ''}`}>
                               {publishStep === 'setting-attribution' ? '⏳' : '⭕'} Transaction 2: Chapter Pricing Setup

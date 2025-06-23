@@ -68,7 +68,44 @@ export async function GET(
 
     console.log('📚 Getting chapter count for book:', bookId)
 
-    // Parse book ID using the standard parsing logic
+    // First, try to get book metadata to check for inherited chapters
+    try {
+      const bookMetadata = await BookStorageService.getBookMetadata(bookId)
+      
+      if (bookMetadata && bookMetadata.chapterMap) {
+        // Use chapterMap for accurate chapter count (includes inherited chapters)
+        const chapterNumbers = Object.keys(bookMetadata.chapterMap)
+          .map(key => parseInt(key.replace('ch', '')))
+          .filter(num => !isNaN(num))
+          .sort((a, b) => a - b)
+        
+        const totalChapters = chapterNumbers.length
+        const latestChapter = totalChapters > 0 ? Math.max(...chapterNumbers) : 0
+        const nextChapterNumber = totalChapters > 0 ? latestChapter + 1 : 1
+        
+        console.log('📊 Using chapterMap from metadata:', {
+          totalChapters,
+          latestChapter,
+          nextChapterNumber,
+          chapters: chapterNumbers
+        })
+        
+        return NextResponse.json({
+          success: true,
+          data: {
+            bookId,
+            totalChapters,
+            latestChapter,
+            nextChapterNumber,
+            chapters: chapterNumbers
+          }
+        })
+      }
+    } catch (metadataError) {
+      console.log('⚠️ Could not load book metadata, falling back to R2 listing:', metadataError)
+    }
+
+    // Fallback: Parse book ID and list R2 directory
     let authorAddress: string
     let slug: string
     

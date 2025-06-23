@@ -142,6 +142,48 @@ export function useUnifiedPublishStory() {
       throw new Error('SPG NFT Contract not configured')
     }
 
+    // Check if this is a derivative book that needs registration
+    let bookMetadata = null
+    let isDerivativeNeedingRegistration = false
+    let parentIpAssetId: string | null = null
+    let parentLicenseTermsId: string | null = null
+    
+    if (bookId) {
+      try {
+        const bookData = await apiClient.getBookById(bookId)
+        bookMetadata = bookData
+        
+        // Check if this is a derivative book without IP registration
+        if (bookMetadata.parentBook && !bookMetadata.ipAssetId) {
+          console.log('🌿 Detected unregistered derivative book')
+          
+          // Check if this is the first new chapter (after inherited chapters)
+          const inheritedChapterCount = Object.keys(bookMetadata.chapterMap || {}).length
+          const isFirstNewChapter = storyData.chapterNumber === inheritedChapterCount + 1
+          
+          if (isFirstNewChapter) {
+            console.log('📝 This is the first new chapter in the derivative - checking parent registration')
+            
+            // Get parent book's IP registration info
+            const parentBookData = await apiClient.getBookById(bookMetadata.parentBook)
+            if (parentBookData.ipAssetId && parentBookData.licenseTermsId) {
+              isDerivativeNeedingRegistration = true
+              parentIpAssetId = parentBookData.ipAssetId
+              parentLicenseTermsId = parentBookData.licenseTermsId
+              console.log('✅ Parent book is registered, will register derivative', {
+                parentIpAssetId,
+                parentLicenseTermsId
+              })
+            } else {
+              console.log('⚠️ Parent book not registered on chain, skipping derivative registration')
+            }
+          }
+        }
+      } catch (error) {
+        console.warn('Could not fetch book metadata:', error)
+      }
+    }
+
     // Step 1: Generate and store metadata via backend
     setCurrentStep('generating-metadata')
     console.log('📝 Generating metadata...')
@@ -183,17 +225,54 @@ export function useUnifiedPublishStory() {
     const storyProtocolClient = createClientStoryProtocolService(address!)
     
     try {
-      const registrationResult = await storyProtocolClient.mintAndRegisterWithPilTerms({
-        spgNftContract: nftContract,
-        metadata: {
-          ipMetadataURI: metadataUri,
-          ipMetadataHash: metadataHash,
-          nftMetadataURI: metadataUri,
-          nftMetadataHash: metadataHash
-        },
-        licenseTier: options.licenseTier,
-        recipient: address!
-      })
+      let registrationResult
+      
+      if (isDerivativeNeedingRegistration && parentIpAssetId && parentLicenseTermsId) {
+        // Register as derivative
+        console.log('🌿 Registering as derivative of parent IP...')
+        registrationResult = await storyProtocolClient.mintAndRegisterDerivativeWithPilTerms({
+          spgNftContract: nftContract,
+          parentIpId: parentIpAssetId as Address,
+          parentLicenseTermsId: parentLicenseTermsId,
+          metadata: {
+            ipMetadataURI: metadataUri,
+            ipMetadataHash: metadataHash,
+            nftMetadataURI: metadataUri,
+            nftMetadataHash: metadataHash
+          },
+          licenseTier: options.licenseTier,
+          recipient: address!
+        })
+        console.log('✅ Derivative registration complete!')
+        
+        // Update book metadata with IP registration info
+        if (bookId && registrationResult.success && registrationResult.ipId) {
+          try {
+            console.log('📝 Updating book metadata with IP registration...')
+            await apiClient.updateBookIP(bookId, {
+              ipAssetId: registrationResult.ipId as string,
+              transactionHash: registrationResult.txHash as string,
+              licenseTermsId: parentLicenseTermsId
+            })
+            console.log('✅ Book metadata updated with IP registration')
+          } catch (updateError) {
+            console.warn('⚠️ Failed to update book metadata (non-critical):', updateError)
+          }
+        }
+      } else {
+        // Regular registration
+        registrationResult = await storyProtocolClient.mintAndRegisterWithPilTerms({
+          spgNftContract: nftContract,
+          metadata: {
+            ipMetadataURI: metadataUri,
+            ipMetadataHash: metadataHash,
+            nftMetadataURI: metadataUri,
+            nftMetadataHash: metadataHash
+          },
+          licenseTier: options.licenseTier,
+          recipient: address!
+        })
+      }
 
       const registeredIPAssetId = registrationResult.ipId as Address
       const transactionHash = registrationResult.txHash as Hash

@@ -249,6 +249,25 @@ export const apiClient = {
     })
   },
 
+  async updateBookIP(bookId: string, ipData: { 
+    ipAssetId: string; 
+    transactionHash: string; 
+    licenseTermsId?: string 
+  }) {
+    console.log('🔗 Updating book IP registration:', {
+      bookId,
+      ipAssetId: ipData.ipAssetId,
+      transactionHash: ipData.transactionHash
+    })
+    
+    const encodedBookId = encodeURIComponent(bookId)
+    
+    return apiRequest(`/api/books/${encodedBookId}/update-ip`, {
+      method: 'POST',
+      body: JSON.stringify(ipData),
+    })
+  },
+
   // Royalty operations
   async claimRoyalty(data: { chapterId: string; authorAddress: string }) {
     return apiRequest('/api/royalties/claim', {
