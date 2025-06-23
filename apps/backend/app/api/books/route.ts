@@ -223,7 +223,22 @@ async function getFromIndex(request: NextRequest) {
       genre: book.tags?.[0] || 'General',
       moods: [],
       emojis: [],
-      coverUrl: book.coverUrl || `${process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api-testnet.storyhouse.vip'}/api/books/${encodeURIComponent(book.id)}/cover`,
+      coverUrl: (() => {
+        const isDev = process.env.NODE_ENV === 'development'
+        const baseUrl = isDev ? 'http://localhost:3002' : (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3002')
+        if (book.coverUrl && book.coverUrl.startsWith('/books/')) {
+          // Extract book ID from the cover path
+          const match = book.coverUrl.match(/\/books\/([^\/]+\/[^\/]+)\/cover\.(jpg|png|webp)/)
+          if (match) {
+            const coverBookId = match[1]
+            return `${baseUrl}/api/books/${encodeURIComponent(coverBookId)}/cover`
+          }
+        } else if (book.coverUrl && (book.coverUrl.startsWith('http://') || book.coverUrl.startsWith('https://'))) {
+          return book.coverUrl
+        }
+        // Default to this book's cover API endpoint
+        return `${baseUrl}/api/books/${encodeURIComponent(book.id)}/cover`
+      })(),
       createdAt: book.createdAt,
       lastUpdated: book.updatedAt || book.createdAt,
       registeredAt: book.createdAt,
@@ -417,10 +432,26 @@ async function getFromR2Direct(request: NextRequest) {
             const chapterCount = await getChapterCount(authorFromPrefix, bookSlug)
             console.log(`      📊 Chapter count: ${chapterCount}`)
 
-            // Generate the correct cover URL using the API endpoint with full domain
+            // Handle cover URL - convert relative paths to API endpoints
             const bookId = `${authorFromPrefix}/${bookSlug}`
-            const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api-testnet.storyhouse.vip'
-            const coverUrl = `${baseUrl}/api/books/${encodeURIComponent(bookId)}/cover`
+            const isDev = process.env.NODE_ENV === 'development'
+        const baseUrl = isDev ? 'http://localhost:3002' : (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3002')
+            let coverUrl = bookData.coverUrl
+            
+            if (coverUrl && coverUrl.startsWith('/books/')) {
+              // Extract book ID from the cover path
+              const match = coverUrl.match(/\/books\/([^\/]+\/[^\/]+)\/cover\.(jpg|png|webp)/)
+              if (match) {
+                const coverBookId = match[1]
+                coverUrl = `${baseUrl}/api/books/${encodeURIComponent(coverBookId)}/cover`
+              } else {
+                // Fallback if pattern doesn't match
+                coverUrl = `${baseUrl}/api/books/${encodeURIComponent(bookId)}/cover`
+              }
+            } else if (!coverUrl || !(coverUrl.startsWith('http://') || coverUrl.startsWith('https://'))) {
+              // No cover URL or not absolute - use API endpoint
+              coverUrl = `${baseUrl}/api/books/${encodeURIComponent(bookId)}/cover`
+            }
 
             const book: RegisteredBook = {
               id: bookId,
@@ -433,7 +464,7 @@ async function getFromR2Direct(request: NextRequest) {
               genre: bookData.genres?.[0] || 'General',
               moods: bookData.moods,
               emojis: bookData.emojis,
-              coverUrl: coverUrl, // Use API endpoint instead of direct R2 URL
+              coverUrl: coverUrl, // Use metadata coverUrl or API endpoint fallback
               createdAt: bookData.createdAt || bookData.registeredAt || new Date().toISOString(),
               lastUpdated: bookData.updatedAt || bookData.createdAt || new Date().toISOString(),
               registeredAt: bookData.registeredAt,

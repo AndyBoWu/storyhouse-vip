@@ -241,7 +241,7 @@ export const BOOK_SYSTEM_CONSTANTS = {
   
   // Validation patterns
   SLUG_PATTERN: /^[a-z0-9-]+$/,
-  BOOK_ID_PATTERN: /^0x[a-fA-F0-9]{40}-[a-z0-9-]+$/,
+  BOOK_ID_PATTERN: /^0x[a-fA-F0-9]{40}\/[a-z0-9-]+$/, // Correct format: authorAddress/slug
   
   // Economics defaults
   FREE_CHAPTERS_COUNT: 3,

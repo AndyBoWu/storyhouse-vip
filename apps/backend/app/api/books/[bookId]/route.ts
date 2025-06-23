@@ -32,25 +32,81 @@ export async function GET(
       );
     }
 
-    // Calculate additional stats
+    // Return all book metadata fields
     const bookDetails = {
+      // Basic info
       id: book.id,
+      bookId: book.bookId,
       title: book.title,
+      description: book.description,
+      
+      // Author info
       author: book.authorAddress || book.author,
       authorAddress: book.authorAddress || book.author,
       authorName: book.authorName || 'Anonymous',
-      description: book.description,
-      coverUrl: `/api/books/${encodeURIComponent(bookId)}/cover`, // Use relative URL for cover with proper encoding
-      genre: book.genres || [],
-      totalChapters: book.chapters || 0,
+      
+      // Cover - convert relative URLs to absolute API URLs
+      coverUrl: (() => {
+        const storedUrl = book.coverUrl || book.coverImageUrl
+        // Use appropriate base URL for environment
+        const isDev = process.env.NODE_ENV === 'development'
+        const baseUrl = isDev ? 'http://localhost:3002' : (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3002')
+        
+        if (storedUrl && storedUrl.startsWith('/books/')) {
+          // Extract book ID from the cover path (e.g., /books/{authorAddress}/{slug}/cover.jpg)
+          const match = storedUrl.match(/\/books\/([^\/]+\/[^\/]+)\/cover\.(jpg|png|webp)/)
+          if (match) {
+            const coverBookId = match[1]
+            // Convert to API endpoint for that specific book
+            return `${baseUrl}/api/books/${encodeURIComponent(coverBookId)}/cover`
+          }
+        } else if (storedUrl && (storedUrl.startsWith('http://') || storedUrl.startsWith('https://'))) {
+          // Already an absolute URL
+          return storedUrl
+        }
+        
+        // Default: use this book's cover API endpoint
+        return `${baseUrl}/api/books/${encodeURIComponent(bookId)}/cover`
+      })(),
+      
+      // Content info
+      genres: book.genres || [],
+      genre: book.genres?.[0] || book.genre || 'General',
+      contentRating: book.contentRating || 'G',
+      tags: book.tags || [],
+      isRemixable: book.isRemixable !== false,
+      
+      // Chapter info
+      totalChapters: book.totalChapters || book.chapters || 0,
+      chapterMap: book.chapterMap || {},
+      
+      // Branching info
+      parentBook: book.parentBook,
+      parentBookId: book.parentBookId || book.parentBook,
+      branchPoint: book.branchPoint,
+      derivativeBooks: book.derivativeBooks || [],
+      originalAuthors: book.originalAuthors || {},
+      
+      // Stats
       totalReads: book.totalReads || 0,
       totalEarnings: book.totalEarnings || 0,
-      rating: book.rating,
-      createdAt: book.createdAt,
+      totalRevenue: book.totalRevenue || 0,
+      averageRating: book.averageRating || book.rating || 0,
+      rating: book.rating || 0,
+      
+      // Blockchain info
       ipAssetId: book.ipAssetId,
+      licenseTermsId: book.licenseTermsId,
       tokenId: book.tokenId,
       transactionHash: book.transactionHash,
-      status: book.status || 'published'
+      
+      // Timestamps
+      createdAt: book.createdAt,
+      updatedAt: book.updatedAt,
+      
+      // Status
+      status: book.status || 'published',
+      isPublic: book.isPublic !== false
     };
 
     return NextResponse.json(bookDetails);

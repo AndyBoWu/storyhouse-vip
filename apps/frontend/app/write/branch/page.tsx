@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect, Suspense, useMemo } from 'react'
-import { ArrowLeft, BookOpen, Users, GitBranch, Upload, AlertCircle, Sparkles, Search, Filter, Clock, Star } from 'lucide-react'
+import { ArrowLeft, BookOpen, Users, GitBranch, Upload, AlertCircle, Sparkles, Search, Filter, Clock, Star, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useAccount } from 'wagmi'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
@@ -71,6 +71,7 @@ function BranchStoryPageContent() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedGenre, setSelectedGenre] = useState<string>('all')
   const [sortBy, setSortBy] = useState<'recent' | 'popular' | 'rating'>('recent')
+  const [showSuccess, setShowSuccess] = useState(false)
 
   const availableGenres = ['Fantasy', 'Romance', 'Mystery', 'Sci-Fi', 'Horror', 'Comedy', 'Drama', 'Adventure']
   const filterGenres = ['all', 'Fantasy', 'Romance', 'Mystery', 'Sci-Fi', 'Horror', 'Comedy', 'Drama', 'Adventure']
@@ -181,13 +182,19 @@ function BranchStoryPageContent() {
     
     // Load branching information
     try {
+      console.log('🔍 Loading branching info for story:', story.id)
       const data = await apiClient.getBranchingInfo(story.id)
       
+      console.log('📊 Branching info response:', data)
+      
       if (data.success) {
+        console.log('✅ Available branch points:', data.availableBranchPoints)
         setBranchingInfo(data)
+      } else {
+        console.warn('⚠️ Branching info failed:', data.error)
       }
     } catch (error) {
-      console.error('Error loading branching info:', error)
+      console.error('❌ Error loading branching info:', error)
     }
   }
 
@@ -227,11 +234,37 @@ function BranchStoryPageContent() {
         formData.append('newCover', coverFile)
       }
 
+      console.log('🌿 Branching book with data:', {
+        parentBookId: selectedStory.id,
+        branchPoint: `ch${selectedChapter}`,
+        newTitle,
+        nextChapterToWrite: (selectedChapter || 0) + 1
+      })
+
       const result = await apiClient.branchBook(formData)
+      console.log('📊 Branch API response:', result)
 
       if (result.success) {
-        // Redirect to new story
-        router.push(`/stories?bookId=${result.book.bookId}`)
+        // Calculate next chapter number (branch point + 1)
+        const nextChapterNumber = parseInt(selectedChapter?.toString() || '1') + 1
+        
+        console.log('✅ Branch successful! New book:', {
+          bookId: result.book.bookId,
+          coverUrl: result.book.coverUrl,
+          inheritedChapters: Object.keys(result.book.chapterMap || {}),
+          redirectingToChapter: nextChapterNumber
+        })
+        
+        // Show success message briefly
+        // Show success notification
+        setShowSuccess(true)
+        
+        // Auto-redirect after a brief delay to show success
+        setTimeout(() => {
+          const redirectUrl = `/write/chapter?bookId=${encodeURIComponent(result.book.bookId)}&chapterNumber=${nextChapterNumber}`
+          console.log('🚀 Redirecting to:', redirectUrl)
+          router.push(redirectUrl)
+        }, 2000)
       } else {
         setError(result.error || 'Failed to create branch')
       }
@@ -294,7 +327,8 @@ function BranchStoryPageContent() {
                 <div>
                   <h4 className="text-green-800 font-medium">How Branching Works</h4>
                   <p className="text-green-700 text-sm mt-1">
-                    Pick any story and any chapter to continue from that point with your own twist. 
+                    Pick any story and choose a chapter (3+) to continue from that point with your own twist. 
+                    Chapters 1-2 are protected to preserve the original story setup. 
                     Revenue is shared between you and the original author(s) based on contribution.
                   </p>
                 </div>
@@ -314,6 +348,26 @@ function BranchStoryPageContent() {
               </div>
             ) : (
               <>
+                {/* Success Notification */}
+                <AnimatePresence>
+                  {showSuccess && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50"
+                    >
+                      <div className="bg-green-600 text-white px-6 py-4 rounded-lg shadow-2xl flex items-center gap-3">
+                        <CheckCircle className="w-6 h-6" />
+                        <div>
+                          <h3 className="font-semibold">Branch Created Successfully!</h3>
+                          <p className="text-sm opacity-90">Redirecting to write your first chapter...</p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
                 {/* Error Display */}
                 {error && (
                   <motion.div
@@ -506,25 +560,45 @@ function BranchStoryPageContent() {
                       📍 Choose your branching point:
                     </h3>
                     
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                      {branchingInfo.availableBranchPoints.map((point) => (
-                        <button
-                          key={point.chapterKey}
-                          onClick={() => setSelectedChapter(point.chapterNumber)}
-                          className={`p-3 text-center rounded-lg border-2 transition-all ${
-                            selectedChapter === point.chapterNumber
-                              ? 'border-green-400 bg-green-50 text-green-800'
-                              : 'border-gray-200 hover:border-gray-300'
-                          }`}
-                        >
-                          <div className="font-medium">Chapter {point.chapterNumber}</div>
-                        </button>
-                      ))}
-                    </div>
+                    {branchingInfo.availableBranchPoints && branchingInfo.availableBranchPoints.length > 0 ? (
+                      <>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                          {branchingInfo.availableBranchPoints.map((point) => (
+                            <button
+                              key={point.chapterKey}
+                              onClick={() => setSelectedChapter(point.chapterNumber)}
+                              className={`p-4 text-left rounded-lg border-2 transition-all ${
+                                selectedChapter === point.chapterNumber
+                                  ? 'border-green-400 bg-green-50 text-green-800'
+                                  : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                              }`}
+                            >
+                              <div className="flex items-start gap-3">
+                                <div className="text-2xl">📝</div>
+                                <div className="flex-1">
+                                  <div className="font-semibold text-lg">Write Chapter {point.chapterNumber + 1}</div>
+                                  <div className="text-sm opacity-75 mt-1">
+                                    inherit chapters 1-{point.chapterNumber}
+                                  </div>
+                                </div>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
 
-                    <p className="text-sm text-gray-600">
-                      💡 You'll inherit chapters 1-{selectedChapter || '?'} and continue from there with your own story.
-                    </p>
+                        <p className="text-sm text-gray-600">
+                          💡 Select which chapter you want to write. You'll inherit all previous chapters and continue the story from there.
+                        </p>
+                      </>
+                    ) : (
+                      <div className="text-center py-8">
+                        <div className="text-gray-400 text-6xl mb-4">📖</div>
+                        <h4 className="text-lg font-medium text-gray-700 mb-2">No branching points available</h4>
+                        <p className="text-sm text-gray-500">
+                          This story needs at least 3 chapters to allow branching. Chapters 1-2 are protected.
+                        </p>
+                      </div>
+                    )}
                   </motion.div>
                 )}
 
@@ -536,7 +610,7 @@ function BranchStoryPageContent() {
                     className="bg-white rounded-xl shadow-lg p-6"
                   >
                     <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                      ✨ Create your branched story:
+                      ✨ Create your branched story (Writing Chapter {(selectedChapter || 0) + 1}):
                     </h3>
 
                     <div className="space-y-4">
