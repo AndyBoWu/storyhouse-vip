@@ -25,6 +25,11 @@ export interface UnifiedRegistrationParams {
   recipient: Address
 }
 
+export interface DerivativeRegistrationParams extends UnifiedRegistrationParams {
+  parentIpId: Address
+  parentLicenseTermsId: string
+}
+
 export class ClientStoryProtocolService {
   private storyClient: StoryClient | null = null
   private account: Address
@@ -196,6 +201,59 @@ export class ClientStoryProtocolService {
       }
     } catch (error) {
       console.error('❌ Unified registration failed:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Execute derivative registration with user's wallet
+   */
+  async mintAndRegisterDerivativeWithPilTerms(params: DerivativeRegistrationParams) {
+    if (!this.storyClient) {
+      await this.initialize()
+    }
+
+    if (!this.storyClient) {
+      throw new Error('Story Protocol SDK not initialized')
+    }
+
+    try {
+      console.log('🌿 Executing derivative registration on client-side...', params)
+
+      // Prepare PIL terms data
+      const pilTermsData = this.preparePilTermsData(params.licenseTier)
+      console.log('📋 PIL Terms Data:', JSON.stringify(pilTermsData, (_, v) => typeof v === 'bigint' ? v.toString() : v, 2))
+
+      // Execute derivative registration transaction with user's wallet
+      const result = await this.storyClient.ipAsset.mintAndRegisterIpAndMakeDerivative({
+        spgNftContract: params.spgNftContract,
+        derivData: {
+          parentIpIds: [params.parentIpId],
+          licenseTermsIds: [params.parentLicenseTermsId]
+        },
+        ipMetadata: {
+          ipMetadataURI: params.metadata.ipMetadataURI || '',
+          ipMetadataHash: params.metadata.ipMetadataHash || ('0x0000000000000000000000000000000000000000000000000000000000000000' as Hash),
+          nftMetadataURI: params.metadata.nftMetadataURI || '',
+          nftMetadataHash: params.metadata.nftMetadataHash || ('0x0000000000000000000000000000000000000000000000000000000000000000' as Hash)
+        },
+        recipient: params.recipient,
+        txOptions: {
+          gas: 1000000n // Extra gas for derivative registration
+        }
+      })
+
+      console.log('✅ Derivative registration completed:', JSON.stringify(result, (_, v) => typeof v === 'bigint' ? v.toString() : v, 2))
+
+      return {
+        success: true,
+        ipId: result.ipId,
+        tokenId: result.tokenId,
+        licenseTermsId: params.parentLicenseTermsId, // Inherits parent's license terms
+        txHash: result.txHash
+      }
+    } catch (error) {
+      console.error('❌ Derivative registration failed:', error)
       throw error
     }
   }
