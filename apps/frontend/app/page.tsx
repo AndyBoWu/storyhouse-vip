@@ -48,14 +48,16 @@ export default function HomePage() {
           <div className="mx-auto max-w-4xl text-center py-12">
             {/* Hero Section */}
             <div className="mb-16">
-              <h1 className="mb-6 text-4xl font-bold text-gray-900 lg:text-6xl">
-                Explore Infinite Worlds,{' '}
-                <span className="text-red-600">
+              <h1 className="mb-8 text-5xl font-bold leading-tight tracking-tight lg:text-7xl">
+                <span className="block bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent drop-shadow-sm">
+                  Explore Infinite Worlds,
+                </span>
+                <span className="block bg-gradient-to-r from-red-600 via-red-500 to-orange-500 bg-clip-text text-transparent animate-pulse-slow drop-shadow-sm">
                   Create Without Limits
                 </span>
               </h1>
 
-              <p className="mb-8 text-xl text-gray-700 lg:text-2xl">
+              <p className="mb-10 text-xl text-gray-600 leading-relaxed lg:text-2xl max-w-3xl mx-auto">
                 Discover stories that transport you to new dimensions.
                 <br />
                 Build worlds that live forever in the Universe.
