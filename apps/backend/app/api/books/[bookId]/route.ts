@@ -61,8 +61,9 @@ export async function GET(
             return `${baseUrl}/api/books/${encodeURIComponent(coverBookId)}/cover`
           }
         } else if (storedUrl && (storedUrl.startsWith('http://') || storedUrl.startsWith('https://'))) {
-          // Already an absolute URL
-          return storedUrl
+          // Even if it's an absolute URL, we need to proxy it through our API
+          // because the R2 bucket is private
+          return `${baseUrl}/api/books/${encodeURIComponent(bookId)}/cover`
         }
         
         // Default: use this book's cover API endpoint

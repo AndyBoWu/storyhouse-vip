@@ -209,6 +209,16 @@ forge script script/Deploy.s.sol:Deploy --broadcast --rpc-url $STORY_RPC_URL
 - Authors have complete control over their books
 - Simpler architecture with only one revenue controller
 
+## Critical Architecture Decisions
+
+### R2 Private Bucket & Cover Image Proxy (IMPORTANT!)
+- **R2 bucket is PRIVATE** - Direct URLs will NOT work from browsers
+- **ALWAYS use proxy API** for serving images: `/api/books/{bookId}/cover`
+- **NEVER return raw R2 URLs** to frontend, even if they're absolute URLs
+- **Why**: R2 bucket has `Public Access: Disabled` for security
+- **Proxy endpoint** handles authentication and serves images from private bucket
+- **Common mistake**: Returning stored R2 URLs directly when they start with `http://` or `https://`
+
 ## Memories
 
 - Remember that our mainnet is not integrated yet

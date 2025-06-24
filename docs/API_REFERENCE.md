@@ -949,6 +949,7 @@ GET /api/books
       "totalChapters": 5,
       "publishedChapters": 3,
       "ipAssetId": "0xabcdef1234567890",
+      "coverUrl": "https://api.storyhouse.vip/api/books/0x1234-detective-portal/cover",
       "licenseInfo": {
         "templateId": "premium",
         "commercialUse": true,
@@ -958,6 +959,36 @@ GET /api/books
   ]
 }
 ```
+
+### Get Book Cover (Proxy API) 🔒
+
+**IMPORTANT**: R2 bucket is PRIVATE. Always use this proxy endpoint for cover images.
+
+```http
+GET /api/books/[bookId]/cover
+```
+
+**Purpose:** Serve book cover images from private R2 storage through authenticated proxy.
+
+**Path Parameters:**
+- `bookId`: The book identifier in format `{authorAddress}/{slug}`
+
+**Response:**
+- Success: Returns the image file with appropriate content-type
+- Not Found: Returns SVG placeholder with book's first letter
+- Error: Returns 404 or 500 status
+
+**Example:**
+```
+GET /api/books/0x3873c0d1bcfa245773b13b694a49dac5b3f03ca2/shadows-and-light/cover
+```
+
+**Important Notes:**
+- ⚠️ **NEVER expose raw R2 URLs** to frontend (they won't work from browsers)
+- ✅ **ALWAYS use this proxy endpoint** for all cover images
+- 🔄 The endpoint handles authentication with R2 automatically
+- 📦 Includes proper caching headers for performance
+- 🎨 Returns a generated placeholder if cover doesn't exist
 
 ---
 
