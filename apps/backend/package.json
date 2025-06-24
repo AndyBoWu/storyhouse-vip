@@ -16,7 +16,12 @@
     "check-cover": "cp .env.testnet .env.local && tsx scripts/check-book-cover.ts",
     "migrate:license-terms": "cp .env.testnet .env.local && tsx scripts/add-license-terms-to-chapters.ts",
     "check-book": "tsx scripts/check-book-registration.ts",
-    "register-book": "tsx scripts/register-book-hybrid.ts"
+    "register-book": "tsx scripts/register-book-hybrid.ts",
+    "list-r2": "cp .env.testnet .env.local && tsx scripts/list-r2-contents.ts",
+    "list-r2:tree": "cp .env.testnet .env.local && tsx scripts/list-r2-contents.ts --tree",
+    "list-r2:count": "cp .env.testnet .env.local && tsx scripts/list-r2-contents.ts --count",
+    "clean-r2": "cp .env.testnet .env.local && tsx scripts/clean-r2-bucket.ts",
+    "clean-r2:force": "cp .env.testnet .env.local && tsx scripts/clean-r2-bucket-force.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.825.0",

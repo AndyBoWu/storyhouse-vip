@@ -54,6 +54,7 @@ const config: Config = {
         'slide-up': 'slideUp 0.5s ease-out',
         'bounce-gentle': 'bounceGentle 2s infinite',
         'pulse-slow': 'pulseSlow 3s ease-in-out infinite',
+        'subtle-bounce': 'subtleBounce 2s ease-in-out infinite',
       },
       keyframes: {
         fadeIn: {
@@ -71,6 +72,10 @@ const config: Config = {
         pulseSlow: {
           '0%, 100%': { opacity: '1' },
           '50%': { opacity: '0.8' },
+        },
+        subtleBounce: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-3px)' },
         },
       },
       backdropBlur: {
