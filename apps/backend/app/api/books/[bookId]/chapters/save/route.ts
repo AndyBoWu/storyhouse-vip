@@ -214,7 +214,8 @@ export async function POST(
       try {
         console.log('📚 Updating book index after new chapter...')
         const { bookIndexService } = await import('../../../../../../lib/services/bookIndexService')
-        await bookIndexService.updateBookIndex()
+        // Use the more efficient single book update
+        await bookIndexService.updateSingleBookInIndex(bookId)
         console.log('✅ Book index updated successfully')
       } catch (indexError) {
         console.error('⚠️ Failed to update book index:', indexError)

@@ -226,6 +226,114 @@ export class BookIndexService {
   }
 
   /**
+   * Updates a single book in the index without rebuilding the entire index
+   */
+  async updateSingleBookInIndex(bookId: string): Promise<void> {
+    this.ensureInitialized()
+    try {
+      console.log(`Updating single book in index: ${bookId}`)
+      
+      // Get current index
+      const currentIndex = await this.getBookIndex()
+      let index: BookIndex
+      
+      if (!currentIndex) {
+        // No index exists, create a new one with just this book
+        console.log('No existing index found, creating new index')
+        const books = await this.fetchAllBooksMetadata()
+        index = {
+          version: '1.0.0',
+          lastUpdated: new Date().toISOString(),
+          totalBooks: books.length,
+          books
+        }
+      } else {
+        // Parse the book ID
+        const [authorAddress, slug] = bookId.includes('/') 
+          ? bookId.split('/')
+          : [bookId.split('-')[0], bookId.split('-').slice(1).join('-')]
+        
+        // Fetch updated metadata for this specific book
+        const chapterCount = await this.getChapterCount(authorAddress, slug)
+        
+        // Update the book in the index
+        const bookIndex = currentIndex.books.findIndex(b => b.id === bookId)
+        
+        if (bookIndex >= 0) {
+          // Update existing book
+          currentIndex.books[bookIndex].chapterCount = chapterCount
+          currentIndex.books[bookIndex].updatedAt = new Date().toISOString()
+          console.log(`Updated book ${bookId} with ${chapterCount} chapters`)
+        } else {
+          // Book not in index, fetch its metadata and add it
+          console.log(`Book ${bookId} not found in index, fetching metadata`)
+          try {
+            const metadataCommand = new GetObjectCommand({
+              Bucket: this.bucketName!,
+              Key: `books/${authorAddress}/${slug}/metadata.json`
+            })
+            
+            const metadataResponse = await this.client!.send(metadataCommand)
+            const metadataString = await metadataResponse.Body?.transformToString()
+            
+            if (metadataString) {
+              const metadata = JSON.parse(metadataString)
+              const baseUrl = process.env.NODE_ENV === 'development' 
+                ? 'http://localhost:3002' 
+                : (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3002')
+              
+              const bookEntry: BookIndexEntry = {
+                id: bookId,
+                title: metadata.title || 'Untitled',
+                author: metadata.author || 'Unknown',
+                authorAddress,
+                slug,
+                chapterCount,
+                coverUrl: `${baseUrl}/api/books/${encodeURIComponent(bookId)}/cover`,
+                description: metadata.description,
+                tags: metadata.tags || [],
+                status: metadata.status || 'published',
+                createdAt: metadata.createdAt || new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+              }
+              
+              currentIndex.books.push(bookEntry)
+              console.log(`Added new book ${bookId} to index`)
+            }
+          } catch (error) {
+            console.error(`Failed to fetch metadata for book ${bookId}:`, error)
+          }
+        }
+        
+        // Sort books by most recently updated
+        currentIndex.books.sort((a, b) => 
+          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+        )
+        
+        currentIndex.lastUpdated = new Date().toISOString()
+        currentIndex.totalBooks = currentIndex.books.length
+        index = currentIndex
+      }
+      
+      // Save updated index to R2
+      const putCommand = new PutObjectCommand({
+        Bucket: this.bucketName!,
+        Key: this.indexKey,
+        Body: JSON.stringify(index, null, 2),
+        ContentType: 'application/json',
+        CacheControl: 'public, max-age=60, s-maxage=60, stale-while-revalidate=120'
+      })
+      
+      await this.client!.send(putCommand)
+      console.log('Book index updated successfully')
+      
+    } catch (error) {
+      console.error('Error updating single book in index:', error)
+      throw error
+    }
+  }
+
+  /**
    * Updates the book index in R2
    */
   async updateBookIndex(): Promise<void> {
@@ -300,14 +408,14 @@ export class BookIndexService {
   }
 
   /**
-   * Validates the index is not stale (older than 1 hour)
+   * Validates the index is not stale (older than 5 minutes)
    */
   isIndexStale(index: BookIndex): boolean {
     const indexDate = new Date(index.lastUpdated)
     const now = new Date()
-    const hoursSinceUpdate = (now.getTime() - indexDate.getTime()) / (1000 * 60 * 60)
+    const minutesSinceUpdate = (now.getTime() - indexDate.getTime()) / (1000 * 60)
     
-    return hoursSinceUpdate > 1
+    return minutesSinceUpdate > 5
   }
 }
 
