@@ -63,8 +63,13 @@ lerna-debug.log*
 *.swp
 *.swo
 
-# Claude Code
+# Claude Code / AI-related files
 .claude-permissions
+.claude/
+.claude-code/
+.ai-assistant/
+claude-artifacts/
+claude-sessions/
 
 # Temporary folders
 tmp/

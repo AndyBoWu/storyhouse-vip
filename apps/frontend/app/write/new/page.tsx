@@ -157,8 +157,16 @@ function NewStoryPageContent() {
   }
 
   const handleRegisterBook = async () => {
-    if (!plotDescription.trim() || !isWalletConnected) {
-      setError(isWalletConnected ? 'Please provide a story plot' : 'Please connect your wallet to register a book')
+    if (!plotDescription.trim() || !isWalletConnected || selectedGenres.length === 0 || !storyTitle.trim()) {
+      if (!isWalletConnected) {
+        setError('Please connect your wallet to register a book')
+      } else if (!plotDescription.trim()) {
+        setError('Please describe what your story is about')
+      } else if (selectedGenres.length === 0) {
+        setError('Please select at least one genre')
+      } else if (!storyTitle.trim()) {
+        setError('Please give your story a title')
+      }
       return
     }
 
@@ -398,25 +406,82 @@ function NewStoryPageContent() {
             </motion.div>
           )}
 
+          {/* Plot Description */}
+          <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <label className="block text-lg font-semibold text-gray-800 mb-4">
+              📝 What's your story about?
+            </label>
+            <textarea
+              value={plotDescription}
+              onChange={(e) => setPlotDescription(e.target.value)}
+              placeholder="Start with your story idea. What happens? Who are the main characters? What's the conflict?"
+              className="w-full h-32 p-4 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              maxLength={750}
+            />
+            <div className="flex items-center justify-between mt-4">
+              <span className="text-sm text-gray-500">{plotDescription.length}/750 characters</span>
+              <button
+                onClick={() => setShowMultiModal(!showMultiModal)}
+                className="flex items-center gap-2 px-4 py-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+              >
+                <Palette className="w-4 h-4" />
+                Add Inspiration
+              </button>
+            </div>
+          </div>
+
+          {/* Genre Selection - Required Field */}
+          <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <label className="block text-lg font-semibold text-gray-800 mb-4">
+              🎭 What type of story is this? <span className="text-red-500">*</span>
+              <span className="text-sm font-normal text-gray-500 ml-2">(Required - Choose at least one genre)</span>
+            </label>
+            <div className="flex flex-wrap gap-3">
+              {genres.map((genre) => (
+                <button
+                  key={genre}
+                  onClick={() => toggleSelection(genre, selectedGenres, setSelectedGenres)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all transform ${
+                    selectedGenres.includes(genre)
+                      ? 'bg-purple-600 text-white scale-105 shadow-md'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:scale-102'
+                  }`}
+                >
+                  {genre}
+                </button>
+              ))}
+            </div>
+            {selectedGenres.length === 0 && (
+              <p className="text-sm text-red-500 mt-2">
+                ⚠️ Please select at least one genre to continue
+              </p>
+            )}
+          </div>
+
           {/* Story Title */}
           <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
             <label className="block text-lg font-semibold text-gray-800 mb-4">
-              📖 Story Title:
+              📝 What's your story called?
+              <span className="text-sm font-normal text-gray-500 ml-2">(You can change this later)</span>
             </label>
             <input
               type="text"
               value={storyTitle}
               onChange={(e) => setStoryTitle(e.target.value)}
-              placeholder="Enter your story title"
+              placeholder="Give your story a memorable title"
               className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               maxLength={100}
             />
+            <div className="mt-2 text-sm text-gray-500">
+              {storyTitle.length}/100 characters
+            </div>
           </div>
 
           {/* Book Cover Upload */}
           <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
             <label className="block text-lg font-semibold text-gray-800 mb-4">
-              🎨 Book Cover:
+              🎨 Add a cover image
+              <span className="text-sm font-normal text-gray-500 ml-2">(Optional - You can add this later)</span>
             </label>
             
             {bookCoverPreview ? (
@@ -497,31 +562,7 @@ function NewStoryPageContent() {
             </div>
           </div>
 
-          {/* Plot Description */}
-          <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-            <label className="block text-lg font-semibold text-gray-800 mb-4">
-              📝 Describe your story plot:
-            </label>
-            <textarea
-              value={plotDescription}
-              onChange={(e) => setPlotDescription(e.target.value)}
-              placeholder="Describe your story plot..."
-              className="w-full h-32 p-4 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              maxLength={500}
-            />
-            <div className="flex items-center justify-between mt-4">
-              <span className="text-sm text-gray-500">{plotDescription.length}/500 characters</span>
-              <button
-                onClick={() => setShowMultiModal(!showMultiModal)}
-                className="flex items-center gap-2 px-4 py-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
-              >
-                <Palette className="w-4 h-4" />
-                Add Inspiration
-              </button>
-            </div>
-          </div>
-
-          {/* Multi-Modal Input Panel */}
+          {/* Multi-Modal Input Panel - Optional */}
           <AnimatePresence>
             {showMultiModal && (
               <motion.div
@@ -530,7 +571,7 @@ function NewStoryPageContent() {
                 exit={{ opacity: 0, height: 0 }}
                 className="bg-white rounded-xl shadow-lg p-6 mb-6"
               >
-                <h3 className="text-lg font-semibold text-gray-800 mb-6">🎨 Add inspiration (optional):</h3>
+                <h3 className="text-lg font-semibold text-gray-800 mb-6">🎨 Add creative elements (optional):</h3>
 
                 {/* Emoji Selection */}
                 <div className="mb-6">
@@ -554,29 +595,7 @@ function NewStoryPageContent() {
                   </div>
                 </div>
 
-                {/* Genre Selection */}
-                <div className="mb-6">
-                  <label className="block text-md font-medium text-gray-700 mb-3">
-                    🎭 Genre
-                  </label>
-                  <div className="flex flex-wrap gap-2">
-                    {genres.map((genre) => (
-                      <button
-                        key={genre}
-                        onClick={() => toggleSelection(genre, selectedGenres, setSelectedGenres)}
-                        className={`px-3 py-1 rounded-full text-sm font-medium transition-all ${
-                          selectedGenres.includes(genre)
-                            ? 'bg-purple-600 text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
-                      >
-                        {genre}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Style Selection */}
+                {/* Style/Mood Selection */}
                 <div>
                   <label className="block text-md font-medium text-gray-700 mb-3">
                     🎨 Style
@@ -605,11 +624,11 @@ function NewStoryPageContent() {
           <div className="text-center mb-6">
             <motion.button
               onClick={handleRegisterBook}
-              disabled={!plotDescription.trim() || !isWalletConnected || isRegistering || isUploadingCover}
-              whileHover={plotDescription.trim() && isWalletConnected && !isRegistering && !isUploadingCover ? { scale: 1.05 } : {}}
-              whileTap={plotDescription.trim() && isWalletConnected && !isRegistering && !isUploadingCover ? { scale: 0.95 } : {}}
+              disabled={!plotDescription.trim() || !isWalletConnected || isRegistering || isUploadingCover || selectedGenres.length === 0 || !storyTitle.trim()}
+              whileHover={plotDescription.trim() && isWalletConnected && !isRegistering && !isUploadingCover && selectedGenres.length > 0 && storyTitle.trim() ? { scale: 1.05 } : {}}
+              whileTap={plotDescription.trim() && isWalletConnected && !isRegistering && !isUploadingCover && selectedGenres.length > 0 && storyTitle.trim() ? { scale: 0.95 } : {}}
               className={`inline-flex items-center gap-3 px-8 py-4 rounded-xl text-lg font-semibold transition-all ${
-                plotDescription.trim() && isWalletConnected && !isRegistering && !isUploadingCover
+                plotDescription.trim() && isWalletConnected && !isRegistering && !isUploadingCover && selectedGenres.length > 0 && storyTitle.trim()
                   ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700 shadow-lg'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
               }`}
@@ -618,7 +637,7 @@ function NewStoryPageContent() {
               {isUploadingCover ? `Uploading cover...` : isRegistering ? `Registering book...` : !isWalletConnected ? `Connect Wallet First` : `📚 Register My Book`}
             </motion.button>
 
-            {plotDescription.trim() && isWalletConnected && (
+            {plotDescription.trim() && isWalletConnected && selectedGenres.length > 0 && storyTitle.trim() && (
               <div className="space-y-1 mt-2">
                 <p className="text-sm text-gray-500">
                   💡 This will register your book on-chain and take you to your library
@@ -638,6 +657,16 @@ function NewStoryPageContent() {
             {plotDescription.trim() && !isWalletConnected && (
               <p className="text-sm text-red-500 mt-2">
                 🔒 Please connect your wallet to register books on the blockchain
+              </p>
+            )}
+            {plotDescription.trim() && isWalletConnected && selectedGenres.length === 0 && (
+              <p className="text-sm text-red-500 mt-2">
+                🎭 Please select at least one genre to register your book
+              </p>
+            )}
+            {plotDescription.trim() && isWalletConnected && selectedGenres.length > 0 && !storyTitle.trim() && (
+              <p className="text-sm text-red-500 mt-2">
+                📝 Please give your story a title to register your book
               </p>
             )}
           </div>
