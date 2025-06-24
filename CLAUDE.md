@@ -39,6 +39,8 @@ Tech Stack: Next.js 15.3.3, TypeScript, Story Protocol SDK, OpenAI GPT-4, Smart 
 - **DO NOT include Claude as a co-author** in commit messages
 - **DO NOT add "Generated with Claude Code" or similar attributions** to commits
 - Keep commit messages clean and professional without AI/Claude references
+- **DO NOT mention Claude, Claude Code, or any AI assistance** in commit messages
+- **DO NOT reference this CLAUDE.md file** in commits or PRs
 
 ### GitHub Actions Workflow Naming
 - **Always use emoji prefixes** for workflow names to enable quick visual identification
@@ -56,6 +58,12 @@ Tech Stack: Next.js 15.3.3, TypeScript, Story Protocol SDK, OpenAI GPT-4, Smart 
   - `🚀 Deploy to Production (Auto on Main)`
   - `🧪 Test Suite (All Tests)`
   - `🔍 Code Quality (Lint, Type Check)`
+
+### Pull Requests
+- **DO NOT mention Claude, Claude Code, or AI assistance** in PR titles or descriptions
+- **DO NOT reference this CLAUDE.md file** in PRs
+- Focus on what was changed and why, not how it was created
+- Write PRs as if you personally made all the changes
 
 ## Recent Implementation Work
 
