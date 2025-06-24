@@ -45,6 +45,7 @@ interface UnifiedPublishResult extends PublishResult {
   method?: 'unified' | 'legacy'
   gasOptimized?: boolean
   metadataUri?: string
+  warning?: string
 }
 
 export function useUnifiedPublishStory() {
@@ -345,11 +346,44 @@ export function useUnifiedPublishStory() {
             const registerResult = await registerBook({
               bookId: finalBookId,
               totalChapters: 100, // Current contract maximum (will be increased when contract is redeployed)
-              isDerivative: false,
+              isDerivative: isDerivativeNeedingRegistration || false,
+              parentBookId: isDerivativeNeedingRegistration ? bookMetadata?.parentBook : undefined,
               ipfsMetadataHash: metadataUri || ''
             })
             
-            if (!registerResult.success) {
+            if (registerResult.pending) {
+              // Book registration is pending, but we can continue with a warning
+              console.warn('⚠️ Book registration pending:', registerResult.message)
+              alert(
+                '⚠️ Book Registration Pending\n\n' +
+                'Your book registration transaction is still pending. ' +
+                'The chapter has been saved, but pricing may not work until the registration completes.\n\n' +
+                'Please check your wallet for any pending transactions.'
+              )
+              // Continue with publishing, but skip attribution for now
+              console.log('📝 Skipping attribution due to pending book registration')
+              
+              // Success with warning
+              setCurrentStep('success')
+              const unifiedResult: UnifiedPublishResult = {
+                success: true,
+                method: 'unified',
+                gasOptimized: true,
+                data: {
+                  transactionHash,
+                  ipAssetId: registeredIPAssetId,
+                  tokenId: mintedTokenId,
+                  licenseTermsId: undefined, // No license terms ID available yet
+                  contentUrl: saveResult.data?.contentUrl,
+                  explorerUrl: `https://aeneid.storyscan.io/tx/${transactionHash}`
+                },
+                metadataUri: metadataUri,
+                warning: 'Book registration pending - chapter pricing may be delayed'
+              }
+              setPublishResult(unifiedResult)
+              return unifiedResult
+              
+            } else if (!registerResult.success) {
               // This is critical for paid chapters - throw error to stop publish
               throw new Error(`Book registration failed: ${registerResult.error || 'Unknown error'}. Cannot publish paid chapters without revenue registration.`)
             } else {

@@ -8,7 +8,7 @@
 
 ## ✨ Why StoryHouse?
 
-- **💰 90% Creator Revenue**: Authors keep 90% of all sales (only 10% platform fee)
+- **💰 90% Creator Revenue**: 70% to authors + 20% to curators (only 10% platform fee)
   - Compare: Amazon KDP (35-70%)
 - **🔓 Permissionless Publishing**: No gatekeepers—anyone can publish directly to the blockchain
 - **📈 Multiple Earning Models**: Revolutionary chapter-level IP registration ($50 vs $1000+ for full books)
@@ -89,7 +89,7 @@ StoryHouse uses a minimal 2-contract architecture integrated with Story Protocol
 | Contract | Address | Purpose |
 |----------|---------|---------|
 | TIP Token | `0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E` | Platform currency |
-| HybridRevenueControllerV2 | `0x9c6a3c50e5d77f99d805d8d7c935acb23208fd9f` | Revenue distribution (70/20/10) |
+| HybridRevenueControllerV2 | `0x99dA048826Bbb8189FBB6C3e62EaA75d0fB36812` | Revenue distribution (70/20/10) |
 
 **Story Protocol Handles**: IP registration, NFT minting, licensing, derivatives, royalties
 

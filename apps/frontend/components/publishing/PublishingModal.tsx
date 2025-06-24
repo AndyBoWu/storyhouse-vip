@@ -1046,6 +1046,11 @@ function PublishingModal({
                     <p className="text-gray-600">
                       Your chapter is now on R2 storage and registered as an IP Asset on Story Protocol!
                     </p>
+                    {publishResult.warning && (
+                      <div className="mt-3 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                        <p className="text-sm text-yellow-800">⚠️ {publishResult.warning}</p>
+                      </div>
+                    )}
                   </div>
 
                   <div className="p-6 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl border border-green-200">

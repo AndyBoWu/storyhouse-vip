@@ -11,13 +11,13 @@ Complete guide for setting up and developing StoryHouse.vip's revolutionary Web3
 - **Git** latest version
 - **VS Code** (recommended) with TypeScript extension
 
-### 🏗️ Phase 6.0 Status  
-**Current Implementation:** 5-Contract Architecture Deployed & Production-Ready
-- ✅ **44% Contract Reduction**: Optimized from 9→5 contracts for gas efficiency
+### 🏗️ Phase 6.4 Status  
+**Current Implementation:** 2-Contract Architecture with Permissionless Publishing
+- ✅ **Minimal Architecture**: TIP Token + HybridRevenueControllerV2 only
+- ✅ **Permissionless Publishing**: Anyone can publish without admin approval
 - ✅ **Full Deployment**: All contracts operational on Story Protocol testnet
-- ✅ **Frontend Migration**: Updated with new contract ABIs and addresses
-- ✅ **Backend Integration**: Services updated for 5-contract architecture
-- ✅ **97.3% Test Coverage**: 182 comprehensive tests across all contracts
+- ✅ **Story Protocol Integration**: IP registration, NFTs, and licensing handled by SDK
+- ✅ **Legacy Workflow Removed**: Single unified registration path only
 - ✅ **Anti-AI Farming Protection**: Secure economics with human-verified rewards
 
 ### 🆕 Phase 5.4 Achievements
@@ -87,17 +87,13 @@ R2_ENDPOINT=your_account_id.r2.cloudflarestorage.com
 R2_PUBLIC_URL=https://your_account_id.r2.cloudflarestorage.com/storyhouse-content
 
 # Feature Flags
-UNIFIED_REGISTRATION_ENABLED=false  # Set to true to enable 40% gas optimization
+UNIFIED_REGISTRATION_ENABLED=true  # Always enabled - legacy workflow removed
 
-# 5-Contract Architecture (Deployed)
+# 2-Contract Architecture (Deployed)
 TIP_TOKEN_ADDRESS=0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E
-REWARDS_MANAGER_ADDRESS=0xf5aE031bA92295C2aE86a99e88f09989339707E5  
-UNIFIED_REWARDS_CONTROLLER_ADDRESS=0x741105d6ee9b25567205f57c0e4f1d293f0d00c5
-CHAPTER_ACCESS_CONTROLLER_ADDRESS=0x1bd65ad10b1ca3ed67ae75fcdd3aba256a9918e3
-HYBRID_REVENUE_CONTROLLER_ADDRESS=0xd1f7e8c6fd77dadbe946ae3e4141189b39ef7b08
+HYBRID_REVENUE_CONTROLLER_V2_ADDRESS=0x99dA048826Bbb8189FBB6C3e62EaA75d0fB36812
 
-# HybridRevenueControllerV2 (Ready to Deploy)
-HYBRID_REVENUE_CONTROLLER_V2_ADDRESS=  # Set after deployment
+# Story Protocol handles: IP registration, NFT minting, licensing, derivatives
 ```
 
 **Backend (.env.local in apps/backend/):**

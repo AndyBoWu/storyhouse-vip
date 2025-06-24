@@ -226,17 +226,11 @@ async function getFromIndex(request: NextRequest) {
       coverUrl: (() => {
         const isDev = process.env.NODE_ENV === 'development'
         const baseUrl = isDev ? 'http://localhost:3002' : (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3002')
-        if (book.coverUrl && book.coverUrl.startsWith('/books/')) {
-          // Extract book ID from the cover path
-          const match = book.coverUrl.match(/\/books\/([^\/]+\/[^\/]+)\/cover\.(jpg|png|webp)/)
-          if (match) {
-            const coverBookId = match[1]
-            return `${baseUrl}/api/books/${encodeURIComponent(coverBookId)}/cover`
-          }
-        } else if (book.coverUrl && (book.coverUrl.startsWith('http://') || book.coverUrl.startsWith('https://'))) {
-          return book.coverUrl
-        }
-        // Default to this book's cover API endpoint
+        // Always use API endpoint for consistency
+        // This ensures covers are served through our API which handles:
+        // 1. R2 bucket access with proper credentials
+        // 2. Fallback to placeholder if cover doesn't exist
+        // 3. Proper caching headers
         return `${baseUrl}/api/books/${encodeURIComponent(book.id)}/cover`
       })(),
       createdAt: book.createdAt,
@@ -432,26 +426,17 @@ async function getFromR2Direct(request: NextRequest) {
             const chapterCount = await getChapterCount(authorFromPrefix, bookSlug)
             console.log(`      📊 Chapter count: ${chapterCount}`)
 
-            // Handle cover URL - convert relative paths to API endpoints
+            // Handle cover URL - always use API endpoint for consistency
             const bookId = `${authorFromPrefix}/${bookSlug}`
             const isDev = process.env.NODE_ENV === 'development'
-        const baseUrl = isDev ? 'http://localhost:3002' : (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3002')
-            let coverUrl = bookData.coverUrl
+            const baseUrl = isDev ? 'http://localhost:3002' : (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3002')
             
-            if (coverUrl && coverUrl.startsWith('/books/')) {
-              // Extract book ID from the cover path
-              const match = coverUrl.match(/\/books\/([^\/]+\/[^\/]+)\/cover\.(jpg|png|webp)/)
-              if (match) {
-                const coverBookId = match[1]
-                coverUrl = `${baseUrl}/api/books/${encodeURIComponent(coverBookId)}/cover`
-              } else {
-                // Fallback if pattern doesn't match
-                coverUrl = `${baseUrl}/api/books/${encodeURIComponent(bookId)}/cover`
-              }
-            } else if (!coverUrl || !(coverUrl.startsWith('http://') || coverUrl.startsWith('https://'))) {
-              // No cover URL or not absolute - use API endpoint
-              coverUrl = `${baseUrl}/api/books/${encodeURIComponent(bookId)}/cover`
-            }
+            // Always use API endpoint regardless of what's in metadata
+            // This ensures the cover is served through our API which handles:
+            // 1. R2 bucket access with proper credentials
+            // 2. Fallback to placeholder if cover doesn't exist
+            // 3. Proper caching headers
+            const coverUrl = `${baseUrl}/api/books/${encodeURIComponent(bookId)}/cover`
 
             const book: RegisteredBook = {
               id: bookId,

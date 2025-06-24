@@ -2,6 +2,30 @@ import { NextRequest, NextResponse } from 'next/server'
 import { GetObjectCommand } from '@aws-sdk/client-s3'
 import { S3Client } from '@aws-sdk/client-s3'
 
+// Helper function to generate placeholder SVG
+function generatePlaceholderSVG(title: string, authorAddress: string): string {
+  const firstLetter = title.charAt(0).toUpperCase() || 'B'
+  
+  // Generate consistent colors based on author address
+  const hash = authorAddress.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+  const hue1 = hash % 360
+  const hue2 = (hash + 120) % 360
+  
+  return `
+    <svg width="400" height="600" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:hsl(${hue1}, 70%, 60%);stop-opacity:1" />
+          <stop offset="100%" style="stop-color:hsl(${hue2}, 70%, 50%);stop-opacity:1" />
+        </linearGradient>
+      </defs>
+      <rect width="400" height="600" fill="url(#grad)"/>
+      <text x="200" y="320" font-family="Arial, sans-serif" font-size="180" font-weight="bold" 
+            fill="white" text-anchor="middle" dominant-baseline="middle">${firstLetter}</text>
+    </svg>
+  `
+}
+
 // Initialize R2 client for direct image serving with header cleaning
 let r2Client: S3Client
 
@@ -80,19 +104,98 @@ export async function GET(
     const authorAddress = parts[0]
     const slug = parts[1]
     
-    // Generate the cover key
-    const coverKey = `books/${authorAddress}/${slug}/cover.jpg`
-    
-    console.log('🖼️ Serving cover image:', coverKey)
-    
-    // Fetch the image from R2
+    // Try different image formats
+    const imageFormats = ['jpg', 'png', 'webp', 'jpeg']
     const client = getR2Client()
-    const command = new GetObjectCommand({
-      Bucket: BUCKET_NAME,
-      Key: coverKey,
-    })
     
-    const response = await client.send(command)
+    let response
+    let coverKey
+    let contentType = 'image/jpeg'
+    
+    // Try each format until we find the cover
+    for (const format of imageFormats) {
+      coverKey = `books/${authorAddress}/${slug}/cover.${format}`
+      console.log('🖼️ Trying cover image:', coverKey)
+      
+      try {
+        const command = new GetObjectCommand({
+          Bucket: BUCKET_NAME,
+          Key: coverKey,
+        })
+        
+        response = await client.send(command)
+        
+        // Set correct content type based on format
+        switch (format) {
+          case 'png':
+            contentType = 'image/png'
+            break
+          case 'webp':
+            contentType = 'image/webp'
+            break
+          case 'jpg':
+          case 'jpeg':
+          default:
+            contentType = 'image/jpeg'
+        }
+        
+        console.log(`✅ Found cover in ${format} format`)
+        break // Found the image, exit loop
+      } catch (error) {
+        if ((error as any)?.name === 'NoSuchKey') {
+          console.log(`❌ No cover found in ${format} format`)
+          continue // Try next format
+        }
+        throw error // Re-throw other errors
+      }
+    }
+    
+    if (!response) {
+      console.log('❌ No cover found in any format, generating placeholder')
+      
+      // Try to get book metadata to generate a better placeholder
+      try {
+        const metadataCommand = new GetObjectCommand({
+          Bucket: BUCKET_NAME,
+          Key: `books/${authorAddress}/${slug}/metadata.json`,
+        })
+        
+        const metadataResponse = await client.send(metadataCommand)
+        if (metadataResponse.Body) {
+          const metadataText = await metadataResponse.Body.transformToString()
+          const metadata = JSON.parse(metadataText)
+          const title = metadata.title || slug
+          
+          // Generate placeholder SVG
+          const svgContent = generatePlaceholderSVG(title, authorAddress)
+          const svgBuffer = Buffer.from(svgContent, 'utf-8')
+          
+          return new NextResponse(svgBuffer, {
+            status: 200,
+            headers: {
+              'Content-Type': 'image/svg+xml',
+              'Content-Length': svgBuffer.length.toString(),
+              'Cache-Control': 'public, max-age=86400', // Cache for 1 day
+            },
+          })
+        }
+      } catch (metadataError) {
+        console.log('❌ Could not fetch metadata for placeholder generation')
+      }
+      
+      // Fallback: Generate placeholder with slug
+      const svgContent = generatePlaceholderSVG(slug, authorAddress)
+      const svgBuffer = Buffer.from(svgContent, 'utf-8')
+      
+      return new NextResponse(svgBuffer, {
+        status: 200,
+        headers: {
+          'Content-Type': 'image/svg+xml',
+          'Content-Length': svgBuffer.length.toString(),
+          'Cache-Control': 'public, max-age=86400', // Cache for 1 day
+        },
+      })
+    }
     
     if (!response.Body) {
       return new NextResponse('Cover image not found', { status: 404 })
@@ -116,7 +219,7 @@ export async function GET(
     return new NextResponse(imageBuffer, {
       status: 200,
       headers: {
-        'Content-Type': response.ContentType || 'image/jpeg',
+        'Content-Type': response.ContentType || contentType,
         'Content-Length': response.ContentLength?.toString() || imageBuffer.length.toString(),
         'Cache-Control': 'public, max-age=31536000, immutable', // Cache for 1 year
         'ETag': response.ETag || '',
