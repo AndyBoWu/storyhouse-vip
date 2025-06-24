@@ -4,7 +4,7 @@
 
 StoryHouse.vip is a revolutionary Web3 publishing platform built on Story Protocol, enabling:
 
-- **90% Creator Revenue**: Authors keep 90% of all sales (only 10% platform fee vs Amazon KDP 35-70%)
+- **90% Creator Revenue**: 70% to authors + 20% to curators (only 10% platform fee vs Amazon KDP 35-70%)
 - **Permissionless Publishing**: No gatekeepers—anyone can publish directly to the blockchain
 - **Multiple Earning Models**: Revolutionary chapter-level IP registration with pay-per-chapter, audiobook licensing, translation rights, and derivative works
 - **40% Lower Gas Costs**: Single-transaction IP registration saves time and money
@@ -39,11 +39,11 @@ StoryHouse.vip is a revolutionary Web3 publishing platform built on Story Protoc
 - **Proper Separation of Concerns**: Clear distinction between client-side blockchain and server-side metadata
 
 **🏗️ Phase 6.0 Architecture Achievements:**
-- **5-Contract Architecture Deployed**: Optimized from 9→5 contracts with 44% reduction
+- **2-Contract Architecture**: Simplified to TIP Token + HybridRevenueControllerV2
 - **Full-Stack Migration Complete**: Frontend and backend updated for new architecture
 - **Gas Cost Optimization**: 40% reduction through unified smart contract design
 - **Production Deployment**: All contracts operational on Story Protocol testnet
-- **Enterprise Security**: 97.3% test coverage with comprehensive anti-AI farming protection
+- **Enterprise Security**: Comprehensive testing with anti-AI farming protection
 
 **Phase 5.4 Unified Registration Foundation:**
 - **Unified IP Registration**: Revolutionary single-transaction registration with 40% gas savings
@@ -573,7 +573,7 @@ client.plugins.register(aiPlugin);
 
 ### Contract Architecture
 
-The platform uses a modular 5-contract system optimized for gas efficiency and security:
+The platform uses a minimal 2-contract system integrated with Story Protocol SDK:
 
 #### 1. TIP Token Contract
 ```solidity
@@ -589,22 +589,22 @@ contract TIPToken is ERC20, ERC20Burnable, AccessControl {
 }
 ```
 
-#### 2. Unified Rewards Controller
+#### 2. HybridRevenueControllerV2 
 ```solidity
-contract UnifiedRewardsController {
-    // Consolidated reward logic replacing 3 legacy controllers
-    struct RewardConfig {
-        uint256 readingReward;      // 1 TIP per chapter
-        uint256 completionBonus;    // 10 TIP per book
-        uint256 streakMultiplier;   // Up to 2x for consistency
-        uint256 qualityThreshold;   // Min score for bonus
+contract HybridRevenueControllerV2 {
+    // Permissionless book registration and revenue distribution
+    struct Book {
+        address curator;         // Book registrant (automatic assignment)
+        address author;          // Story author
+        address platformAddress; // Platform fee recipient
+        uint256 chapterPrice;    // Price per chapter in TIP
+        uint256 totalRevenue;    // Total revenue collected
+        bool isActive;           // Book status
     }
     
-    // Anti-farming protection
-    modifier preventFarming(address user) {
-        require(lastAction[user] + minInterval <= block.timestamp);
-        require(!botDetection.isBot(user));
-        _;
+    // Revenue distribution: 70% author, 20% curator, 10% platform
+    function unlockChapter(bytes32 _bookId, uint256 _chapterNumber) external {
+        // Automatic revenue split on payment
     }
 }
 ```
@@ -767,7 +767,7 @@ interface Book {
 
 ### Contract Architecture
 
-The platform uses a modular 5-contract system optimized for gas efficiency and security:
+The platform uses a minimal 2-contract system integrated with Story Protocol SDK:
 
 #### 1. TIP Token Contract
 ```solidity
@@ -783,76 +783,34 @@ contract TIPToken is ERC20, ERC20Burnable, AccessControl {
 }
 ```
 
-#### 2. Unified Rewards Controller
-```solidity
-contract UnifiedRewardsController {
-    // Consolidated reward logic replacing 3 legacy controllers
-    struct RewardConfig {
-        uint256 readingReward;      // 1 TIP per chapter
-        uint256 completionBonus;    // 10 TIP per book
-        uint256 streakMultiplier;   // Up to 2x for consistency
-        uint256 qualityThreshold;   // Min score for bonus
-    }
-    
-    // Anti-farming protection
-    modifier preventFarming(address user) {
-        require(lastAction[user] + minInterval <= block.timestamp);
-        require(!botDetection.isBot(user));
-        _;
-    }
-}
-```
-
-#### 3. Chapter Access Controller
-```solidity
-contract ChapterAccessController {
-    // Efficient access control with bitmap optimization
-    mapping(address => mapping(uint256 => uint256)) private userAccess;
-    
-    function hasAccess(address user, uint256 bookId, uint256 chapterId) 
-        public view returns (bool) {
-        uint256 bitmap = userAccess[user][bookId];
-        return (bitmap & (1 << chapterId)) != 0;
-    }
-    
-    // Batch access grant for gas optimization
-    function grantBatchAccess(address user, uint256 bookId, uint256[] chapters) {
-        uint256 bitmap = userAccess[user][bookId];
-        for (uint i = 0; i < chapters.length; i++) {
-            bitmap |= (1 << chapters[i]);
-        }
-        userAccess[user][bookId] = bitmap;
-    }
-}
-```
-
-#### 4. Hybrid Revenue Controller V2
+#### 2. HybridRevenueControllerV2 
 ```solidity
 contract HybridRevenueControllerV2 {
-    // Permissionless architecture - no admin required
-    event BookRegistered(bytes32 bookId, address curator, address author);
+    // Permissionless book registration and revenue distribution
+    struct Book {
+        address curator;         // Book registrant (automatic assignment)
+        address author;          // Story author
+        address platformAddress; // Platform fee recipient
+        uint256 chapterPrice;    // Price per chapter in TIP
+        uint256 totalRevenue;    // Total revenue collected
+        bool isActive;           // Book status
+    }
     
-    function registerBook(
-        bytes32 _bookId,
-        address _author,
-        uint256 _chapterPrice
-    ) external {
-        // Anyone can register - true decentralization
-        books[_bookId] = Book({
-            curator: msg.sender,  // Automatic curator
-            author: _author,
-            chapterPrice: _chapterPrice,
-            totalRevenue: 0,
-            isActive: true
-        });
-        
-        // Track relationships for discovery
-        curatorBooks[msg.sender].push(_bookId);
-        authorBooks[_author].push(_bookId);
-        allBooks.push(_bookId);
+    // Revenue distribution: 70% author, 20% curator, 10% platform
+    function unlockChapter(bytes32 _bookId, uint256 _chapterNumber) external {
+        // Automatic revenue split on payment
     }
 }
 ```
+
+#### Story Protocol Integration
+
+The platform leverages Story Protocol SDK v1.3.2 for:
+- **IP Registration**: Single-transaction chapter/book registration
+- **NFT Minting**: Automatic NFT creation for each chapter
+- **License Management**: Programmable licenses (reading, commercial, exclusive)
+- **Derivative Tracking**: Parent-child relationships for remixes
+- **Metadata Storage**: R2 integration with SHA-256 verification
 
 ### Gas Optimization Techniques
 

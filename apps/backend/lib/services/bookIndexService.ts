@@ -158,26 +158,17 @@ export class BookIndexService {
             // Count chapters efficiently
             const chapterCount = await this.getChapterCount(authorAddress, bookSlug)
             
-            // Handle cover URL - convert relative paths to API endpoints
+            // Always use API endpoint for cover URLs to ensure consistency
             const bookId = `${authorAddress}/${bookSlug}`
             const isDev = process.env.NODE_ENV === 'development'
             const baseUrl = isDev ? 'http://localhost:3002' : (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3002')
-            let coverUrl = metadata.coverUrl
             
-            if (coverUrl && coverUrl.startsWith('/books/')) {
-              // Extract book ID from the cover path
-              const match = coverUrl.match(/\/books\/([^\/]+\/[^\/]+)\/cover\.(jpg|png|webp)/)
-              if (match) {
-                const coverBookId = match[1]
-                coverUrl = `${baseUrl}/api/books/${encodeURIComponent(coverBookId)}/cover`
-              } else {
-                // Fallback if pattern doesn't match
-                coverUrl = `${baseUrl}/api/books/${encodeURIComponent(bookId)}/cover`
-              }
-            } else if (!coverUrl || !(coverUrl.startsWith('http://') || coverUrl.startsWith('https://'))) {
-              // No cover URL or not absolute - use API endpoint
-              coverUrl = `${baseUrl}/api/books/${encodeURIComponent(bookId)}/cover`
-            }
+            // Always use API endpoint regardless of what's in metadata
+            // This ensures the cover is served through our API which handles:
+            // 1. R2 bucket access with proper credentials
+            // 2. Fallback to placeholder if cover doesn't exist
+            // 3. Proper caching headers
+            const coverUrl = `${baseUrl}/api/books/${encodeURIComponent(bookId)}/cover`
             
             const bookEntry: BookIndexEntry = {
               id: bookId,

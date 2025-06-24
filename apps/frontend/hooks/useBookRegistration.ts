@@ -176,31 +176,69 @@ export function useBookRegistration() {
       }
       
       // Register the book
-      writeRegisterBook({
-        address: HYBRID_REVENUE_CONTROLLER_V2_ADDRESS as `0x${string}`,
-        abi: HYBRID_V2_ABI,
-        functionName: 'registerBook',
-        args: [
-          bytes32Id,
-          isDerivative,
-          parentBytes32,
-          BigInt(totalChapters),
-          ipfsMetadataHash
-        ],
-      })
+      console.log('📝 Initiating book registration transaction...')
       
-      // Wait for transaction
+      try {
+        await writeRegisterBook({
+          address: HYBRID_REVENUE_CONTROLLER_V2_ADDRESS as `0x${string}`,
+          abi: HYBRID_V2_ABI,
+          functionName: 'registerBook',
+          args: [
+            bytes32Id,
+            isDerivative,
+            parentBytes32,
+            BigInt(totalChapters),
+            ipfsMetadataHash
+          ],
+        })
+      } catch (writeError) {
+        console.error('❌ Failed to initiate transaction:', writeError)
+        if (writeError instanceof Error && writeError.message.includes('User rejected')) {
+          throw new Error('Transaction rejected by user')
+        }
+        throw writeError
+      }
+      
+      // Wait for transaction hash to be available
+      console.log('⏳ Waiting for transaction hash...')
       let attempts = 0
-      while (!registerHash && attempts < 30) {
+      const maxAttempts = 60 // 60 seconds timeout
+      
+      while (!registerHash && !isRegisterError && attempts < maxAttempts) {
         await new Promise(resolve => setTimeout(resolve, 1000))
         attempts++
+        
+        if (attempts % 10 === 0) {
+          console.log(`Still waiting for transaction... (${attempts}s elapsed)`)
+        }
+      }
+      
+      if (isRegisterError && registerError) {
+        console.error('❌ Register error:', registerError)
+        throw new Error(registerError.message || 'Transaction failed')
       }
       
       if (!registerHash) {
-        throw new Error('Transaction timeout')
+        console.error('⏱️ Transaction timeout after', attempts, 'seconds')
+        // Instead of throwing, return a pending status
+        return { 
+          success: false, 
+          pending: true, 
+          error: 'Transaction is still pending. Please check your wallet and wait for confirmation.',
+          message: 'Book registration initiated but awaiting confirmation'
+        }
       }
       
       console.log('✅ Book registration transaction:', registerHash)
+      
+      // Wait for transaction confirmation
+      console.log('⏳ Waiting for transaction confirmation...')
+      let confirmationAttempts = 0
+      while (isRegisterPending && confirmationAttempts < 30) {
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        confirmationAttempts++
+      }
+      
       return { success: true, transactionHash: registerHash }
       
     } catch (error) {
