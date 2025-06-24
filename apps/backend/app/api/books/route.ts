@@ -263,8 +263,8 @@ async function getFromIndex(request: NextRequest) {
       indexLastUpdated: index.lastUpdated
     })
     
-    // Set cache headers for R2 edge caching
-    response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=300, stale-while-revalidate=600')
+    // Disable caching to ensure fresh data
+    response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate')
     
     return response
     
