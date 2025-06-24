@@ -225,7 +225,10 @@ function ContinueStoryPageContent() {
                     <div className="text-center py-16">
                       <div className="text-8xl mb-6">📚</div>
                       <h3 className="text-2xl font-semibold text-gray-700 mb-4">No stories to continue!</h3>
-                      <p className="text-gray-500 mb-8 text-lg">Create your first story to see it here.</p>
+                      <p className="text-gray-500 mb-4 text-lg">Create your first story to see it here.</p>
+                      <p className="text-sm text-gray-400 mb-8">
+                        💡 Tip: Books need at least 3 chapters before you can continue or remix them from chapter 4.
+                      </p>
                       <Link href="/write/new">
                         <button className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 transition-all text-lg">
                           <Sparkles className="w-5 h-5" />
@@ -238,9 +241,11 @@ function ContinueStoryPageContent() {
                       {existingStories.map((story) => (
                         <motion.div
                           key={story.id}
-                          whileHover={{ scale: 1.02, y: -5 }}
-                          onClick={() => handleSelectStory(story)}
-                          className={`bg-white rounded-lg shadow-lg overflow-hidden border hover:shadow-xl transition-all cursor-pointer w-full max-w-xs mx-auto ${
+                          whileHover={story.chapters >= 3 ? { scale: 1.02, y: -5 } : {}}
+                          onClick={() => story.chapters >= 3 && handleSelectStory(story)}
+                          className={`bg-white rounded-lg shadow-lg overflow-hidden border hover:shadow-xl transition-all w-full max-w-xs mx-auto ${
+                            story.chapters >= 3 ? 'cursor-pointer' : 'opacity-75'
+                          } ${
                             selectedStory?.id === story.id
                               ? 'border-purple-400 ring-2 ring-purple-200'
                               : 'border-gray-200'
@@ -292,19 +297,37 @@ function ContinueStoryPageContent() {
                             </div>
 
                             <div className="flex gap-2">
-                              <button 
-                                className={`flex-1 px-3 py-2 rounded-lg text-sm font-semibold transition-all ${
-                                  selectedStory?.id === story.id
-                                    ? 'bg-gradient-to-r from-green-600 to-green-700 text-white'
-                                    : 'bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700'
-                                }`}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleSelectStory(story);
-                                }}
-                              >
-                                {selectedStory?.id === story.id ? '✅ Selected' : '✍️ Continue Writing'}
-                              </button>
+                              {story.chapters >= 3 ? (
+                                <button 
+                                  className={`flex-1 px-3 py-2 rounded-lg text-sm font-semibold transition-all ${
+                                    selectedStory?.id === story.id
+                                      ? 'bg-gradient-to-r from-green-600 to-green-700 text-white'
+                                      : 'bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700'
+                                  }`}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleSelectStory(story);
+                                  }}
+                                >
+                                  {selectedStory?.id === story.id ? '✅ Selected' : '✍️ Continue Writing'}
+                                </button>
+                              ) : (
+                                story.chapters === 0 ? (
+                                  <Link 
+                                    href={`/write?continueStory=${encodeURIComponent(story.id)}&nextChapter=1&title=${encodeURIComponent(story.title)}&genre=${encodeURIComponent(story.genre)}`}
+                                    className="flex-1"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <button className="w-full px-3 py-2 rounded-lg text-sm font-semibold bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700 transition-all">
+                                      📝 Write First Chapter
+                                    </button>
+                                  </Link>
+                                ) : (
+                                  <div className="flex-1 px-3 py-2 rounded-lg text-xs text-center bg-gray-100 text-gray-500">
+                                    📝 Need {3 - story.chapters} more chapter{3 - story.chapters !== 1 ? 's' : ''} to continue
+                                  </div>
+                                )
+                              )}
                             </div>
                           </div>
                         </motion.div>
