@@ -160,12 +160,12 @@ function NewStoryPageContent() {
     if (!plotDescription.trim() || !isWalletConnected || selectedGenres.length === 0 || !storyTitle.trim()) {
       if (!isWalletConnected) {
         setError('Please connect your wallet to register a book')
-      } else if (!plotDescription.trim()) {
-        setError('Please describe what your story is about')
+      } else if (!storyTitle.trim()) {
+        setError('Please enter a title for your story')
       } else if (selectedGenres.length === 0) {
         setError('Please select at least one genre')
-      } else if (!storyTitle.trim()) {
-        setError('Please give your story a title')
+      } else if (!plotDescription.trim()) {
+        setError('Please describe your story plot')
       }
       return
     }
@@ -406,35 +406,30 @@ function NewStoryPageContent() {
             </motion.div>
           )}
 
-          {/* Plot Description */}
+          {/* Story Title */}
           <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
             <label className="block text-lg font-semibold text-gray-800 mb-4">
-              📝 What's your story about?
+              📖 Story Title <span className="text-red-500">*</span>
+              <span className="text-sm font-normal text-gray-500 ml-2">(Required)</span>
             </label>
-            <textarea
-              value={plotDescription}
-              onChange={(e) => setPlotDescription(e.target.value)}
-              placeholder="Start with your story idea. What happens? Who are the main characters? What's the conflict?"
-              className="w-full h-32 p-4 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              maxLength={750}
+            <input
+              type="text"
+              value={storyTitle}
+              onChange={(e) => setStoryTitle(e.target.value)}
+              placeholder="Enter your story title"
+              className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              maxLength={100}
             />
-            <div className="flex items-center justify-between mt-4">
-              <span className="text-sm text-gray-500">{plotDescription.length}/750 characters</span>
-              <button
-                onClick={() => setShowMultiModal(!showMultiModal)}
-                className="flex items-center gap-2 px-4 py-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
-              >
-                <Palette className="w-4 h-4" />
-                Add Inspiration
-              </button>
+            <div className="mt-2 text-sm text-gray-500">
+              {storyTitle.length}/100 characters
             </div>
           </div>
 
           {/* Genre Selection - Required Field */}
           <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
             <label className="block text-lg font-semibold text-gray-800 mb-4">
-              🎭 What type of story is this? <span className="text-red-500">*</span>
-              <span className="text-sm font-normal text-gray-500 ml-2">(Required - Choose at least one genre)</span>
+              🎭 Genre <span className="text-red-500">*</span>
+              <span className="text-sm font-normal text-gray-500 ml-2">(Required - Select at least one)</span>
             </label>
             <div className="flex flex-wrap gap-3">
               {genres.map((genre) => (
@@ -458,30 +453,11 @@ function NewStoryPageContent() {
             )}
           </div>
 
-          {/* Story Title */}
-          <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-            <label className="block text-lg font-semibold text-gray-800 mb-4">
-              📝 What's your story called?
-              <span className="text-sm font-normal text-gray-500 ml-2">(You can change this later)</span>
-            </label>
-            <input
-              type="text"
-              value={storyTitle}
-              onChange={(e) => setStoryTitle(e.target.value)}
-              placeholder="Give your story a memorable title"
-              className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              maxLength={100}
-            />
-            <div className="mt-2 text-sm text-gray-500">
-              {storyTitle.length}/100 characters
-            </div>
-          </div>
-
           {/* Book Cover Upload */}
           <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
             <label className="block text-lg font-semibold text-gray-800 mb-4">
-              🎨 Add a cover image
-              <span className="text-sm font-normal text-gray-500 ml-2">(Optional - You can add this later)</span>
+              🎨 Book Cover
+              <span className="text-sm font-normal text-gray-500 ml-2">(Optional)</span>
             </label>
             
             {bookCoverPreview ? (
@@ -559,6 +535,31 @@ function NewStoryPageContent() {
             
             <div className="mt-3 text-xs text-gray-500">
               💡 A good cover helps readers discover your story. You can always add or change it later.
+            </div>
+          </div>
+
+          {/* Plot Description */}
+          <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <label className="block text-lg font-semibold text-gray-800 mb-4">
+              📝 Story Plot <span className="text-red-500">*</span>
+              <span className="text-sm font-normal text-gray-500 ml-2">(Required)</span>
+            </label>
+            <textarea
+              value={plotDescription}
+              onChange={(e) => setPlotDescription(e.target.value)}
+              placeholder="Describe your story. What happens? Who are the main characters? What's the conflict?"
+              className="w-full h-32 p-4 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              maxLength={750}
+            />
+            <div className="flex items-center justify-between mt-4">
+              <span className="text-sm text-gray-500">{plotDescription.length}/750 characters</span>
+              <button
+                onClick={() => setShowMultiModal(!showMultiModal)}
+                className="flex items-center gap-2 px-4 py-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+              >
+                <Palette className="w-4 h-4" />
+                Add Inspiration
+              </button>
             </div>
           </div>
 
@@ -659,14 +660,19 @@ function NewStoryPageContent() {
                 🔒 Please connect your wallet to register books on the blockchain
               </p>
             )}
-            {plotDescription.trim() && isWalletConnected && selectedGenres.length === 0 && (
+            {isWalletConnected && !storyTitle.trim() && (
               <p className="text-sm text-red-500 mt-2">
-                🎭 Please select at least one genre to register your book
+                📖 Please enter a title for your story
               </p>
             )}
-            {plotDescription.trim() && isWalletConnected && selectedGenres.length > 0 && !storyTitle.trim() && (
+            {isWalletConnected && storyTitle.trim() && selectedGenres.length === 0 && (
               <p className="text-sm text-red-500 mt-2">
-                📝 Please give your story a title to register your book
+                🎭 Please select at least one genre
+              </p>
+            )}
+            {isWalletConnected && storyTitle.trim() && selectedGenres.length > 0 && !plotDescription.trim() && (
+              <p className="text-sm text-red-500 mt-2">
+                📝 Please describe your story plot
               </p>
             )}
           </div>
