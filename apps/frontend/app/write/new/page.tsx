@@ -44,13 +44,13 @@ function NewStoryPageContent() {
   const router = useRouter()
   const { registerChapterAsIP, isReady, isWalletConnected } = useStoryProtocol()
   const { registerBook: registerBookForRevenue, isSupported: isRevenueSupported } = useBookRegistration()
-  const [plotDescription, setPlotDescription] = useState('A young detective discovers a hidden portal in their grandmother\'s attic that leads to different time periods. Each time they step through, they must solve a historical mystery to return home, but each journey reveals more about a family secret that spans centuries.')
-  const [storyTitle, setStoryTitle] = useState('The Detective\'s Portal')
+  const [plotDescription, setPlotDescription] = useState('')
+  const [storyTitle, setStoryTitle] = useState('')
 
   // Existing state for multimodal inputs
-  const [selectedMoods, setSelectedMoods] = useState<string[]>(['Suspenseful'])
-  const [selectedEmojis, setSelectedEmojis] = useState<string[]>(['🔍', '⏰', '🏛️'])
-  const [selectedGenres, setSelectedGenres] = useState<string[]>(['Mystery'])
+  const [selectedMoods, setSelectedMoods] = useState<string[]>([])
+  const [selectedEmojis, setSelectedEmojis] = useState<string[]>([])
+  const [selectedGenres, setSelectedGenres] = useState<string[]>([])
   const [isGenerating, setIsGenerating] = useState(false)
   const [generatedStory, setGeneratedStory] = useState<GeneratedStory | null>(null)
   const [showMultiModal, setShowMultiModal] = useState(false)
@@ -407,7 +407,7 @@ function NewStoryPageContent() {
               type="text"
               value={storyTitle}
               onChange={(e) => setStoryTitle(e.target.value)}
-              placeholder="The Detective's Portal"
+              placeholder="Enter your story title"
               className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               maxLength={100}
             />
@@ -505,7 +505,7 @@ function NewStoryPageContent() {
             <textarea
               value={plotDescription}
               onChange={(e) => setPlotDescription(e.target.value)}
-              placeholder="A young detective discovers a hidden portal in their grandmother's attic that leads to..."
+              placeholder="Describe your story plot..."
               className="w-full h-32 p-4 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               maxLength={500}
             />
