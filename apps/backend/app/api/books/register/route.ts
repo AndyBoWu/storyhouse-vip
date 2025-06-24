@@ -244,6 +244,17 @@ export async function POST(request: NextRequest) {
       
       console.log('✅ Book metadata stored successfully at:', metadataUrl)
 
+      // Update book index to include the new book
+      try {
+        console.log('📚 Updating book index after registration...')
+        const { bookIndexService } = await import('../../../../lib/services/bookIndexService')
+        await bookIndexService.updateBookIndex()
+        console.log('✅ Book index updated successfully')
+      } catch (indexError) {
+        console.error('⚠️ Failed to update book index:', indexError)
+        // Don't fail the book registration if index update fails
+      }
+
       // ===== SUCCESS RESPONSE =====
       
       const response: BookRegistrationResponse = {
