@@ -49,6 +49,21 @@ export const HYBRID_V2_ABI = [
     stateMutability: 'view'
   },
   {
+    name: 'chapterAttributions',
+    type: 'function',
+    inputs: [
+      { name: 'bookId', type: 'bytes32' },
+      { name: 'chapterNumber', type: 'uint256' }
+    ],
+    outputs: [
+      { name: 'originalAuthor', type: 'address' },
+      { name: 'sourceBookId', type: 'bytes32' },
+      { name: 'unlockPrice', type: 'uint256' },
+      { name: 'isOriginalContent', type: 'bool' }
+    ],
+    stateMutability: 'view'
+  },
+  {
     name: 'unlockChapter',
     type: 'function',
     inputs: [
@@ -57,6 +72,17 @@ export const HYBRID_V2_ABI = [
     ],
     outputs: [],
     stateMutability: 'nonpayable'
+  },
+  {
+    name: 'hasUnlockedChapter',
+    type: 'function',
+    inputs: [
+      { name: 'user', type: 'address' },
+      { name: 'bookId', type: 'bytes32' },
+      { name: 'chapterNumber', type: 'uint256' }
+    ],
+    outputs: [{ name: 'unlocked', type: 'bool' }],
+    stateMutability: 'view'
   }
 ] as const
 

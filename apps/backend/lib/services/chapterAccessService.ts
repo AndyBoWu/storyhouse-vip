@@ -15,7 +15,7 @@ const LICENSE_REGISTRY_ABI = [
 
 interface ChapterAccessResult {
   hasAccess: boolean
-  reason: 'free' | 'owner' | 'licensed' | 'unlocked' | 'no_access'
+  reason: 'free' | 'owner' | 'licensed' | 'unlocked' | 'no_access' | 'blockchain_unlocked'
   licenseTokenId?: string
   error?: string
 }
@@ -110,7 +110,8 @@ export class ChapterAccessService {
           bookId,
           bytes32Id,
           chapterNumber,
-          provider: this.provider.connection.url
+          provider: this.provider._getConnection()?.url || 'unknown',
+          contractInitialized: !!this.hybridRevenueControllerV2
         })
         
         const hasUnlocked = await this.hybridRevenueControllerV2.hasUnlockedChapter(
