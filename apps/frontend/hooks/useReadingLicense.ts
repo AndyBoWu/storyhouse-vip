@@ -98,7 +98,7 @@ export function useReadingLicense() {
         params.append('userAddress', address)
       }
 
-      const data = await apiClient.get(`/books/${bookId}/chapter/${chapterNumber}/mint-reading-license?${params}`)
+      const data = await apiClient.get(`/books/${encodeURIComponent(bookId)}/chapter/${chapterNumber}/mint-reading-license?${params}`)
       
       if (!data.success) {
         throw new Error(data.error || 'Failed to get reading license info')
@@ -504,7 +504,7 @@ export function useReadingLicense() {
           
           // Update backend to record the license minting (optional, for tracking)
           try {
-            await apiClient.post(`/books/${bookId}/chapter/${chapterNumber}/mint-reading-license`, {
+            await apiClient.post(`/books/${encodeURIComponent(bookId)}/chapter/${chapterNumber}/mint-reading-license`, {
               userAddress: address,
               chapterIpAssetId,
               licenseTokenId: licenseTokenId,

@@ -181,7 +181,7 @@ export default function ChapterAccessControl({
                     
                     try {
                       const finalCheck = await apiClient.get(
-                        `/books/${bookId}/chapter/${chapterNumber}/access?userAddress=${address}&t=${Date.now()}`
+                        `/books/${encodeURIComponent(bookId)}/chapter/${chapterNumber}/access?userAddress=${address}&t=${Date.now()}`
                       )
                       
                       if (finalCheck?.canAccess || finalCheck?.alreadyUnlocked) {
@@ -283,7 +283,7 @@ export default function ChapterAccessControl({
                             
                             try {
                               const updatedAccessInfo = await apiClient.get(
-                                `/books/${bookId}/chapter/${chapterNumber}/access?userAddress=${address}&t=${Date.now()}`
+                                `/books/${encodeURIComponent(bookId)}/chapter/${chapterNumber}/access?userAddress=${address}&t=${Date.now()}`
                               )
                               
                               if (updatedAccessInfo?.canAccess || updatedAccessInfo?.alreadyUnlocked) {
