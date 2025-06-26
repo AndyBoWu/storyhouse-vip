@@ -12,6 +12,9 @@ import ReadingProgressBar from '@/components/ui/ReadingProgressBar';
 import ReadingPreferences from '@/components/ui/ReadingPreferences';
 import { ChapterAttributionStatus } from '@/components/book/ChapterAttributionStatus';
 import BranchChoiceModal from '@/components/book/BranchChoiceModal';
+import { TipAuthorButton } from '@/components/ui/TipAuthorButton';
+import { TipModal } from '@/components/ui/TipModal';
+import { useTipAuthor } from '@/hooks/useTipAuthor';
 
 
 interface ChapterContent {
@@ -62,6 +65,10 @@ export default function ChapterPage() {
   // Branch modal state
   const [showBranchModal, setShowBranchModal] = useState(false);
   const [hasBranches, setHasBranches] = useState(false);
+  
+  // Tipping state
+  const [showTipModal, setShowTipModal] = useState(false);
+  const { tipAuthor, recordTip, isTipping, transactionHash, isConfirmed } = useTipAuthor();
   
   const { getChapterPricing } = useChapterAccess();
 
@@ -275,6 +282,41 @@ export default function ChapterPage() {
       router.push(`/book/${branchAuthor}/${branchSlug}/chapter/${selectedChapterNumber}`);
     }
   };
+  
+  // Handle tip submission
+  const handleTip = async (amount: string) => {
+    if (!chapter) return;
+    
+    try {
+      // Send the tip
+      const result = await tipAuthor(chapter.authorAddress, amount, {
+        bookId: chapter.bookId,
+        chapterNumber: chapter.chapterNumber
+      });
+      
+      // Record tip in backend after successful transaction
+      if (result.success && transactionHash) {
+        await recordTip(transactionHash, chapter.authorAddress, amount, {
+          bookId: chapter.bookId,
+          chapterNumber: chapter.chapterNumber
+        });
+      }
+    } catch (error) {
+      console.error('Tip failed:', error);
+      throw error;
+    }
+  };
+  
+  // Watch for confirmed transaction
+  useEffect(() => {
+    if (isConfirmed && transactionHash && chapter) {
+      // Record tip in backend after confirmation
+      recordTip(transactionHash, chapter.authorAddress, '0', {
+        bookId: chapter.bookId,
+        chapterNumber: chapter.chapterNumber
+      });
+    }
+  }, [isConfirmed, transactionHash, chapter, recordTip]);
 
   const formatAddress = (address: string) => {
     if (!address) return 'Unknown';
@@ -413,9 +455,20 @@ export default function ChapterPage() {
                   <span>{chapter.readingTime} min read</span>
                 </div>
                 
-                {/* Author Controls */}
-                {isBookOwner(chapter) && canDeleteChapter(chapter) && (
-                  <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2">
+                  {/* Tip Button - show only if not the author */}
+                  {!isBookOwner(chapter) && address && (
+                    <TipAuthorButton
+                      authorAddress={chapter.authorAddress}
+                      authorName={formatAddress(chapter.authorAddress)}
+                      bookId={chapter.bookId}
+                      chapterNumber={chapter.chapterNumber}
+                      onTipClick={() => setShowTipModal(true)}
+                    />
+                  )}
+                  
+                  {/* Author Controls */}
+                  {isBookOwner(chapter) && canDeleteChapter(chapter) && (
                     <button
                       onClick={() => setShowDeleteConfirm(true)}
                       className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
@@ -423,8 +476,8 @@ export default function ChapterPage() {
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
               
               {/* Wallet Address Display */}
@@ -735,6 +788,19 @@ export default function ChapterPage() {
         chapterNumber={chapterNumber}
         onContinue={handleBranchChoice}
       />
+      
+      {/* Tip Modal */}
+      {chapter && (
+        <TipModal
+          isOpen={showTipModal}
+          onClose={() => setShowTipModal(false)}
+          authorAddress={chapter.authorAddress}
+          authorName={formatAddress(chapter.authorAddress)}
+          bookTitle={chapter.bookTitle}
+          chapterTitle={chapter.title}
+          onTip={handleTip}
+        />
+      )}
     </div>
   );
 }

@@ -361,7 +361,7 @@ function BranchStoryPageContent() {
                         <CheckCircle className="w-6 h-6" />
                         <div>
                           <h3 className="font-semibold">Branch Created Successfully!</h3>
-                          <p className="text-sm opacity-90">Redirecting to write your first chapter...</p>
+                          <p className="text-sm opacity-90">Taking you to write Chapter {(selectedChapter || 0) + 1}...</p>
                         </div>
                       </div>
                     </motion.div>
@@ -609,9 +609,12 @@ function BranchStoryPageContent() {
                     animate={{ opacity: 1, y: 0 }}
                     className="bg-white rounded-xl shadow-lg p-6"
                   >
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                      ✨ Create your branched story (Writing Chapter {(selectedChapter || 0) + 1}):
+                    <h3 className="text-lg font-semibold text-gray-800 mb-1">
+                      ✨ Step 1: Set up your branched book
                     </h3>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Configure your book details, then you'll write Chapter {(selectedChapter || 0) + 1}
+                    </p>
 
                     <div className="space-y-4">
                       {/* Title */}
@@ -628,13 +631,14 @@ function BranchStoryPageContent() {
 
                       {/* Description */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Book Description</label>
                         <textarea
                           value={newDescription}
                           onChange={(e) => setNewDescription(e.target.value)}
                           className="w-full h-24 p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                           placeholder="Describe your unique take on this story..."
                         />
+                        <p className="text-xs text-gray-500 mt-1">This describes your branched book as a whole, not just the chapter</p>
                       </div>
 
                       {/* Genres */}
@@ -713,7 +717,7 @@ function BranchStoryPageContent() {
                           }`}
                         >
                           <Sparkles className="w-4 h-4" />
-                          {isCreatingBranch ? 'Creating Branch...' : 'Create Branched Story'}
+                          {isCreatingBranch ? 'Setting up branch...' : 'Continue to Write Chapter'}
                         </button>
                       </div>
                     </div>
