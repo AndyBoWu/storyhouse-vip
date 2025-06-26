@@ -13,6 +13,9 @@ import { BookIPInfo } from '@/components/book';
 import { BookRegistrationPrompt } from '@/components/book/BookRegistrationPrompt';
 import { ChapterPricingSetup } from '@/components/book/ChapterPricingSetup';
 import { getHardcodedGenres, getGenreBadgeClass, type GenreType } from '@/lib/genre-utils';
+import { TipAuthorButton } from '@/components/ui/TipAuthorButton';
+import { TipModal } from '@/components/ui/TipModal';
+import { useTipAuthor } from '@/hooks/useTipAuthor';
 
 // Dynamically import WalletConnect to avoid hydration issues
 const WalletConnect = dynamic(() => import('@/components/WalletConnect'), {
@@ -61,6 +64,10 @@ export default function BookPage() {
   const [nextChapterNumber, setNextChapterNumber] = useState<number>(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Tipping state
+  const [showTipModal, setShowTipModal] = useState(false);
+  const { tipAuthor, recordTip, transactionHash, isConfirmed } = useTipAuthor();
 
   useEffect(() => {
     if (bookId) {
@@ -199,6 +206,38 @@ export default function BookPage() {
       day: 'numeric'
     });
   };
+  
+  // Handle tip submission
+  const handleTip = async (amount: string) => {
+    if (!book) return;
+    
+    try {
+      // Send the tip
+      const result = await tipAuthor(book.authorAddress, amount, {
+        bookId: book.id
+      });
+      
+      // Record tip in backend after successful transaction
+      if (result.success && transactionHash) {
+        await recordTip(transactionHash, book.authorAddress, amount, {
+          bookId: book.id
+        });
+      }
+    } catch (error) {
+      console.error('Tip failed:', error);
+      throw error;
+    }
+  };
+  
+  // Watch for confirmed transaction
+  useEffect(() => {
+    if (isConfirmed && transactionHash && book) {
+      // Record tip in backend after confirmation
+      recordTip(transactionHash, book.authorAddress, '0', {
+        bookId: book.id
+      });
+    }
+  }, [isConfirmed, transactionHash, book, recordTip]);
 
   if (loading) {
     return (
@@ -464,7 +503,7 @@ export default function BookPage() {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex gap-4">
+            <div className="flex gap-4 flex-wrap">
               {/* Only show Write Chapter button if current user is the author */}
               {address && book.authorAddress && address.toLowerCase() === book.authorAddress.toLowerCase() && (
                 <button
@@ -474,6 +513,17 @@ export default function BookPage() {
                   ✍️ Write Chapter {nextChapterNumber}
                 </button>
               )}
+              
+              {/* Tip Author button - show only if not the author */}
+              {address && book.authorAddress && address.toLowerCase() !== book.authorAddress.toLowerCase() && (
+                <TipAuthorButton
+                  authorAddress={book.authorAddress}
+                  authorName={formatAddress(book.authorAddress)}
+                  bookId={book.id}
+                  onTipClick={() => setShowTipModal(true)}
+                />
+              )}
+              
               <ShareButton
                 title={book.title}
                 description={book.description}
@@ -657,6 +707,18 @@ export default function BookPage() {
         )}
       </div>
       </div>
+      
+      {/* Tip Modal */}
+      {book && (
+        <TipModal
+          isOpen={showTipModal}
+          onClose={() => setShowTipModal(false)}
+          authorAddress={book.authorAddress}
+          authorName={formatAddress(book.authorAddress)}
+          bookTitle={book.title}
+          onTip={handleTip}
+        />
+      )}
     </div>
   );
 }
