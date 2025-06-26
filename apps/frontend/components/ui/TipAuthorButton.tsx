@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { DollarSign, Heart, Loader2 } from 'lucide-react'
+import { Heart } from 'lucide-react'
 
 interface TipAuthorButtonProps {
   authorAddress: string
@@ -39,16 +39,15 @@ export function TipAuthorButton({
       <div className="relative flex items-center gap-2">
         <div className="relative">
           <Heart className={`w-4 h-4 transition-all duration-300 ${isHovered ? 'scale-110' : ''}`} 
-                 fill={isHovered ? 'currentColor' : 'none'} />
+                 fill={isHovered ? 'currentColor' : 'currentColor'} />
           {/* Pulse animation on hover */}
           {isHovered && (
             <div className="absolute inset-0 animate-ping">
-              <Heart className="w-4 h-4" />
+              <Heart className="w-4 h-4" fill="currentColor" />
             </div>
           )}
         </div>
-        <span>Thanks</span>
-        <DollarSign className="w-4 h-4" />
+        <span>TIP</span>
       </div>
       
       {/* Tooltip */}

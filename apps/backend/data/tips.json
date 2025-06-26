@@ -16,5 +16,14 @@
     "bookId": "0x3873c0d1bcfa245773b13b694a49dac5b3f03ca2/shadows-and-light",
     "chapterNumber": 1,
     "timestamp": "2025-06-26T22:50:59.339Z"
+  },
+  {
+    "transactionHash": "0x537d9d8d1607eda80e3ce3f541fd9b92e4db30e3ea368a48618de4dbd9136f0d",
+    "authorAddress": "0x3873c0d1bcfa245773b13b694a49dac5b3f03ca2",
+    "tipperAddress": "0x71b93d154886c297F4B6e6219C47d378F6Ac6a70",
+    "amount": "0",
+    "bookId": "0x3873c0d1bcfa245773b13b694a49dac5b3f03ca2/shadows-and-light",
+    "chapterNumber": 4,
+    "timestamp": "2025-06-26T22:56:05.343Z"
   }
 ]
