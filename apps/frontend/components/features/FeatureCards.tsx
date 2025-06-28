@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BookOpen, Sparkles, Shuffle, ChevronRight, X } from 'lucide-react';
+import { ChevronRight, X } from 'lucide-react';
 
 interface Feature {
   id: string;
@@ -17,10 +17,78 @@ interface Feature {
   };
 }
 
+// Custom sophisticated icons
+const BookIcon = () => (
+  <svg className="w-10 h-10" viewBox="0 0 48 48" fill="none">
+    <path d="M8 6C8 4.89543 8.89543 4 10 4H24V40H10C8.89543 40 8 39.1046 8 38V6Z" fill="url(#book-gradient1)" fillOpacity="0.9"/>
+    <path d="M24 4H38C39.1046 4 40 4.89543 40 6V38C40 39.1046 39.1046 40 38 40H24V4Z" fill="url(#book-gradient2)" fillOpacity="0.8"/>
+    <path d="M12 12H20M12 18H20M12 24H20M28 12H36M28 18H36M28 24H36" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+    <defs>
+      <linearGradient id="book-gradient1" x1="8" y1="4" x2="24" y2="40">
+        <stop stopColor="#3B82F6"/>
+        <stop offset="1" stopColor="#8B5CF6"/>
+      </linearGradient>
+      <linearGradient id="book-gradient2" x1="24" y1="4" x2="40" y2="40">
+        <stop stopColor="#8B5CF6"/>
+        <stop offset="1" stopColor="#EC4899"/>
+      </linearGradient>
+    </defs>
+  </svg>
+);
+
+const SparklesIcon = () => (
+  <svg className="w-10 h-10" viewBox="0 0 48 48" fill="none">
+    <path d="M24 4L26.7961 17.5106L38.3923 9.6077L30.4894 21.2039L44 24L30.4894 26.7961L38.3923 38.3923L26.7961 30.4894L24 44L21.2039 30.4894L9.6077 38.3923L17.5106 26.7961L4 24L17.5106 21.2039L9.6077 9.6077L21.2039 17.5106L24 4Z" fill="url(#sparkle-gradient)" fillOpacity="0.9"/>
+    <circle cx="15" cy="15" r="2" fill="#FBBF24"/>
+    <circle cx="33" cy="33" r="2" fill="#FBBF24"/>
+    <circle cx="33" cy="15" r="1.5" fill="#FCD34D"/>
+    <circle cx="15" cy="33" r="1.5" fill="#FCD34D"/>
+    <defs>
+      <linearGradient id="sparkle-gradient" x1="4" y1="4" x2="44" y2="44">
+        <stop stopColor="#F59E0B"/>
+        <stop offset="0.5" stopColor="#EF4444"/>
+        <stop offset="1" stopColor="#8B5CF6"/>
+      </linearGradient>
+    </defs>
+  </svg>
+);
+
+const NetworkIcon = () => (
+  <svg className="w-10 h-10" viewBox="0 0 48 48" fill="none">
+    <circle cx="24" cy="8" r="4" fill="url(#network-gradient1)"/>
+    <circle cx="12" cy="24" r="4" fill="url(#network-gradient2)"/>
+    <circle cx="36" cy="24" r="4" fill="url(#network-gradient3)"/>
+    <circle cx="24" cy="40" r="4" fill="url(#network-gradient4)"/>
+    <path d="M24 12V20M24 28V36M20 10L16 22M28 10L32 22M16 26L20 38M32 26L28 38" stroke="url(#network-line)" strokeWidth="2" strokeOpacity="0.6"/>
+    <defs>
+      <linearGradient id="network-gradient1" x1="20" y1="4" x2="28" y2="12">
+        <stop stopColor="#06B6D4"/>
+        <stop offset="1" stopColor="#3B82F6"/>
+      </linearGradient>
+      <linearGradient id="network-gradient2" x1="8" y1="20" x2="16" y2="28">
+        <stop stopColor="#8B5CF6"/>
+        <stop offset="1" stopColor="#A855F7"/>
+      </linearGradient>
+      <linearGradient id="network-gradient3" x1="32" y1="20" x2="40" y2="28">
+        <stop stopColor="#EC4899"/>
+        <stop offset="1" stopColor="#F43F5E"/>
+      </linearGradient>
+      <linearGradient id="network-gradient4" x1="20" y1="36" x2="28" y2="44">
+        <stop stopColor="#F59E0B"/>
+        <stop offset="1" stopColor="#F97316"/>
+      </linearGradient>
+      <linearGradient id="network-line" x1="24" y1="8" x2="24" y2="40">
+        <stop stopColor="#3B82F6"/>
+        <stop offset="1" stopColor="#8B5CF6"/>
+      </linearGradient>
+    </defs>
+  </svg>
+);
+
 const features: Feature[] = [
   {
     id: 'immerse',
-    icon: <BookOpen className="w-8 h-8" />,
+    icon: <BookIcon />,
     title: 'Immerse & Discover',
     description: 'Dive deep into captivating narratives. Every chapter opens new dimensions of possibility.',
     expandedContent: {
@@ -42,7 +110,7 @@ const features: Feature[] = [
   },
   {
     id: 'dream',
-    icon: <Sparkles className="w-8 h-8" />,
+    icon: <SparklesIcon />,
     title: 'Dream & Create',
     description: 'Transform imagination into reality with AI. Your wildest ideas become living stories.',
     expandedContent: {
@@ -64,7 +132,7 @@ const features: Feature[] = [
   },
   {
     id: 'expand',
-    icon: <Shuffle className="w-8 h-8" />,
+    icon: <NetworkIcon />,
     title: 'Expand & Evolve',
     description: 'Build upon existing worlds. Create infinite variations that spawn new universes.',
     expandedContent: {
@@ -96,30 +164,47 @@ export default function FeatureCards() {
           <motion.div
             key={feature.id}
             layoutId={feature.id}
-            className="relative"
+            className="relative h-full"
           >
             <motion.div
               className={`
-                bg-white/70 backdrop-blur-sm rounded-xl p-6 cursor-pointer
-                border border-white/50 transition-all duration-300
-                hover:bg-white/80 hover:shadow-lg
+                relative bg-white/50 backdrop-blur-md rounded-2xl p-8 cursor-pointer
+                border border-white/60 transition-all duration-300
+                hover:bg-white/70 hover:shadow-2xl hover:border-white/80
+                group overflow-hidden h-full flex flex-col
                 ${expandedCard === feature.id ? 'invisible' : 'visible'}
               `}
               onClick={() => setExpandedCard(feature.id)}
-              whileHover={{ y: -4 }}
-              whileTap={{ scale: 0.98 }}
+              whileHover={{ y: -8 }}
+              whileTap={{ scale: 0.97 }}
             >
-              <div className="flex justify-center mb-4 text-blue-600">
-                {feature.icon}
+              {/* Gradient overlay on hover */}
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              
+              {/* Subtle pattern background */}
+              <div className="absolute inset-0 opacity-5">
+                <div className="absolute inset-0" style={{
+                  backgroundImage: `radial-gradient(circle at 1px 1px, rgb(99, 102, 241) 1px, transparent 1px)`,
+                  backgroundSize: '24px 24px'
+                }} />
               </div>
-              <h3 className="text-xl font-bold text-gray-800 mb-2 text-center">
-                {feature.title}
-              </h3>
-              <p className="text-gray-600 text-center">
-                {feature.description}
-              </p>
-              <div className="flex justify-center mt-6">
-                <ChevronRight className="w-5 h-5 text-gray-400" />
+              
+              <div className="relative z-10 flex flex-col h-full">
+                <div className="flex justify-center mb-6 transform transition-transform duration-300 group-hover:scale-110">
+                  {feature.icon}
+                </div>
+                <h3 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-900 bg-clip-text text-transparent mb-3 text-center">
+                  {feature.title}
+                </h3>
+                <p className="text-gray-600 text-center leading-relaxed flex-grow">
+                  {feature.description}
+                </p>
+                <div className="flex justify-center mt-8">
+                  <div className="flex items-center gap-2 text-sm font-medium text-indigo-600 group-hover:text-indigo-700 transition-colors">
+                    <span>Learn more</span>
+                    <ChevronRight className="w-4 h-4 transform transition-transform group-hover:translate-x-1" />
+                  </div>
+                </div>
               </div>
             </motion.div>
           </motion.div>
@@ -142,16 +227,18 @@ export default function FeatureCards() {
             >
               <button
                 onClick={() => setExpandedCard(null)}
-                className="absolute top-6 right-6 p-2 rounded-full hover:bg-gray-100 transition-colors"
+                className="absolute top-6 right-6 p-3 rounded-full bg-gray-100/80 backdrop-blur-sm hover:bg-gray-200/80 transition-all duration-200 group"
               >
-                <X className="w-6 h-6 text-gray-500" />
+                <X className="w-5 h-5 text-gray-600 group-hover:text-gray-800 transition-colors" />
               </button>
 
               {features.find(f => f.id === expandedCard) && (
                 <div className="space-y-8">
                   <div className="text-center">
-                    <div className="flex justify-center mb-4 text-blue-600">
-                      {features.find(f => f.id === expandedCard)?.icon}
+                    <div className="flex justify-center mb-6">
+                      <div className="transform scale-125">
+                        {features.find(f => f.id === expandedCard)?.icon}
+                      </div>
                     </div>
                     <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
                       {features.find(f => f.id === expandedCard)?.title}
@@ -181,7 +268,9 @@ export default function FeatureCards() {
                       <ul className="space-y-2">
                         {features.find(f => f.id === expandedCard)?.expandedContent.benefits.map((benefit, i) => (
                           <li key={i} className="flex items-start">
-                            <span className="text-green-500 mr-2">✓</span>
+                            <svg className="w-5 h-5 text-green-500 mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                            </svg>
                             <span className="text-gray-600">{benefit}</span>
                           </li>
                         ))}
@@ -189,20 +278,30 @@ export default function FeatureCards() {
                     </div>
                   </div>
 
-                  <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6">
-                    <h3 className="text-xl font-semibold mb-3 text-gray-900">Real Example</h3>
-                    <p className="text-gray-700 italic">
-                      {features.find(f => f.id === expandedCard)?.expandedContent.example}
-                    </p>
+                  <div className="relative bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 rounded-2xl p-8 overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-indigo-200/30 to-purple-200/30 rounded-full -mr-16 -mt-16 blur-2xl" />
+                    <div className="relative">
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="w-2 h-2 bg-indigo-600 rounded-full" />
+                        <h3 className="text-xl font-semibold text-gray-900">Success Story</h3>
+                      </div>
+                      <p className="text-gray-700 leading-relaxed">
+                        {features.find(f => f.id === expandedCard)?.expandedContent.example}
+                      </p>
+                    </div>
                   </div>
 
                   <div className="flex justify-center">
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+                      className="relative px-10 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 group overflow-hidden"
                     >
-                      {features.find(f => f.id === expandedCard)?.expandedContent.cta}
+                      <span className="relative z-10 flex items-center gap-2">
+                        {features.find(f => f.id === expandedCard)?.expandedContent.cta}
+                        <ChevronRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                      </span>
+                      <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     </motion.button>
                   </div>
                 </div>
