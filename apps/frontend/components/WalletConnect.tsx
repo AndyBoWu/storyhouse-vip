@@ -2,8 +2,18 @@
 
 import { useAccount, useDisconnect, useBalance } from 'wagmi'
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Wallet, LogOut, AlertCircle, CheckCircle, Copy } from 'lucide-react'
+import { LogOut, AlertCircle, CheckCircle, Copy } from 'lucide-react'
 import { storyProtocolTestnet, TIP_TOKEN_CONFIG } from '@/lib/web3/config'
+
+// Custom Wallet Icon
+const WalletIcon = () => (
+  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+    <rect x="3" y="6" width="18" height="13" rx="2" stroke="currentColor" strokeWidth="2"/>
+    <path d="M3 10H21" stroke="currentColor" strokeWidth="2"/>
+    <circle cx="16" cy="15" r="1.5" fill="currentColor"/>
+    <path d="M7 3L5 6M17 3L19 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+  </svg>
+)
 
 // Global connection state to prevent duplicate requests across all instances
 let globalConnectionInProgress = false
@@ -179,8 +189,8 @@ export default function WalletConnect() {
   // Don't render until mounted to prevent hydration errors
   if (!mounted) {
     return (
-      <button className="flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-sm bg-gray-200 text-gray-400 cursor-not-allowed">
-        <Wallet className="w-5 h-5" />
+      <button className="flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-sm bg-white/60 backdrop-blur-sm text-gray-400 cursor-not-allowed border border-white/40">
+        <WalletIcon />
         Loading...
       </button>
     )
@@ -191,9 +201,9 @@ export default function WalletConnect() {
       <div className="relative">
         <button
           onClick={() => setShowDetails(!showDetails)}
-          className="flex items-center gap-2 bg-white/60 backdrop-blur-sm hover:bg-white/80 text-gray-800 px-6 py-3 rounded-full transition-all border border-white/50 text-sm font-semibold"
+          className="group flex items-center gap-2.5 bg-white/60 backdrop-blur-sm hover:bg-white/80 text-gray-800 px-6 py-3 rounded-full transition-all border border-white/40 hover:border-white/60 hover:shadow-md text-sm font-semibold"
         >
-          💳
+          <WalletIcon />
           <span>{formatAddress(address)}</span>
         </button>
 
@@ -292,21 +302,21 @@ export default function WalletConnect() {
     <button
       onClick={handleConnect}
       disabled={isCurrentlyConnecting}
-      className={`flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-sm transition-all ${
+      className={`group flex items-center gap-2.5 px-6 py-3 rounded-full font-semibold text-sm transition-all ${
         isCurrentlyConnecting
-          ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-          : 'bg-white/60 backdrop-blur-sm hover:bg-white/80 text-gray-800 border border-white/50'
+          ? 'bg-white/40 text-gray-500 cursor-not-allowed border border-white/30'
+          : 'bg-white/60 backdrop-blur-sm hover:bg-white/80 text-gray-800 border border-white/40 hover:border-white/60 hover:shadow-md'
       }`}
     >
       {isCurrentlyConnecting ? (
         <>
           <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
-          Connecting...
+          <span>Connecting...</span>
         </>
       ) : (
         <>
-          <Wallet className="w-4 h-4" />
-          Connect
+          <WalletIcon />
+          <span>Connect</span>
         </>
       )}
     </button>
