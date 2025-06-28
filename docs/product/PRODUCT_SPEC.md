@@ -66,9 +66,13 @@ storyhouse-vip/
 1. **Frontend-First Architecture**: Direct blockchain interactions from the browser
 2. **Minimal Smart Contracts**: Only 2 custom contracts, leverage Story Protocol SDK for everything else
 3. **Author Ownership**: Creators retain 100% IP ownership of their content
-4. **Atomic Operations**: Single-transaction IP registration for 40% gas savings
-5. **90% Creator Revenue**: Authors keep 90% of all sales (only 10% platform fee vs Amazon KDP 35-70%)
-6. **Hybrid Approach**: Story Protocol for IP/licensing, custom contracts for TIP payments
+4. **Fair IP Model**: One book = One IP. First author owns the book IP forever
+   - Original books: Single IP asset for entire work
+   - Derivative books: No book-level IP, only individual chapter IPs
+   - Inherited chapters maintain original author's IP ownership
+5. **Atomic Operations**: Single-transaction IP registration for 40% gas savings
+6. **90% Creator Revenue**: Authors keep 90% of all sales (only 10% platform fee vs Amazon KDP 35-70%)
+7. **Hybrid Approach**: Story Protocol for IP/licensing, custom contracts for TIP payments
 
 ### Technology Stack
 

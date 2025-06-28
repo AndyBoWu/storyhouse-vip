@@ -40,15 +40,43 @@ packages/contracts/
 ├── src/                          # Smart Contracts (Production)
 │   ├── TIPToken.sol             # Platform token with 10B supply cap
 │   └── HybridRevenueControllerV2.sol     # PERMISSIONLESS revenue sharing + chapter access (V2)
+├── deployments/                 # Deployment Information
+│   ├── addresses.ts             # SINGLE SOURCE OF TRUTH for contract addresses
+│   ├── story-testnet.json       # Network deployment registry
+│   └── README.md                # Deployment documentation
 ├── test/                        # Test Files (Foundry *.t.sol)
 │   ├── TIPToken.t.sol          # Platform token tests
 │   └── HybridRevenueControllerV2.t.sol  # V2 tests
 ├── script/                      # Deployment Scripts (Foundry *.s.sol)
 ├── lib/                         # Dependencies (git submodules)
 ├── out/                         # Compiled artifacts
+├── index.ts                     # Package entry point
 ├── foundry.toml                 # Foundry configuration
 └── README.md                    # This file
 ```
+
+## 📍 Contract Addresses - Single Source of Truth
+
+**IMPORTANT**: All contract addresses are maintained in `/deployments/addresses.ts`
+
+### Current Deployment (Story Protocol Testnet)
+
+| Contract | Address | Status |
+|----------|---------|--------|
+| TIP Token | `0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E` | ✅ Active |
+| HybridRevenueControllerV2 | `0x99dA048826Bbb8189FBB6C3e62EaA75d0fB36812` | ✅ Active (95 txns) |
+
+### Usage in Frontend/Backend
+
+```typescript
+import { ADDRESSES } from '@storyhouse/contracts';
+
+// Use addresses
+const tipToken = ADDRESSES.TIP_TOKEN;
+const hybridController = ADDRESSES.HYBRID_REVENUE_CONTROLLER_V2;
+```
+
+⚠️ **WARNING**: Never hardcode addresses. Always import from the contracts package.
 
 ## 🧪 Testing Commands
 

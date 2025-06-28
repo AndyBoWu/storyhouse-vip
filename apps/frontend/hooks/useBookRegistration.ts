@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react'
 import { useAccount, useWriteContract, useWaitForTransactionReceipt, usePublicClient } from 'wagmi'
 import { parseBookId } from '@/lib/contracts/hybridRevenueController'
 
-// HybridRevenueControllerV2 deployed address (2025-06-18 - Full Version)
+// HybridRevenueControllerV2 deployed address (Story Protocol Testnet)
 export const HYBRID_REVENUE_CONTROLLER_V2_ADDRESS = '0x99dA048826Bbb8189FBB6C3e62EaA75d0fB36812'
 
 // ABI for HybridRevenueControllerV2
@@ -139,25 +139,52 @@ export function useBookRegistration() {
    * Check if a book is already registered
    */
   const checkBookRegistration = useCallback(async (bookId: string): Promise<boolean> => {
-    if (!publicClient) return false
+    console.log('🔍 checkBookRegistration called with:', bookId)
+    
+    if (!publicClient) {
+      console.error('❌ No publicClient available')
+      return false
+    }
     
     try {
       const { bytes32Id } = parseBookId(bookId)
+      console.log('📝 Parsed bookId to bytes32:', bytes32Id)
       
-      const bookData = await publicClient.readContract({
+      console.log('📡 Calling contract at:', HYBRID_REVENUE_CONTROLLER_V2_ADDRESS)
+      const chainId = await publicClient.getChainId()
+      console.log('🔗 Current chain ID:', chainId)
+      
+      // Add timeout wrapper
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Contract call timed out after 10 seconds')), 10000)
+      )
+      
+      const contractCallPromise = publicClient.readContract({
         address: HYBRID_REVENUE_CONTROLLER_V2_ADDRESS as `0x${string}`,
         abi: HYBRID_V2_ABI,
         functionName: 'books',
         args: [bytes32Id],
       })
       
+      const bookData = await Promise.race([contractCallPromise, timeoutPromise])
+      
+      console.log('📚 Contract response:', bookData)
+      
       // Check if curator address is not zero address (indicates book exists)
       const curator = bookData[0] as string
       const isActive = bookData[4] as boolean
       
-      return curator !== '0x0000000000000000000000000000000000000000' && isActive
+      const isRegistered = curator !== '0x0000000000000000000000000000000000000000' && isActive
+      console.log('✅ Book registration check result:', isRegistered)
+      
+      return isRegistered
     } catch (error) {
-      console.error('Error checking book registration:', error)
+      console.error('❌ Error checking book registration:', error)
+      console.error('Error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        code: (error as any)?.code,
+        cause: (error as any)?.cause
+      })
       // If error occurs, assume book is not registered
       return false
     }

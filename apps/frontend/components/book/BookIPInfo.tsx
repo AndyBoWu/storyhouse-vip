@@ -43,6 +43,37 @@ export function BookIPInfo({ bookId }: BookIPInfoProps) {
   }
 
   const hasIPAsset = !!bookData.ipAssetId
+  const isDerivative = !!bookData.parentBook
+
+  // For derivative books, we don't show book-level IP info
+  if (isDerivative) {
+    return (
+      <div className="bg-gray-50 rounded-lg p-6 h-full">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <span className="text-gray-700">🔗</span>
+          IP Registration Info
+        </h3>
+        <div className="space-y-3">
+          <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm text-blue-900 font-medium">Derivative Work</p>
+            <p className="text-xs text-blue-700 mt-1">
+              Individual chapters have their own IP registrations
+            </p>
+          </div>
+          {bookData.parentBook && (
+            <div>
+              <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Parent Book</label>
+              <div className="mt-1">
+                <code className="block p-2 bg-white rounded-md border border-gray-200 text-xs font-mono text-gray-700 truncate">
+                  {bookData.parentBook}
+                </code>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="bg-gray-50 rounded-lg p-6 h-full">

@@ -244,3 +244,6 @@ forge script script/Deploy.s.sol:Deploy --broadcast --rpc-url $STORY_RPC_URL
 - **AI Story Generation Removed (December 2024)**: No longer generating or remixing stories with AI
 - **AI Role Redefined (December 2024)**: AI features planned for future implementation (content fraud detection, translation, text-to-audio, and content recommendations)
 - **AI Services Status (December 2024)**: Not currently implemented - platform focuses on core IP/payment functionality first
+- **Fair IP Model for Derivatives (December 2024)**: Derivative books do NOT get book-level IP assets - only individual new chapters are registered as IP
+- **IP Attribution**: Each chapter maintains its original IP ownership - inherited chapters remain IP of original authors
+- **One Book = One IP**: Original books get single IP asset, derivatives only register new chapters

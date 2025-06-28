@@ -220,28 +220,57 @@ export class ClientStoryProtocolService {
     try {
       console.log('🌿 Executing derivative registration on client-side...', params)
 
-      // Prepare PIL terms data
+      // Prepare PIL terms data for the derivative
       const pilTermsData = this.preparePilTermsData(params.licenseTier)
-      console.log('📋 PIL Terms Data:', JSON.stringify(pilTermsData, (_, v) => typeof v === 'bigint' ? v.toString() : v, 2))
+      console.log('📋 PIL Terms Data for derivative:', JSON.stringify(pilTermsData, (_, v) => typeof v === 'bigint' ? v.toString() : v, 2))
 
-      // Execute derivative registration transaction with user's wallet
-      const result = await this.storyClient.ipAsset.mintAndRegisterIpAndMakeDerivative({
-        spgNftContract: params.spgNftContract,
-        derivData: {
-          parentIpIds: [params.parentIpId],
-          licenseTermsIds: [params.parentLicenseTermsId]
-        },
-        ipMetadata: {
-          ipMetadataURI: params.metadata.ipMetadataURI || '',
-          ipMetadataHash: params.metadata.ipMetadataHash || ('0x0000000000000000000000000000000000000000000000000000000000000000' as Hash),
-          nftMetadataURI: params.metadata.nftMetadataURI || '',
-          nftMetadataHash: params.metadata.nftMetadataHash || ('0x0000000000000000000000000000000000000000000000000000000000000000' as Hash)
-        },
-        recipient: params.recipient,
-        txOptions: {
-          gas: 1000000n // Extra gas for derivative registration
-        }
-      })
+      // Check if the SDK supports the PIL terms method for derivatives
+      let result
+      
+      if ('mintAndRegisterIpAndMakeDerivativeWithPilTerms' in this.storyClient.ipAsset) {
+        console.log('✅ Using mintAndRegisterIpAndMakeDerivativeWithPilTerms (with PIL terms)')
+        
+        // Use the newer SDK method that supports PIL terms for derivatives
+        result = await this.storyClient.ipAsset.mintAndRegisterIpAndMakeDerivativeWithPilTerms({
+          spgNftContract: params.spgNftContract,
+          derivData: {
+            parentIpIds: [params.parentIpId],
+            licenseTermsIds: [params.parentLicenseTermsId]
+          },
+          licenseTermsData: [{ terms: pilTermsData }], // Add PIL terms for the derivative
+          ipMetadata: {
+            ipMetadataURI: params.metadata.ipMetadataURI || '',
+            ipMetadataHash: params.metadata.ipMetadataHash || ('0x0000000000000000000000000000000000000000000000000000000000000000' as Hash),
+            nftMetadataURI: params.metadata.nftMetadataURI || '',
+            nftMetadataHash: params.metadata.nftMetadataHash || ('0x0000000000000000000000000000000000000000000000000000000000000000' as Hash)
+          },
+          recipient: params.recipient,
+          txOptions: {
+            gas: 1000000n // Extra gas for derivative registration with PIL terms
+          }
+        })
+      } else {
+        console.log('⚠️ Falling back to mintAndRegisterIpAndMakeDerivative (without PIL terms)')
+        
+        // Fallback to older method without PIL terms (inherits parent's terms)
+        result = await this.storyClient.ipAsset.mintAndRegisterIpAndMakeDerivative({
+          spgNftContract: params.spgNftContract,
+          derivData: {
+            parentIpIds: [params.parentIpId],
+            licenseTermsIds: [params.parentLicenseTermsId]
+          },
+          ipMetadata: {
+            ipMetadataURI: params.metadata.ipMetadataURI || '',
+            ipMetadataHash: params.metadata.ipMetadataHash || ('0x0000000000000000000000000000000000000000000000000000000000000000' as Hash),
+            nftMetadataURI: params.metadata.nftMetadataURI || '',
+            nftMetadataHash: params.metadata.nftMetadataHash || ('0x0000000000000000000000000000000000000000000000000000000000000000' as Hash)
+          },
+          recipient: params.recipient,
+          txOptions: {
+            gas: 1000000n // Extra gas for derivative registration
+          }
+        })
+      }
 
       console.log('✅ Derivative registration completed:', JSON.stringify(result, (_, v) => typeof v === 'bigint' ? v.toString() : v, 2))
 
@@ -249,7 +278,7 @@ export class ClientStoryProtocolService {
         success: true,
         ipId: result.ipId,
         tokenId: result.tokenId,
-        licenseTermsId: params.parentLicenseTermsId, // Inherits parent's license terms
+        licenseTermsId: result.licenseTermsIds?.[0] || params.parentLicenseTermsId, // New license terms or inherit parent's
         txHash: result.txHash
       }
     } catch (error) {

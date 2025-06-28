@@ -8,6 +8,7 @@ import { injected } from 'wagmi/connectors'
 import { useUnifiedPublishStory } from '@/hooks/useUnifiedPublishStory'
 import { useEnhancedStoryProtocol } from '@/hooks/useEnhancedStoryProtocol'
 import { getExplorerUrl, getIPAssetUrl } from '@/lib/contracts/storyProtocol'
+import { DerivativeRegistrationFlow } from './DerivativeRegistrationFlow'
 
 interface GeneratedStory {
   title: string
@@ -68,7 +69,11 @@ function PublishingModal({
     isPublishing,
     currentStep: publishStep,
     publishResult,
-    isUnifiedSupported
+    isUnifiedSupported,
+    showRegistrationFlow,
+    pendingPublishData,
+    handleRegistrationProceed,
+    handleRegistrationCancel
   } = useUnifiedPublishStory()
 
   // Reset state when modal opens
@@ -180,7 +185,15 @@ function PublishingModal({
         contentUrl: story.contentUrl // Pass the R2 URL
       }, options, bookId)
 
-            if (result.success) {
+      // Check if registration is required (for derivatives)
+      if (!result.success && result.requiresRegistration) {
+        // The registration flow modal will be shown automatically
+        // by the hook, so we just need to keep the modal open
+        console.log('📚 Registration required, showing flow...')
+        return
+      }
+
+      if (result.success) {
         setCurrentStep('success')
 
         // Story is automatically saved to R2 during the publishing process
@@ -1120,6 +1133,19 @@ function PublishingModal({
             </div>
           </motion.div>
         </motion.div>
+      )}
+      
+      {/* Derivative Registration Flow Modal */}
+      {showRegistrationFlow && pendingPublishData && (
+        <DerivativeRegistrationFlow
+          bookId={pendingPublishData.bookId || bookId || ''}
+          chapterNumber={chapterNumber}
+          chapterPrice={`${chapterPrice} TIP`}
+          onProceed={handleRegistrationProceed}
+          onCancel={handleRegistrationCancel}
+          isDerivative={isDerivative}
+          parentBookTitle={parentBookTitle}
+        />
       )}
     </AnimatePresence>
   )

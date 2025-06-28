@@ -9,12 +9,18 @@ interface BookRegistrationPromptProps {
   bookId: string
   chapterNumber: number
   onRegistrationComplete?: () => void
+  isDerivative?: boolean
+  showAsButton?: boolean
+  parentBookId?: string
 }
 
 export function BookRegistrationPrompt({ 
   bookId, 
   chapterNumber,
-  onRegistrationComplete
+  onRegistrationComplete,
+  isDerivative = false,
+  showAsButton = false,
+  parentBookId
 }: BookRegistrationPromptProps) {
   const { address } = useAccount()
   const { 
@@ -30,7 +36,39 @@ export function BookRegistrationPrompt({
   // Check if book is already registered
   useEffect(() => {
     if (bookId && isSupported) {
-      checkBookRegistration(bookId).then(setIsRegistered)
+      console.log('🔍 Checking book registration for:', bookId)
+      console.log('🔧 Hook support status:', { isSupported })
+      
+      // Add timeout to prevent hanging
+      const timeoutId = setTimeout(() => {
+        console.warn('⏱️ Registration check timed out, assuming not registered')
+        setIsRegistered(false)
+      }, 15000) // 15 second timeout
+      
+      checkBookRegistration(bookId)
+        .then((result) => {
+          clearTimeout(timeoutId)
+          console.log('✅ Registration check result:', result)
+          setIsRegistered(result)
+        })
+        .catch((error) => {
+          clearTimeout(timeoutId)
+          console.error('❌ Registration check failed:', error)
+          console.error('Error stack:', error.stack)
+          
+          // More detailed error logging
+          if (error.message) {
+            console.error('Error message:', error.message)
+          }
+          if (error.cause) {
+            console.error('Error cause:', error.cause)
+          }
+          
+          // If check fails, assume not registered so we show the prompt
+          setIsRegistered(false)
+        })
+    } else {
+      console.log('⚠️ Not checking registration:', { bookId, isSupported })
     }
   }, [bookId, isSupported, checkBookRegistration])
 
@@ -39,11 +77,20 @@ export function BookRegistrationPrompt({
     
     setIsRegistering(true)
     try {
+      // For derivatives, use the actual parent book ID
+      const parentBookIdToUse = isDerivative && parentBookId 
+        ? parentBookId 
+        : '0x0000000000000000000000000000000000000000000000000000000000000000'
+      
+      if (isDerivative) {
+        console.log('Registering derivative book with parent:', parentBookIdToUse)
+      }
+      
       const result = await registerBook({
         bookId,
         totalChapters: 100, // Current contract maximum (will be increased when contract is redeployed)
-        isDerivative: false,
-        parentBookId: '0x0000000000000000000000000000000000000000000000000000000000000000',
+        isDerivative: isDerivative,
+        parentBookId: parentBookIdToUse,
         ipfsMetadataHash: ''
       })
       
@@ -66,19 +113,64 @@ export function BookRegistrationPrompt({
     bookId
   })
   
-  // Don't show if not supported, already registered, or no chapters yet
-  if (!isSupported || isRegistered === true || chapterNumber < 1) {
-    console.log('❌ Not showing prompt:', { isSupported, isRegistered, chapterNumber })
+  // Don't show if not supported or no chapters yet
+  if (!isSupported || chapterNumber < 1) {
+    console.log('❌ Not showing prompt - not supported or no chapters:', { isSupported, chapterNumber })
     return null
   }
   
-  // Still checking registration status
-  if (isRegistered === null) {
+  // Don't show if already registered
+  if (isRegistered === true) {
+    console.log('❌ Not showing prompt - already registered')
     return null
+  }
+  
+  // Still checking registration status - show loading
+  if (isRegistered === null) {
+    console.log('⏳ Still checking registration status...')
+    return (
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        <div className="flex items-center gap-3">
+          <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          <span className="text-blue-700">Checking book registration status...</span>
+        </div>
+      </div>
+    )
   }
   
   console.log('✅ Rendering BookRegistrationPrompt')
 
+  // If showAsButton is true, render only the button
+  if (showAsButton) {
+    return (
+      <div>
+        <button
+          onClick={handleRegisterBook}
+          disabled={isRegistering || isLoading}
+          className="px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg hover:from-amber-700 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg flex items-center gap-2 font-semibold"
+        >
+          {isRegistering || isLoading ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin" />
+              Registering Book...
+            </>
+          ) : (
+            <>
+              <CheckCircle2 className="w-5 h-5" />
+              Register Book Now
+            </>
+          )}
+        </button>
+        {error && (
+          <div className="mt-2 text-sm text-red-600">
+            {error}
+          </div>
+        )}
+      </div>
+    )
+  }
+  
+  // Regular prompt display
   return (
     <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-6 mb-6">
       <div className="flex items-start gap-4">

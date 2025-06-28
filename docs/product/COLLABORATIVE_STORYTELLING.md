@@ -5,6 +5,10 @@
 StoryHouse.vip implements a revolutionary collaborative storytelling platform using Story Protocol's IP licensing system. Writers can create branching narratives where any reader can purchase remix licenses to continue or diverge from existing stories, creating an infinite multiverse of interconnected tales.
 
 ### Core Innovation
+- **Fair IP Model**: One book = One IP. Original authors own their work forever
+  - First author (chapters 1-3) owns the book IP
+  - Derivative books register individual chapters, not the entire book
+  - Each chapter maintains its original author's IP ownership
 - **Chapter-level IP Assets**: Each chapter is a separate IP asset with its own licensing terms
 - **Branching Narratives**: Readers can branch from any chapter to create alternate storylines
 - **Automatic Royalties**: Parent chapters earn royalties from derivative works through blockchain-native distribution

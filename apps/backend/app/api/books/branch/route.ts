@@ -335,6 +335,14 @@ export async function POST(request: NextRequest) {
         console.log('ℹ️ Parent book not registered on Story Protocol, skipping derivative registration')
       }
       
+      // ===== HYBRID REVENUE CONTROLLER REGISTRATION =====
+      
+      // Note: We're not automatically registering on HybridRevenueControllerV2 here
+      // because it requires a user transaction. Instead, we'll prompt the user
+      // to register when they try to publish their first new chapter.
+      console.log('💰 Note: Book will need to be registered on HybridRevenueControllerV2 before publishing paid chapters')
+      derivativeBookMetadata.needsRevenueRegistration = true
+      
       // Store derivative book metadata (with or without IP registration)
       await BookStorageService.storeBookMetadata(
         authorAddress,

@@ -135,7 +135,7 @@ export class UnifiedIpService extends IPService {
 
         // Create IP Asset object
         const ipAsset: IPAsset = {
-          id: registrationResult.ipId || `ip_${request.story.id}_${Date.now()}`,
+          id: registrationResult.ipId || '',
           address: request.nftContract,
           tokenId: registrationResult.tokenId?.toString() || '0',
           metadata: {
@@ -237,7 +237,7 @@ export class UnifiedIpService extends IPService {
 
         // Create IP Asset object for response
         const ipAsset: IPAsset = {
-          id: registrationResult.ipId || `derivative_${request.derivativeStory.id}_${Date.now()}`,
+          id: registrationResult.ipId || '',
           address: request.nftContract,
           tokenId: registrationResult.tokenId?.toString() || '0',
           metadata: {

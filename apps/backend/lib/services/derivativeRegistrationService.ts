@@ -68,7 +68,6 @@ export interface DerivativeRegistrationResult {
   }
   
   error?: string
-  simulationMode?: boolean
   registrationTime?: Date
 }
 
@@ -277,45 +276,8 @@ export class DerivativeRegistrationService {
         }
 
       } catch (blockchainError) {
-        console.warn('⚠️ Blockchain derivative registration failed, creating simulation:', blockchainError)
-        
-        // Use graceful fallback for development/testing
-        const simulatedTxHash = `0x${'derivative'.padEnd(64, '0')}` as Hash
-        
-        // Still update metadata and return success for development
-        await this.updateDerivativeMetadata(
-          registrationData,
-          ipRegistrationResult.ipAssetId,
-          simulatedTxHash,
-          similarityScore
-        )
-
-        const revenueProjection = await this.calculateRevenueProjection(
-          registrationData,
-          licenseTermsId,
-          similarityScore
-        )
-
-        const qualityComparison = await this.performQualityComparison(
-          registrationData.parentChapterId,
-          registrationData.derivativeContent
-        )
-
-        return {
-          success: true,
-          derivativeIpId: ipRegistrationResult.ipAssetId,
-          transactionHash: simulatedTxHash,
-          parentChildRelationship: {
-            parentIpId: registrationData.parentIpId,
-            childIpId: ipRegistrationResult.ipAssetId,
-            licenseTermsId: licenseTermsId
-          },
-          aiSimilarityScore: similarityScore,
-          qualityComparison,
-          revenueProjection,
-          simulationMode: true,
-          registrationTime: startTime
-        }
+        console.error('❌ Blockchain derivative registration failed:', blockchainError)
+        throw blockchainError
       }
 
     } catch (error) {
@@ -540,8 +502,7 @@ export class DerivativeRegistrationService {
   private async inheritParentLicense(parentIpId: string): Promise<string> {
     try {
       // TODO: Implement actual license inheritance query
-      // For now, return a simulated license terms ID
-      return `license_inherited_from_${parentIpId.slice(-8)}`
+      throw new Error('License inheritance not yet implemented')
     } catch (error) {
       console.error('Failed to inherit parent license:', error)
       throw error
@@ -709,19 +670,7 @@ export class DerivativeRegistrationService {
     try {
       // TODO: Implement actual AI-based parent detection
       // This would integrate with existing contentAnalysisService
-      
-      // For now, return simulated results
-      return [
-        {
-          ipId: '0x1234567890123456789012345678901234567890',
-          chapterId: 'chapter_123',
-          title: 'Original Fantasy Adventure',
-          similarityScore: 0.85,
-          licenseTermsId: 'license_123',
-          analysisId: 'analysis_456',
-          influenceFactors: ['similar themes', 'character archetypes', 'world building']
-        }
-      ]
+      throw new Error('AI-based parent detection not yet implemented')
 
     } catch (error) {
       console.error('Failed to find potential parents:', error)
@@ -734,14 +683,7 @@ export class DerivativeRegistrationService {
    */
   private async buildDerivativeNode(ipId: string, depth: number, options: DerivativeQueryOptions): Promise<DerivativeTree> {
     // TODO: Implement actual node building from blockchain data
-    return {
-      ipId,
-      chapterId: `chapter_${ipId.slice(-8)}`,
-      title: `Story ${ipId.slice(-8)}`,
-      creatorAddress: '0x1234567890123456789012345678901234567890' as Address,
-      children: [],
-      depth
-    }
+    throw new Error('Derivative tree building not yet implemented')
   }
 
   private async buildDerivativeChildren(node: DerivativeTree, options: DerivativeQueryOptions, maxDepth: number): Promise<void> {
@@ -764,12 +706,7 @@ export class DerivativeRegistrationService {
 
   private async getParentLicenseInfo(parentIpId: string): Promise<any> {
     // TODO: Implement actual license info retrieval
-    return {
-      licenseTermsId: 'license_123',
-      tier: 'premium',
-      allowsDerivatives: true,
-      commercialUse: true
-    }
+    throw new Error('Parent license info retrieval not yet implemented')
   }
 
   private checkInheritanceEligibility(parentLicense: any, derivativeCreator: Address): boolean {

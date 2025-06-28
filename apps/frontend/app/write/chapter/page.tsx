@@ -10,6 +10,7 @@ import dynamic from 'next/dynamic'
 import QuickNavigation from '@/components/ui/QuickNavigation'
 import IPRegistrationSection from '@/components/creator/IPRegistrationSection'
 import PublishingModal from '@/components/publishing/PublishingModal'
+import { BookRegistrationModal } from '@/components/publishing/BookRegistrationModal'
 import { usePublishBookChapter } from '@/hooks/usePublishBookChapter'
 import type { EnhancedStoryCreationParams } from '@/lib/types/shared'
 
@@ -54,6 +55,8 @@ function ChapterWritingPageContent() {
   
   // Publishing workflow state
   const [showPublishingModal, setShowPublishingModal] = useState(false)
+  const [showRegistrationModal, setShowRegistrationModal] = useState(false)
+  const [bookMetadata, setBookMetadata] = useState<any>(null)
   
   // Rich text editor state
   const [fontSize, setFontSize] = useState(16)
@@ -187,7 +190,7 @@ function ChapterWritingPageContent() {
   }, [isFocusMode])
   
   // Publishing workflow handlers
-  const handleChooseLicense = () => {
+  const handleChooseLicense = async () => {
     if (!chapterData.title.trim()) {
       setError('Chapter title is required')
       return
@@ -199,10 +202,35 @@ function ChapterWritingPageContent() {
     }
     
     setError(null)
+    
+    // Check book registration status first
+    if (bookId) {
+      try {
+        const registrationStatus = await apiClient.checkBookRegistrationStatus(bookId)
+        if (!registrationStatus.data?.isRegistered) {
+          console.log('📚 Book not registered, showing registration modal')
+          
+          // Fetch book metadata for registration
+          const book = await apiClient.getBookById(bookId)
+          setBookMetadata(book)
+          setShowRegistrationModal(true)
+          return
+        }
+      } catch (error) {
+        console.error('Failed to check registration:', error)
+      }
+    }
+    
     // Skip license selection, go directly to publishing modal
     setShowPublishingModal(true)
   }
   
+  
+  const handleRegistrationSuccess = () => {
+    console.log('✅ Book registered successfully, proceeding to publish')
+    setShowRegistrationModal(false)
+    setShowPublishingModal(true)
+  }
   
   const handlePublishingSuccess = (result: any) => {
     console.log('Chapter published successfully:', result)
@@ -551,6 +579,20 @@ function ChapterWritingPageContent() {
           storyTitle={bookId ? `${bookId.split('-').slice(1, -1).join(' ')}` : 'Untitled Story'}
           bookId={bookId || undefined}
           onSuccess={handlePublishingSuccess}
+        />
+      )}
+      
+      {/* Book Registration Modal */}
+      {showRegistrationModal && bookMetadata && (
+        <BookRegistrationModal
+          isOpen={showRegistrationModal}
+          onClose={() => setShowRegistrationModal(false)}
+          bookId={bookId || ''}
+          bookTitle={bookMetadata.title || bookTitle || 'Untitled Book'}
+          totalChapters={bookMetadata.totalChapters || 10}
+          isDerivative={!!bookMetadata.parentBook}
+          parentBookId={bookMetadata.parentBook}
+          onSuccess={handleRegistrationSuccess}
         />
       )}
     </div>

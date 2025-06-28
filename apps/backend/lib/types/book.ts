@@ -66,6 +66,9 @@ export interface BookMetadata {
   createdAt: string        // ISO string
   updatedAt: string        // ISO string
   
+  // Registration Status
+  needsRevenueRegistration?: boolean  // True for derivatives that need HybridRevenueControllerV2 registration
+  
   // Legacy/compatibility fields
   status?: string
 }

@@ -12,10 +12,12 @@ import ShareButton from '@/components/ui/ShareButton';
 import { BookIPInfo } from '@/components/book';
 import { BookRegistrationPrompt } from '@/components/book/BookRegistrationPrompt';
 import { ChapterPricingSetup } from '@/components/book/ChapterPricingSetup';
+import { ChapterIPAttribution, DerivativeBookIPWarning } from '@/components/book/ChapterIPAttribution';
 import { getHardcodedGenres, getGenreBadgeClass, type GenreType } from '@/lib/genre-utils';
 import { TipAuthorButton } from '@/components/ui/TipAuthorButton';
 import { TipModal } from '@/components/ui/TipModal';
 import { useTipAuthor } from '@/hooks/useTipAuthor';
+import { useBookRegistration } from '@/hooks/useBookRegistration';
 
 // Dynamically import WalletConnect to avoid hydration issues
 const WalletConnect = dynamic(() => import('@/components/WalletConnect'), {
@@ -37,6 +39,11 @@ interface BookDetails {
   totalEarnings: number;
   rating?: number;
   createdAt: string;
+  needsRevenueRegistration?: boolean;
+  parentBook?: string;
+  branchPoint?: string;
+  chapterMap?: { [key: string]: string };
+  ipAssetId?: string;
 }
 
 interface Chapter {
@@ -49,6 +56,10 @@ interface Chapter {
   status: 'published' | 'draft' | 'locked';
   createdAt: string;
   unlocked?: boolean; // Whether the current user has unlocked this chapter
+  isInherited?: boolean; // Whether this chapter is from the parent book
+  originalAuthor?: string;
+  originalBookId?: string;
+  ipAssetId?: string;
 }
 
 export default function BookPage() {
@@ -68,6 +79,20 @@ export default function BookPage() {
   // Tipping state
   const [showTipModal, setShowTipModal] = useState(false);
   const { tipAuthor, recordTip, transactionHash, isConfirmed } = useTipAuthor();
+  
+  // Registration debug
+  const { isSupported, checkBookRegistration } = useBookRegistration();
+  
+  // Log registration hook status
+  console.log('📊 BookRegistration hook status:', {
+    isSupported,
+    hasCheckFunction: !!checkBookRegistration,
+    address,
+    bookId,
+    bookState: book,
+    hasBook: !!book,
+    bookAuthorAddress: book?.authorAddress
+  });
 
   useEffect(() => {
     if (bookId) {
@@ -134,6 +159,28 @@ export default function BookPage() {
           try {
             const chapterResponse = await apiClient.getChapter(bookId, chapterNum, address);
             
+            // Check if this chapter is inherited (for derivative books)
+            let isInherited = false;
+            let originalAuthor = chapterResponse.authorAddress;
+            let originalBookId = undefined;
+            
+            if (bookResponse.parentBook && bookResponse.chapterMap) {
+              const chapterKey = `ch${chapterNum}`;
+              const chapterSource = bookResponse.chapterMap[chapterKey];
+              
+              // If chapter source doesn't match current book, it's inherited
+              if (chapterSource && !chapterSource.includes(bookId)) {
+                isInherited = true;
+                // Extract original book ID from chapter source
+                const sourceParts = chapterSource.split('/chapters/');
+                if (sourceParts[0]) {
+                  originalBookId = sourceParts[0];
+                  // Extract author from book ID
+                  originalAuthor = originalBookId.split('/')[0];
+                }
+              }
+            }
+            
             return {
               number: chapterNum,
               title: chapterResponse.title || `Chapter ${chapterNum}`,
@@ -143,7 +190,11 @@ export default function BookPage() {
               wordCount: chapterResponse.wordCount || 0,
               status: 'published' as const,
               createdAt: chapterResponse.createdAt || new Date().toISOString(),
-              unlocked: isUnlocked
+              unlocked: isUnlocked,
+              isInherited,
+              originalAuthor,
+              originalBookId,
+              ipAssetId: chapterResponse.ipAssetId
             };
           } catch (error) {
             console.error(`Failed to load chapter ${chapterNum} content:`, error);
@@ -248,6 +299,15 @@ export default function BookPage() {
       </div>
     );
   }
+
+  // Log book state to debug
+  console.log('🔍 Page render state:', {
+    loading,
+    error,
+    hasBook: !!book,
+    bookTitle: book?.title,
+    bookAuthor: book?.authorAddress
+  });
 
   if (error || !book) {
     return (
@@ -423,6 +483,10 @@ export default function BookPage() {
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
+      
+      {/* Derivative Book IP Warning */}
+      {book.parentBook && <DerivativeBookIPWarning />}
+      
       {/* Book Details Section */}
       <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -464,11 +528,11 @@ export default function BookPage() {
                 <div className="text-sm text-gray-600">Chapters</div>
               </div>
               <div className="bg-gray-50 rounded-lg p-3 text-center">
-                <div className="text-2xl font-bold text-green-600">{book.totalReads || 1247}</div>
+                <div className="text-2xl font-bold text-green-600">{book.totalReads || 0}</div>
                 <div className="text-sm text-gray-600">Total Reads</div>
               </div>
               <div className="bg-gray-50 rounded-lg p-3 text-center">
-                <div className="text-2xl font-bold text-purple-600">{book.totalEarnings || 85.6}</div>
+                <div className="text-2xl font-bold text-purple-600">{book.totalEarnings || 0}</div>
                 <div className="text-sm text-gray-600">TIP Earnings</div>
               </div>
               {!!book.rating && (
@@ -540,16 +604,80 @@ export default function BookPage() {
         </div>
       </div>
 
-      {/* Book Registration Prompt - shows for authors after publishing chapters */}
-      {address && book.authorAddress && address.toLowerCase() === book.authorAddress.toLowerCase() && (
-        <BookRegistrationPrompt 
-          bookId={bookId}
-          chapterNumber={book.totalChapters || 0}
-          onRegistrationComplete={() => {
-            // Refresh book data after registration
-            fetchBookDetails()
-          }}
-        />
+      {/* Book Registration Prompt - shows when book needs blockchain registration */}
+      {(() => {
+        const isAuthor = address && book.authorAddress && address.toLowerCase() === book.authorAddress.toLowerCase()
+        const chapterCount = book.totalChapters || 0
+        // Show for all users when book has chapters but isn't registered
+        const shouldShow = chapterCount > 0
+        
+        console.log('🔍 BookRegistrationPrompt render conditions:', {
+          address,
+          bookAuthorAddress: book.authorAddress,
+          isAuthor,
+          shouldShow,
+          chapterCount,
+          bookParentBook: book.parentBook,
+          isDerivative: !!book.parentBook
+        })
+        
+        return shouldShow ? (
+          <BookRegistrationPrompt 
+            bookId={bookId}
+            chapterNumber={chapterCount}
+            onRegistrationComplete={() => {
+              // Refresh book data after registration
+              fetchBookDetails()
+            }}
+            isDerivative={!!book.parentBook}
+            parentBookId={book.parentBook}
+            showAsButton={!isAuthor} // Show as button for non-authors
+          />
+        ) : null
+      })()}
+      
+      {/* Derivative Book Revenue Registration Prompt */}
+      {book.needsRevenueRegistration && book.parentBook && address && 
+       book.authorAddress && address.toLowerCase() === book.authorAddress.toLowerCase() && (
+        <div className="bg-amber-50 border-2 border-amber-300 rounded-lg p-6 mb-6">
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0">
+              <div className="w-12 h-12 bg-amber-400 rounded-full flex items-center justify-center">
+                <span className="text-2xl">💰</span>
+              </div>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-amber-900 mb-2">
+                Register Your Derivative Book for Revenue Sharing
+              </h3>
+              <p className="text-amber-700 mb-4">
+                Your derivative book needs to be registered on the revenue sharing contract before you can publish paid chapters (Chapter 4+).
+                This is a one-time setup that enables:
+              </p>
+              <ul className="text-sm text-amber-700 space-y-1 mb-4">
+                <li>• Chapter pricing and unlocking (0.5 TIP per chapter)</li>
+                <li>• Automatic revenue distribution (70% author, 20% curator, 10% platform)</li>
+                <li>• Attribution tracking for original authors</li>
+                <li>• Reader payment processing</li>
+              </ul>
+              <p className="text-sm text-amber-600 mb-4">
+                <strong>Note:</strong> This is a blockchain transaction that requires gas fees. 
+                Make sure you have some ETH in your wallet for transaction costs.
+              </p>
+              <BookRegistrationPrompt 
+                bookId={bookId}
+                chapterNumber={book.totalChapters || 0}
+                onRegistrationComplete={() => {
+                  // Refresh book data after registration
+                  fetchBookDetails()
+                }}
+                isDerivative={true}
+                showAsButton={true}
+                parentBookId={book.parentBook}
+              />
+            </div>
+          </div>
+        </div>
       )}
 
 
@@ -699,6 +827,20 @@ export default function BookPage() {
                       <span>•</span>
                       <span>{formatDate(chapter.createdAt)}</span>
                     </div>
+                    
+                    {/* IP Attribution for derivative books */}
+                    {book?.parentBook && (
+                      <div className="mt-3">
+                        <ChapterIPAttribution
+                          chapterNumber={chapter.number}
+                          isInherited={chapter.isInherited}
+                          originalAuthor={chapter.originalAuthor}
+                          originalBookId={chapter.originalBookId}
+                          chapterIPAssetId={chapter.ipAssetId}
+                          isDerivativeBook={true}
+                        />
+                      </div>
+                    )}
                   </div>
                 </Link>
               );
