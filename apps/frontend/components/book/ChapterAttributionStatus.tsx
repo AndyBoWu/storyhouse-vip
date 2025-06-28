@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react'
 import { usePublicClient } from 'wagmi'
 import { parseBookId } from '@/lib/contracts/hybridRevenueController'
 import { HYBRID_REVENUE_CONTROLLER_V2_ADDRESS } from '@/hooks/useBookRegistration'
-import { CheckCircle, XCircle, Loader2 } from 'lucide-react'
+import { CheckCircle, XCircle, Loader2, GitBranch } from 'lucide-react'
+import { apiClient } from '@/lib/api-client'
 
 interface ChapterAttributionStatusProps {
   bookId: string
@@ -37,6 +38,9 @@ export function ChapterAttributionStatus({ bookId, chapterNumber }: ChapterAttri
     unlockPrice: bigint
     isOriginalContent: boolean
     isSet: boolean
+    isInherited?: boolean
+    sourceBookId?: string
+    sourceAuthorName?: string
   } | null>(null)
 
   useEffect(() => {
@@ -44,7 +48,42 @@ export function ChapterAttributionStatus({ bookId, chapterNumber }: ChapterAttri
 
     const checkAttribution = async () => {
       try {
-        const { bytes32Id } = parseBookId(bookId)
+        // First, check if this book is a derivative and if this chapter is inherited
+        let isInheritedChapter = false
+        let parentBookId: string | undefined
+        let parentBookData: any | undefined
+        
+        try {
+          console.log(`🔍 Checking if book ${bookId} is a derivative...`)
+          const bookData = await apiClient.getBookById(bookId)
+          
+          if (bookData && bookData.parentBook && bookData.branchPoint) {
+            // This is a derivative book
+            const branchChapter = parseInt(bookData.branchPoint.replace('ch', ''))
+            
+            // Check if current chapter is inherited (before or at branch point)
+            if (chapterNumber <= branchChapter) {
+              isInheritedChapter = true
+              parentBookId = bookData.parentBook
+              console.log(`🌿 Chapter ${chapterNumber} is inherited from parent book: ${parentBookId}`)
+              
+              // Get parent book data for author info
+              parentBookData = await apiClient.getBookById(parentBookId)
+            }
+          }
+        } catch (error) {
+          console.warn('Failed to check book derivation status:', error)
+        }
+        
+        // Determine which book ID to use for attribution check
+        const bookIdToCheck = isInheritedChapter && parentBookId ? parentBookId : bookId
+        const { bytes32Id } = parseBookId(bookIdToCheck)
+        
+        console.log(`📋 Checking attribution for:`, {
+          bookIdToCheck,
+          chapterNumber,
+          isInheritedChapter
+        })
         
         const result = await publicClient.readContract({
           address: HYBRID_REVENUE_CONTROLLER_V2_ADDRESS as `0x${string}`,
@@ -60,7 +99,10 @@ export function ChapterAttributionStatus({ bookId, chapterNumber }: ChapterAttri
           originalAuthor: originalAuthor as string,
           unlockPrice: unlockPrice as bigint,
           isOriginalContent: isOriginalContent as boolean,
-          isSet
+          isSet,
+          isInherited: isInheritedChapter,
+          sourceBookId: isInheritedChapter ? parentBookId : undefined,
+          sourceAuthorName: isInheritedChapter && parentBookData ? parentBookData.authorName : undefined
         })
         
         console.log(`📊 Chapter ${chapterNumber} attribution:`, {
@@ -69,7 +111,9 @@ export function ChapterAttributionStatus({ bookId, chapterNumber }: ChapterAttri
           unlockPrice: unlockPrice.toString(),
           unlockPriceTIP: Number(unlockPrice) / 1e18,
           isOriginalContent,
-          isSet
+          isSet,
+          isInherited: isInheritedChapter,
+          sourceBook: parentBookId
         })
       } catch (error) {
         console.error('Failed to check attribution:', error)
@@ -109,6 +153,12 @@ export function ChapterAttributionStatus({ bookId, chapterNumber }: ChapterAttri
             <>
               <CheckCircle className="w-4 h-4 text-green-600" />
               <span className="text-green-700 font-medium">Attribution Set</span>
+              {attribution.isInherited && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">
+                  <GitBranch className="w-3 h-3" />
+                  Inherited
+                </span>
+              )}
             </>
           ) : (
             <>
@@ -122,9 +172,16 @@ export function ChapterAttributionStatus({ bookId, chapterNumber }: ChapterAttri
           <>
             <div className="grid grid-cols-2 gap-2 mt-3 text-xs">
               <div>
-                <span className="text-gray-500">Author:</span>
+                <span className="text-gray-500">
+                  {attribution.isInherited ? 'Original Author:' : 'Author:'}
+                </span>
                 <div className="font-mono text-gray-700">
                   {attribution.originalAuthor.slice(0, 6)}...{attribution.originalAuthor.slice(-4)}
+                  {attribution.sourceAuthorName && (
+                    <div className="text-xs text-gray-600 mt-0.5">
+                      ({attribution.sourceAuthorName})
+                    </div>
+                  )}
                 </div>
               </div>
               <div>
@@ -134,6 +191,14 @@ export function ChapterAttributionStatus({ bookId, chapterNumber }: ChapterAttri
                 </div>
               </div>
             </div>
+            {attribution.isInherited && attribution.sourceBookId && (
+              <div className="mt-2 p-2 bg-blue-50 rounded text-xs">
+                <span className="text-blue-700">
+                  This chapter is inherited from the parent book through branching.
+                  Revenue will be shared with the original author.
+                </span>
+              </div>
+            )}
             <div className="mt-2">
               <span className="text-gray-500 text-xs">Type:</span>
               <div className="text-xs text-gray-700">
