@@ -265,7 +265,7 @@ export async function POST(request: NextRequest) {
       // Override with branching-specific data
       derivativeBookMetadata.chapterMap = hybridChapterMap
       derivativeBookMetadata.originalAuthors = originalAuthors
-      derivativeBookMetadata.totalChapters = originalChapters.length // Will be updated as new chapters are added
+      derivativeBookMetadata.totalChapters = 100 // Allow for many future chapters (consistent with registration limit)
       derivativeBookMetadata.derivativeBooks = [] // This derivative has no children yet
 
       // Set cover URL: use new cover if uploaded, otherwise inherit from parent
