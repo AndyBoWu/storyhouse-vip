@@ -1,14 +1,14 @@
 import Link from 'next/link'
 import { 
-  FileText, 
-  Map, 
-  TrendingUp, 
-  Code, 
-  MessageCircle, 
-  Github, 
-  Twitter,
-  ExternalLink 
-} from 'lucide-react'
+  DocumentIcon,
+  RoadmapIcon,
+  ChartIcon,
+  CodeIcon,
+  DiscordIcon,
+  GithubIcon,
+  TwitterIcon,
+  LinkIcon
+} from './icons'
 
 export default function Footer() {
   return (
@@ -63,7 +63,7 @@ export default function Footer() {
                   href="/whitepaper" 
                   className="text-gray-400 hover:text-white transition-colors flex items-center gap-2"
                 >
-                  <FileText className="h-4 w-4" />
+                  <DocumentIcon className="h-4 w-4" />
                   Whitepaper
                 </Link>
               </li>
@@ -72,7 +72,7 @@ export default function Footer() {
                   href="/roadmap" 
                   className="text-gray-400 hover:text-white transition-colors flex items-center gap-2"
                 >
-                  <Map className="h-4 w-4" />
+                  <RoadmapIcon className="h-4 w-4" />
                   Roadmap
                 </Link>
               </li>
@@ -81,7 +81,7 @@ export default function Footer() {
                   href="/tokenomics" 
                   className="text-gray-400 hover:text-white transition-colors flex items-center gap-2"
                 >
-                  <TrendingUp className="h-4 w-4" />
+                  <ChartIcon className="h-4 w-4" />
                   Tokenomics
                 </Link>
               </li>
@@ -90,7 +90,7 @@ export default function Footer() {
                   href="/docs" 
                   className="text-gray-400 hover:text-white transition-colors flex items-center gap-2"
                 >
-                  <Code className="h-4 w-4" />
+                  <CodeIcon className="h-4 w-4" />
                   Technical Docs
                 </Link>
               </li>
@@ -108,9 +108,9 @@ export default function Footer() {
                   rel="noopener noreferrer"
                   className="text-gray-400 hover:text-white transition-colors flex items-center gap-2"
                 >
-                  <MessageCircle className="h-4 w-4" />
+                  <DiscordIcon className="h-4 w-4" />
                   Discord
-                  <ExternalLink className="h-3 w-3" />
+                  <LinkIcon className="h-3 w-3" />
                 </a>
               </li>
               <li>
@@ -120,9 +120,9 @@ export default function Footer() {
                   rel="noopener noreferrer"
                   className="text-gray-400 hover:text-white transition-colors flex items-center gap-2"
                 >
-                  <Twitter className="h-4 w-4" />
+                  <TwitterIcon className="h-4 w-4" />
                   Twitter
-                  <ExternalLink className="h-3 w-3" />
+                  <LinkIcon className="h-3 w-3" />
                 </a>
               </li>
               <li>
@@ -132,9 +132,9 @@ export default function Footer() {
                   rel="noopener noreferrer"
                   className="text-gray-400 hover:text-white transition-colors flex items-center gap-2"
                 >
-                  <Github className="h-4 w-4" />
+                  <GithubIcon className="h-4 w-4" />
                   GitHub
-                  <ExternalLink className="h-3 w-3" />
+                  <LinkIcon className="h-3 w-3" />
                 </a>
               </li>
               <li>
