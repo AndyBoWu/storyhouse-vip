@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "description": "StoryHouse.vip smart contracts",
   "private": true,
+  "main": "index.ts",
+  "types": "index.ts",
   "scripts": {
     "build": "forge build",
     "test": "forge test",

@@ -11,6 +11,10 @@
 - **💰 90% Creator Revenue**: 70% to authors + 20% to curators (only 10% platform fee)
   - Compare: Amazon KDP (35-70%)
 - **🔓 Permissionless Publishing**: No gatekeepers—anyone can publish directly to the blockchain
+- **⚖️ Fair IP Model**: One book = One IP. Original authors own their work forever
+  - First author (chapters 1-3) owns the book IP
+  - Derivative works can't steal original content
+  - Each chapter maintains its original ownership
 - **📈 Multiple Earning Models**: Revolutionary chapter-level IP registration ($50 vs $1000+ for full books)
   - **Pay-per-chapter**: Instant monetization from chapter 1 (0.5 TIP/chapter)
   - **Subscription tiers**: Reading, commercial, or exclusive licenses

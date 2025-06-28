@@ -6,6 +6,10 @@ StoryHouse.vip is a revolutionary Web3 publishing platform built on Story Protoc
 
 - **90% Creator Revenue**: 70% to authors + 20% to curators (only 10% platform fee vs Amazon KDP 35-70%)
 - **Permissionless Publishing**: No gatekeepers—anyone can publish directly to the blockchain
+- **Fair IP Model**: One book = One IP. Original authors own their work forever
+  - First author (chapters 1-3) owns the book IP
+  - Derivative books cannot register book-level IP
+  - Each chapter maintains its original author's IP ownership
 - **Multiple Earning Models**: Revolutionary chapter-level IP registration with pay-per-chapter, audiobook licensing, translation rights, and derivative works
 - **40% Lower Gas Costs**: Single-transaction IP registration saves time and money
 

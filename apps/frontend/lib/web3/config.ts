@@ -27,7 +27,11 @@ export const storyProtocolTestnet: Chain = {
 export const config = createConfig({
   chains: [storyProtocolTestnet],
   transports: {
-    [storyProtocolTestnet.id]: http(),
+    [storyProtocolTestnet.id]: http('https://aeneid.storyrpc.io', {
+      timeout: 30000, // 30 second timeout
+      retryCount: 3,
+      retryDelay: 1000,
+    }),
   },
 })
 

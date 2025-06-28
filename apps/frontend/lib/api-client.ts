@@ -130,8 +130,14 @@ export const apiClient = {
   },
   
   async getChapter(storyId: string, chapterNumber: number, userAddress?: string) {
-    const params = userAddress ? `?userAddress=${userAddress}` : ''
-    return apiRequest(`/api/chapters/${encodeURIComponent(storyId)}/${chapterNumber}${params}`)
+    const headers: Record<string, string> = {}
+    if (userAddress) {
+      headers['x-user-address'] = userAddress
+    }
+    
+    return apiRequest(`/api/books/${encodeURIComponent(storyId)}/chapter/${chapterNumber}`, {
+      headers
+    })
   },
   
   // Upload operations
@@ -196,6 +202,10 @@ export const apiClient = {
 
   async getBookChapter(bookId: string, chapterNumber: number) {
     return apiRequest(`/api/books/${encodeURIComponent(bookId)}/chapter/${chapterNumber}`)
+  },
+
+  async checkBookRegistrationStatus(bookId: string) {
+    return apiRequest(`/api/books/${encodeURIComponent(bookId)}/registration-status`)
   },
 
   // Generic GET method for flexibility

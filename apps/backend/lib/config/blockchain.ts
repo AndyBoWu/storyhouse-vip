@@ -62,14 +62,13 @@ export const CONTRACT_ADDRESSES = {
     // StoryHouse contracts (3-contract minimal architecture)
     tipToken: '0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E',
     chapterAccessController: '0x1BD65ad10B1CA3ED67aE75FCdD3abA256a9918e3',
-    hybridRevenueControllerV2: '0x9c6a3c50e5d77f99d805d8d7c935acb23208fd9f',
+    hybridRevenueControllerV2: '0x99dA048826Bbb8189FBB6C3e62EaA75d0fB36812', // V2 - Current (Story Protocol Testnet)
     spgNftContract: '0x26B6Aa7E7036FC9e8fa2d8184C2CF07aE2e2412d',
     
     // Legacy contracts (removed/unused)
     rewardsManager: '0xf5aE031bA92295C2aE86a99e88f09989339707E5', // REMOVED
     unifiedRewardsController: '0x741105D6ee9b25567205f57C0E4f1d293F0d00C5', // REMOVED  
     hybridRevenueController: '0xd1F7e8c6FD77dADbE946aE3e4141189b39Ef7b08', // LEGACY V1
-    hybridRevenueControllerV2: '0x99dA048826Bbb8189FBB6C3e62EaA75d0fB36812', // V2 - CURRENT
   },
   [storyMainnet.id]: {
     // Mainnet addresses (to be updated when available)

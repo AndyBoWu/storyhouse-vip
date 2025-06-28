@@ -12,6 +12,10 @@ StoryHouse.vip introduces the first **blockchain-based storytelling ecosystem** 
 
 - **Readers access content** with tokens
 - **Creators monetize immediately** from Chapter 1
+- **Fair IP Model**: One book = One IP. Original authors own their work forever
+  - First author (chapters 1-3) owns the book IP
+  - Derivative books register individual chapters only
+  - Inherited chapters maintain original author's IP ownership
 - **IP rights are granular** and tradeable at the chapter level
 - **AI ensures quality** through fraud detection and recommendations
 

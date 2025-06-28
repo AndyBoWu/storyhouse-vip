@@ -46,6 +46,7 @@ interface UnifiedPublishResult extends PublishResult {
   gasOptimized?: boolean
   metadataUri?: string
   warning?: string
+  requiresRegistration?: boolean
 }
 
 export function useUnifiedPublishStory() {
@@ -54,6 +55,14 @@ export function useUnifiedPublishStory() {
   const [isUnifiedSupported, setIsUnifiedSupported] = useState<boolean | null>(null)
   const [tokenId, setTokenId] = useState<bigint | null>(null)
   const [ipAssetId, setIPAssetId] = useState<Address | null>(null)
+  const [showRegistrationFlow, setShowRegistrationFlow] = useState(false)
+  const [pendingPublishData, setPendingPublishData] = useState<{
+    storyData: StoryData,
+    options: PublishOptions,
+    bookId?: string,
+    bookMetadata?: any,
+    isDerivative?: boolean
+  } | null>(null)
 
   const { address } = useAccount()
   const { setChapterAttribution, checkBookRegistration, registerBook } = useBookRegistration()
@@ -151,34 +160,33 @@ export function useUnifiedPublishStory() {
     
     if (bookId) {
       try {
+        // Check if book is registered in HybridRevenueController
+        const registrationStatus = await apiClient.checkBookRegistrationStatus(bookId)
+        if (!registrationStatus.data?.isRegistered) {
+          console.log('⚠️ Book not registered in revenue controller')
+          
+          // Return a special result indicating registration is needed
+          const result: UnifiedPublishResult = {
+            success: false,
+            error: 'Book needs to be registered for revenue sharing first',
+            requiresRegistration: true
+          }
+          setPublishResult(result)
+          setCurrentStep('error')
+          return result
+        }
+        
         const bookData = await apiClient.getBookById(bookId)
         bookMetadata = bookData
         
-        // Check if this is a derivative book without IP registration
-        if (bookMetadata.parentBook && !bookMetadata.ipAssetId) {
-          console.log('🌿 Detected unregistered derivative book')
+        // Check if this is a derivative book
+        if (bookMetadata.parentBook) {
+          console.log('🌿 Detected derivative book')
           
-          // Check if this is the first new chapter (after inherited chapters)
-          const inheritedChapterCount = Object.keys(bookMetadata.chapterMap || {}).length
-          const isFirstNewChapter = storyData.chapterNumber === inheritedChapterCount + 1
-          
-          if (isFirstNewChapter) {
-            console.log('📝 This is the first new chapter in the derivative - checking parent registration')
-            
-            // Get parent book's IP registration info
-            const parentBookData = await apiClient.getBookById(bookMetadata.parentBook)
-            if (parentBookData.ipAssetId && parentBookData.licenseTermsId) {
-              isDerivativeNeedingRegistration = true
-              parentIpAssetId = parentBookData.ipAssetId
-              parentLicenseTermsId = parentBookData.licenseTermsId
-              console.log('✅ Parent book is registered, will register derivative', {
-                parentIpAssetId,
-                parentLicenseTermsId
-              })
-            } else {
-              console.log('⚠️ Parent book not registered on chain, skipping derivative registration')
-            }
-          }
+          // For derivatives, we always register chapters individually
+          // We never register the book itself as an IP asset
+          isDerivativeNeedingRegistration = true
+          console.log('📝 Will register this chapter individually (not book-level IP)')
         }
       } catch (error) {
         console.warn('Could not fetch book metadata:', error)
@@ -228,40 +236,40 @@ export function useUnifiedPublishStory() {
     try {
       let registrationResult
       
-      if (isDerivativeNeedingRegistration && parentIpAssetId && parentLicenseTermsId) {
-        // Register as derivative
-        console.log('🌿 Registering as derivative of parent IP...')
-        registrationResult = await storyProtocolClient.mintAndRegisterDerivativeWithPilTerms({
+      // IMPORTANT: For derivative books, we only register the individual chapter
+      // We do NOT register the entire derivative book as an IP asset
+      if (isDerivativeNeedingRegistration && bookMetadata?.parentBook) {
+        console.log('🌿 Publishing new chapter in derivative book...')
+        console.log('📝 Only registering this specific chapter as IP, not the entire book')
+        
+        // Add metadata indicating this is a derivative chapter
+        const enhancedMetadata = {
+          ...metadataUri && { ipMetadataURI: metadataUri },
+          ...metadataHash && { ipMetadataHash: metadataHash },
+          nftMetadataURI: metadataUri,
+          nftMetadataHash: metadataHash,
+          // Additional metadata to indicate derivative chapter
+          attributes: [
+            { trait_type: "type", value: "derivative_chapter" },
+            { trait_type: "chapter_number", value: storyData.chapterNumber.toString() },
+            { trait_type: "parent_book", value: bookMetadata.parentBook },
+            { trait_type: "derivative_book", value: bookId }
+          ]
+        }
+        
+        // Register only this chapter, not as a derivative of parent IP
+        registrationResult = await storyProtocolClient.mintAndRegisterWithPilTerms({
           spgNftContract: nftContract,
-          parentIpId: parentIpAssetId as Address,
-          parentLicenseTermsId: parentLicenseTermsId,
-          metadata: {
-            ipMetadataURI: metadataUri,
-            ipMetadataHash: metadataHash,
-            nftMetadataURI: metadataUri,
-            nftMetadataHash: metadataHash
-          },
+          metadata: enhancedMetadata,
           licenseTier: options.licenseTier,
           recipient: address!
         })
-        console.log('✅ Derivative registration complete!')
+        console.log('✅ Derivative chapter registration complete!')
         
-        // Update book metadata with IP registration info
-        if (bookId && registrationResult.success && registrationResult.ipId) {
-          try {
-            console.log('📝 Updating book metadata with IP registration...')
-            await apiClient.updateBookIP(bookId, {
-              ipAssetId: registrationResult.ipId as string,
-              transactionHash: registrationResult.txHash as string,
-              licenseTermsId: parentLicenseTermsId
-            })
-            console.log('✅ Book metadata updated with IP registration')
-          } catch (updateError) {
-            console.warn('⚠️ Failed to update book metadata (non-critical):', updateError)
-          }
-        }
+        // Note: We do NOT update the book's IP asset ID because derivative books
+        // should not have book-level IP assets, only chapter-level
       } else {
-        // Regular registration
+        // Regular registration for original books or chapters
         registrationResult = await storyProtocolClient.mintAndRegisterWithPilTerms({
           spgNftContract: nftContract,
           metadata: {
@@ -338,9 +346,32 @@ export function useUnifiedPublishStory() {
           // First ensure the book is registered
           const isBookRegistered = await checkBookRegistration(finalBookId)
           if (!isBookRegistered) {
-            console.log('📚 Book not registered, registering first...')
+            console.log('📚 Book not registered, showing registration flow...')
             
-            // Show alert to user about book registration
+            // For derivatives, show the special registration flow
+            if (isDerivativeNeedingRegistration || bookMetadata?.parentBook) {
+              // Store the publishing data for later
+              setPendingPublishData({
+                storyData,
+                options,
+                bookId: finalBookId,
+                bookMetadata,
+                isDerivative: true
+              })
+              
+              // Show the registration flow modal
+              setShowRegistrationFlow(true)
+              setCurrentStep('idle') // Reset step while waiting
+              
+              // Return a pending result - actual publishing will happen after registration
+              return {
+                success: false,
+                error: 'Registration required',
+                requiresRegistration: true
+              }
+            }
+            
+            // For regular books, use simple alert
             alert('📚 Book Registration Required\n\nYour book needs to be registered for revenue sharing. You will see a MetaMask transaction request.')
             
             const registerResult = await registerBook({
@@ -551,11 +582,73 @@ export function useUnifiedPublishStory() {
   }
 
 
+  const handleRegistrationProceed = async () => {
+    if (!pendingPublishData) return
+    
+    const { storyData, options, bookId, bookMetadata, isDerivative } = pendingPublishData
+    
+    setShowRegistrationFlow(false)
+    setCurrentStep('setting-attribution')
+    
+    try {
+      console.log('📚 Starting book registration process...')
+      
+      // Register the book
+      const registerResult = await registerBook({
+        bookId: bookId!,
+        totalChapters: 100,
+        isDerivative: isDerivative || false,
+        parentBookId: isDerivative && bookMetadata?.parentBook ? bookMetadata.parentBook : undefined,
+        ipfsMetadataHash: ''
+      })
+      
+      if (!registerResult.success) {
+        throw new Error(`Book registration failed: ${registerResult.error || 'Unknown error'}`)
+      }
+      
+      // Wait a bit for registration to confirm
+      console.log('⏳ Waiting for book registration to confirm...')
+      await new Promise(resolve => setTimeout(resolve, 3000))
+      
+      // Clear pending data and registration flow state
+      setPendingPublishData(null)
+      setShowRegistrationFlow(false)
+      
+      // Now resume the original publishing flow
+      console.log('📝 Resuming chapter publishing after book registration...')
+      
+      // Call the publish function again - this time it will skip the registration check
+      // since the book is now registered
+      const publishResult = await publishStoryUnified(storyData, options, bookId)
+      
+      // The result will be handled by the original publishing flow
+      return publishResult
+      
+    } catch (error) {
+      console.error('❌ Registration and publishing failed:', error)
+      setCurrentStep('error')
+      setPublishResult({
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      })
+      setPendingPublishData(null)
+      setShowRegistrationFlow(false)
+    }
+  }
+
+  const handleRegistrationCancel = () => {
+    setShowRegistrationFlow(false)
+    setPendingPublishData(null)
+    setCurrentStep('idle')
+  }
+
   const reset = () => {
     setCurrentStep('idle')
     setPublishResult(null)
     setTokenId(null)
     setIPAssetId(null)
+    setShowRegistrationFlow(false)
+    setPendingPublishData(null)
   }
 
   const isPublishing = currentStep !== 'idle' && currentStep !== 'success' && currentStep !== 'error'
@@ -569,6 +662,10 @@ export function useUnifiedPublishStory() {
     tokenId,
     ipAssetId,
     isUnifiedSupported,
-    checkUnifiedSupport
+    checkUnifiedSupport,
+    showRegistrationFlow,
+    pendingPublishData,
+    handleRegistrationProceed,
+    handleRegistrationCancel
   }
 }
