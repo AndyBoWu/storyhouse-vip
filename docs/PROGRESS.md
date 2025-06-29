@@ -14,7 +14,7 @@
 - ✅ **RewardsManager**: `0xf5aE031bA92295C2aE86a99e88f09989339707E5` (Reused)
 - ✅ **UnifiedRewardsController**: `0x741105d6ee9b25567205f57c0e4f1d293f0d00c5` (NEW)
 - ✅ **ChapterAccessController**: `0x1bd65ad10b1ca3ed67ae75fcdd3aba256a9918e3` (NEW)
-- ✅ **HybridRevenueController**: `0xd1f7e8c6fd77dadbe946ae3e4141189b39ef7b08` (NEW)
+- ✅ **HybridRevenueController**: `0x99dA048826Bbb8189FBB6C3e62EaA75d0fB36812` (V2)
 
 ### 🔄 **Full-Stack Migration (Phase 6.0 - COMPLETED)**
 - ✅ **Frontend Migration**: Updated contracts, ABIs, and hooks for 5-contract architecture
@@ -126,6 +126,39 @@
 - **Automated Test Suites** with 220+ comprehensive test cases
 - **CI/CD Ready** test infrastructure for continuous validation
 - **Documentation Standards** with clear test categorization and coverage metrics
+
+---
+
+## 🎉 **Phase 3: Frontend Updates (COMPLETED - December 29, 2024)**
+
+### **Implementation Summary**
+All Phase 3 Frontend Update tasks have been successfully completed as part of the "Fair IP Model" implementation where derivative books no longer get book-level IP assets.
+
+#### **Completed Tasks**
+| ID | Task | Status | Notes |
+|----|------|--------|-------|
+| 3.1 | Update branch/remix UI - show "adding chapter to [book]" | ✅ Complete | UI shows "Add Chapters to Existing Stories" with clear messaging |
+| 3.2 | Fix book display to show all chapters with attribution | ✅ Complete | Chapter attribution with visual indicators for contributed/inherited chapters |
+| 3.3 | Remove derivative book registration from publishing flow | ✅ Complete | BookRegistrationFlow only shown for original books |
+
+#### **Key UI/UX Improvements**
+1. **Branch/Remix UI** (`/write/branch/page.tsx`):
+   - Clear title: "📚 Add Chapters to Existing Stories"
+   - Info box explains: "Your chapters become part of the original book, maintaining proper attribution"
+   - Shows "Contributing to: [Book Title]" when selecting where to add chapters
+   - Success message: "Ready to Add Your Chapter!"
+
+2. **Chapter Attribution** (Book display pages):
+   - Visual indicators for chapter authorship:
+     - Blue box: Inherited chapters from parent book
+     - Purple box: Contributed chapters by different authors
+     - IP Protected badge for registered chapters
+   - Multi-author warning banner for books with chapters from multiple authors
+
+3. **Publishing Flow** (`PublishingModal.tsx`):
+   - BookRegistrationFlow component only shown when `!isDerivative`
+   - No derivative book registration prompts
+   - Streamlined chapter-only publishing for remixes
 
 ---
 

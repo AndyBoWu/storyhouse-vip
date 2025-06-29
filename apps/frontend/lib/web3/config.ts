@@ -35,7 +35,7 @@ export const config = createConfig({
   },
 })
 
-// StoryHouse Contract Configuration - 5-Contract Optimized Architecture
+// StoryHouse Contract Configuration - 2-Contract Minimal Architecture
 export const STORYHOUSE_CONTRACT_CONFIG = {
   // TIP Token (ERC-20) - Core platform token
   TIP_TOKEN: {
@@ -89,14 +89,9 @@ export const STORYHOUSE_CONTRACT_CONFIG = {
     ] as const,
   },
   
-  // Chapter Access Controller - Chapter monetization (0.5 TIP per chapter 4+)
-  CHAPTER_ACCESS_CONTROLLER: {
-    address: '0x1bd65ad10b1ca3ed67ae75fcdd3aba256a9918e3' as const,
-  },
-  
-  // Hybrid Revenue Controller - Multi-author revenue sharing
-  HYBRID_REVENUE_CONTROLLER: {
-    address: '0xd1f7e8c6fd77dadbe946ae3e4141189b39ef7b08' as const,
+  // Hybrid Revenue Controller V2 - Handles everything (book registration, chapter unlocking, revenue sharing)
+  HYBRID_REVENUE_CONTROLLER_V2: {
+    address: '0x995c07920fb8eC57cBA8b0E2be8903cB4434f9D6' as const,
   },
 } as const
 
@@ -118,7 +113,7 @@ export const NETWORK_INFO = {
   faucetUrl: 'https://aeneid.faucet.story.foundation/',
   deployer: '0xD9b6d1bd7D8A90915B905EB801c55bA5De1d4476',
   deploymentDate: '2025-06-16',
-  architecture: '3-contract-optimized',
+  architecture: '2-contract-minimal',
 } as const
 
 export default config

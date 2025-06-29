@@ -9,18 +9,14 @@ interface BookRegistrationPromptProps {
   bookId: string
   chapterNumber: number
   onRegistrationComplete?: () => void
-  isDerivative?: boolean
   showAsButton?: boolean
-  parentBookId?: string
 }
 
 export function BookRegistrationPrompt({ 
   bookId, 
   chapterNumber,
   onRegistrationComplete,
-  isDerivative = false,
-  showAsButton = false,
-  parentBookId
+  showAsButton = false
 }: BookRegistrationPromptProps) {
   const { address } = useAccount()
   const { 
@@ -77,20 +73,9 @@ export function BookRegistrationPrompt({
     
     setIsRegistering(true)
     try {
-      // For derivatives, use the actual parent book ID
-      const parentBookIdToUse = isDerivative && parentBookId 
-        ? parentBookId 
-        : '0x0000000000000000000000000000000000000000000000000000000000000000'
-      
-      if (isDerivative) {
-        console.log('Registering derivative book with parent:', parentBookIdToUse)
-      }
-      
       const result = await registerBook({
         bookId,
         totalChapters: 100, // Current contract maximum (will be increased when contract is redeployed)
-        isDerivative: isDerivative,
-        parentBookId: parentBookIdToUse,
         ipfsMetadataHash: ''
       })
       

@@ -10,8 +10,6 @@ interface BookRegistrationModalProps {
   bookId: string
   bookTitle: string
   totalChapters: number
-  isDerivative?: boolean
-  parentBookId?: string
   onSuccess: () => void
 }
 
@@ -21,8 +19,6 @@ export function BookRegistrationModal({
   bookId,
   bookTitle,
   totalChapters,
-  isDerivative,
-  parentBookId,
   onSuccess
 }: BookRegistrationModalProps) {
   const { registerBook, isLoading } = useBookRegistration()
@@ -37,9 +33,7 @@ export function BookRegistrationModal({
       
       await registerBook({
         bookId,
-        totalChapters,
-        isDerivative,
-        parentBookId
+        totalChapters
       })
       
       console.log('✅ Book registered successfully!')

@@ -2,7 +2,7 @@ import { createPublicClient, http, keccak256, toBytes } from 'viem';
 
 const BOOK_ID = '0x3873c0d1bcfa245773b13b694a49dac5b3f03ca2/the-detectives-portal';
 const CHAPTER_NUMBER = 7;
-const HYBRID_REVENUE_CONTROLLER_V2_ADDRESS = '0x99dA048826Bbb8189FBB6C3e62EaA75d0fB36812';
+const HYBRID_REVENUE_CONTROLLER_V2_ADDRESS = '0x995c07920fb8eC57cBA8b0E2be8903cB4434f9D6';
 
 const client = createPublicClient({
   transport: http('https://aeneid.storyrpc.io')

@@ -31,7 +31,7 @@ contract HybridRevenueControllerV2Test is Test {
         // Register a book
         bookId = keccak256("test-book");
         vm.prank(author);
-        controller.registerBook(bookId, false, bytes32(0), 5, "ipfs://testbook");
+        controller.registerBook(bookId, 5, "ipfs://testbook");
         
         // Fund reader with TIP tokens
         tipToken.mint(reader, 1000 * 10**18);
@@ -40,7 +40,7 @@ contract HybridRevenueControllerV2Test is Test {
     }
     
     function testBookRegistration() public {
-        (address bookCurator,,,,,) = controller.getBookInfo(bookId);
+        (address bookCurator,,,) = controller.getBookInfo(bookId);
         assertEq(bookCurator, author); // author becomes curator in this version
     }
     
@@ -49,9 +49,9 @@ contract HybridRevenueControllerV2Test is Test {
         bytes32 newBookId = keccak256("new-book");
         
         vm.prank(newAuthor);
-        controller.registerBook(newBookId, false, bytes32(0), 3, "ipfs://newbook");
+        controller.registerBook(newBookId, 3, "ipfs://newbook");
         
-        (address bookCurator,,,,,) = controller.getBookInfo(newBookId);
+        (address bookCurator,,,) = controller.getBookInfo(newBookId);
         assertEq(bookCurator, newAuthor); // author becomes curator
     }
     
@@ -75,7 +75,7 @@ contract HybridRevenueControllerV2Test is Test {
         bytes32 invalidBookId = keccak256("invalid");
         vm.prank(author);
         vm.expectRevert("HybridRevenueV2: invalid chapter count");
-        controller.registerBook(invalidBookId, false, bytes32(0), 0, "ipfs://invalid");
+        controller.registerBook(invalidBookId, 0, "ipfs://invalid");
     }
     
     function testOnlyCuratorCanSetAttribution() public {

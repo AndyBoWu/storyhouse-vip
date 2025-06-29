@@ -15,7 +15,8 @@ import "./TIPToken.sol";
  * - registerBook() is now permissionless - no STORY_MANAGER_ROLE required
  * - msg.sender automatically becomes the curator when registering
  * - Maintains same revenue distribution model (70/20/10)
- * - Backward compatible with existing interfaces
+ * - REMOVED derivative book registration - only original books allowed
+ * - updateTotalChapters() function for admin to adjust chapter limits
  *
  * Core Features:
  * - Multi-author revenue splits for chapter unlocks
@@ -51,8 +52,7 @@ contract HybridRevenueControllerV2 is AccessControl, Pausable, ReentrancyGuard {
     event BookRegistered(
         bytes32 indexed bookId,
         address indexed curator,
-        uint256 totalChapters,
-        string bookType // "original" or "derivative"
+        uint256 totalChapters
     );
     
     event RevenueSharingUpdated(
@@ -60,6 +60,13 @@ contract HybridRevenueControllerV2 is AccessControl, Pausable, ReentrancyGuard {
         address indexed authorAddress,
         uint256 newRevenueShare,
         string[] chapters
+    );
+    
+    event TotalChaptersUpdated(
+        bytes32 indexed bookId,
+        uint256 oldTotal,
+        uint256 newTotal,
+        address updatedBy
     );
 
     // State variables
@@ -73,8 +80,6 @@ contract HybridRevenueControllerV2 is AccessControl, Pausable, ReentrancyGuard {
     // Book metadata and revenue structure
     struct BookMetadata {
         address curator; // Who assembled this book
-        bool isDerivative; // true for branched books
-        bytes32 parentBookId; // for derivative books
         uint256 totalChapters;
         bool isActive;
         string ipfsMetadataHash; // Link to R2 metadata
@@ -143,15 +148,11 @@ contract HybridRevenueControllerV2 is AccessControl, Pausable, ReentrancyGuard {
      * @dev Register a book for revenue sharing - PERMISSIONLESS
      * @notice Anyone can register their book. The msg.sender becomes the curator.
      * @param bookId Unique identifier for the book
-     * @param isDerivative Whether this book contains chapters from other books
-     * @param parentBookId If derivative, the parent book ID
      * @param totalChapters Number of chapters in book
      * @param ipfsMetadataHash IPFS hash pointing to R2 metadata
      */
     function registerBook(
         bytes32 bookId,
-        bool isDerivative,
-        bytes32 parentBookId,
         uint256 totalChapters,
         string memory ipfsMetadataHash
     ) external {
@@ -161,8 +162,6 @@ contract HybridRevenueControllerV2 is AccessControl, Pausable, ReentrancyGuard {
         // msg.sender becomes the curator automatically
         books[bookId] = BookMetadata({
             curator: msg.sender,
-            isDerivative: isDerivative,
-            parentBookId: parentBookId,
             totalChapters: totalChapters,
             isActive: true,
             ipfsMetadataHash: ipfsMetadataHash
@@ -175,8 +174,7 @@ contract HybridRevenueControllerV2 is AccessControl, Pausable, ReentrancyGuard {
         emit BookRegistered(
             bookId,
             msg.sender,
-            totalChapters,
-            isDerivative ? "derivative" : "original"
+            totalChapters
         );
     }
 
@@ -388,12 +386,31 @@ contract HybridRevenueControllerV2 is AccessControl, Pausable, ReentrancyGuard {
     function unpause() external onlyRole(ADMIN_ROLE) {
         _unpause();
     }
+    
+    /**
+     * @dev Update the total chapters for a book (admin only)
+     * @notice This allows fixing books with incorrect chapter limits
+     * @param bookId The book to update
+     * @param newTotalChapters The new total chapter limit
+     */
+    function updateTotalChapters(
+        bytes32 bookId,
+        uint256 newTotalChapters
+    ) external onlyRole(ADMIN_ROLE) {
+        require(books[bookId].isActive, "HybridRevenueV2: book not found");
+        require(newTotalChapters > 0 && newTotalChapters <= 1000000, "HybridRevenueV2: invalid chapter count");
+        
+        uint256 oldTotal = books[bookId].totalChapters;
+        require(newTotalChapters > oldTotal, "HybridRevenueV2: cannot reduce total chapters");
+        
+        books[bookId].totalChapters = newTotalChapters;
+        
+        emit TotalChaptersUpdated(bookId, oldTotal, newTotalChapters, msg.sender);
+    }
 
     // View functions
     function getBookInfo(bytes32 bookId) external view returns (
         address curator,
-        bool isDerivative,
-        bytes32 parentBookId,
         uint256 totalChapters,
         bool isActive,
         uint256 totalRevenue
@@ -401,8 +418,6 @@ contract HybridRevenueControllerV2 is AccessControl, Pausable, ReentrancyGuard {
         BookMetadata memory book = books[bookId];
         return (
             book.curator,
-            book.isDerivative,
-            book.parentBookId,
             book.totalChapters,
             book.isActive,
             bookTotalRevenue[bookId]

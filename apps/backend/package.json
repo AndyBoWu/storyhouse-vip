@@ -22,7 +22,20 @@
     "list-r2:count": "cp .env.testnet .env.local && tsx scripts/list-r2-contents.ts --count",
     "clean-r2": "cp .env.testnet .env.local && tsx scripts/clean-r2-bucket.ts",
     "clean-r2:force": "cp .env.testnet .env.local && tsx scripts/clean-r2-bucket-force.ts",
-    "fix-cover-urls": "cp .env.testnet .env.local && tsx scripts/fix-corrupted-cover-urls.ts"
+    "fix-cover-urls": "cp .env.testnet .env.local && tsx scripts/fix-corrupted-cover-urls.ts",
+    "script:r2-cleanup": "tsx scripts/r2-cleanup.ts",
+    "migrate:stories": "tsx scripts/migrate-stories-to-books.ts",
+    "migrate:stories:cleanup": "tsx scripts/migrate-stories-to-books.ts --cleanup",
+    "migrate:stories:cleanup:force": "tsx scripts/migrate-stories-to-books.ts --cleanup --force",
+    "backup:create": "tsx scripts/manage-r2-backups.ts create",
+    "backup:restore": "tsx scripts/manage-r2-backups.ts restore",
+    "backup:list": "tsx scripts/manage-r2-backups.ts list",
+    "backup:cleanup": "tsx scripts/manage-r2-backups.ts cleanup",
+    "clean:test": "tsx scripts/clean-test-data.ts --dry-run --interactive",
+    "clean:test:force": "tsx scripts/clean-test-data.ts --live --force",
+    "clean:test:live": "tsx scripts/clean-test-data.ts --live --interactive",
+    "deep-clean": "tsx scripts/deep-clean-r2.ts --dry-run",
+    "deep-clean:live": "tsx scripts/deep-clean-r2.ts --live"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.825.0",

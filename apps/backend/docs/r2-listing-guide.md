@@ -113,14 +113,12 @@ storyhouse-content/
 │   │           └── ch2/
 │   │               ├── content.json
 │   │               └── metadata.json
-├── stories/                        # Legacy story format
-│   └── {storyId}/                 # Story ID
-│       ├── metadata.json
-│       └── chapters/
-│           ├── 1.json
-│           └── 2.json
-└── images/                         # Uploaded images
-    └── {hash}.{ext}
+└── stories/                        # Legacy story format (to be migrated)
+    └── {storyId}/                 # Story ID
+        ├── metadata.json
+        └── chapters/
+            ├── 1.json
+            └── 2.json
 ```
 
 ## Other R2 Management Scripts

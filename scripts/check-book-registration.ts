@@ -2,14 +2,14 @@ import { ethers } from 'ethers'
 import { keccak256, toBytes } from 'viem'
 
 const STORY_RPC_URL = 'https://aeneid.storyrpc.io'
-const HYBRID_REVENUE_CONTROLLER_V2_ADDRESS = '0x99dA048826Bbb8189FBB6C3e62EaA75d0fB36812'
+const HYBRID_REVENUE_CONTROLLER_V2_ADDRESS = '0x995c07920fb8eC57cBA8b0E2be8903cB4434f9D6'
 
 // The book ID from the URL
 const BOOK_ID = '0x3873c0d1bcfa245773b13b694a49dac5b3f03ca2/project-phoenix'
 
 // ABI for checking book registration
 const HYBRID_V2_ABI = [
-  'function books(bytes32) view returns (address curator, bool isDerivative, bytes32 parentBookId, uint256 totalChapters, bool isActive, string ipfsMetadataHash)'
+  'function books(bytes32) view returns (address curator, uint256 totalChapters, bool isActive, string ipfsMetadataHash)'
 ]
 
 // Generate bytes32 ID the same way as frontend
@@ -44,8 +44,6 @@ async function checkBookRegistration() {
     
     console.log('📚 Book Registration Data:')
     console.log('Curator:', bookData.curator)
-    console.log('Is Derivative:', bookData.isDerivative)
-    console.log('Parent Book ID:', bookData.parentBookId)
     console.log('Total Chapters:', bookData.totalChapters.toString())
     console.log('Is Active:', bookData.isActive)
     console.log('IPFS Metadata Hash:', bookData.ipfsMetadataHash)
@@ -65,11 +63,11 @@ async function checkBookRegistration() {
       console.log('Or use this direct registration call:')
       console.log(`registerBook(`)
       console.log(`  bookId: "${bytes32Id}",`)
-      console.log(`  isDerivative: false,`)
-      console.log(`  parentBookId: "0x0000000000000000000000000000000000000000000000000000000000000000",`)
-      console.log(`  totalChapters: 100, // Current contract maximum (will be increased when contract is redeployed)`)
+      console.log(`  totalChapters: 100, // Adjust as needed for book length`)
       console.log(`  ipfsMetadataHash: ""`)
       console.log(`)`)
+      console.log('')
+      console.log('Note: Derivative books are no longer supported.')
     }
 
   } catch (error) {

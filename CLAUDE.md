@@ -171,43 +171,70 @@ Removed unused and test API endpoints to improve security and reduce maintenance
 - Removed 1,438 lines of unused code
 - Improved maintainability
 
-### 🚀 HybridRevenueControllerV2 - Permissionless Revenue Sharing (December 2024)
+### 🚀 HybridRevenueControllerV2 - Permissionless Revenue Sharing (2025-06-29)
 
-**Status: Ready for Deployment**
+**Status: DEPLOYED to Story Protocol Testnet**
+
+#### Contract Address
+- **HybridRevenueControllerV2**: `0x995c07920fb8eC57cBA8b0E2be8903cB4434f9D6`
+- **Block**: 6105838
+- **Network**: Story Protocol Aeneid Testnet
 
 #### Overview
 Replaced centralized HybridRevenueController (V1) with fully permissionless V2. Authors can now register their own books without admin approval, making the platform truly decentralized.
 
-#### Key Changes
+#### Key Changes (2025-06-29 Update)
 - **Removed HybridRevenueController V1** - No more STORY_MANAGER_ROLE requirement
 - **Permissionless Registration** - Authors register books directly through MetaMask
+- **REMOVED Derivative Book Registration** - Only original books can be registered
 - **Automatic Curator Assignment** - Registering address becomes the curator
 - **Same Revenue Model** - 70% author, 20% curator, 10% platform
 - **Frontend-Only Registration** - Backend just directs to frontend for registration
+- **NEW: updateTotalChapters()** - Admin function to fix chapter limits for existing books
+
+#### Contract Interface Changes
+```solidity
+// OLD registerBook function (removed parameters)
+function registerBook(
+    bytes32 bookId,
+    // bool isDerivative,    // REMOVED
+    // bytes32 parentBookId, // REMOVED
+    uint256 totalChapters,
+    string ipfsMetadataHash
+)
+
+// NEW updateTotalChapters function
+function updateTotalChapters(
+    bytes32 bookId,
+    uint256 newTotalChapters
+)
+```
 
 #### Deployment
 ```bash
 cd packages/contracts
-forge script script/Deploy.s.sol:Deploy --broadcast --rpc-url $STORY_RPC_URL
+./script/deploy.sh v2
 ```
 
 #### Updated Files
-- `packages/contracts/src/HybridRevenueControllerV2.sol` - New permissionless contract
-- `packages/contracts/script/Deploy.s.sol` - Updated to deploy only V2
-- `apps/frontend/hooks/useBookRegistration.ts` - Frontend registration hook
-- `apps/frontend/components/BookRegistrationModal.tsx` - Registration UI
-- `apps/backend/app/api/books/register-hybrid/route.ts` - Redirects to frontend
+- `packages/contracts/src/HybridRevenueControllerV2.sol` - Updated to remove derivative parameters
+- `packages/contracts/script/DeployMinimal.s.sol` - Deployment script
+- `apps/frontend/hooks/useBookRegistration.ts` - Updated to remove derivative parameters
+- `apps/frontend/components/BookRegistrationModal.tsx` - Simplified registration UI
+- `apps/backend/app/api/books/register-hybrid/route.ts` - Updated ABI
+- All frontend components - Removed isDerivative and parentBookId props
 
-#### Removed Files
-- HybridRevenueController V1 contract and deployment
-- Backend registration scripts (now frontend-only)
-- V1 ABI files and references
+#### Removed Features
+- Derivative book registration (enforced by contract)
+- isDerivative and parentBookId parameters throughout codebase
+- Related TypeScript interfaces and props
 
 #### Results
 - Fully decentralized book registration
-- No admin keys or special roles needed
+- Enforces "One Book = One IP" model
+- No more derivative book confusion
 - Authors have complete control over their books
-- Simpler architecture with only one revenue controller
+- Admin can fix chapter limits with updateTotalChapters()
 
 ## Critical Architecture Decisions
 

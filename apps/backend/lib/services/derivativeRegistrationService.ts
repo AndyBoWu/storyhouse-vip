@@ -1,7 +1,16 @@
 /**
- * @fileoverview Derivative Registration Service for Story Protocol SDK Integration
- * Implements blockchain-tracked derivative relationships using Story Protocol SDK v1.3.2
- * Bridges the gap between existing AI analysis and actual derivative registration
+ * @fileoverview DEPRECATED: Derivative Registration Service
+ * 
+ * ⚠️ WARNING: This service is deprecated in favor of the "one book = one IP" model.
+ * 
+ * In the new model:
+ * - Derivative books are NO LONGER created
+ * - All chapters belong to the original book
+ * - Individual chapters are registered as IP assets when needed
+ * - Chapter attribution is tracked within the original book structure
+ * 
+ * This file is kept for reference but should not be used in production.
+ * Use individual chapter IP registration instead.
  */
 
 import { StoryConfig, StoryClient } from '@story-protocol/core-sdk'
@@ -152,12 +161,16 @@ export class DerivativeRegistrationService {
   }
 
   /**
+   * @deprecated This method is deprecated. Use individual chapter IP registration instead.
+   * 
    * Register a derivative work on Story Protocol blockchain
    * Core implementation using registerDerivative() SDK method
    */
   async registerDerivative(
     registrationData: DerivativeRegistrationData
   ): Promise<DerivativeRegistrationResult> {
+    console.warn('⚠️ DEPRECATED: registerDerivative() is deprecated. Use individual chapter IP registration instead.')
+    throw new Error('Derivative book registration is deprecated. Use the new "one book = one IP" model with individual chapter IP registration.')
     try {
       if (!this.client) {
         throw new Error('Service not initialized. Call initialize() first.')
@@ -291,6 +304,8 @@ export class DerivativeRegistrationService {
   }
 
   /**
+   * @deprecated This method is deprecated. Use individual chapter IP registration instead.
+   * 
    * Register derivative with automatic parent detection using AI
    */
   async registerDerivativeWithAutoDetection(
@@ -302,6 +317,8 @@ export class DerivativeRegistrationService {
       requireManualConfirmation?: boolean
     }
   ): Promise<DerivativeRegistrationResult> {
+    console.warn('⚠️ DEPRECATED: registerDerivativeWithAutoDetection() is deprecated. Use individual chapter IP registration instead.')
+    throw new Error('Derivative book registration is deprecated. Use the new "one book = one IP" model with individual chapter IP registration.')
     try {
       console.log('🔍 Auto-detecting potential parent IPs for derivative...')
       

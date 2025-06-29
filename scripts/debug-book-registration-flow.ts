@@ -2,7 +2,7 @@ import { createPublicClient, http } from 'viem';
 import { parseBookId } from '../apps/frontend/lib/contracts/hybridRevenueController';
 
 const BOOK_ID = '0x3873c0d1bcfa245773b13b694a49dac5b3f03ca2/the-detectives-portal';
-const HYBRID_REVENUE_CONTROLLER_V2_ADDRESS = '0x99dA048826Bbb8189FBB6C3e62EaA75d0fB36812';
+const HYBRID_REVENUE_CONTROLLER_V2_ADDRESS = '0x995c07920fb8eC57cBA8b0E2be8903cB4434f9D6';
 
 const client = createPublicClient({
   transport: http('https://aeneid.storyrpc.io')
@@ -15,8 +15,6 @@ const HYBRID_V2_ABI = [
     inputs: [{ name: '', type: 'bytes32' }],
     outputs: [
       { name: 'curator', type: 'address' },
-      { name: 'isDerivative', type: 'bool' },
-      { name: 'parentBookId', type: 'bytes32' },
       { name: 'totalChapters', type: 'uint256' },
       { name: 'isActive', type: 'bool' },
       { name: 'ipfsMetadataHash', type: 'string' }
@@ -43,7 +41,7 @@ async function checkBookRegistration(bookId: string): Promise<boolean> {
     
     // Check if curator address is not zero address (indicates book exists)
     const curator = bookData[0] as string;
-    const isActive = bookData[4] as boolean;
+    const isActive = bookData[2] as boolean;
     
     console.log('👤 Curator:', curator);
     console.log('✅ Is Active:', isActive);

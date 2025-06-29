@@ -10,6 +10,7 @@ import dynamic from 'next/dynamic'
 import { apiClient } from '@/lib/api-client'
 import { useStoryProtocol } from '@/hooks/useStoryProtocol'
 import { useBookRegistration } from '@/hooks/useBookRegistration'
+import { useNotifications } from '@/components/providers/NotificationProvider'
 
 // Dynamically import WalletConnect to avoid hydration issues
 const WalletConnect = dynamic(() => import('@/components/WalletConnect'), {
@@ -44,6 +45,7 @@ function NewStoryPageContent() {
   const router = useRouter()
   const { registerChapterAsIP, isReady, isWalletConnected } = useStoryProtocol()
   const { registerBook: registerBookForRevenue, isSupported: isRevenueSupported } = useBookRegistration()
+  const { showToast } = useNotifications()
   const [plotDescription, setPlotDescription] = useState('')
   const [storyTitle, setStoryTitle] = useState('')
 
@@ -157,7 +159,7 @@ function NewStoryPageContent() {
   }
 
   const handleRegisterBook = async () => {
-    if (!plotDescription.trim() || !isWalletConnected || selectedGenres.length === 0 || !storyTitle.trim()) {
+    if (!plotDescription.trim() || plotDescription.trim().length < 50 || !isWalletConnected || selectedGenres.length === 0 || !storyTitle.trim()) {
       if (!isWalletConnected) {
         setError('Please connect your wallet to register a book')
       } else if (!storyTitle.trim()) {
@@ -166,6 +168,8 @@ function NewStoryPageContent() {
         setError('Please select at least one genre')
       } else if (!plotDescription.trim()) {
         setError('Please describe your story plot')
+      } else if (plotDescription.trim().length < 50) {
+        setError(`Your story plot needs at least ${50 - plotDescription.trim().length} more characters. Please provide more details about your story.`)
       }
       return
     }
@@ -260,12 +264,27 @@ function NewStoryPageContent() {
           const revenueResult = await registerBookForRevenue({
             bookId: revenueBookId,
             totalChapters: 100, // Current contract maximum (will be increased when contract is redeployed)
-            isDerivative: false,
             ipfsMetadataHash: '' // We don't have IPFS metadata for this flow
           })
           
           if (revenueResult?.success) {
             console.log('✅ Revenue sharing registration successful!')
+            revenueRegistrationSuccess = true
+            
+            // Show info message if transaction is pending
+            if (revenueResult.pending) {
+              showToast.showInfo(
+                'Transaction Pending',
+                revenueResult.message || 'Transaction is pending confirmation'
+              )
+            }
+          } else if (revenueResult?.pending) {
+            console.log('⏳ Revenue sharing registration pending...')
+            showToast.showInfo(
+              'Transaction Pending',
+              revenueResult.error || 'Transaction is still pending. Please check your wallet.'
+            )
+            // Consider it successful since the transaction was submitted
             revenueRegistrationSuccess = true
           } else {
             console.warn('⚠️ Revenue sharing registration failed:', revenueResult?.error || 'Unknown error')
@@ -335,6 +354,13 @@ function NewStoryPageContent() {
           console.log('✅ Book metadata saved to R2 successfully:', result)
           console.log('📚 Book ID:', result.book?.bookId)
           console.log('🔗 IP Asset ID:', result.book?.ipAssetId)
+          
+          // Show success notification
+          showToast.showSuccess(
+            'Book Registered Successfully!',
+            `Your book "${bookMetadata.title}" has been registered on Story Protocol${revenueRegistrationSuccess ? ' with revenue sharing enabled' : ''}`,
+            { duration: 5000 }
+          )
         }
       } catch (metadataError) {
         console.error('❌ Book metadata registration error:', metadataError)
@@ -343,8 +369,10 @@ function NewStoryPageContent() {
         return
       }
 
-      // Step 5: Redirect to /own page
-      router.push('/own')
+      // Step 5: Redirect to /own page after a brief delay to show the success message
+      setTimeout(() => {
+        router.push('/own')
+      }, 1000)
 
     } catch (err) {
       console.error('❌ Book registration failed:', err)
@@ -542,17 +570,34 @@ function NewStoryPageContent() {
           <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
             <label className="block text-lg font-semibold text-gray-800 mb-4">
               📝 Story Plot <span className="text-red-500">*</span>
-              <span className="text-sm font-normal text-gray-500 ml-2">(Required)</span>
+              <span className="text-sm font-normal text-gray-500 ml-2">(Required - minimum 50 characters)</span>
             </label>
             <textarea
               value={plotDescription}
               onChange={(e) => setPlotDescription(e.target.value)}
               placeholder="Describe your story. What happens? Who are the main characters? What's the conflict?"
-              className="w-full h-32 p-4 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className={`w-full h-32 p-4 border rounded-lg resize-none focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
+                plotDescription.length > 0 && plotDescription.length < 50 
+                  ? 'border-red-300' 
+                  : 'border-gray-300'
+              }`}
               maxLength={750}
             />
             <div className="flex items-center justify-between mt-4">
-              <span className="text-sm text-gray-500">{plotDescription.length}/750 characters</span>
+              <div className="flex flex-col gap-1">
+                <span className={`text-sm ${
+                  plotDescription.length > 0 && plotDescription.length < 50 
+                    ? 'text-red-600 font-medium' 
+                    : 'text-gray-500'
+                }`}>
+                  {plotDescription.length}/750 characters
+                </span>
+                {plotDescription.length > 0 && plotDescription.length < 50 && (
+                  <span className="text-xs text-red-600">
+                    ⚠️ Please write at least {50 - plotDescription.length} more characters to describe your story
+                  </span>
+                )}
+              </div>
               <button
                 onClick={() => setShowMultiModal(!showMultiModal)}
                 className="flex items-center gap-2 px-4 py-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"

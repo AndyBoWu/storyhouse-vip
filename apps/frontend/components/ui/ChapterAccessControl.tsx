@@ -249,13 +249,15 @@ export default function ChapterAccessControl({
             console.error('Reading license minting failed:', error)
             
             // Auto-retry for attribution not configured error
-            if (error?.includes('Chapter attribution not yet configured')) {
-              console.log('⏳ Chapter attribution not ready, will retry in 5 seconds...')
+            if (error?.includes('Chapter attribution not yet configured') || 
+                error?.includes('Unable to unlock chapter') ||
+                error?.includes('configuration issue')) {
+              console.log('⏳ Chapter attribution not ready, will retry in 10 seconds...')
               
               // Show a temporary message
-              setRetryError('Chapter setup in progress... Retrying in 5 seconds...')
+              setRetryError('Chapter pricing is being confirmed on the blockchain... This may take up to 10 seconds...')
               
-              // Wait 5 seconds and retry once
+              // Wait 10 seconds and retry once
               setTimeout(async () => {
                 console.log('🔄 Retrying chapter unlock...')
                 setRetryError(null)
@@ -346,7 +348,7 @@ export default function ChapterAccessControl({
                   console.error('Retry failed:', retryError)
                   setRetryError(null) // Clear the temporary message
                 }
-              }, 5000)
+              }, 10000)
             }
           }
         })

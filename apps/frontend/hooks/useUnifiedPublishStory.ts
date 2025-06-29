@@ -64,7 +64,6 @@ export function useUnifiedPublishStory() {
     options: PublishOptions;
     bookId?: string;
     bookMetadata?: any;
-    isDerivative?: boolean;
   } | null>(null);
 
   const { address } = useAccount();
@@ -159,48 +158,51 @@ export function useUnifiedPublishStory() {
       throw new Error("SPG NFT Contract not configured");
     }
 
-    // Check if this is a derivative book that needs registration
+    // Check if book needs registration
     let bookMetadata = null;
-    let isDerivativeNeedingRegistration = false;
-    let parentIpAssetId: string | null = null;
-    let parentLicenseTermsId: string | null = null;
+    let isDerivativeBook = false;
 
+    try {
     if (bookId) {
       try {
-        // Check if book is registered in HybridRevenueController
-        const registrationStatus =
-          await apiClient.checkBookRegistrationStatus(bookId);
-        if (!registrationStatus.data?.isRegistered) {
-          console.log("⚠️ Book not registered in revenue controller");
-
-          // Return a special result indicating registration is needed
-          const result: UnifiedPublishResult = {
-            success: false,
-            error: "Book needs to be registered for revenue sharing first",
-            requiresRegistration: true,
-          };
-          setPublishResult(result);
-          setCurrentStep("error");
-          return result;
-        }
-
         const bookData = await apiClient.getBookById(bookId);
         bookMetadata = bookData;
 
         // Check if this is a derivative book
         if (bookMetadata.parentBook) {
           console.log("🌿 Detected derivative book");
-
-          // For derivatives, we always register chapters individually
-          // We never register the book itself as an IP asset
-          isDerivativeNeedingRegistration = true;
+          isDerivativeBook = true;
           console.log(
             "📝 Will register this chapter individually (not book-level IP)",
           );
+          
+          // For derivative books, we don't need book registration
+          // Chapters are registered individually with their own IP
+          console.log("✅ Derivative book - skipping book registration requirement");
+        } else {
+          // Only check registration for original books
+          const registrationStatus =
+            await apiClient.checkBookRegistrationStatus(bookId);
+          if (!registrationStatus.data?.isRegistered) {
+            console.log("⚠️ Original book not registered in revenue controller");
+
+            // Return a special result indicating registration is needed for original books
+            const result: UnifiedPublishResult = {
+              success: false,
+              error: "Original book needs to be registered for revenue sharing first",
+              requiresRegistration: true,
+            };
+            setPublishResult(result);
+            setCurrentStep("error");
+            return result;
+          }
         }
       } catch (error) {
         console.warn("Could not fetch book metadata:", error);
       }
+    }
+    } catch (error) {
+      console.warn("Error in book metadata loading:", error);
     }
 
     // Step 1: Generate and store metadata via backend
@@ -208,7 +210,7 @@ export function useUnifiedPublishStory() {
     console.log("📝 Generating metadata...");
 
     const storyForMetadata = {
-      id: `${address!.toLowerCase()}-${Date.now()}`,
+      id: bookId || `${address!.toLowerCase()}-${Date.now()}`, // Use bookId if available, otherwise fallback
       title: storyData.title,
       content: storyData.content,
       author: address!,
@@ -253,7 +255,7 @@ export function useUnifiedPublishStory() {
 
       // IMPORTANT: For derivative books, we only register the individual chapter
       // We do NOT register the entire derivative book as an IP asset
-      if (isDerivativeNeedingRegistration && bookMetadata?.parentBook) {
+      if (isDerivativeBook && bookMetadata?.parentBook) {
         console.log("🌿 Publishing new chapter in derivative book...");
         console.log(
           "📝 Only registering this specific chapter as IP, not the entire book",
@@ -426,34 +428,45 @@ export function useUnifiedPublishStory() {
         setCurrentStep("setting-attribution");
         console.log("💰 Setting chapter attribution for revenue sharing...");
 
-        try {
-          // First ensure the book is registered
+          // For derivative books, skip book registration requirement
+          if (isDerivativeBook || bookMetadata?.parentBook) {
+            console.log("🌿 Derivative book - chapters don't need book registration");
+            console.log("📝 Each chapter has its own IP registration");
+            
+            // Skip to success since derivative chapters don't need attribution setup
+            setCurrentStep("success");
+            const unifiedResult: UnifiedPublishResult = {
+              success: true,
+              method: "unified",
+              gasOptimized: true,
+              data: {
+                transactionHash,
+                ipAssetId: registeredIPAssetId,
+                tokenId: mintedTokenId,
+                licenseTermsId: registrationResult.licenseTermsId
+                  ? BigInt(registrationResult.licenseTermsId)
+                  : undefined,
+                contentUrl: saveResult.data?.contentUrl,
+                explorerUrl: `https://aeneid.storyscan.io/tx/${transactionHash}`,
+              },
+              metadataUri: metadataUri,
+            };
+            setPublishResult(unifiedResult);
+            console.log(
+              "🎉 Derivative chapter published successfully!",
+              JSON.stringify(
+                unifiedResult,
+                (_, v) => (typeof v === "bigint" ? v.toString() : v),
+                2,
+              ),
+            );
+            return unifiedResult;
+          }
+
+          // For original books, ensure the book is registered
           const isBookRegistered = await checkBookRegistration(finalBookId);
           if (!isBookRegistered) {
-            console.log("📚 Book not registered, showing registration flow...");
-
-            // For derivatives, show the special registration flow
-            if (isDerivativeNeedingRegistration || bookMetadata?.parentBook) {
-              // Store the publishing data for later
-              setPendingPublishData({
-                storyData,
-                options,
-                bookId: finalBookId,
-                bookMetadata,
-                isDerivative: true,
-              });
-
-              // Show the registration flow modal
-              setShowRegistrationFlow(true);
-              setCurrentStep("idle"); // Reset step while waiting
-
-              // Return a pending result - actual publishing will happen after registration
-              return {
-                success: false,
-                error: "Registration required",
-                requiresRegistration: true,
-              };
-            }
+            console.log("📚 Original book not registered, registration required...");
 
             // For regular books, use simple alert
             alert(
@@ -463,10 +476,6 @@ export function useUnifiedPublishStory() {
             const registerResult = await registerBook({
               bookId: finalBookId,
               totalChapters: 100, // Current contract maximum (will be increased when contract is redeployed)
-              isDerivative: isDerivativeNeedingRegistration || false,
-              parentBookId: isDerivativeNeedingRegistration
-                ? bookMetadata?.parentBook
-                : undefined,
               ipfsMetadataHash: metadataUri || "",
             });
 
@@ -519,34 +528,53 @@ export function useUnifiedPublishStory() {
             }
           }
 
-          // Set chapter attribution with pricing
-          // For chapters 1-3: price is 0, for 4+: use the specified price (default 0.5 TIP)
-          const chapterPrice =
-            storyData.chapterNumber <= 3
-              ? "0"
-              : (options.chapterPrice || 0.5).toString();
-
-          console.log("📝 Setting attribution with price:", {
-            bookId: finalBookId,
-            chapterNumber: storyData.chapterNumber,
-            price: `${chapterPrice} TIP`,
-            originalAuthor: address,
+          // Check if current user is the book author/curator
+          const book = await apiClient.getBookById(finalBookId);
+          const isBookAuthor = book.author?.toLowerCase() === address?.toLowerCase();
+          
+          console.log("🔍 Checking authorship:", {
+            bookAuthor: book.author,
+            currentUser: address,
+            isBookAuthor,
+            chapterNumber: storyData.chapterNumber
           });
 
-          // Alert user about the second transaction
-          alert(
-            `💰 Chapter Pricing Setup\n\nNow you need to set the unlock price (${chapterPrice} TIP) for this chapter. You will see another MetaMask transaction request.`,
-          );
+          // Only set chapter attribution if user is the book author
+          // For derivative authors, skip this step per Fair IP Model
+          
+          // Check if this is a paid chapter (> 3) or free chapter (1-3)
+          if (storyData.chapterNumber > 3) {
+            // Paid chapter - handle attribution with pricing
+            if (isBookAuthor) {
+              try {
+                // Set chapter attribution with pricing
+                // For chapters 1-3: price is 0, for 4+: use the specified price (default 0.5 TIP)
+                const chapterPrice =
+                storyData.chapterNumber <= 3
+                  ? "0"
+                  : (options.chapterPrice || 0.5).toString();
 
-          const attributionResult = await setChapterAttribution({
-            bookId: finalBookId,
-            chapterNumber: storyData.chapterNumber,
-            originalAuthor: address!,
-            unlockPrice: chapterPrice,
-            isOriginalContent: true,
-          });
+              console.log("📝 Setting attribution with price:", {
+                bookId: finalBookId,
+                chapterNumber: storyData.chapterNumber,
+                price: `${chapterPrice} TIP`,
+                originalAuthor: address,
+              });
 
-          if (attributionResult.pending) {
+              // Alert user about the second transaction
+              alert(
+                `💰 Chapter Pricing Setup\n\nNow you need to set the unlock price (${chapterPrice} TIP) for this chapter. You will see another MetaMask transaction request.`,
+              );
+
+              const attributionResult = await setChapterAttribution({
+                bookId: finalBookId,
+                chapterNumber: storyData.chapterNumber,
+                originalAuthor: address!,
+                unlockPrice: chapterPrice,
+                isOriginalContent: true,
+              });
+
+              if (attributionResult.pending) {
             console.log(
               "⏳ Attribution transaction initiated:",
               attributionResult.message,
@@ -630,47 +658,21 @@ export function useUnifiedPublishStory() {
           }
         } catch (attributionError) {
           console.error("❌ Attribution setting failed:", attributionError);
-
-          // Check for specific "invalid chapter" error
-          const errorMessage = attributionError instanceof Error ? attributionError.message : String(attributionError);
-          if (errorMessage.includes("invalid chapter") || errorMessage.includes("HybridRevenueV2: invalid chapter")) {
-            throw new Error(
-              `Chapter ${storyData.chapterNumber} cannot be added to this book. The book was registered with too few total chapters. ` +
-              `Please contact support to increase the book's chapter limit, or try creating a new book for additional chapters.`
-            );
-          }
-
-          // For paid chapters, this is a critical error that should stop publishing
-          if (storyData.chapterNumber > 3) {
-            // Clean up by trying to remove the saved chapter
-            console.log(
-              "🧹 Attempting to clean up saved chapter due to attribution failure...",
-            );
-
-            try {
-              // Delete the chapter from backend
-              await apiClient.delete(
-                `/chapters/${encodeURIComponent(finalBookId)}/${storyData.chapterNumber}`,
-              );
-              console.log("✅ Chapter cleaned up successfully");
-            } catch (cleanupError) {
-              console.error("❌ Failed to clean up chapter:", cleanupError);
-            }
-
-            // Re-throw with user-friendly message
-            throw new Error(
-              `Failed to set chapter pricing. The chapter was not published. ${attributionError instanceof Error ? attributionError.message : "Unknown error"}. ` +
-                `Please try again or contact support if the issue persists.`,
-            );
-          } else {
-            // For free chapters, log but continue
-            console.warn(
-              "⚠️ Attribution failed for free chapter, continuing...",
-            );
-          }
+          throw attributionError;
         }
       } else {
-        console.log("📝 Free chapter (1-3) - setting attribution with 0 price");
+        // Derivative author - skip attribution setting
+        console.log("🌿 Derivative chapter by non-author. Skipping attribution setup per Fair IP Model.");
+        console.log("📝 Derivative chapters maintain their own IP, inherited chapters remain original author's IP.");
+      }
+    } else {
+      // This is for free chapters (1-3)
+      if (isDerivativeBook || bookMetadata?.parentBook) {
+        // Derivative books - free chapters don't need attribution
+        console.log("🌿 Derivative book free chapter (1-3) - no attribution needed");
+      } else if (isBookAuthor) {
+        // Original book author writing free chapter
+        console.log("📝 Original book free chapter (1-3) - setting attribution with 0 price");
         // Even for free chapters, we should set attribution to track the author
         try {
           const attributionResult = await setChapterAttribution({
@@ -693,7 +695,11 @@ export function useUnifiedPublishStory() {
             error,
           );
         }
+      } else {
+        // Non-author writing to original book - not allowed
+        console.log("❌ Non-author cannot add chapters to original book");
       }
+    }
 
       // Success!
       setCurrentStep("success");
@@ -724,6 +730,7 @@ export function useUnifiedPublishStory() {
         ),
       );
       return unifiedResult;
+    }
     } catch (error) {
       console.error("❌ Unified registration failed:", error);
       throw error;
@@ -731,26 +738,22 @@ export function useUnifiedPublishStory() {
   };
 
   const handleRegistrationProceed = async () => {
+    // This flow is now only used for original books
+    // Derivative books no longer need registration
     if (!pendingPublishData) return;
 
-    const { storyData, options, bookId, bookMetadata, isDerivative } =
-      pendingPublishData;
+    const { storyData, options, bookId } = pendingPublishData;
 
     setShowRegistrationFlow(false);
     setCurrentStep("setting-attribution");
 
     try {
-      console.log("📚 Starting book registration process...");
+      console.log("📚 Starting original book registration process...");
 
-      // Register the book
+      // Register the original book only
       const registerResult = await registerBook({
         bookId: bookId!,
         totalChapters: 100,
-        isDerivative: isDerivative || false,
-        parentBookId:
-          isDerivative && bookMetadata?.parentBook
-            ? bookMetadata.parentBook
-            : undefined,
         ipfsMetadataHash: "",
       });
 

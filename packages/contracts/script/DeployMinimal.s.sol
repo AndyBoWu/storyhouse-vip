@@ -41,6 +41,9 @@ contract DeployMinimal is Script {
         
         address hybridV2Address = address(hybridV2);
         console.log("[OK] HybridRevenueControllerV2 deployed at:", hybridV2Address);
+        console.log("");
+        console.log("IMPORTANT: Save this address!");
+        console.log("HybridRevenueControllerV2:", hybridV2Address);
         
         vm.stopBroadcast();
         

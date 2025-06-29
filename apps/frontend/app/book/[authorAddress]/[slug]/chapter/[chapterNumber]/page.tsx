@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useAccount } from 'wagmi';
 import Link from 'next/link';
 import { Settings, X, Type, Minus, Plus, Trash2 } from 'lucide-react';
-import apiClient from '@/lib/api-client';
+import apiClient, { apiRequest } from '@/lib/api-client';
 import ChapterAccessControl from '@/components/ui/ChapterAccessControl';
 import { useChapterAccess } from '@/hooks/useChapterAccess';
 import ReadingProgressBar from '@/components/ui/ReadingProgressBar';
@@ -175,7 +175,15 @@ export default function ChapterPage() {
         // Always try to fetch full content - let the backend decide access
         try {
           console.log('🔍 Attempting to fetch full chapter content...');
-          const fullChapter = await apiClient.get(`/books/${encodeURIComponent(bookId)}/chapter/${chapterNumber}`);
+          console.log('👤 Current user address:', address);
+          
+          // Explicitly pass the user address in the request headers
+          const fullChapter = await apiRequest(`/api/books/${encodeURIComponent(bookId)}/chapter/${chapterNumber}`, {
+            method: 'GET',
+            headers: {
+              ...(address ? { 'x-user-address': address } : {})
+            }
+          });
           
           // Check if we got access denied (403) in the response
           if (fullChapter.hasAccess === false) {

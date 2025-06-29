@@ -15,9 +15,6 @@ export interface BookMetadata {
     coverUrl?: string;
     ipAssetId?: string;
     licenseTermsId?: string;
-    parentBook?: string;
-    branchPoint?: string;
-    derivativeBooks: string[];
     chapterMap: {
         [chapterNumber: string]: string;
     };

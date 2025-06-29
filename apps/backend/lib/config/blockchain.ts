@@ -59,16 +59,14 @@ export const CONTRACT_ADDRESSES = {
     pilTemplate: '0x7dD80B7C81E44ef5f62d8e1B8C68B1a5a5E5C5f8',
     royaltyModule: '0x6EF8a46584B69be6b7bb6AA3cB3F2C46aE97A2b1',
     
-    // StoryHouse contracts (3-contract minimal architecture)
+    // StoryHouse contracts (2-contract minimal architecture)
     tipToken: '0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E',
-    chapterAccessController: '0x1BD65ad10B1CA3ED67aE75FCdD3abA256a9918e3',
-    hybridRevenueControllerV2: '0x99dA048826Bbb8189FBB6C3e62EaA75d0fB36812', // V2 - Current (Story Protocol Testnet)
+    hybridRevenueControllerV2: '0x995c07920fb8eC57cBA8b0E2be8903cB4434f9D6', // V2 - Current (includes chapter access)
     spgNftContract: '0x26B6Aa7E7036FC9e8fa2d8184C2CF07aE2e2412d',
     
     // Legacy contracts (removed/unused)
     rewardsManager: '0xf5aE031bA92295C2aE86a99e88f09989339707E5', // REMOVED
-    unifiedRewardsController: '0x741105D6ee9b25567205f57C0E4f1d293F0d00C5', // REMOVED  
-    hybridRevenueController: '0xd1F7e8c6FD77dADbE946aE3e4141189b39Ef7b08', // LEGACY V1
+    unifiedRewardsController: '0x741105D6ee9b25567205f57C0E4f1d293F0d00C5', // REMOVED
   },
   [storyMainnet.id]: {
     // Mainnet addresses (to be updated when available)

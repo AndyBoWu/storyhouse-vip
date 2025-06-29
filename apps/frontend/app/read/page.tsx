@@ -27,16 +27,91 @@ interface PublicStory {
   preview: string
   coverUrl?: string
   tags: string[]
+  authorAddress?: string
+  parentBookId?: string
+  isDerivative?: boolean
+}
+
+interface StoryUniverse {
+  id: string
+  originalBook: PublicStory
+  derivatives: PublicStory[]
+  totalPaths: number
+  totalChapters: number
+  avgRating: number
+  combinedReads: number
 }
 
 export default function ReadPage() {
   const [stories, setStories] = useState<PublicStory[]>([])
+  const [storyUniverses, setStoryUniverses] = useState<StoryUniverse[]>([])
+  const [standaloneStories, setStandaloneStories] = useState<PublicStory[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedGenre, setSelectedGenre] = useState<string>('all')
   const [sortBy, setSortBy] = useState<'recent' | 'popular' | 'rating'>('recent')
+  const [expandedUniverse, setExpandedUniverse] = useState<string | null>(null)
 
   const genres = ['all', 'Mystery', 'Romance', 'Sci-Fi', 'Fantasy', 'Horror', 'Comedy', 'Adventure', 'Drama']
+
+  // Consolidate books into story universes
+  const consolidateIntoUniverses = (books: PublicStory[]) => {
+    const universes: StoryUniverse[] = []
+    const standalone: PublicStory[] = []
+    const processed = new Set<string>()
+    
+    // Process original books first to ensure proper universe creation
+    const originalBooks = books.filter(book => !book.isDerivative)
+    const derivativeBooks = books.filter(book => book.isDerivative)
+    
+    // First pass: Process all original books and their derivatives
+    originalBooks.forEach(book => {
+      if (processed.has(book.id)) return
+      
+      const derivatives = books.filter(b => 
+        b.parentBookId === book.id && b.isDerivative && !processed.has(b.id)
+      )
+
+      if (derivatives.length > 0) {
+          // Create story universe
+          const allBooks = [book, ...derivatives]
+          const totalRating = allBooks.filter(b => b.rating > 0).reduce((sum, b) => sum + b.rating, 0)
+          const ratedBooks = allBooks.filter(b => b.rating > 0).length
+
+          const universe: StoryUniverse = {
+            id: book.id,
+            originalBook: book,
+            derivatives,
+            totalPaths: 1 + derivatives.length,
+            totalChapters: Math.max(...allBooks.map(b => b.chapters)),
+            avgRating: ratedBooks > 0 ? totalRating / ratedBooks : 0,
+            combinedReads: allBooks.reduce((sum, b) => sum + b.totalReads, 0)
+          }
+          
+          universes.push(universe)
+          
+          // Mark all books as processed
+          processed.add(book.id)
+          derivatives.forEach(d => processed.add(d.id))
+        } else {
+          // Standalone original book
+          standalone.push(book)
+          processed.add(book.id)
+        }
+    })
+    
+    // Second pass: Process any remaining derivative books (orphaned ones)
+    derivativeBooks.forEach(book => {
+      if (!processed.has(book.id)) {
+        // Orphaned derivative (original not found)
+        standalone.push(book)
+        processed.add(book.id)
+      }
+    })
+
+
+    return { universes, standalone }
+  }
 
   // Load public books
   useEffect(() => {
@@ -52,6 +127,7 @@ export default function ReadPage() {
             id: book.id,
             title: book.title,
             author: book.authorName || book.author?.slice(0, 6) + '...' + book.author?.slice(-4) || 'Unknown',
+            authorAddress: book.author,
             genre: book.genres?.[0] || 'Story',
             chapters: book.chapters || 0,
             lastUpdated: book.createdAt,
@@ -59,9 +135,17 @@ export default function ReadPage() {
             rating: book.rating || 0,
             preview: book.description || 'No description available.',
             coverUrl: book.coverUrl,
-            tags: book.genres?.map((g: string) => g.toLowerCase()) || []
+            tags: book.genres?.map((g: string) => g.toLowerCase()) || [],
+            parentBookId: book.parentBookId,
+            isDerivative: !!book.parentBookId
           }))
+          
           setStories(publicStories)
+          
+          // Consolidate into universes
+          const { universes, standalone } = consolidateIntoUniverses(publicStories)
+          setStoryUniverses(universes)
+          setStandaloneStories(standalone)
         }
       } catch (error) {
         console.error('Error loading public books:', error)
@@ -201,85 +285,152 @@ export default function ReadPage() {
               <h3 className="text-lg font-semibold text-gray-700 mb-2">Loading amazing books...</h3>
               <p className="text-gray-500">Discovering content from creators worldwide</p>
             </div>
-          ) : filteredStories.length === 0 ? (
+          ) : storyUniverses.length === 0 && standaloneStories.length === 0 ? (
             <div className="text-center py-16">
               <div className="text-8xl mb-6">📚</div>
               <h3 className="text-2xl font-semibold text-gray-700 mb-4">No books found</h3>
               <p className="text-gray-500 mb-8">Try adjusting your search or filter criteria</p>
             </div>
           ) : (
-            <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
-              {filteredStories.map((story) => (
-                <Link key={story.id} href={`/book/${story.id}`}>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+              {/* Story Universes - Card View */}
+              {storyUniverses.map((universe) => (
+                <Link key={universe.id} href={`/universe/${encodeURIComponent(universe.id)}`}>
                   <motion.div
                     whileHover={{ scale: 1.02, y: -5 }}
-                    className="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200 hover:shadow-xl transition-all cursor-pointer w-full max-w-xs mx-auto"
+                    className="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200 hover:shadow-xl transition-all cursor-pointer w-full"
                   >
-                    {/* Book Cover */}
-                    <div className="aspect-[3/4] w-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center">
-                      {story.coverUrl && (
+                    {/* Universe Cover */}
+                    <div className="aspect-[3/4] w-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center relative">
+                      {universe.originalBook.coverUrl ? (
                         <img
-                          src={story.coverUrl}
-                          alt={`${story.title} cover`}
+                          src={universe.originalBook.coverUrl}
+                          alt={`${universe.originalBook.title} cover`}
                           className="w-full h-full object-cover"
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
                             target.style.display = 'none';
                             const parent = target.parentElement;
                             if (parent) {
-                              parent.innerHTML = `<span class="text-white text-4xl font-bold">${story.title.charAt(0)}</span>`;
+                              parent.innerHTML = `<span class="text-white text-4xl font-bold">${universe.originalBook.title.charAt(0)}</span>`;
                             }
                           }}
                         />
+                      ) : (
+                        <span className="text-white text-4xl font-bold">{universe.originalBook.title.charAt(0)}</span>
                       )}
-                      {!story.coverUrl && (
-                        <span className="text-white text-4xl font-bold">{story.title.charAt(0)}</span>
-                      )}
+                      
+                      
+                      {/* Story Paths Badge */}
+                      <div className="absolute bottom-4 left-4">
+                        <span className="px-3 py-1 bg-black bg-opacity-50 text-white text-xs font-medium rounded-full">
+                          📖 {universe.totalPaths} story paths
+                        </span>
+                      </div>
                     </div>
 
                     <div className="p-4">
                       <div className="mb-4">
                         <div className="flex items-start justify-between mb-2">
                           <h3 className="text-base font-semibold text-gray-800 line-clamp-2 flex-1">
-                            {story.title}
+                            {universe.originalBook.title}
                           </h3>
-                          {story.rating > 0 && (
+                          {universe.avgRating > 0 && (
                             <div className="flex items-center gap-1 text-yellow-500 ml-2">
                               <Star className="w-4 h-4 fill-current" />
-                              <span className="text-sm font-medium text-gray-700">{story.rating.toFixed(1)}</span>
+                              <span className="text-sm font-medium text-gray-700">{universe.avgRating.toFixed(1)}</span>
                             </div>
                           )}
                         </div>
                         
                         <div className="flex items-center gap-2 text-xs text-gray-600 mb-2">
                           <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
-                            {story.genre}
+                            {universe.originalBook.genre}
                           </span>
                           <span>•</span>
                           <div className="flex items-center gap-1 text-gray-500">
                             <Clock className="w-4 h-4" />
-                            <span>{story.chapters} chapters</span>
+                            <span>{universe.totalChapters} chapters</span>
                           </div>
-                          {story.totalReads > 0 && (
-                            <>
-                              <span>•</span>
-                              <div className="flex items-center gap-1 text-gray-500">
-                                <TrendingUp className="w-4 h-4" />
-                                <span>{story.totalReads.toLocaleString()} reads</span>
-                              </div>
-                            </>
-                          )}
+                          <span>•</span>
+                          <div className="flex items-center gap-1 text-gray-500">
+                            <span>👥 {1 + universe.derivatives.length} authors</span>
+                          </div>
                         </div>
+                        
+                        <p className="text-sm text-gray-600 line-clamp-2">
+                          {universe.originalBook.preview}
+                        </p>
                       </div>
 
-                      <div className="flex gap-2">
-                        <button className="flex-1 px-3 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg text-sm font-semibold hover:from-purple-700 hover:to-blue-700 transition-all">
-                          📖 Read Book
-                        </button>
-                      </div>
+                      <button className="w-full px-3 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg text-sm font-semibold hover:from-purple-700 hover:to-blue-700 transition-all">
+                        🌌 Explore Universe
+                      </button>
                     </div>
                   </motion.div>
                 </Link>
+              ))}
+
+              {/* Standalone Stories */}
+              {standaloneStories.map((story) => (
+                      <Link key={story.id} href={`/book/${story.id}`}>
+                        <motion.div
+                          whileHover={{ scale: 1.02, y: -5 }}
+                          className="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200 hover:shadow-xl transition-all cursor-pointer"
+                        >
+                          {/* Book Cover */}
+                          <div className="aspect-[3/4] w-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center">
+                            {story.coverUrl ? (
+                              <img
+                                src={story.coverUrl}
+                                alt={`${story.title} cover`}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.style.display = 'none';
+                                  const parent = target.parentElement;
+                                  if (parent) {
+                                    parent.innerHTML = `<span class="text-white text-4xl font-bold">${story.title.charAt(0)}</span>`;
+                                  }
+                                }}
+                              />
+                            ) : (
+                              <span className="text-white text-4xl font-bold">{story.title.charAt(0)}</span>
+                            )}
+                          </div>
+
+                          <div className="p-4">
+                            <div className="mb-4">
+                              <div className="flex items-start justify-between mb-2">
+                                <h3 className="text-base font-semibold text-gray-800 line-clamp-2 flex-1">
+                                  {story.title}
+                                </h3>
+                                {story.rating > 0 && (
+                                  <div className="flex items-center gap-1 text-yellow-500 ml-2">
+                                    <Star className="w-4 h-4 fill-current" />
+                                    <span className="text-sm font-medium text-gray-700">{story.rating.toFixed(1)}</span>
+                                  </div>
+                                )}
+                              </div>
+                              
+                              <div className="flex items-center gap-2 text-xs text-gray-600 mb-2">
+                                <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
+                                  {story.genre}
+                                </span>
+                                <span>•</span>
+                                <div className="flex items-center gap-1 text-gray-500">
+                                  <Clock className="w-4 h-4" />
+                                  <span>{story.chapters} chapters</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <button className="w-full px-3 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg text-sm font-semibold hover:from-purple-700 hover:to-blue-700 transition-all">
+                              📖 Read Book
+                            </button>
+                          </div>
+                        </motion.div>
+                      </Link>
               ))}
             </div>
           )}

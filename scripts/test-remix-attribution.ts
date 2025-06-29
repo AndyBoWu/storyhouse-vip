@@ -1,8 +1,8 @@
 #!/usr/bin/env npx tsx
 
 /**
- * Test script to verify that remixed chapter attribution is properly displayed
- * This tests the fix for the issue where Bob's remixed chapter 4 showed "No Attribution"
+ * Test script to verify chapter attribution
+ * NOTE: Remixed/derivative books are no longer supported - only individual chapters
  */
 
 import { createPublicClient, http, keccak256, toBytes } from 'viem'
@@ -11,7 +11,7 @@ import { storyTestnet } from '@story-protocol/core-sdk'
 
 // Configuration
 const RPC_URL = 'https://aeneid.storyrpc.io'
-const CONTRACT_ADDRESS = '0x99dA048826Bbb8189FBB6C3e62EaA75d0fB36812' as const
+const CONTRACT_ADDRESS = '0x995c07920fb8eC57cBA8b0E2be8903cB4434f9D6' as const
 
 // Test book IDs
 const ANDY_BOOK = '0x3873c0d1bcfa245773b13b694a49dac5b3f03ca2/shadows-and-light'

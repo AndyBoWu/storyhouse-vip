@@ -16,7 +16,7 @@ async function findRegisteredBooks() {
   console.log('🔍 Finding registered books in HybridRevenueControllerV2\n');
 
   // Configuration
-  const CONTRACT_ADDRESS = '0x99dA048826Bbb8189FBB6C3e62EaA75d0fB36812';
+  const CONTRACT_ADDRESS = '0x995c07920fb8eC57cBA8b0E2be8903cB4434f9D6';
   const RPC_URL = process.env.STORY_RPC_URL || 'https://testnet.storyrpc.io';
 
   // Connect to provider

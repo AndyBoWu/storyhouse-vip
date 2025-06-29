@@ -30,10 +30,10 @@ contract RevenueFlowTest is Test {
         book2Id = keccak256("book-two");
         
         vm.prank(author1);
-        controller.registerBook(book1Id, false, bytes32(0), 10, "ipfs://book1metadata");
+        controller.registerBook(book1Id, 10, "ipfs://book1metadata");
         
         vm.prank(author2);
-        controller.registerBook(book2Id, false, bytes32(0), 10, "ipfs://book2metadata");
+        controller.registerBook(book2Id, 10, "ipfs://book2metadata");
         
         // Set up chapter attributions (authors become curators)
         uint256 chapterPrice = 100 * 10**18;
@@ -112,7 +112,7 @@ contract RevenueFlowTest is Test {
         uint256 initialCurator1Balance = tipToken.balanceOf(curator1);
         
         vm.prank(curator1);
-        controller.registerBook(curatedBookId, false, bytes32(0), 5, "ipfs://curatedbook");
+        controller.registerBook(curatedBookId, 5, "ipfs://curatedbook");
         
         vm.prank(curator1);
         controller.setChapterAttribution(curatedBookId, 1, author1, curatedBookId, 100 * 10**18, true);

@@ -48,53 +48,35 @@ export default function BranchChoiceModal({
   const loadBranches = async () => {
     setLoading(true);
     try {
-      // Get the current book's metadata
-      const bookData = await apiClient.getBookById(currentBookId);
+      // ⚠️ DEPRECATED: In the new "one book = one IP" model, derivative books no longer exist
+      // All chapters belong to the original book, so this modal is no longer needed
       
-      if (bookData && bookData.derivativeBooks && bookData.derivativeBooks.length > 0) {
-        // Load metadata for each derivative book
-        const branchPromises = bookData.derivativeBooks.map(async (derivativeId: string) => {
-          const derivativeData = await apiClient.getBookById(derivativeId);
-          if (derivativeData && derivativeData.branchPoint === `ch${chapterNumber}`) {
-            return {
-              bookId: derivativeId,
-              title: derivativeData.title,
-              authorName: derivativeData.authorName || 'Unknown Author',
-              authorAddress: derivativeData.authorAddress,
-              preview: derivativeData.description || 'Continue the story...',
-              chapterCount: derivativeData.totalChapters || 0,
-              totalReads: derivativeData.totalReads || 0,
-              averageRating: derivativeData.averageRating || 0,
-              coverUrl: derivativeData.coverUrl,
-              nextChapterNumber: chapterNumber + 1
-            };
-          }
-          return null;
+      console.log('⚠️ BranchChoiceModal is deprecated - no derivative books in new model');
+      
+      // Get the current book's metadata for the original continuation only
+      const bookData = await apiClient.getBookById(currentBookId);
+      const validBranches: BranchOption[] = [];
+      
+      // Only include the original continuation if there are more chapters
+      if (bookData && bookData.totalChapters > chapterNumber) {
+        validBranches.push({
+          bookId: currentBookId,
+          title: bookData.title,
+          authorName: bookData.authorName || 'Original Author',
+          authorAddress: bookData.authorAddress,
+          preview: 'Continue with the original author\'s version...',
+          chapterCount: bookData.totalChapters,
+          totalReads: bookData.totalReads || 0,
+          averageRating: bookData.averageRating || 0,
+          coverUrl: bookData.coverUrl,
+          nextChapterNumber: chapterNumber + 1
         });
-
-        const branchResults = await Promise.all(branchPromises);
-        const validBranches = branchResults.filter(branch => branch !== null) as BranchOption[];
-        
-        // Also include the original continuation if there are more chapters
-        if (bookData.totalChapters > chapterNumber) {
-          validBranches.unshift({
-            bookId: currentBookId,
-            title: bookData.title + ' (Original)',
-            authorName: bookData.authorName || 'Original Author',
-            authorAddress: bookData.authorAddress,
-            preview: 'Continue with the original story...',
-            chapterCount: bookData.totalChapters,
-            totalReads: bookData.totalReads || 0,
-            averageRating: bookData.averageRating || 0,
-            coverUrl: bookData.coverUrl,
-            nextChapterNumber: chapterNumber + 1
-          });
-        }
-
-        setBranches(validBranches);
       }
+
+      setBranches(validBranches);
     } catch (error) {
       console.error('Error loading branches:', error);
+      setBranches([]);
     } finally {
       setLoading(false);
     }
@@ -131,7 +113,7 @@ export default function BranchChoiceModal({
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <GitBranch className="w-8 h-8" />
-                <h2 className="text-2xl font-bold">Choose Your Path</h2>
+                <h2 className="text-2xl font-bold">Multiple Chapter Versions Available</h2>
               </div>
               <button
                 onClick={onClose}
@@ -141,7 +123,7 @@ export default function BranchChoiceModal({
               </button>
             </div>
             <p className="text-green-100">
-              This story branches here. Choose which version you'd like to continue reading.
+              Different authors have contributed chapters at this point. Choose which version to read.
             </p>
           </div>
 
@@ -237,7 +219,7 @@ export default function BranchChoiceModal({
           <div className="bg-gray-50 px-6 py-4 border-t">
             <div className="flex items-center justify-between">
               <p className="text-sm text-gray-600">
-                💡 Each branch offers a unique continuation of the story
+                💡 Each version shows different authors' contributions to the story
               </p>
               <button
                 onClick={onClose}

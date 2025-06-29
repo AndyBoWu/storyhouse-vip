@@ -69,7 +69,10 @@ export async function POST(request: NextRequest) {
         
         // Extract author address and slug from story for R2 storage
         const authorAddress = story.author.toLowerCase()
-        const slug = story.id.split('-').slice(1).join('-') // Remove author prefix
+        // Parse bookId format: {authorAddress}-{slug}
+        const idParts = story.id.split('-')
+        const addressPart = idParts[0]
+        const slug = idParts.slice(1).join('-') // Everything after the address is the slug
         
         const { metadataUri: generatedUri, metadataHash: generatedHash } = 
           await BookStorageService.storeIpMetadata(
@@ -139,8 +142,8 @@ export async function POST(request: NextRequest) {
         const hybridContract = new ethers.Contract(
           HYBRID_REVENUE_CONTROLLER_V2_ADDRESS,
           [
-            'function books(bytes32) view returns (address curator, bool isDerivative, bytes32 parentBookId, uint256 totalChapters, bool isActive, string ipfsMetadataHash)',
-            'function registerBook(bytes32 bookId, bool isDerivative, bytes32 parentBookId, uint256 totalChapters, string ipfsMetadataHash)'
+            'function books(bytes32) view returns (address curator, uint256 totalChapters, bool isActive, string ipfsMetadataHash)',
+            'function registerBook(bytes32 bookId, uint256 totalChapters, string ipfsMetadataHash)'
           ],
           provider
         )

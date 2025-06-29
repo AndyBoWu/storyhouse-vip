@@ -301,6 +301,10 @@ export function useReadingLicense() {
             console.log('✅ Sufficient allowance already exists')
           }
           
+          // Additional delay to ensure blockchain state is synced
+          console.log('⏳ Ensuring blockchain state is synced...')
+          await new Promise(resolve => setTimeout(resolve, 1000))
+          
           // Unlock the chapter through HybridRevenueControllerV2
           console.log('📝 Submitting chapter unlock transaction...')
           console.log('Transaction params:', {
@@ -343,16 +347,44 @@ export function useReadingLicense() {
             console.log('  BigInt(chapterNumber):', BigInt(chapterNumber).toString())
             console.log('  address (user):', address)
             
-            // Add gas estimation to help with transaction
-            const gasEstimate = await publicClient.estimateContractGas({
-              address: HYBRID_REVENUE_CONTROLLER_V2_ADDRESS as Address,
-              abi: HYBRID_V2_ABI,
-              functionName: 'unlockChapter',
-              args: [bytes32Id, BigInt(chapterNumber)],
-              account: address,
-            })
-            
-            console.log('⛽ Gas estimate:', gasEstimate.toString())
+            // Add gas estimation with retry logic
+            let gasEstimate: bigint
+            try {
+              gasEstimate = await publicClient.estimateContractGas({
+                address: HYBRID_REVENUE_CONTROLLER_V2_ADDRESS as Address,
+                abi: HYBRID_V2_ABI,
+                functionName: 'unlockChapter',
+                args: [bytes32Id, BigInt(chapterNumber)],
+                account: address,
+              })
+              // Add 20% buffer for safety
+              gasEstimate = (gasEstimate * 120n) / 100n
+              console.log('⛽ Gas estimate with buffer:', gasEstimate.toString())
+            } catch (gasError) {
+              console.warn('⚠️ Gas estimation failed, retrying with fresh state...')
+              
+              // Re-check attribution before retrying
+              try {
+                const attributionData = await publicClient.readContract({
+                  address: HYBRID_REVENUE_CONTROLLER_V2_ADDRESS as Address,
+                  abi: HYBRID_V2_ABI,
+                  functionName: 'chapterAttributions',
+                  args: [bytes32Id, BigInt(chapterNumber)],
+                })
+                console.log('📖 Re-checked attribution data:', attributionData)
+                
+                // If attribution is not set, provide clear error
+                if (attributionData[0] === '0x0000000000000000000000000000000000000000') {
+                  throw new Error('Chapter attribution not set on-chain. Please wait for the transaction to confirm and try again.')
+                }
+              } catch (readError) {
+                console.error('Failed to re-check attribution:', readError)
+              }
+              
+              // Use a default gas limit if estimation fails
+              gasEstimate = 500000n
+              console.log('⛽ Using default gas estimate:', gasEstimate.toString())
+            }
             
             // Add extra debugging to see exact parameters
             console.log('🔍 CRITICAL DEBUG - Exact writeContract params:')
@@ -365,13 +397,20 @@ export function useReadingLicense() {
             console.log('  BigInt(chapterNumber):', BigInt(chapterNumber))
             console.log('  gas:', gasEstimate)
             
-            writeUnlockChapter({
+            // Write the transaction - optionally without gas if estimation failed
+            const txParams: any = {
               address: HYBRID_REVENUE_CONTROLLER_V2_ADDRESS as Address,
               abi: HYBRID_V2_ABI,
               functionName: 'unlockChapter',
               args: [bytes32Id, BigInt(chapterNumber)],
-              gas: gasEstimate,
-            })
+            }
+            
+            // Only add gas if we have a reasonable estimate
+            if (gasEstimate > 0n) {
+              txParams.gas = gasEstimate
+            }
+            
+            writeUnlockChapter(txParams)
             
             console.log('✅ writeUnlockChapter called successfully')
           } catch (writeError) {
@@ -445,9 +484,9 @@ export function useReadingLicense() {
             }
             
             throw new Error(
-              'Unable to unlock chapter. This appears to be a configuration issue. ' +
-              'The chapter shows as configured in the UI but the smart contract disagrees. ' +
-              'Please contact support with the error details from the console.'
+              'Unable to unlock chapter. The chapter pricing may still be confirming on the blockchain. ' +
+              'This usually happens if you try to unlock immediately after publishing. ' +
+              'Please wait a few seconds and try again.'
             )
           }
           

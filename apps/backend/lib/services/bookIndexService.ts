@@ -182,7 +182,8 @@ export class BookIndexService {
               tags: metadata.tags || [],
               status: metadata.status || 'published',
               createdAt: metadata.createdAt || new Date().toISOString(),
-              updatedAt: metadata.updatedAt || new Date().toISOString()
+              updatedAt: metadata.updatedAt || new Date().toISOString(),
+              parentBookId: metadata.parentBookId  // Extract parent book relationship
             }
             
             return bookEntry
@@ -294,7 +295,8 @@ export class BookIndexService {
                 tags: metadata.tags || [],
                 status: metadata.status || 'published',
                 createdAt: metadata.createdAt || new Date().toISOString(),
-                updatedAt: new Date().toISOString()
+                updatedAt: new Date().toISOString(),
+                parentBookId: metadata.parentBookId  // Extract parent book relationship
               }
               
               currentIndex.books.push(bookEntry)
