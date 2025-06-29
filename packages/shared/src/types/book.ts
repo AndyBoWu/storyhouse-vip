@@ -22,10 +22,8 @@ export interface BookMetadata {
   ipAssetId?: string;         // Story Protocol IP asset ID
   licenseTermsId?: string;    // PIL terms for licensing
   
-  // Branching Information
-  parentBook?: string;        // "0x1234.../detective" (for derivative books)
-  branchPoint?: string;       // "ch3" (where branching occurred)
-  derivativeBooks: string[];  // ["0x9abc.../detective-dark"] (child books)
+  // Chapter Management
+  // Note: Derivative books no longer exist - all chapters belong to original books
   
   // Chapter Resolution Map - CORE FEATURE
   chapterMap: {
@@ -122,15 +120,11 @@ export interface BookRegistrationRequest {
 }
 
 export interface BookBranchingRequest {
-  parentBookId: string;
-  branchPoint: string;       // "ch3"
-  newTitle: string;
-  newDescription: string;
-  newCover?: File;
+  parentBookId: string;      // Original book to contribute to
+  branchPoint: string;       // "ch3" - where to start contributing
   authorAddress: string;
   authorName?: string;
-  genres: string[];
-  contentRating: 'G' | 'PG' | 'PG-13' | 'R' | 'NC-17';
+  // Note: In new model, no new book is created - chapters are added to original book
 }
 
 export interface BookRegistrationResponse {
@@ -154,15 +148,14 @@ export interface BookRegistrationResponse {
 export interface BookBranchingResponse {
   success: boolean;
   book: {
-    bookId: string;
-    parentBookId: string;
-    ipAssetId?: string;
-    branchPoint: string;
+    bookId: string;           // Original book ID (same book, no derivative created)
+    branchPoint: string;      // Where user will start contributing
+    nextChapterNumber: number; // Chapter number user will write
     coverUrl?: string;
     chapterMap: { [chapterNumber: string]: string };
     originalAuthors: BookMetadata['originalAuthors'];
   };
-  transactionHash?: string;
+  message?: string;
   error?: string;
 }
 
@@ -353,7 +346,7 @@ export const BOOK_SYSTEM_CONSTANTS = {
   // Validation
   MIN_TITLE_LENGTH: 3,
   MAX_TITLE_LENGTH: 100,
-  MIN_DESCRIPTION_LENGTH: 10,
+  MIN_DESCRIPTION_LENGTH: 50,
   MAX_DESCRIPTION_LENGTH: 1000,
   MAX_SLUG_LENGTH: 50,
   

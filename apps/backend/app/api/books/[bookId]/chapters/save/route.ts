@@ -89,12 +89,46 @@ export async function POST(
       slug = bookIdParts.slice(1).join('-')
     }
 
-    // Validate author matches
-    if (authorAddress !== body.authorAddress.toLowerCase()) {
-      return NextResponse.json({
-        success: false,
-        error: 'Author address does not match book owner'
-      }, { status: 403 })
+    // For original books, validate author ownership
+    try {
+      const bookMetadata = await BookStorageService.getBookMetadata(bookId)
+      
+      // If this is an original book (not derivative)
+      if (!bookMetadata.parentBook) {
+        // Import the ownership service
+        const { BookOwnershipService } = await import('@/lib/services/bookOwnershipService')
+        
+        // Check if author can add chapters to this book
+        const ownership = await BookOwnershipService.determineBookOwner(bookId)
+        
+        // If ownership is established, only the IP owner can add chapters
+        if (ownership.ownershipEstablished && 
+            ownership.ipOwner !== body.authorAddress.toLowerCase()) {
+          return NextResponse.json({
+            success: false,
+            error: 'Only the book IP owner can add chapters to this book. The IP is owned by the author of chapters 1-3.'
+          }, { status: 403 })
+        }
+        
+        // If ownership is pending (only chapter 1 exists), only the ch1 author can continue
+        if (ownership.ownershipReason === 'single_chapter' && 
+            ownership.ipOwner !== body.authorAddress.toLowerCase()) {
+          return NextResponse.json({
+            success: false,
+            error: 'Only the author of chapter 1 can continue this book.'
+          }, { status: 403 })
+        }
+      }
+    } catch (error) {
+      console.warn('Could not verify book ownership:', error)
+      // If book doesn't exist yet (first chapter), allow the author to proceed
+      // This handles cases where the book metadata hasn't been created yet
+      if (error instanceof Error && error.message.includes('Book not found')) {
+        console.log('📚 Book not found, allowing first chapter creation for:', body.authorAddress)
+      } else {
+        // For other errors, still continue but log the issue
+        console.error('Unexpected error during ownership check:', error)
+      }
     }
 
     // Create chapter metadata
@@ -180,9 +214,19 @@ export async function POST(
       }
       
       // Register book in HybridRevenueController if blockchain registration is provided
-      if (body.ipAssetId && body.transactionHash) {
+      // Only for original books - derivative books don't need registration
+      let isOriginalBook = true
+      try {
+        const bookMeta = await BookStorageService.getBookMetadata(bookId)
+        isOriginalBook = !bookMeta.parentBook
+      } catch (e) {
+        // If book metadata doesn't exist yet, assume it's original
+        isOriginalBook = true
+      }
+      
+      if (body.ipAssetId && body.transactionHash && isOriginalBook) {
         try {
-          console.log('🔄 Registering book in HybridRevenueController...')
+          console.log('🔄 Registering original book in HybridRevenueController...')
           // Use internal function call instead of HTTP request
           const { POST: registerHybrid } = await import('../../../register-hybrid/route')
           const mockRequest = new NextRequest('http://localhost/api/books/register-hybrid', {
@@ -200,7 +244,7 @@ export async function POST(
           const hybridResponse = await registerHybrid(mockRequest)
           const hybridResult = await hybridResponse.json()
           if (hybridResult.success) {
-            console.log('✅ Book registered in HybridRevenueController')
+            console.log('✅ Original book registered in HybridRevenueController')
           } else {
             console.warn('⚠️ HybridRevenueController registration failed:', hybridResult.error)
           }

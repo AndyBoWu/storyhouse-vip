@@ -11,6 +11,68 @@ export async function POST(request: NextRequest) {
     if (contentType.includes('multipart/form-data')) {
       // Handle FormData uploads
       const formData = await request.formData()
+      
+      // Check if this is a book cover upload
+      const uploadType = formData.get('type') as string
+      if (uploadType === 'cover') {
+        // Handle book cover upload
+        const file = formData.get('file') as File
+        const storyTitle = formData.get('storyTitle') as string
+        
+        if (!file) {
+          return NextResponse.json(
+            { error: 'File is required for cover upload' },
+            { status: 400 }
+          )
+        }
+        
+        if (!storyTitle) {
+          return NextResponse.json(
+            { error: 'Story title is required for cover upload' },
+            { status: 400 }
+          )
+        }
+        
+        // Convert file to buffer for R2 upload
+        const buffer = Buffer.from(await file.arrayBuffer())
+        
+        // Generate a simple slug from the title for the key
+        const slug = storyTitle.toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, '')
+          .replace(/\s+/g, '-')
+          .replace(/-+/g, '-')
+          .trim('-')
+        
+        const fileExtension = file.name.split('.').pop() || 'jpg'
+        const key = `covers/${slug}-${Date.now()}.${fileExtension}`
+        
+        try {
+          const publicUrl = await R2Service.uploadContent(key, buffer, {
+            contentType: file.type || 'image/jpeg',
+            metadata: {
+              uploadType: 'cover',
+              originalName: file.name,
+              storyTitle,
+              uploadedAt: new Date().toISOString(),
+            },
+          })
+          
+          return NextResponse.json({
+            success: true,
+            url: publicUrl,
+            key,
+            type: 'cover'
+          })
+        } catch (uploadError) {
+          console.error('Cover upload to R2 failed:', uploadError)
+          return NextResponse.json(
+            { error: 'Failed to upload cover to storage' },
+            { status: 500 }
+          )
+        }
+      }
+      
+      // Handle regular content uploads
       body = {
         content: formData.get('content'),
         storyId: formData.get('storyId'),
@@ -58,48 +120,86 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Generate appropriate key based on content type
-    let key: string
-    let metadata: Record<string, string> = {
-      storyId,
-      uploadedAt: new Date().toISOString(),
-      ...(authorAddress && { authorAddress }),
-      ...(authorName && { authorName }),
+    try {
+      // Check if this is NFT metadata upload (from Story Protocol registration)
+      if (storyId.startsWith('nft-metadata-')) {
+        // Handle NFT metadata uploads with simple key generation
+        const timestamp = Date.now()
+        const key = `metadata/nft-metadata-${timestamp}.json`
+        
+        const contentToUpload = typeof content === 'string' ? content : JSON.stringify(content)
+        
+        const publicUrl = await R2Service.uploadContent(key, contentToUpload, {
+          contentType: reqContentType,
+          metadata: {
+            type: 'nft-metadata',
+            storyId,
+            uploadedAt: new Date().toISOString(),
+          },
+        })
+        
+        return NextResponse.json({
+          success: true,
+          url: publicUrl,
+          key,
+          type: 'nft-metadata'
+        })
+      }
+
+      // Generate appropriate key based on content type for regular uploads
+      let key: string
+      let metadata: Record<string, string> = {
+        storyId,
+        uploadedAt: new Date().toISOString(),
+        ...(authorAddress && { authorAddress }),
+        ...(authorName && { authorName }),
+      }
+
+      if (chapterNumber !== undefined) {
+        // Chapter content
+        key = R2Service.generateChapterKey(storyId, chapterNumber)
+        metadata.chapterNumber = chapterNumber.toString()
+        metadata.contentType = 'chapter'
+      } else {
+        // Story metadata
+        key = R2Service.generateStoryKey(storyId)
+        metadata.contentType = 'story'
+      }
+
+      // Prepare content for upload
+      const contentToUpload = typeof content === 'string'
+        ? content
+        : JSON.stringify(content)
+
+      // Upload to R2
+      const publicUrl = await R2Service.uploadContent(key, contentToUpload, {
+        contentType: reqContentType,
+        metadata,
+      })
+
+      return NextResponse.json({
+        success: true,
+        url: publicUrl,
+        key,
+        metadata,
+      })
+    } catch (uploadError) {
+      console.error('Upload processing error:', uploadError)
+      return NextResponse.json(
+        { error: 'Failed to process upload', details: uploadError instanceof Error ? uploadError.message : 'Unknown error' },
+        { status: 500 }
+      )
     }
-
-    if (chapterNumber !== undefined) {
-      // Chapter content
-      key = R2Service.generateChapterKey(storyId, chapterNumber)
-      metadata.chapterNumber = chapterNumber.toString()
-      metadata.contentType = 'chapter'
-    } else {
-      // Story metadata
-      key = R2Service.generateStoryKey(storyId)
-      metadata.contentType = 'story'
-    }
-
-    // Prepare content for upload
-    const contentToUpload = typeof content === 'string'
-      ? content
-      : JSON.stringify(content)
-
-    // Upload to R2
-    const publicUrl = await R2Service.uploadContent(key, contentToUpload, {
-      contentType: reqContentType,
-      metadata,
-    })
-
-    return NextResponse.json({
-      success: true,
-      url: publicUrl,
-      key,
-      metadata,
-    })
 
   } catch (error) {
     console.error('Upload error:', error)
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace')
     return NextResponse.json(
-      { error: 'Failed to upload content' },
+      { 
+        error: 'Failed to upload content', 
+        details: error instanceof Error ? error.message : 'Unknown error',
+        type: 'general_upload_error'
+      },
       { status: 500 }
     )
   }

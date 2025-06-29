@@ -214,6 +214,16 @@ export default function BookPage() {
         });
 
         const chapterObjects = await Promise.all(chapterPromises);
+        
+        // Debug logging for chapter 4 investigation
+        console.log('🔍 Chapter loading debug:', {
+          chaptersFromAPI: chaptersResponse.data.chapters,
+          totalLoadedChapters: chapterObjects.length,
+          chapterTitles: chapterObjects.map(c => `${c.number}: ${c.title}`),
+          chapter4Present: chapterObjects.some(c => c.number === 4),
+          chapter4Details: chapterObjects.find(c => c.number === 4)
+        });
+        
         setChapters(chapterObjects);
         
         // Set the next chapter number for writing
@@ -484,8 +494,10 @@ export default function BookPage() {
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
       
-      {/* Derivative Book IP Warning */}
-      {book.parentBook && <DerivativeBookIPWarning />}
+      {/* Multi-Author Attribution Warning */}
+      {(book.parentBook || chapters.some(ch => ch.originalAuthor && ch.originalAuthor.toLowerCase() !== book.authorAddress.toLowerCase())) && (
+        <DerivativeBookIPWarning />
+      )}
       
       {/* Book Details Section */}
       <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
@@ -604,12 +616,13 @@ export default function BookPage() {
         </div>
       </div>
 
-      {/* Book Registration Prompt - shows when book needs blockchain registration */}
+      {/* Book Registration Prompt - shows when original book needs blockchain registration */}
       {(() => {
         const isAuthor = address && book.authorAddress && address.toLowerCase() === book.authorAddress.toLowerCase()
         const chapterCount = book.totalChapters || 0
-        // Show for all users when book has chapters but isn't registered
-        const shouldShow = chapterCount > 0
+        const isOriginalBook = !book.parentBook
+        // Show for all users when original book has chapters but isn't registered
+        const shouldShow = chapterCount > 0 && isOriginalBook
         
         console.log('🔍 BookRegistrationPrompt render conditions:', {
           address,
@@ -618,7 +631,7 @@ export default function BookPage() {
           shouldShow,
           chapterCount,
           bookParentBook: book.parentBook,
-          isDerivative: !!book.parentBook
+          isOriginalBook
         })
         
         return shouldShow ? (
@@ -629,58 +642,11 @@ export default function BookPage() {
               // Refresh book data after registration
               fetchBookDetails()
             }}
-            isDerivative={!!book.parentBook}
-            parentBookId={book.parentBook}
             showAsButton={!isAuthor} // Show as button for non-authors
           />
         ) : null
       })()}
       
-      {/* Derivative Book Revenue Registration Prompt */}
-      {book.needsRevenueRegistration && book.parentBook && address && 
-       book.authorAddress && address.toLowerCase() === book.authorAddress.toLowerCase() && (
-        <div className="bg-amber-50 border-2 border-amber-300 rounded-lg p-6 mb-6">
-          <div className="flex items-start gap-4">
-            <div className="flex-shrink-0">
-              <div className="w-12 h-12 bg-amber-400 rounded-full flex items-center justify-center">
-                <span className="text-2xl">💰</span>
-              </div>
-            </div>
-            <div className="flex-1">
-              <h3 className="text-lg font-semibold text-amber-900 mb-2">
-                Register Your Derivative Book for Revenue Sharing
-              </h3>
-              <p className="text-amber-700 mb-4">
-                Your derivative book needs to be registered on the revenue sharing contract before you can publish paid chapters (Chapter 4+).
-                This is a one-time setup that enables:
-              </p>
-              <ul className="text-sm text-amber-700 space-y-1 mb-4">
-                <li>• Chapter pricing and unlocking (0.5 TIP per chapter)</li>
-                <li>• Automatic revenue distribution (70% author, 20% curator, 10% platform)</li>
-                <li>• Attribution tracking for original authors</li>
-                <li>• Reader payment processing</li>
-              </ul>
-              <p className="text-sm text-amber-600 mb-4">
-                <strong>Note:</strong> This is a blockchain transaction that requires gas fees. 
-                Make sure you have some ETH in your wallet for transaction costs.
-              </p>
-              <BookRegistrationPrompt 
-                bookId={bookId}
-                chapterNumber={book.totalChapters || 0}
-                onRegistrationComplete={() => {
-                  // Refresh book data after registration
-                  fetchBookDetails()
-                }}
-                isDerivative={true}
-                showAsButton={true}
-                parentBookId={book.parentBook}
-              />
-            </div>
-          </div>
-        </div>
-      )}
-
-
       {/* Chapters Section */}
       <div className="bg-white rounded-lg shadow-lg p-6 mt-6">
         <h2 className="text-2xl font-bold mb-6">Chapters</h2>
@@ -698,6 +664,20 @@ export default function BookPage() {
         ) : (
           <div className="space-y-4">
             {chapters.map((chapter) => {
+              // CHAPTER 4 SPECIFIC DEBUG
+              if (chapter.number === 4) {
+                console.log('🔍 CHAPTER 4 RENDERING DEBUG:', {
+                  chapterNumber: chapter.number,
+                  chapterTitle: chapter.title,
+                  chapterUnlocked: chapter.unlocked,
+                  chapterStatus: chapter.status,
+                  chapterPreview: chapter.preview,
+                  isAuthor: address && book.authorAddress && address.toLowerCase() === book.authorAddress.toLowerCase(),
+                  currentAddress: address,
+                  bookAuthorAddress: book.authorAddress,
+                  willRender: true
+                });
+              }
               // Check if current user is the author
               const isAuthor = address && book.authorAddress && address.toLowerCase() === book.authorAddress.toLowerCase();
               
@@ -750,6 +730,18 @@ export default function BookPage() {
                     {isAuthor ? 'AUTHOR' : 'LICENSED'}
                   </span>
                 );
+              }
+              
+              // FINAL RENDER DEBUG FOR CHAPTER 4
+              if (chapter.number === 4) {
+                console.log('🎯 CHAPTER 4 FINAL RENDER:', {
+                  chapterNumber: chapter.number,
+                  chapterTitle: chapter.title,
+                  chapterStyle,
+                  iconComponent: !!iconComponent,
+                  statusBadge: !!statusBadge,
+                  isReturningJSX: true
+                });
               }
               
               return (
@@ -828,19 +820,17 @@ export default function BookPage() {
                       <span>{formatDate(chapter.createdAt)}</span>
                     </div>
                     
-                    {/* IP Attribution for derivative books */}
-                    {book?.parentBook && (
-                      <div className="mt-3">
-                        <ChapterIPAttribution
-                          chapterNumber={chapter.number}
-                          isInherited={chapter.isInherited}
-                          originalAuthor={chapter.originalAuthor}
-                          originalBookId={chapter.originalBookId}
-                          chapterIPAssetId={chapter.ipAssetId}
-                          isDerivativeBook={true}
-                        />
-                      </div>
-                    )}
+                    {/* IP Attribution for all chapters */}
+                    <div className="mt-3">
+                      <ChapterIPAttribution
+                        chapterNumber={chapter.number}
+                        isInherited={chapter.isInherited}
+                        originalAuthor={chapter.originalAuthor}
+                        originalBookId={chapter.originalBookId}
+                        chapterIPAssetId={chapter.ipAssetId}
+                        currentBookAuthor={book.authorAddress}
+                      />
+                    </div>
                   </div>
                 </Link>
               );

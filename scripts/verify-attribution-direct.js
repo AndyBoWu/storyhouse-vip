@@ -5,7 +5,7 @@ async function verifyAttributionDirect() {
   const provider = new ethers.JsonRpcProvider('https://aeneid.storyrpc.io');
   
   // Contract address
-  const contractAddress = '0x99dA048826Bbb8189FBB6C3e62EaA75d0fB36812';
+  const contractAddress = '0x995c07920fb8eC57cBA8b0E2be8903cB4434f9D6';
   
   // Function selector for chapterAttributions(bytes32,uint256)
   const functionSelector = '0x8c5d0d7e'; // First 4 bytes of keccak256("chapterAttributions(bytes32,uint256)")

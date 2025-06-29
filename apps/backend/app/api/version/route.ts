@@ -26,25 +26,22 @@ export async function GET(request: NextRequest) {
       nodeEnv: process.env.NODE_ENV || 'development',
       
       // Application version
-      appVersion: '6.0.0', // Phase 6.0 - 5-Contract Architecture
-      architecture: '5-contract-optimized'
+      appVersion: '6.3.0', // Phase 6.3 - 2-Contract Architecture
+      architecture: '2-contract-minimal'
     }
 
-    // Smart contract addresses (5-contract architecture)
+    // Smart contract addresses (2-contract architecture)
     const contractAddresses = {
       network: 'Story Protocol Aeneid Testnet',
       chainId: 1315,
       contracts: {
         tipToken: '0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E',
-        rewardsManager: '0xf5aE031bA92295C2aE86a99e88f09989339707E5',
-        unifiedRewardsController: '0x741105d6ee9b25567205f57c0e4f1d293f0d00c5',
-        chapterAccessController: '0x1bd65ad10b1ca3ed67ae75fcdd3aba256a9918e3',
-        hybridRevenueController: '0xd1f7e8c6fd77dadbe946ae3e4141189b39ef7b08',
+        hybridRevenueControllerV2: '0x995c07920fb8eC57cBA8b0E2be8903cB4434f9D6', // Includes all functionality
         spgNftContract: '0x26b6aa7e7036fc9e8fa2d8184c2cf07ae2e2412d'
       },
-      deploymentDate: '2025-06-16',
-      testCoverage: '97.3%',
-      totalTests: 182
+      deploymentDate: '2025-06-29',
+      architecture: '2-contract-minimal',
+      notes: 'HybridRevenueControllerV2 includes book registration, chapter unlocking, and revenue distribution'
     }
 
     // Feature flags
@@ -72,7 +69,7 @@ export async function GET(request: NextRequest) {
       features,
       packages: packageInfo,
       timestamp: new Date().toISOString(),
-      phase: 'Phase 6.0 Complete - 5-Contract Architecture Deployed'
+      phase: 'Phase 6.3 Complete - 2-Contract Architecture with Unified Registration'
     })
     
   } catch (error) {

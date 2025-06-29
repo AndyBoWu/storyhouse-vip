@@ -25,11 +25,8 @@ export interface BookMetadata {
   tokenId?: string           // Backward compatibility
   transactionHash?: string
   
-  // Branching Information
-  parentBook?: string        // Parent book ID for derivatives
-  parentBookId?: BookId      // Backward compatibility alias
-  branchPoint?: string       // Chapter where branching occurred (e.g., "ch3")
-  derivativeBooks: string[]  // Child book IDs
+  // Chapter Management
+  // Note: Derivative books no longer exist - all chapters belong to original books
   
   // Chapter Resolution Map - CORE FEATURE
   chapterMap: {
@@ -65,9 +62,6 @@ export interface BookMetadata {
   // Timestamps
   createdAt: string        // ISO string
   updatedAt: string        // ISO string
-  
-  // Registration Status
-  needsRevenueRegistration?: boolean  // True for derivatives that need HybridRevenueControllerV2 registration
   
   // Legacy/compatibility fields
   status?: string
@@ -162,9 +156,8 @@ export interface BookBranchingResponse {
   bookId?: BookId
   message: string
   book?: {
-    bookId: string
-    parentBookId: string
-    ipAssetId?: string
+    bookId: string           // Original book ID (no derivative book created)
+    nextChapterNumber: number // Chapter number user will write
     branchPoint: string
     coverUrl?: string
     chapterMap: { [chapterNumber: string]: string }
@@ -215,7 +208,7 @@ export const BOOK_SYSTEM_CONSTANTS = {
   // Length validation
   MIN_TITLE_LENGTH: 3,
   MAX_TITLE_LENGTH: 200,
-  MIN_DESCRIPTION_LENGTH: 10,
+  MIN_DESCRIPTION_LENGTH: 50,
   MAX_DESCRIPTION_LENGTH: 1000,
   MAX_CHAPTER_TITLE_LENGTH: 100,
   MAX_SLUG_LENGTH: 50,

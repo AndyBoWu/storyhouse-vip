@@ -8,7 +8,7 @@ const ABI = [
 ];
 
 // Contract address on Story testnet
-const CONTRACT_ADDRESS = "0x99dA048826Bbb8189FBB6C3e62EaA75d0fB36812"; // HybridRevenueControllerV2
+const CONTRACT_ADDRESS = "0x995c07920fb8eC57cBA8b0E2be8903cB4434f9D6"; // HybridRevenueControllerV2
 
 async function checkAttribution(bookId, chapterNumber) {
   // Connect to Story testnet

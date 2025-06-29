@@ -8,7 +8,7 @@ import { injected } from 'wagmi/connectors'
 import { useUnifiedPublishStory } from '@/hooks/useUnifiedPublishStory'
 import { useEnhancedStoryProtocol } from '@/hooks/useEnhancedStoryProtocol'
 import { getExplorerUrl, getIPAssetUrl } from '@/lib/contracts/storyProtocol'
-import { DerivativeRegistrationFlow } from './DerivativeRegistrationFlow'
+import { BookRegistrationFlow } from './BookRegistrationFlow'
 
 interface GeneratedStory {
   title: string
@@ -271,9 +271,7 @@ function PublishingModal({
         return { text: 'Generating metadata...', icon: <Upload className="w-5 h-5" /> }
       case 'blockchain-transaction':
         return { 
-          text: isDerivative && chapterNumber === 4
-            ? 'Registering derivative IP Asset - Check MetaMask...' 
-            : 'Step 1/2: Registering IP Asset - Check MetaMask...', 
+          text: 'Step 1/2: Registering IP Asset - Check MetaMask...', 
           icon: <Link className="w-5 h-5" /> 
         }
       case 'saving-to-storage':
@@ -1135,15 +1133,15 @@ function PublishingModal({
         </motion.div>
       )}
       
-      {/* Derivative Registration Flow Modal */}
-      {showRegistrationFlow && pendingPublishData && (
-        <DerivativeRegistrationFlow
+      {/* Book Registration Flow Modal - Only for original books */}
+      {showRegistrationFlow && pendingPublishData && !isDerivative && (
+        <BookRegistrationFlow
           bookId={pendingPublishData.bookId || bookId || ''}
           chapterNumber={chapterNumber}
           chapterPrice={`${chapterPrice} TIP`}
           onProceed={handleRegistrationProceed}
           onCancel={handleRegistrationCancel}
-          isDerivative={isDerivative}
+          isDerivative={false}
           parentBookTitle={parentBookTitle}
         />
       )}

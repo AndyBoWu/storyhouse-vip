@@ -68,7 +68,7 @@ curl https://your-backend-url.vercel.app/api/version
       "rewardsManager": "0xf5aE031bA92295C2aE86a99e88f09989339707E5",
       "unifiedRewardsController": "0x741105d6ee9b25567205f57c0e4f1d293f0d00c5",
       "chapterAccessController": "0x1bd65ad10b1ca3ed67ae75fcdd3aba256a9918e3",
-      "hybridRevenueController": "0xd1f7e8c6fd77dadbe946ae3e4141189b39ef7b08"
+      "hybridRevenueController": "0x99dA048826Bbb8189FBB6C3e62EaA75d0fB36812"
     },
     "testCoverage": "97.3%",
     "totalTests": 182

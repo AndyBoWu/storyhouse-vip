@@ -7,12 +7,12 @@ config({ path: path.resolve(__dirname, '../apps/backend/.env.local') })
 
 const STORY_RPC_URL = 'https://aeneid.storyrpc.io'
 const TIP_TOKEN_ADDRESS = '0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E'
-const HYBRID_REVENUE_CONTROLLER_V2_ADDRESS = '0x99dA048826Bbb8189FBB6C3e62EaA75d0fB36812'
+const HYBRID_REVENUE_CONTROLLER_V2_ADDRESS = '0x995c07920fb8eC57cBA8b0E2be8903cB4434f9D6'
 
 // ABI for HybridRevenueControllerV2
 const HYBRID_V2_ABI = [
-  'function books(bytes32) view returns (address curator, bool isDerivative, bytes32 parentBookId, uint256 totalChapters, bool isActive, string ipfsMetadataHash)',
-  'function registerBook(bytes32 bookId, bool isDerivative, bytes32 parentBookId, uint256 totalChapters, string ipfsMetadataHash)',
+  'function books(bytes32) view returns (address curator, uint256 totalChapters, bool isActive, string ipfsMetadataHash)',
+  'function registerBook(bytes32 bookId, uint256 totalChapters, string ipfsMetadataHash)',
   'function unlockChapter(bytes32 bookId, uint256 chapterNumber) payable',
   'function chapterUnlocks(address, bytes32, uint256) view returns (bool)',
   'function hasRole(bytes32 role, address account) view returns (bool)',

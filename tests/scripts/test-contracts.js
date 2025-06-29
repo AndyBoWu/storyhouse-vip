@@ -23,10 +23,10 @@ const storyTestnet = {
   },
 };
 
-// Contract addresses (2-contract minimal architecture)
+// Contract addresses (3-contract optimized architecture)
 const CONTRACTS = {
   TIP_TOKEN: '0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E',
-  HYBRID_REVENUE_CONTROLLER_V2: '0x99dA048826Bbb8189FBB6C3e62EaA75d0fB36812',
+  HYBRID_REVENUE_CONTROLLER_V2: '0x995c07920fb8eC57cBA8b0E2be8903cB4434f9D6',
 };
 
 // Simple ERC-20 ABI for basic checks

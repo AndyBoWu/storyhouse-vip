@@ -1,12 +1,10 @@
 import { Address, Hash } from 'viem'
 
-// StoryHouse Contract Addresses - 3-Contract Optimized Architecture
-// Deployed on 2025-06-16, all contracts operational and configured
+// StoryHouse Contract Addresses - 2-Contract Minimal Architecture
+// HybridRevenueControllerV2 includes all functionality (book registration, chapter unlocking, revenue sharing)
 export const STORYHOUSE_CONTRACTS = {
   TIP_TOKEN: '0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E' as Address,
-  CHAPTER_ACCESS_CONTROLLER: '0x1bd65ad10b1ca3ed67ae75fcdd3aba256a9918e3' as Address,
-  HYBRID_REVENUE_CONTROLLER: '0xd1f7e8c6fd77dadbe946ae3e4141189b39ef7b08' as Address, // V1 - Legacy
-  HYBRID_REVENUE_CONTROLLER_V2: '0x99dA048826Bbb8189FBB6C3e62EaA75d0fB36812' as Address, // V2 - Current
+  HYBRID_REVENUE_CONTROLLER_V2: '0x995c07920fb8eC57cBA8b0E2be8903cB4434f9D6' as Address, // V2 - Includes chapter access
 } as const
 
 // Essential ABI fragments for frontend operations
@@ -285,8 +283,6 @@ export const HYBRID_REVENUE_CONTROLLER_V2_ABI = [
     stateMutability: 'nonpayable',
     inputs: [
       { name: 'bookId', type: 'bytes32' },
-      { name: 'isDerivative', type: 'bool' },
-      { name: 'parentBookId', type: 'bytes32' },
       { name: 'totalChapters', type: 'uint256' },
       { name: 'ipfsMetadataHash', type: 'string' }
     ],
@@ -323,8 +319,6 @@ export const HYBRID_REVENUE_CONTROLLER_V2_ABI = [
     inputs: [{ name: '', type: 'bytes32' }],
     outputs: [
       { name: 'curator', type: 'address' },
-      { name: 'isDerivative', type: 'bool' },
-      { name: 'parentBookId', type: 'bytes32' },
       { name: 'totalChapters', type: 'uint256' },
       { name: 'isActive', type: 'bool' },
       { name: 'ipfsMetadataHash', type: 'string' }
@@ -340,6 +334,28 @@ export const HYBRID_REVENUE_CONTROLLER_V2_ABI = [
       { name: 'chapterNumber', type: 'uint256' }
     ],
     outputs: [{ name: '', type: 'bool' }]
+  },
+  {
+    name: 'getBookInfo',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [{ name: 'bookId', type: 'bytes32' }],
+    outputs: [
+      { name: 'curator', type: 'address' },
+      { name: 'totalChapters', type: 'uint256' },
+      { name: 'isActive', type: 'bool' },
+      { name: 'totalRevenue', type: 'uint256' }
+    ]
+  },
+  {
+    name: 'updateTotalChapters',
+    type: 'function',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'bookId', type: 'bytes32' },
+      { name: 'newTotalChapters', type: 'uint256' }
+    ],
+    outputs: []
   }
 ] as const
 

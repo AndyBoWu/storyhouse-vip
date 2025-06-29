@@ -1,0 +1,63 @@
+name: 📦 R2 Backup (Weekly)
+
+on:
+  schedule:
+    # Run weekly on Sundays at 3 AM UTC
+    - cron: '0 3 * * 0'
+  workflow_dispatch:
+    inputs:
+      backup_path:
+        description: 'Specific path to backup (leave empty for full backup)'
+        required: false
+        type: string
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    name: Create R2 backups
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: apps/backend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: apps/backend
+        run: npm ci
+
+      - name: Create backups
+        working-directory: apps/backend
+        env:
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+        run: |
+          echo "📦 Starting R2 backup job..."
+          
+          # If specific path provided, backup only that
+          if [ -n "${{ github.event.inputs.backup_path }}" ]; then
+            echo "🎯 Backing up specific path: ${{ github.event.inputs.backup_path }}"
+            npm run backup:create "${{ github.event.inputs.backup_path }}"
+          else
+            # Otherwise, backup critical folders
+            echo "🗂️ Creating full backup of critical folders..."
+            
+            # Backup books folder
+            npm run backup:create "books/" || echo "⚠️ Books backup failed, continuing..."
+            
+            # Backup metadata folder
+            npm run backup:create "metadata/" || echo "⚠️ Metadata backup failed, continuing..."
+            
+            # Clean up old backups (keep last 30 days)
+            echo "🧹 Cleaning up old backups..."
+            npm run backup:cleanup 30
+          fi
+          
+          echo "✅ Backup job completed"

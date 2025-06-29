@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, ListObjectsV2Command } from '@aws-sdk/client-s3'
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, DeleteObjectsCommand, ListObjectsV2Command, CopyObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
 // Initialize R2 client with proper configuration for Cloudflare R2
@@ -513,6 +513,134 @@ export class R2Service {
     } catch (error) {
       console.warn('Could not check enhanced metadata for key:', key, error)
       return false
+    }
+  }
+
+  /**
+   * Create a backup of content to the backups folder
+   */
+  static async createBackup(sourceKey: string, backupKey?: string): Promise<string> {
+    try {
+      const client = getR2Client()
+      
+      // Generate backup key if not provided
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
+      const finalBackupKey = backupKey || `backups/${timestamp}/${sourceKey}`
+      
+      console.log(`🔄 Creating backup: ${sourceKey} -> ${finalBackupKey}`)
+      
+      // Copy object to backup location
+      const copyCommand = new CopyObjectCommand({
+        Bucket: BUCKET_NAME,
+        CopySource: `${BUCKET_NAME}/${sourceKey}`,
+        Key: finalBackupKey,
+        MetadataDirective: 'COPY'
+      })
+      
+      await client.send(copyCommand)
+      
+      console.log(`✅ Backup created successfully: ${finalBackupKey}`)
+      return finalBackupKey
+    } catch (error) {
+      console.error('❌ Error creating backup:', error)
+      throw new Error(`Failed to create backup: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
+  }
+
+  /**
+   * Restore content from a backup
+   */
+  static async restoreFromBackup(backupKey: string, targetKey: string): Promise<void> {
+    try {
+      const client = getR2Client()
+      
+      console.log(`🔄 Restoring from backup: ${backupKey} -> ${targetKey}`)
+      
+      // Copy backup to target location
+      const copyCommand = new CopyObjectCommand({
+        Bucket: BUCKET_NAME,
+        CopySource: `${BUCKET_NAME}/${backupKey}`,
+        Key: targetKey,
+        MetadataDirective: 'COPY'
+      })
+      
+      await client.send(copyCommand)
+      
+      console.log(`✅ Restored successfully from backup to: ${targetKey}`)
+    } catch (error) {
+      console.error('❌ Error restoring from backup:', error)
+      throw new Error(`Failed to restore from backup: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
+  }
+
+  /**
+   * List available backups for a given prefix
+   */
+  static async listBackups(prefix?: string): Promise<Array<{key: string, lastModified: Date, size: number}>> {
+    try {
+      const backupPrefix = prefix ? `backups/${prefix}` : 'backups/'
+      const result = await this.listObjects(backupPrefix)
+      
+      const backups = (result.Contents || [])
+        .filter(obj => obj.Key && obj.LastModified && obj.Size !== undefined)
+        .map(obj => ({
+          key: obj.Key!,
+          lastModified: obj.LastModified!,
+          size: obj.Size!
+        }))
+        .sort((a, b) => b.lastModified.getTime() - a.lastModified.getTime())
+      
+      console.log(`📋 Found ${backups.length} backups`)
+      return backups
+    } catch (error) {
+      console.error('❌ Error listing backups:', error)
+      return []
+    }
+  }
+
+  /**
+   * Clean up old backups older than specified days
+   */
+  static async cleanupOldBackups(daysToKeep: number = 30): Promise<number> {
+    try {
+      const client = getR2Client()
+      const cutoffDate = new Date()
+      cutoffDate.setDate(cutoffDate.getDate() - daysToKeep)
+      
+      console.log(`🧹 Cleaning up backups older than ${daysToKeep} days (before ${cutoffDate.toISOString()})`)
+      
+      const backups = await this.listBackups()
+      const toDelete = backups.filter(backup => backup.lastModified < cutoffDate)
+      
+      if (toDelete.length === 0) {
+        console.log('✅ No old backups to clean up')
+        return 0
+      }
+      
+      // Delete old backups in batches
+      const batchSize = 100
+      let deleted = 0
+      
+      for (let i = 0; i < toDelete.length; i += batchSize) {
+        const batch = toDelete.slice(i, i + batchSize)
+        const deleteCommand = new DeleteObjectsCommand({
+          Bucket: BUCKET_NAME,
+          Delete: {
+            Objects: batch.map(b => ({ Key: b.key })),
+            Quiet: true
+          }
+        })
+        
+        await client.send(deleteCommand)
+        deleted += batch.length
+        console.log(`🗑️ Deleted ${deleted}/${toDelete.length} old backups`)
+      }
+      
+      console.log(`✅ Cleanup complete: deleted ${deleted} old backups`)
+      return deleted
+    } catch (error) {
+      console.error('❌ Error cleaning up old backups:', error)
+      throw new Error(`Failed to cleanup old backups: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
 

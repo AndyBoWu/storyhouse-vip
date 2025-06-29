@@ -22,10 +22,8 @@ export interface BookMetadata {
   ipAssetId?: string;         // Story Protocol IP asset ID
   licenseTermsId?: string;    // PIL terms for licensing
   
-  // Branching Information
-  parentBook?: string;        // "0x1234-detective" (for derivative books)
-  branchPoint?: string;       // "ch3" (where branching occurred)
-  derivativeBooks: string[];  // ["0x9abc-detective-dark"] (child books)
+  // Chapter Management
+  // Note: Derivative books no longer exist - all chapters belong to original books
   
   // Chapter Resolution Map - CORE FEATURE
   chapterMap: {
@@ -352,7 +350,7 @@ export const BOOK_SYSTEM_CONSTANTS = {
   // Validation
   MIN_TITLE_LENGTH: 3,
   MAX_TITLE_LENGTH: 100,
-  MIN_DESCRIPTION_LENGTH: 10,
+  MIN_DESCRIPTION_LENGTH: 50,
   MAX_DESCRIPTION_LENGTH: 1000,
   MAX_SLUG_LENGTH: 50,
   

@@ -61,10 +61,16 @@ packages/contracts/
 
 ### Current Deployment (Story Protocol Testnet)
 
-| Contract | Address | Status |
-|----------|---------|--------|
-| TIP Token | `0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E` | ✅ Active |
-| HybridRevenueControllerV2 | `0x99dA048826Bbb8189FBB6C3e62EaA75d0fB36812` | ✅ Active (95 txns) |
+| Contract | Address | Status | Date |
+|----------|---------|--------|------|
+| TIP Token | `0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E` | ✅ Active | 2024-12-xx |
+| HybridRevenueControllerV2 | `0x995c07920fb8eC57cBA8b0E2be8903cB4434f9D6` | ✅ Active | 2025-06-29 |
+
+### Recent Updates (2025-06-29)
+- **HybridRevenueControllerV2 Updated**: Removed derivative book registration
+- **Contract enforces**: Only original books can be registered
+- **Added**: `updateTotalChapters()` admin function
+- **Deployed to**: Block 6105838
 
 ### Usage in Frontend/Backend
 

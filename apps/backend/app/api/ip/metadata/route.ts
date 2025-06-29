@@ -44,7 +44,18 @@ export async function POST(request: NextRequest) {
       
       // Extract author address and slug from story for R2 storage
       const authorAddress = story.author.toLowerCase()
-      const slug = story.id.split('-').slice(1).join('-') // Remove author prefix
+      
+      // Parse bookId - handle both formats: {authorAddress}/{slug} and {authorAddress}-{slug}
+      let slug: string
+      if (story.id.includes('/')) {
+        // New format: authorAddress/slug
+        const parts = story.id.split('/')
+        slug = parts[1]
+      } else {
+        // Legacy format: authorAddress-slug
+        const idParts = story.id.split('-')
+        slug = idParts.slice(1).join('-') // Everything after the address is the slug
+      }
       
       const { metadataUri, metadataHash } = await BookStorageService.storeIpMetadata(
         authorAddress as any,

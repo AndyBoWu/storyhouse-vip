@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { ethers } from 'ethers'
 import { getBlockchainConfig } from '@/lib/config/blockchain'
 
-const HYBRID_REVENUE_CONTROLLER = '0xd1f7e8c6fd77dadbe946ae3e4141189b39ef7b08'
+const HYBRID_REVENUE_CONTROLLER = '0x995c07920fb8eC57cBA8b0E2be8903cB4434f9D6'
 
 export async function GET(
   request: NextRequest,
@@ -19,14 +19,12 @@ export async function GET(
     const config = getBlockchainConfig()
     const provider = new ethers.JsonRpcProvider(config.rpcUrl)
     
-    // Check HybridRevenueController registration
+    // Check HybridRevenueController V2 registration
     const abi = [{
       inputs: [{ name: "bookId", type: "bytes32" }],
       name: "books",
       outputs: [
         { name: "curator", type: "address" },
-        { name: "isDerivative", type: "bool" },
-        { name: "parentBookId", type: "bytes32" },
         { name: "totalChapters", type: "uint256" },
         { name: "isActive", type: "bool" },
         { name: "ipfsMetadataHash", type: "string" }

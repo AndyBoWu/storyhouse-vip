@@ -3,25 +3,21 @@
 import { useState } from 'react'
 import { AlertCircle, CheckCircle2, Loader2, BookOpen, DollarSign, Users } from 'lucide-react'
 
-interface DerivativeRegistrationFlowProps {
+interface BookRegistrationFlowProps {
   bookId: string
   chapterNumber: number
   chapterPrice: string
   onProceed: () => void
   onCancel: () => void
-  isDerivative?: boolean
-  parentBookTitle?: string
 }
 
-export function DerivativeRegistrationFlow({
+export function BookRegistrationFlow({
   bookId,
   chapterNumber,
   chapterPrice,
   onProceed,
-  onCancel,
-  isDerivative = false,
-  parentBookTitle
-}: DerivativeRegistrationFlowProps) {
+  onCancel
+}: BookRegistrationFlowProps) {
   const [understood, setUnderstood] = useState(false)
 
   return (
@@ -36,7 +32,7 @@ export function DerivativeRegistrationFlow({
             <div>
               <h2 className="text-2xl font-bold">First-Time Book Setup Required</h2>
               <p className="text-amber-100 mt-1">
-                {isDerivative ? 'Your derivative book needs registration' : 'Your book needs registration'}
+                Your book needs registration
               </p>
             </div>
           </div>
@@ -51,10 +47,7 @@ export function DerivativeRegistrationFlow({
               <div className="text-sm text-amber-800">
                 <p className="font-semibold mb-1">Why is this needed?</p>
                 <p>
-                  {isDerivative 
-                    ? `Since this is your first new chapter in this derivative book (branched from "${parentBookTitle}"), we need to register it on the blockchain for revenue sharing.`
-                    : 'Your book needs to be registered on the blockchain to enable paid chapters and revenue sharing.'
-                  }
+                  Your book needs to be registered on the blockchain to enable paid chapters and revenue sharing.
                 </p>
               </div>
             </div>
@@ -71,7 +64,7 @@ export function DerivativeRegistrationFlow({
                 <div>
                   <p className="font-medium text-gray-900">Book Registration</p>
                   <p className="text-sm text-gray-600">
-                    Register your {isDerivative ? 'derivative ' : ''}book on HybridRevenueControllerV2
+                    Register your book on HybridRevenueControllerV2
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
                     This enables revenue sharing and chapter monetization
@@ -122,7 +115,7 @@ export function DerivativeRegistrationFlow({
                 <div>
                   <p className="text-sm font-medium text-gray-900">Attribution Tracking</p>
                   <p className="text-xs text-gray-600">
-                    {isDerivative ? 'Original authors get credited' : 'Your contributions tracked'}
+                    Your contributions tracked
                   </p>
                 </div>
               </div>

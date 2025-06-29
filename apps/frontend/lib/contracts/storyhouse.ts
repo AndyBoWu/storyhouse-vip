@@ -1,12 +1,10 @@
 import { Address, Hash } from 'viem'
 
-// StoryHouse Contract Addresses - 5-Contract Optimized Architecture
-// Deployed on 2025-06-16, all contracts operational and configured
+// StoryHouse Contract Addresses - 2-Contract Minimal Architecture
+// HybridRevenueControllerV2 includes all chapter access functionality
 export const STORYHOUSE_CONTRACTS = {
   TIP_TOKEN: '0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E' as Address,
-  CHAPTER_ACCESS_CONTROLLER: '0x1BD65ad10B1CA3ED67aE75FCdD3abA256a9918e3' as Address,
-  HYBRID_REVENUE_CONTROLLER: '0xd1F7e8c6FD77dADbE946aE3e4141189b39Ef7b08' as Address, // V1 - Legacy
-  HYBRID_REVENUE_CONTROLLER_V2: '0x99dA048826Bbb8189FBB6C3e62EaA75d0fB36812' as Address, // V2 - Current (Story Protocol Testnet)
+  HYBRID_REVENUE_CONTROLLER_V2: '0x995c07920fb8eC57cBA8b0E2be8903cB4434f9D6' as Address, // V2 - Includes chapter unlocking
 } as const
 
 // Essential ABI fragments for frontend operations
@@ -98,76 +96,7 @@ export const TIP_TOKEN_ABI = [
   }
 ] as const
 
-export const CHAPTER_ACCESS_CONTROLLER_ABI = [
-  {
-    name: 'unlockChapter',
-    type: 'function',
-    stateMutability: 'nonpayable',
-    inputs: [
-      { name: 'bookId', type: 'bytes32' },
-      { name: 'chapterNumber', type: 'uint256' }
-    ],
-    outputs: []
-  },
-  {
-    name: 'batchUnlockChapters',
-    type: 'function',
-    stateMutability: 'nonpayable',
-    inputs: [
-      { name: 'bookId', type: 'bytes32' },
-      { name: 'chapterNumbers', type: 'uint256[]' }
-    ],
-    outputs: []
-  },
-  {
-    name: 'canAccessChapter',
-    type: 'function',
-    stateMutability: 'view',
-    inputs: [
-      { name: 'user', type: 'address' },
-      { name: 'bookId', type: 'bytes32' },
-      { name: 'chapterNumber', type: 'uint256' }
-    ],
-    outputs: [{ name: '', type: 'bool' }]
-  },
-  {
-    name: 'getUserProgress',
-    type: 'function',
-    stateMutability: 'view',
-    inputs: [
-      { name: 'user', type: 'address' },
-      { name: 'bookId', type: 'bytes32' }
-    ],
-    outputs: [{ name: 'chaptersUnlocked', type: 'uint256[]' }]
-  },
-  {
-    name: 'getChapterInfo',
-    type: 'function',
-    stateMutability: 'view',
-    inputs: [
-      { name: 'bookId', type: 'bytes32' },
-      { name: 'chapterNumber', type: 'uint256' }
-    ],
-    outputs: [
-      { name: 'exists', type: 'bool' },
-      { name: 'author', type: 'address' },
-      { name: 'ipAssetId', type: 'string' },
-      { name: 'wordCount', type: 'uint256' }
-    ]
-  },
-  // Events
-  {
-    name: 'ChapterUnlocked',
-    type: 'event',
-    inputs: [
-      { name: 'user', type: 'address', indexed: true },
-      { name: 'bookId', type: 'bytes32', indexed: true },
-      { name: 'chapterNumber', type: 'uint256', indexed: true },
-      { name: 'price', type: 'uint256', indexed: false }
-    ]
-  }
-] as const
-
+// HybridRevenueControllerV2 ABI - includes chapter access functionality
 export const HYBRID_REVENUE_CONTROLLER_ABI = [
   {
     name: 'registerBook',
@@ -175,9 +104,18 @@ export const HYBRID_REVENUE_CONTROLLER_ABI = [
     stateMutability: 'nonpayable',
     inputs: [
       { name: 'bookId', type: 'bytes32' },
-      { name: 'curator', type: 'address' },
-      { name: 'isDerivative', type: 'bool' },
-      { name: 'parentBookId', type: 'bytes32' }
+      { name: 'totalChapters', type: 'uint256' },
+      { name: 'ipfsMetadataHash', type: 'string' }
+    ],
+    outputs: []
+  },
+  {
+    name: 'unlockChapter',
+    type: 'function',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'bookId', type: 'bytes32' },
+      { name: 'chapterNumber', type: 'uint256' }
     ],
     outputs: []
   },
@@ -208,12 +146,21 @@ export const HYBRID_REVENUE_CONTROLLER_ABI = [
     stateMutability: 'view',
     inputs: [{ name: 'bookId', type: 'bytes32' }],
     outputs: [
-      { name: 'exists', type: 'bool' },
       { name: 'curator', type: 'address' },
-      { name: 'isDerivative', type: 'bool' },
-      { name: 'parentBookId', type: 'bytes32' },
-      { name: 'isActive', type: 'bool' }
+      { name: 'totalChapters', type: 'uint256' },
+      { name: 'isActive', type: 'bool' },
+      { name: 'totalRevenue', type: 'uint256' }
     ]
+  },
+  {
+    name: 'updateTotalChapters',
+    type: 'function',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'bookId', type: 'bytes32' },
+      { name: 'newTotalChapters', type: 'uint256' }
+    ],
+    outputs: []
   }
 ] as const
 

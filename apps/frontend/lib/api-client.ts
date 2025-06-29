@@ -208,6 +208,10 @@ export const apiClient = {
     return apiRequest(`/api/books/${encodeURIComponent(bookId)}/registration-status`)
   },
 
+  async checkBookOwnership(bookId: string) {
+    return apiRequest(`/api/books/${encodeURIComponent(bookId)}/ownership`)
+  },
+
   // Generic GET method for flexibility
   async get(endpoint: string) {
     return apiRequest(endpoint)

@@ -74,7 +74,6 @@ export interface StoryWithIP {
     ipRegistrationTxHash?: Hash;
     licenseStatus: 'none' | 'attached' | 'available';
     availableLicenseTypes: LicenseTier[];
-    isDerivative: boolean;
     parentStoryId?: string;
     parentIpAssetId?: string;
     derivativeChain?: string[];

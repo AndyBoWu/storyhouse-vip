@@ -176,8 +176,8 @@ function BranchStoryPageContent() {
     setSelectedStory(story)
     setSelectedChapter(null)
     setBranchingInfo(null)
-    setNewTitle(`${story.title} - Remix`)
-    setNewDescription(`A new take on ${story.title}`)
+    setNewTitle(story.title)
+    setNewDescription(`Contributing new chapters to ${story.title}`)
     setSelectedGenres(story.genre ? [story.genre] : [])
     
     // Load branching information
@@ -248,11 +248,11 @@ function BranchStoryPageContent() {
         // Calculate next chapter number (branch point + 1)
         const nextChapterNumber = parseInt(selectedChapter?.toString() || '1') + 1
         
-        console.log('✅ Branch successful! New book:', {
+        console.log('✅ Branch validation successful!', {
           bookId: result.book.bookId,
           coverUrl: result.book.coverUrl,
-          inheritedChapters: Object.keys(result.book.chapterMap || {}),
-          redirectingToChapter: nextChapterNumber
+          existingChapters: Object.keys(result.book.chapterMap || {}),
+          redirectingToChapter: result.book.nextChapterNumber
         })
         
         // Show success message briefly
@@ -261,7 +261,8 @@ function BranchStoryPageContent() {
         
         // Auto-redirect after a brief delay to show success
         setTimeout(() => {
-          const redirectUrl = `/write/chapter?bookId=${encodeURIComponent(result.book.bookId)}&chapterNumber=${nextChapterNumber}`
+          // Use the original book ID from the validation response
+          const redirectUrl = `/write/chapter?bookId=${encodeURIComponent(result.book.bookId)}&chapterNumber=${result.book.nextChapterNumber}`
           console.log('🚀 Redirecting to:', redirectUrl)
           router.push(redirectUrl)
         }, 2000)
@@ -312,10 +313,10 @@ function BranchStoryPageContent() {
           >
             <div className="text-center mb-8">
               <h1 className="text-4xl font-bold text-gray-800 mb-4">
-                🌿 Branch & Remix Stories
+                📚 Add Chapters to Existing Stories
               </h1>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                Choose a story to branch from and create your own unique continuation. 
+                Choose a story and contribute your own chapters. 
                 Revenue is automatically shared with original authors.
               </p>
             </div>
@@ -325,10 +326,10 @@ function BranchStoryPageContent() {
               <div className="flex items-start gap-3">
                 <GitBranch className="w-5 h-5 text-green-600 mt-0.5" />
                 <div>
-                  <h4 className="text-green-800 font-medium">How Branching Works</h4>
+                  <h4 className="text-green-800 font-medium">How Chapter Contribution Works</h4>
                   <p className="text-green-700 text-sm mt-1">
-                    Pick any story and choose a chapter (3+) to continue from that point with your own twist. 
-                    Chapters 1-2 are protected to preserve the original story setup. 
+                    Pick any story and choose where to add your chapter (after chapter 2+). 
+                    Your chapters become part of the original book, maintaining proper attribution. 
                     Revenue is shared between you and the original author(s) based on contribution.
                   </p>
                 </div>
@@ -360,8 +361,8 @@ function BranchStoryPageContent() {
                       <div className="bg-green-600 text-white px-6 py-4 rounded-lg shadow-2xl flex items-center gap-3">
                         <CheckCircle className="w-6 h-6" />
                         <div>
-                          <h3 className="font-semibold">Branch Created Successfully!</h3>
-                          <p className="text-sm opacity-90">Taking you to write Chapter {(selectedChapter || 0) + 1}...</p>
+                          <h3 className="font-semibold">Ready to Add Your Chapter!</h3>
+                          <p className="text-sm opacity-90">Taking you to write Chapter {(selectedChapter || 0) + 1} of {selectedStory?.title}...</p>
                         </div>
                       </div>
                     </motion.div>
@@ -504,10 +505,10 @@ function BranchStoryPageContent() {
                                   <Clock className="w-3 h-3" />
                                   <span>{story.chapters} ch</span>
                                 </div>
-                                {story.totalReads > 0 && (
+                                {story.totalReads && story.totalReads > 0 && (
                                   <>
                                     <span>•</span>
-                                    <span>{story.totalReads} reads</span>
+                                    <span>{story.totalReads || 0} reads</span>
                                   </>
                                 )}
                               </div>
@@ -517,10 +518,10 @@ function BranchStoryPageContent() {
                               <span className="text-xs text-gray-500">
                                 {selectedStory?.id === story.id ? '✅ Selected' : 'Click to select'}
                               </span>
-                              {story.averageRating > 0 && (
+                              {story.averageRating && story.averageRating > 0 && (
                                 <div className="flex items-center gap-1 text-yellow-500">
                                   <Star className="w-3 h-3 fill-current" />
-                                  <span className="text-xs font-medium text-gray-700">{story.averageRating.toFixed(1)}</span>
+                                  <span className="text-xs font-medium text-gray-700">{story.averageRating?.toFixed(1)}</span>
                                 </div>
                               )}
                             </div>
@@ -557,7 +558,7 @@ function BranchStoryPageContent() {
                       </div>
                     </div>
                     <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                      📍 Choose your branching point:
+                      📍 Choose where to add your chapter:
                     </h3>
                     
                     {branchingInfo.availableBranchPoints && branchingInfo.availableBranchPoints.length > 0 ? (
@@ -610,95 +611,41 @@ function BranchStoryPageContent() {
                     className="bg-white rounded-xl shadow-lg p-6"
                   >
                     <h3 className="text-lg font-semibold text-gray-800 mb-1">
-                      ✨ Step 1: Set up your branched book
+                      ✨ Add your chapter to "{selectedStory.title}"
                     </h3>
                     <p className="text-sm text-gray-600 mb-4">
-                      Configure your book details, then you'll write Chapter {(selectedChapter || 0) + 1}
+                      You'll be writing Chapter {(selectedChapter || 0) + 1} as part of the original book
                     </p>
 
                     <div className="space-y-4">
-                      {/* Title */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">New Title</label>
-                        <input
-                          type="text"
-                          value={newTitle}
-                          onChange={(e) => setNewTitle(e.target.value)}
-                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                          placeholder="Your story's new title..."
-                        />
-                      </div>
-
-                      {/* Description */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Book Description</label>
-                        <textarea
-                          value={newDescription}
-                          onChange={(e) => setNewDescription(e.target.value)}
-                          className="w-full h-24 p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                          placeholder="Describe your unique take on this story..."
-                        />
-                        <p className="text-xs text-gray-500 mt-1">This describes your branched book as a whole, not just the chapter</p>
-                      </div>
-
-                      {/* Genres */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Genres</label>
-                        <div className="flex flex-wrap gap-2">
-                          {availableGenres.map((genre) => (
-                            <button
-                              key={genre}
-                              onClick={() => handleGenreToggle(genre)}
-                              className={`px-3 py-1 rounded-full border transition-all ${
-                                selectedGenres.includes(genre)
-                                  ? 'bg-green-100 border-green-400 text-green-800'
-                                  : 'bg-gray-100 border-gray-300 text-gray-700 hover:border-gray-400'
-                              }`}
-                            >
-                              {genre}
-                            </button>
-                          ))}
+                      {/* Book Info Display */}
+                      <div className="bg-gray-50 rounded-lg p-4">
+                        <div className="flex items-center gap-3 mb-2">
+                          <BookOpen className="w-5 h-5 text-gray-600" />
+                          <h4 className="font-medium text-gray-800">Contributing to:</h4>
+                        </div>
+                        <p className="text-lg font-semibold text-gray-900">{selectedStory.title}</p>
+                        <p className="text-sm text-gray-600 mt-1">by {selectedStory.authorName}</p>
+                        <div className="mt-3 pt-3 border-t border-gray-200">
+                          <p className="text-sm text-gray-700">
+                            <span className="font-medium">Your contribution:</span> Chapter {(selectedChapter || 0) + 1}
+                          </p>
                         </div>
                       </div>
 
-                      {/* Content Rating */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Content Rating</label>
-                        <div className="flex gap-2">
-                          {(['G', 'PG', 'PG-13', 'R'] as const).map((rating) => (
-                            <button
-                              key={rating}
-                              onClick={() => setContentRating(rating)}
-                              className={`px-4 py-2 rounded-lg border transition-all ${
-                                contentRating === rating
-                                  ? 'bg-green-100 border-green-400 text-green-800'
-                                  : 'bg-gray-100 border-gray-300 text-gray-700 hover:border-gray-400'
-                              }`}
-                            >
-                              {rating}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Cover Upload */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">New Cover (Optional)</label>
-                        <div className="flex items-center gap-4">
-                          <input
-                            type="file"
-                            onChange={handleCoverUpload}
-                            accept="image/*"
-                            className="hidden"
-                            id="cover-upload"
-                          />
-                          <label
-                            htmlFor="cover-upload"
-                            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-200 transition-all"
-                          >
-                            <Upload className="w-4 h-4" />
-                            {coverFile ? coverFile.name : 'Choose Image'}
-                          </label>
+                      {/* Chapter Preview Info */}
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div className="flex items-start gap-3">
+                          <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                          <div className="text-sm text-blue-800">
+                            <p className="font-medium mb-1">What happens next?</p>
+                            <p>After confirming, you'll be taken to write Chapter {(selectedChapter || 0) + 1}. Your chapter will:</p>
+                            <ul className="list-disc list-inside mt-2 space-y-1">
+                              <li>Be added to the original book</li>
+                              <li>Show your name as the chapter author</li>
+                              <li>Share revenue with original authors</li>
+                            </ul>
+                          </div>
                         </div>
                       </div>
 
@@ -709,15 +656,15 @@ function BranchStoryPageContent() {
                         </div>
                         <button
                           onClick={handleCreateBranch}
-                          disabled={!newTitle.trim() || isCreatingBranch}
+                          disabled={isCreatingBranch}
                           className={`inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
-                            newTitle.trim() && !isCreatingBranch
+                            !isCreatingBranch
                               ? 'bg-green-600 text-white hover:bg-green-700'
                               : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                           }`}
                         >
                           <Sparkles className="w-4 h-4" />
-                          {isCreatingBranch ? 'Setting up branch...' : 'Continue to Write Chapter'}
+                          {isCreatingBranch ? 'Setting up...' : `Start Writing Chapter ${(selectedChapter || 0) + 1}`}
                         </button>
                       </div>
                     </div>

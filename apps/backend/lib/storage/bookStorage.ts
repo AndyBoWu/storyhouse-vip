@@ -126,7 +126,6 @@ export class BookStorageService {
             title: metadata.title,
             totalChapters: metadata.totalChapters.toString(),
             isRemixable: metadata.isRemixable.toString(),
-            parentBook: metadata.parentBook || '',
             createdAt: metadata.createdAt
           }
         }
@@ -255,9 +254,7 @@ export class BookStorageService {
     description: string,
     genres: string[],
     contentRating: BookMetadata['contentRating'],
-    ipAssetId?: string,
-    parentBook?: string,
-    branchPoint?: string
+    ipAssetId?: string
   ): BookMetadata {
     const bookId = `${authorAddress.toLowerCase()}/${slug}` as BookId
     const now = new Date().toISOString()
@@ -281,11 +278,8 @@ export class BookStorageService {
       tokenId: undefined,            // Backward compatibility
       transactionHash: undefined,
       
-      // Branching Information
-      parentBook,
-      parentBookId: parentBook,      // Backward compatibility alias
-      branchPoint,
-      derivativeBooks: [],
+      // Chapter Management
+      // Note: Derivative books no longer exist - all chapters belong to original books
       
       // Chapter Resolution Map
       chapterMap: {},

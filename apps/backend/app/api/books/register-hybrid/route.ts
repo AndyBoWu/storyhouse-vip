@@ -4,11 +4,12 @@ import { BookStorageService } from '@/lib/storage/bookStorage'
 
 // V2 is now the only version
 const HYBRID_REVENUE_CONTROLLER_V2_ABI = [
-  'function registerBook(bytes32 bookId, bool isDerivative, bytes32 parentBookId, uint256 totalChapters, string ipfsMetadataHash)',
+  'function registerBook(bytes32 bookId, uint256 totalChapters, string ipfsMetadataHash)',
   'function setChapterAttribution(bytes32 bookId, uint256 chapterNumber, address originalAuthor, bytes32 sourceBookId, uint256 unlockPrice, bool isOriginalContent)',
-  'function books(bytes32) view returns (address curator, bool isDerivative, bytes32 parentBookId, uint256 totalChapters, bool isActive, string ipfsMetadataHash)',
+  'function books(bytes32) view returns (address curator, uint256 totalChapters, bool isActive, string ipfsMetadataHash)',
   'function hasRole(bytes32 role, address account) view returns (bool)',
-  'function ADMIN_ROLE() view returns (bytes32)'
+  'function ADMIN_ROLE() view returns (bytes32)',
+  'function updateTotalChapters(bytes32 bookId, uint256 newTotalChapters)'
 ]
 
 // Helper to convert string to bytes32

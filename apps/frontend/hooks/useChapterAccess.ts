@@ -103,7 +103,7 @@ export function useChapterAccess() {
 
       // TODO: Implement Web3 transaction for paid chapters
       // This would involve:
-      // 1. Call ChapterAccessController.unlockChapter() with proper TIP payment
+      // 1. Call HybridRevenueControllerV2.unlockChapter() with proper TIP payment
       // 2. Wait for transaction confirmation
       // 3. Call API with transaction hash
 

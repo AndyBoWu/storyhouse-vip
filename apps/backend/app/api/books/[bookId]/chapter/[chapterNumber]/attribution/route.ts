@@ -7,7 +7,7 @@ const CHAPTER_ATTRIBUTIONS_ABI = [
   "function chapterAttributions(bytes32 bookId, uint256 chapterNumber) view returns (address originalAuthor, bytes32 sourceBookId, uint256 unlockPrice, bool isOriginalContent)"
 ]
 
-const CONTRACT_ADDRESS = "0x99dA048826Bbb8189FBB6C3e62EaA75d0fB36812"
+const CONTRACT_ADDRESS = "0x995c07920fb8eC57cBA8b0E2be8903cB4434f9D6"
 const RPC_URL = "https://aeneid.storyrpc.io"
 
 export async function GET(

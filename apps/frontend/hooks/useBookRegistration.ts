@@ -3,7 +3,7 @@ import { useAccount, useWriteContract, useWaitForTransactionReceipt, usePublicCl
 import { parseBookId } from '@/lib/contracts/hybridRevenueController'
 
 // HybridRevenueControllerV2 deployed address (Story Protocol Testnet)
-export const HYBRID_REVENUE_CONTROLLER_V2_ADDRESS = '0x99dA048826Bbb8189FBB6C3e62EaA75d0fB36812'
+export const HYBRID_REVENUE_CONTROLLER_V2_ADDRESS = '0x995c07920fb8eC57cBA8b0E2be8903cB4434f9D6'
 
 // ABI for HybridRevenueControllerV2
 export const HYBRID_V2_ABI = [
@@ -12,8 +12,6 @@ export const HYBRID_V2_ABI = [
     type: 'function',
     inputs: [
       { name: 'bookId', type: 'bytes32' },
-      { name: 'isDerivative', type: 'bool' },
-      { name: 'parentBookId', type: 'bytes32' },
       { name: 'totalChapters', type: 'uint256' },
       { name: 'ipfsMetadataHash', type: 'string' }
     ],
@@ -40,8 +38,6 @@ export const HYBRID_V2_ABI = [
     inputs: [{ name: 'bookId', type: 'bytes32' }],
     outputs: [
       { name: 'curator', type: 'address' },
-      { name: 'isDerivative', type: 'bool' },
-      { name: 'parentBookId', type: 'bytes32' },
       { name: 'totalChapters', type: 'uint256' },
       { name: 'isActive', type: 'bool' },
       { name: 'ipfsMetadataHash', type: 'string' }
@@ -89,8 +85,6 @@ export const HYBRID_V2_ABI = [
 interface RegisterBookParams {
   bookId: string
   totalChapters: number
-  isDerivative?: boolean
-  parentBookId?: string
   ipfsMetadataHash?: string
 }
 
@@ -110,14 +104,15 @@ export function useBookRegistration() {
   
   // Contract write hooks
   const { 
-    writeContract: writeRegisterBook, 
-    data: registerHash,
+    writeContractAsync: writeRegisterBook, 
     isError: isRegisterError,
     error: registerError,
     isPending: isRegisterWritePending
   } = useWriteContract()
+  
+  const [pendingRegisterHash, setPendingRegisterHash] = useState<`0x${string}` | undefined>()
   const { isLoading: isRegisterPending } = useWaitForTransactionReceipt({
-    hash: registerHash,
+    hash: pendingRegisterHash,
   })
   
   const { 
@@ -172,7 +167,7 @@ export function useBookRegistration() {
       
       // Check if curator address is not zero address (indicates book exists)
       const curator = bookData[0] as string
-      const isActive = bookData[4] as boolean
+      const isActive = bookData[2] as boolean
       
       const isRegistered = curator !== '0x0000000000000000000000000000000000000000' && isActive
       console.log('✅ Book registration check result:', isRegistered)
@@ -196,8 +191,6 @@ export function useBookRegistration() {
   const registerBook = useCallback(async ({
     bookId,
     totalChapters,
-    isDerivative = false,
-    parentBookId = '0x0000000000000000000000000000000000000000000000000000000000000000',
     ipfsMetadataHash = ''
   }: RegisterBookParams) => {
     if (!address) {
@@ -210,15 +203,11 @@ export function useBookRegistration() {
     
     try {
       const { bytes32Id } = parseBookId(bookId)
-      const parentBytes32 = parentBookId === '0x0000000000000000000000000000000000000000000000000000000000000000' 
-        ? parentBookId as `0x${string}`
-        : parseBookId(parentBookId).bytes32Id
       
       console.log('📚 Registering book:', {
         bookId,
         bytes32Id,
-        totalChapters,
-        isDerivative
+        totalChapters
       })
       
       // Check if already registered
@@ -231,68 +220,64 @@ export function useBookRegistration() {
       // Register the book
       console.log('📝 Initiating book registration transaction...')
       
+      let txHash: `0x${string}` | undefined
+      
       try {
-        await writeRegisterBook({
+        // Use writeContractAsync which returns the transaction hash
+        txHash = await writeRegisterBook({
           address: HYBRID_REVENUE_CONTROLLER_V2_ADDRESS as `0x${string}`,
           abi: HYBRID_V2_ABI,
           functionName: 'registerBook',
           args: [
             bytes32Id,
-            isDerivative,
-            parentBytes32,
             BigInt(totalChapters),
             ipfsMetadataHash
           ],
         })
-      } catch (writeError) {
-        console.error('❌ Failed to initiate transaction:', writeError)
-        if (writeError instanceof Error && writeError.message.includes('User rejected')) {
-          throw new Error('Transaction rejected by user')
+        
+        console.log('✅ Book registration transaction submitted:', txHash)
+        setPendingRegisterHash(txHash)
+        
+        // Wait for transaction confirmation with a reasonable timeout
+        const receipt = await publicClient?.waitForTransactionReceipt({
+          hash: txHash,
+          timeout: 120_000, // 2 minutes timeout
+        })
+        
+        if (receipt?.status === 'success') {
+          console.log('✅ Book registration confirmed!')
+          return { success: true, transactionHash: txHash }
+        } else {
+          throw new Error('Transaction failed')
         }
+        
+      } catch (writeError) {
+        console.error('❌ Failed to register book:', writeError)
+        
+        // Handle specific error cases
+        if (writeError instanceof Error) {
+          if (writeError.message.includes('User rejected') || 
+              writeError.message.includes('user rejected') || 
+              writeError.message.includes('denied')) {
+            throw new Error('Transaction rejected by user')
+          }
+          
+          if (writeError.message.includes('timeout')) {
+            // Transaction is still pending, but we have the hash
+            if (txHash) {
+              return { 
+                success: true, 
+                transactionHash: txHash,
+                pending: true,
+                message: 'Transaction submitted but confirmation is taking longer than expected. You can check the transaction status in your wallet.'
+              }
+            }
+            throw new Error('Transaction timeout - please check your wallet for pending transactions')
+          }
+        }
+        
         throw writeError
       }
-      
-      // Wait for transaction hash to be available
-      console.log('⏳ Waiting for transaction hash...')
-      let attempts = 0
-      const maxAttempts = 60 // 60 seconds timeout
-      
-      while (!registerHash && !isRegisterError && attempts < maxAttempts) {
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        attempts++
-        
-        if (attempts % 10 === 0) {
-          console.log(`Still waiting for transaction... (${attempts}s elapsed)`)
-        }
-      }
-      
-      if (isRegisterError && registerError) {
-        console.error('❌ Register error:', registerError)
-        throw new Error(registerError.message || 'Transaction failed')
-      }
-      
-      if (!registerHash) {
-        console.error('⏱️ Transaction timeout after', attempts, 'seconds')
-        // Instead of throwing, return a pending status
-        return { 
-          success: false, 
-          pending: true, 
-          error: 'Transaction is still pending. Please check your wallet and wait for confirmation.',
-          message: 'Book registration initiated but awaiting confirmation'
-        }
-      }
-      
-      console.log('✅ Book registration transaction:', registerHash)
-      
-      // Wait for transaction confirmation
-      console.log('⏳ Waiting for transaction confirmation...')
-      let confirmationAttempts = 0
-      while (isRegisterPending && confirmationAttempts < 30) {
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        confirmationAttempts++
-      }
-      
-      return { success: true, transactionHash: registerHash }
       
     } catch (error) {
       console.error('Failed to register book:', error)
@@ -301,7 +286,7 @@ export function useBookRegistration() {
     } finally {
       setIsLoading(false)
     }
-  }, [address, writeRegisterBook, registerHash, checkBookRegistration])
+  }, [address, writeRegisterBook, publicClient, checkBookRegistration])
   
   /**
    * Set chapter attribution and pricing

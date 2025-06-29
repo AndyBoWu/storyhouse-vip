@@ -119,37 +119,18 @@ echo ""
 # Run the deployment script
 echo -e "${BLUE}🔨 Running deployment script...${NC}"
 if [ "$DEPLOY_MODE" = "v2" ] || [ "$DEPLOY_MODE" = "v2-full" ]; then
-    # Temporarily rename problematic contracts that depend on removed RewardsManager
-    if [ -f "src/HybridRevenueController.sol" ]; then
-        mv src/HybridRevenueController.sol src/HybridRevenueController.sol.bak
-        V1_RENAMED=true
-    fi
-    if [ -f "src/HybridRevenueControllerV2.sol" ]; then
-        mv src/HybridRevenueControllerV2.sol src/HybridRevenueControllerV2.sol.bak
-        V2_ORIG_RENAMED=true
-    fi
-    
+    # No need to rename files for V2 deployment
     DEPLOY_OUTPUT=$(PRIVATE_KEY=$PRIVATE_KEY forge script script/$SCRIPT_NAME \
-        --rpc-url $NETWORK \
+        --rpc-url $RPC_URL \
         --broadcast \
         --gas-price $GAS_PRICE \
-        --legacy \
-        --json 2>&1)
-    
-    # Restore renamed files
-    if [ "$V1_RENAMED" = true ]; then
-        mv src/HybridRevenueController.sol.bak src/HybridRevenueController.sol
-    fi
-    if [ "$V2_ORIG_RENAMED" = true ]; then
-        mv src/HybridRevenueControllerV2.sol.bak src/HybridRevenueControllerV2.sol
-    fi
+        --legacy 2>&1 | tee deploy_output.log)
 else
     DEPLOY_OUTPUT=$(PRIVATE_KEY=$PRIVATE_KEY forge script script/$SCRIPT_NAME \
-        --rpc-url $NETWORK \
+        --rpc-url $RPC_URL \
         --broadcast \
         --gas-price $GAS_PRICE \
-        --legacy \
-        --json 2>&1)
+        --legacy 2>&1 | tee deploy_output.log)
 fi
 
 DEPLOY_EXIT_CODE=$?
@@ -162,6 +143,17 @@ if [ $DEPLOY_EXIT_CODE -ne 0 ]; then
 fi
 
 echo -e "${GREEN}✅ Deployment script executed successfully${NC}"
+
+# Extract contract address from output
+echo ""
+echo -e "${BLUE}📋 Extracting contract address...${NC}"
+HYBRID_V2_ADDRESS=$(grep "HybridRevenueControllerV2:" deploy_output.log | tail -1 | awk '{print $2}')
+
+if [ ! -z "$HYBRID_V2_ADDRESS" ]; then
+    echo -e "${GREEN}✅ Found HybridRevenueControllerV2 at: $HYBRID_V2_ADDRESS${NC}"
+else
+    echo -e "${YELLOW}⚠️  Could not extract address from logs, check deploy_output.log${NC}"
+fi
 
 # Parse deployment results
 echo ""
@@ -203,7 +195,8 @@ cat > deployments/latest.json << EOF
     "status": "completed"
   },
   "contracts": {
-    "note": "Check broadcast/Deploy5ContractArchitecture.s.sol/$CHAIN_ID/run-latest.json for addresses"
+    "TIPToken": "0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E",
+    "HybridRevenueControllerV2": "${HYBRID_V2_ADDRESS:-not_found}"
   },
   "next_steps": [
     "1. Verify contracts on StoryScan explorer",

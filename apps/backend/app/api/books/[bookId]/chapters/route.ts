@@ -87,7 +87,9 @@ export async function GET(
           totalChapters,
           latestChapter,
           nextChapterNumber,
-          chapters: chapterNumbers
+          chapters: chapterNumbers,
+          chapterMap: bookMetadata.chapterMap,
+          chapter4Present: chapterNumbers.includes(4)
         })
         
         return NextResponse.json({

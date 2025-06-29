@@ -246,7 +246,7 @@ async function getFromIndex(request: NextRequest) {
       averageRating: 0,
       contentRating: 'G',
       tags: book.tags || [],
-      preview: book.description?.slice(0, 150) + '...' || ''
+      preview: book.description?.slice(0, 150) + '...' || '',
     }))
     
     const duration = Date.now() - startTime
@@ -463,7 +463,7 @@ async function getFromR2Direct(request: NextRequest) {
               averageRating: bookData.averageRating || 0,
               contentRating: bookData.contentRating || 'G',
               tags: bookData.tags || [],
-              preview: bookData.description?.slice(0, 150) + '...' || ''
+              preview: bookData.description?.slice(0, 150) + '...' || '',
             }
 
             books.push(book)

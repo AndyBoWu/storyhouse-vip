@@ -92,8 +92,7 @@ export interface StoryWithIP {
   licenseStatus: 'none' | 'attached' | 'available'
   availableLicenseTypes: LicenseTier[]
 
-  // Derivative information
-  isDerivative: boolean
+  // IP chain information
   parentStoryId?: string
   parentIpAssetId?: string
   derivativeChain?: string[] // Array of parent IP asset IDs
