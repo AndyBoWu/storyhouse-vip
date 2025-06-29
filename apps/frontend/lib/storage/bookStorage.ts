@@ -165,7 +165,7 @@ export class BookStorageService {
         {
           contentType,
           metadata: {
-            bookId: `${authorAddress.toLowerCase()}-${slug}`,
+            bookId: `${authorAddress.toLowerCase()}/${slug}`,
             authorAddress,
             uploadedAt: new Date().toISOString(),
             sizeBytes: coverData.length.toString()
@@ -238,7 +238,7 @@ export class BookStorageService {
     parentBook?: string,
     branchPoint?: string
   ): BookMetadata {
-    const bookId = `${authorAddress.toLowerCase()}-${slug}` as BookId
+    const bookId = `${authorAddress.toLowerCase()}/${slug}` as BookId
     const now = new Date().toISOString()
     
     return {
@@ -358,16 +358,8 @@ export class BookStorageService {
  */
 export async function getBookById(bookId: string): Promise<BookMetadata | null> {
   try {
-    // Parse bookId to get authorAddress and slug
-    const parts = bookId.split('-');
-    if (parts.length < 2) {
-      console.error('Invalid book ID format:', bookId);
-      return null;
-    }
-    
-    // Ethereum address is 42 chars (0x + 40 hex chars)
-    const authorAddress = parts[0] as AuthorAddress;
-    const slug = parts.slice(1).join('-'); // Handle slugs with hyphens
+    // Use BookStorageService.parseBookId() to ensure consistent parsing with '/' delimiter
+    const { authorAddress, slug } = BookStorageService.parseBookId(bookId as BookId);
     
     console.log('📚 Fetching book:', { bookId, authorAddress, slug });
     
