@@ -201,10 +201,22 @@ export default function WalletConnect() {
       <div className="relative">
         <button
           onClick={() => setShowDetails(!showDetails)}
-          className="group flex items-center gap-2.5 bg-white/60 backdrop-blur-sm hover:bg-white/80 text-gray-800 px-6 py-3 rounded-full transition-all border border-white/40 hover:border-white/60 hover:shadow-md text-sm font-semibold"
+          className="group flex items-center gap-3 bg-white/60 backdrop-blur-sm hover:bg-white/80 text-gray-800 px-4 py-2.5 rounded-full transition-all border border-white/40 hover:border-white/60 hover:shadow-md text-sm font-semibold"
         >
-          <WalletIcon />
+          {/* Avatar */}
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white text-xs font-bold shadow-sm">
+            {formatAddress(address).charAt(0).toUpperCase()}
+          </div>
           <span>{formatAddress(address)}</span>
+          {/* Dropdown arrow */}
+          <svg 
+            className={`w-4 h-4 text-gray-600 transition-transform ${showDetails ? 'rotate-180' : ''}`} 
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
         </button>
 
         {showDetails && (
@@ -305,12 +317,12 @@ export default function WalletConnect() {
       className={`group flex items-center gap-2.5 px-6 py-3 rounded-full font-semibold text-sm transition-all ${
         isCurrentlyConnecting
           ? 'bg-white/40 text-gray-500 cursor-not-allowed border border-white/30'
-          : 'bg-white/60 backdrop-blur-sm hover:bg-white/80 text-gray-800 border border-white/40 hover:border-white/60 hover:shadow-md'
+          : 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white border border-transparent hover:shadow-lg hover:scale-105'
       }`}
     >
       {isCurrentlyConnecting ? (
         <>
-          <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
           <span>Connecting...</span>
         </>
       ) : (
