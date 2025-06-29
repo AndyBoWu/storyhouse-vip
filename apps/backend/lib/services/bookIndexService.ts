@@ -249,10 +249,13 @@ export class BookIndexService {
           books
         }
       } else {
-        // Parse the book ID
-        const [authorAddress, slug] = bookId.includes('/') 
-          ? bookId.split('/')
-          : [bookId.split('-')[0], bookId.split('-').slice(1).join('-')]
+        // Parse the book ID (format: authorAddress/slug)
+        const slashIndex = bookId.indexOf('/')
+        if (slashIndex === -1) {
+          throw new Error(`Invalid book ID format: ${bookId}. Expected format: authorAddress/slug`)
+        }
+        const authorAddress = bookId.substring(0, slashIndex)
+        const slug = bookId.substring(slashIndex + 1)
         
         // Fetch updated metadata for this specific book
         const chapterCount = await this.getChapterCount(authorAddress, slug)
