@@ -40,7 +40,6 @@ const DEFAULT_TIERS: PricingTier[] = [
     estimatedDaily: { min: 0, max: 0 },
     features: [
       'Basic reading access',
-      'Read-to-earn rewards',
       'IP protection',
       'No commercial rights'
     ]
@@ -53,7 +52,6 @@ const DEFAULT_TIERS: PricingTier[] = [
     estimatedDaily: { min: 0.5, max: 2.0 },
     features: [
       'Commercial use permitted',
-      'Enhanced read rewards',
       'Creator revenue share',
       'Attribution required'
     ],
@@ -67,7 +65,6 @@ const DEFAULT_TIERS: PricingTier[] = [
     estimatedDaily: { min: 2.0, max: 8.0 },
     features: [
       'Full derivative rights',
-      'Maximum read rewards',
       'Premium revenue share',
       'Exclusive licensing'
     ]
@@ -273,25 +270,21 @@ export default function LicensePricing({
         })}
       </div>
 
-      {/* Overall Economics Info */}
+      {/* Revenue Info */}
       {showProjections && (
         <div className="mt-6 p-4 bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl border border-gray-200">
           <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
             <Users className="w-5 h-5" />
-            Read-to-Earn Economics
+            Chapter Economics
           </h4>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div className="text-center">
               <div className="font-medium text-gray-900">Readers Pay</div>
               <div className="text-gray-600">Unlock chapters with TIP tokens</div>
             </div>
             <div className="text-center">
-              <div className="font-medium text-gray-900">Readers Earn</div>
-              <div className="text-gray-600">Get TIP back while reading</div>
-            </div>
-            <div className="text-center">
-              <div className="font-medium text-gray-900">You Profit</div>
-              <div className="text-gray-600">Keep the difference as revenue</div>
+              <div className="font-medium text-gray-900">You Earn</div>
+              <div className="text-gray-600">Revenue from chapter unlocks</div>
             </div>
           </div>
         </div>

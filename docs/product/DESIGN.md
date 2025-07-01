@@ -1,12 +1,12 @@
 Owner: @Andy Wu
 
-Date: June 1, 2025
+Date: July 1, 2025
 
 ## **Hero Section (Above the Fold)**
 
-**Primary Headline:** "Read Stories, Earn Tokens, Create with AI"
+**Primary Headline:** "Web3 Storytelling with AI & IP Protection"
 
-**Sub-headline:** "First 3 chapters FREE. Earn $TIP tokens while reading. Remix content and earn from your creativity."
+**Sub-headline:** "First 3 chapters FREE. Create with AI, protect your IP on blockchain. Earn from your content and derivatives."
 
 **Dual Call-to-Action:** "Start Reading Free" | "Create Your Story"
 
@@ -41,8 +41,8 @@ Date: June 1, 2025
 
 **Demo Features:**
 
-- Three-panel demo: Reader earning tokens → Writer creating content → Remixer building derivatives
-- Read-to-Earn visualization: TIP tokens accumulating as user reads
+- Three-panel demo: Reader discovering content → Writer creating content → Remixer building derivatives
+- Chapter unlock visualization: Premium content access with TIP tokens
 - MetaMask integration flow: Wallet connection after chapter 3
 - AI generation preview: Text prompt + emoji + image = generated chapter
 - Remix workflow: Licensing fee payment and derivative content creation
@@ -53,7 +53,7 @@ Date: June 1, 2025
 - "MetaMask Secured" - trusted wallet integration
 - Security badges from smart contract audits
 - Team photos and LinkedIn profiles
-- Early user testimonials showcasing read-to-earn success stories
+- Early user testimonials showcasing creator success stories
 
 ## **How It Works Section**
 
@@ -64,8 +64,8 @@ Date: June 1, 2025
 | 1. Browse stories                  | **Powered by**    | 1. Connect wallet        |
 | 2. Read 3 chapters FREE            | Story Protocol &  | 2. Describe your story   |
 | 3. Connect MetaMask for chapter 4+ | AI assistance     | 3. AI generates content  |
-| 4. Pay $TIP to unlock chapters     | **Read-to-Earn**  | 4. Earn $TIP from sales  |
-| 5. Earn $TIP for completion        | Rewards System    | 5. License remix rights  |
+| 4. Pay $TIP to unlock chapters     | **IP Protection** | 4. Earn $TIP from sales  |
+| 5. Own reading licenses            | & Licensing       | 5. License remix rights  |
 | 6. Remix content for licensing fee |                   | 6. Earn from derivatives |
 
 **Additional Remix Creator Flow:**
@@ -78,10 +78,10 @@ Date: June 1, 2025
 
 Interactive diagram showing:
 
-- **Reader Journey:** Free reading → Paid unlocks → Read-to-earn rewards
+- **Reader Journey:** Free reading → Paid unlocks → License ownership
 - **Creator Economy:** Chapter sales → Remix licensing → Derivative royalties
 - **Token Conversion:** $TIP ↔ $IP bridging explanation
-- **Economic Balance:** How read-to-earn can offset or exceed reading costs
+- **Economic Model:** Direct creator-to-reader value exchange
 
 ## **Mobile-First Design Requirements**
 
@@ -1125,7 +1125,7 @@ This frontend implementation provides a comprehensive, modern, and user-friendly
 # StoryHouse.vip - Content Publishing Workflow Wireframes
 
 Owner: @Andy Wu
-Date: June 1, 2025
+Date: July 1, 2025
 
 ## **Writer Journey Overview**
 

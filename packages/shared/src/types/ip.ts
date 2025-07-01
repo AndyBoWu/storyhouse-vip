@@ -292,7 +292,6 @@ export interface EnhancedChapterIPData {
     
     // Economic parameters
     unlockPrice: number    // TIP tokens to unlock
-    readReward: number     // TIP tokens earned for reading
     licensePrice: number   // TIP tokens for licensing
     royaltyPercentage: number // % for derivatives
     

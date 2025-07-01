@@ -317,7 +317,6 @@ export class AdvancedStoryProtocolService {
           tags: chapterData.metadata.suggestedTags,
           economics: {
             unlockPrice: chapterData.metadata.unlockPrice,
-            readReward: chapterData.metadata.readReward,
             licensePrice: chapterData.metadata.licensePrice,
             royaltyPercentage: chapterData.metadata.royaltyPercentage,
           },
@@ -696,7 +695,6 @@ export const advancedStoryProtocolService = new AdvancedStoryProtocolService()
 export interface TIPTokenEconomics {
   // Base economics (from existing system)
   unlockPrice: number      // TIP tokens required to unlock chapter
-  readReward: number       // TIP tokens earned for reading
   creatorReward: number    // TIP tokens earned by creator per read
   
   // Enhanced licensing economics
@@ -726,7 +724,6 @@ export class TIPTokenEconomicsCalculator {
     licenseTier: 'free' | 'premium' | 'exclusive'
   ): TIPTokenEconomics {
     const baseUnlockPrice = chapterData.metadata.unlockPrice || 0
-    const baseReadReward = chapterData.metadata.readReward || 1
     const licenseConfig = LICENSE_TIERS[licenseTier]
     
     if (!licenseConfig) {
@@ -740,8 +737,7 @@ export class TIPTokenEconomicsCalculator {
     
     // Calculate enhanced economics
     const adjustedUnlockPrice = Math.floor(baseUnlockPrice * qualityMultiplier)
-    const adjustedReadReward = Math.floor(baseReadReward * qualityMultiplier * originalityMultiplier)
-    const creatorReward = Math.floor(adjustedReadReward * 0.8) // Creator gets 80% of read reward
+    const creatorReward = Math.floor(baseUnlockPrice * 0.8 * qualityMultiplier) // Creator gets 80% of unlock price
     
     // License pricing based on tier and quality
     const baseLicensePrice = licenseConfig.tipPrice
@@ -751,7 +747,6 @@ export class TIPTokenEconomicsCalculator {
     
     return {
       unlockPrice: adjustedUnlockPrice,
-      readReward: adjustedReadReward,
       creatorReward: creatorReward,
       licensePrice: adjustedLicensePrice,
       royaltyPercentage: licenseConfig.royaltyPercentage,
@@ -869,9 +864,9 @@ export class TIPTokenEconomicsCalculator {
     const qualityMultiplier = 1 + (chapterData.metadata.qualityScore / 100)
     
     const projectedRevenue = {
-      conservative: Math.floor(baseReads * 0.5 * qualityMultiplier * suggestedPricing.readReward),
-      optimistic: Math.floor(baseReads * qualityMultiplier * suggestedPricing.readReward),
-      aggressive: Math.floor(baseReads * 2 * qualityMultiplier * suggestedPricing.readReward)
+      conservative: Math.floor(baseReads * 0.5 * qualityMultiplier * suggestedPricing.unlockPrice),
+      optimistic: Math.floor(baseReads * qualityMultiplier * suggestedPricing.unlockPrice),
+      aggressive: Math.floor(baseReads * 2 * qualityMultiplier * suggestedPricing.unlockPrice)
     }
     
     return {

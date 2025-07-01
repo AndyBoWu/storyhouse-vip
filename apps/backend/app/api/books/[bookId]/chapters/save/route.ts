@@ -17,7 +17,6 @@ interface SaveChapterRequest {
   licenseTermsId?: string
   // Chapter metadata
   unlockPrice?: number
-  readReward?: number
   licensePrice?: number
   genre?: string
   mood?: string
@@ -150,7 +149,6 @@ export async function POST(
 
       // Economics (based on chapter number and design spec)
       unlockPrice: body.chapterNumber <= 3 ? 0 : (body.unlockPrice || 0.5), // Free for chapters 1-3, 0.5 TIP for 4+
-      readReward: body.readReward || (body.chapterNumber <= 3 ? 0.05 : 0.1), // Higher rewards for paid chapters
       licensePrice: body.licensePrice || 2.0, // 2.0 TIP as per design spec
 
       // Content Metrics
