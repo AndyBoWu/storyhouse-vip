@@ -2,18 +2,11 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Search, Filter, TrendingUp, Clock, Star } from 'lucide-react'
+import { Search, Clock, Star } from 'lucide-react'
 import Link from 'next/link'
-import dynamic from 'next/dynamic'
 import Fuse from 'fuse.js'
-import QuickNavigation from '@/components/ui/QuickNavigation'
+import Header from '@/components/ui/Header'
 import { apiClient } from '@/lib/api-client'
-
-// Dynamically import WalletConnect to avoid hydration issues
-const WalletConnect = dynamic(() => import('@/components/WalletConnect'), {
-  ssr: false,
-  loading: () => <div className="w-24 h-10 bg-gray-200 rounded-full animate-pulse"></div>
-})
 
 interface PublicStory {
   id: string
@@ -202,23 +195,7 @@ export default function ReadPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-orange-100 via-pink-100 to-blue-200">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2 text-gray-600 hover:text-gray-800">
-              <ArrowLeft className="w-4 h-4" />
-              Back to StoryHouse
-            </Link>
-            <div className="flex items-center gap-4">
-              <div className="text-sm text-gray-500">
-                Discover amazing stories from creators worldwide
-              </div>
-              <QuickNavigation currentPage="read" />
-              <WalletConnect />
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       <div className="container mx-auto px-6 py-8">
         <motion.div

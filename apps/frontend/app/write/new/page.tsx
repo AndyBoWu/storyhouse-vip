@@ -11,6 +11,7 @@ import { apiClient } from '@/lib/api-client'
 import { useStoryProtocol } from '@/hooks/useStoryProtocol'
 import { useBookRegistration } from '@/hooks/useBookRegistration'
 import { useNotifications } from '@/components/providers/NotificationProvider'
+import type { IPRegistrationResult } from '@/lib/storyProtocol'
 
 // Dynamically import WalletConnect to avoid hydration issues
 const WalletConnect = dynamic(() => import('@/components/WalletConnect'), {
@@ -242,14 +243,46 @@ function NewStoryPageContent() {
         }
       }
 
-      // Register with MetaMask signature
-      const registrationResult = await registerChapterAsIP(chapterData)
+      // Register with MetaMask signature - with timeout wrapper
+      console.log('🔄 Calling registerChapterAsIP...')
+      
+      const registrationTimeout = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Book registration timed out after 60 seconds. Please check MetaMask for pending transactions.')), 60000)
+      )
+      
+      let registrationResult: IPRegistrationResult
+      
+      try {
+        registrationResult = await Promise.race([
+          registerChapterAsIP(chapterData),
+          registrationTimeout
+        ]) as IPRegistrationResult
 
-      if (!registrationResult.success) {
-        throw new Error(registrationResult.error || 'Book registration failed')
+        if (!registrationResult.success) {
+          console.error('❌ Registration failed:', registrationResult.error)
+          throw new Error(registrationResult.error || 'Book registration failed')
+        }
+
+        console.log('✅ Book registration successful!', registrationResult)
+      } catch (timeoutError) {
+        console.error('⏱️ Registration timeout or error:', timeoutError)
+        
+        // Show a warning but allow continuing without blockchain registration
+        showToast.showWarning(
+          'Blockchain Registration Issue',
+          'Book could not be registered on blockchain. You can still create and save chapters locally.',
+          { duration: 8000 }
+        )
+        
+        // Set a flag to indicate blockchain registration failed
+        registrationResult = {
+          success: false,
+          error: timeoutError instanceof Error ? timeoutError.message : 'Unknown error'
+        }
+        
+        // Don't throw - allow the process to continue
+        console.warn('⚠️ Continuing without blockchain registration')
       }
-
-      console.log('✅ Book registration successful!', registrationResult)
 
       // Step 3: Register book for revenue sharing (HybridRevenueControllerV2)
       let revenueRegistrationSuccess = false
@@ -321,11 +354,11 @@ function NewStoryPageContent() {
         formData.append('licenseTerms', JSON.stringify(licenseConfig))
         
         // Add IP Asset ID and transaction hash from blockchain registration
-        if (registrationResult.ipAssetId) {
+        if (registrationResult.success && registrationResult.ipAssetId) {
           formData.append('ipAssetId', registrationResult.ipAssetId)
           console.log('📝 IP Asset ID:', registrationResult.ipAssetId)
         }
-        if (registrationResult.transactionHash) {
+        if (registrationResult.success && registrationResult.transactionHash) {
           formData.append('transactionHash', registrationResult.transactionHash)
           console.log('🔗 Transaction hash:', registrationResult.transactionHash)
         }

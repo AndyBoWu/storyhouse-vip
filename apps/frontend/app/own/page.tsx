@@ -1,20 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ArrowLeft, Sparkles, Book } from 'lucide-react'
+import { Sparkles, Book } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAccount } from 'wagmi'
 import { buildChapterUrl } from '@/lib/utils/slugify'
 import { apiClient } from '@/lib/api-client'
 import dynamic from 'next/dynamic'
-import QuickNavigation from '@/components/ui/QuickNavigation'
-
-// Dynamically import WalletConnect to avoid hydration issues
-const WalletConnect = dynamic(() => import('@/components/WalletConnect'), {
-  ssr: false,
-  loading: () => <div className="w-24 h-10 bg-gray-200 rounded-full animate-pulse"></div>
-})
+import Header from '@/components/ui/Header'
 
 
 interface RegisteredBook {
@@ -198,20 +192,7 @@ export default function MyStoriesPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-orange-100 via-pink-100 to-blue-200">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2 text-gray-600 hover:text-gray-800">
-              <ArrowLeft className="w-4 h-4" />
-              Back to StoryHouse
-            </Link>
-            <div className="flex items-center gap-4">
-              <QuickNavigation currentPage="own" />
-              <WalletConnect />
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       <div className="container mx-auto px-6 py-8">
         <div className="max-w-6xl mx-auto">
