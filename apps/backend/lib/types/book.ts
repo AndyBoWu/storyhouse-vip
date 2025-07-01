@@ -89,7 +89,6 @@ export interface ChapterMetadata {
   
   // Economics
   unlockPrice: number
-  readReward: number
   licensePrice: number
   totalRevenue: number
   

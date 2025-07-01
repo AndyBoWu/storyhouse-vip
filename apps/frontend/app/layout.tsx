@@ -22,9 +22,9 @@ const merriweather = Merriweather({
 })
 
 export const metadata: Metadata = {
-  title: 'StoryHouse.vip - Read Stories, Earn Tokens, Create with AI',
-  description: 'First 3 chapters FREE. Earn $TIP tokens while reading. Remix content and earn from your creativity. Built on Story Protocol.',
-  keywords: ['AI writing', 'blockchain publishing', 'read to earn', 'story protocol', 'content creation'],
+  title: 'StoryHouse.vip - Web3 Storytelling with AI & IP Protection',
+  description: 'First 3 chapters FREE. Create stories with AI, protect your IP on blockchain, and earn from your content. Built on Story Protocol.',
+  keywords: ['AI writing', 'blockchain publishing', 'IP protection', 'story protocol', 'content creation', 'web3 storytelling'],
   authors: [{ name: 'StoryHouse.vip Team' }],
   icons: {
     icon: '/favicon.svg',

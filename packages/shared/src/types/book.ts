@@ -72,7 +72,6 @@ export interface ChapterMetadata {
   
   // Economics
   unlockPrice: number;       // $TIP cost to read
-  readReward: number;        // $TIP earned for completion
   licensePrice: number;      // $TIP cost for remix rights
   
   // Content Metrics
@@ -217,7 +216,6 @@ export interface ChapterResolutionResponse {
     wordCount: number;
     readingTime: number;
     unlockPrice: number;
-    readReward: number;
     
     // Source Attribution
     source: {

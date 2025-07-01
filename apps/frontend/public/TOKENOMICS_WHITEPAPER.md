@@ -604,7 +604,7 @@ Realistic capture: 0.01% = $150M
 **Phase 2: Reader Growth (Months 6-18)**
 
 - Target: 100,000 active readers
-- Strategy: Read-to-earn marketing, viral mechanics
+- Strategy: Community marketing, viral mechanics
 - Investment: $2M in user acquisition
 
 **Phase 3: Network Effects (Months 18-36)**

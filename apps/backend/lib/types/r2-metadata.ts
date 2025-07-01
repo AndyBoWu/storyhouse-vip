@@ -34,9 +34,8 @@ export interface BaseChapterMetadata {
   licensePrice: number
   royaltyPercentage: number
   
-  // Read-to-Earn Economics (existing)
+  // Chapter Economics
   unlockPrice: number
-  readReward: number
   
   // Status & Lifecycle
   status: 'draft' | 'published' | 'archived'
@@ -273,7 +272,6 @@ export interface EnhancedR2ChapterData {
   economics: {
     // Current TIP Token Economics
     currentUnlockPrice: number
-    currentReadReward: number
     currentLicensePrice: number
     currentRoyaltyPercentage: number
     
@@ -281,7 +279,6 @@ export interface EnhancedR2ChapterData {
     priceHistory: Array<{
       date: string
       unlockPrice: number
-      readReward: number
       licensePrice: number
       reason: string // 'quality_adjustment' | 'market_demand' | 'manual_override'
     }>
@@ -346,7 +343,6 @@ export interface EnhancedR2StorageMetadata {
   contentRating: string
   genre: string // comma-separated for HTTP header
   unlockPrice: string
-  readReward: string
   licensePrice: string
   royaltyPercentage: string
   
@@ -393,7 +389,6 @@ export function convertToR2StorageMetadata(
     contentRating: chapterData.metadata.contentRating,
     genre: chapterData.metadata.genre.join(','),
     unlockPrice: chapterData.economics.currentUnlockPrice.toString(),
-    readReward: chapterData.economics.currentReadReward.toString(),
     licensePrice: chapterData.economics.currentLicensePrice.toString(),
     royaltyPercentage: chapterData.economics.currentRoyaltyPercentage.toString(),
     

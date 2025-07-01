@@ -45,7 +45,6 @@ export declare const STORY_CONFIG: {
 export declare const API_CONFIG: {
     readonly baseUrl: "https://testnet.storyhouse.vip" | "http://localhost:3000";
     readonly endpoints: {
-        readonly generateStory: "/api/generate";
         readonly stories: "/api/stories";
         readonly users: "/api/users";
         readonly rewards: "/api/rewards";

@@ -28,7 +28,6 @@ interface GeneratedStory {
     bookCoverUrl?: string
     plotDescription: string
     unlockPrice: number
-    readReward: number
     licensePrice: number
     royaltyPercentage: number
     isRemixable: boolean
@@ -257,7 +256,7 @@ export default function StoryGenerationInterface({
               <div className="w-4 h-4 bg-yellow-400 rounded-full mt-0.5 flex-shrink-0"></div>
               <div className="text-sm text-yellow-800">
                 <strong>Important:</strong> Publishing to blockchain will register your story as an IP asset,
-                enabling licensing, royalties, and read-to-earn mechanics. This requires MetaMask signing
+                enabling licensing and royalties. This requires MetaMask signing
                 and a small gas fee. Drafts are saved locally and can be published later.
               </div>
             </div>

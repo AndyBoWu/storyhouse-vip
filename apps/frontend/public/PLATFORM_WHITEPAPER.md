@@ -33,7 +33,7 @@ StoryHouse.vip is a revolutionary Web3 storytelling platform that transforms how
 4. [Smart Contract System](#smart-contract-system)
 5. [Unified IP Registration](#unified-ip-registration)
 6. [Metadata & Attribution](#metadata-attribution)
-7. [Read-to-Earn Mechanics](#read-to-earn)
+7. [Token Economics & Revenue](#token-economics)
 8. [AI Integration](#ai-integration)
 9. [Security & Performance](#security-performance)
 10. [Roadmap & Future](#roadmap-future)

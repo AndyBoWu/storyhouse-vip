@@ -1,7 +1,7 @@
 # 🚀 StoryHouse.vip Pitch Deck
 
 **The Most Native Story Protocol L1 Ecosystem Project**  
-*Revolutionizing Web3 Publishing with Chapter-Level IP Assets and Read-to-Earn Economics*
+*Revolutionizing Web3 Publishing with Chapter-Level IP Assets and Blockchain Revenue*
 
 ---
 
@@ -115,7 +115,7 @@ flowchart LR
 
 **🌟 Triple Value Proposition:**
 1. **For Creators:** Instant monetization + AI assistance
-2. **For Readers:** Read-to-earn + discovery rewards  
+2. **For Readers:** Premium content access + IP ownership  
 3. **For Protocol:** Native ecosystem validation
 
 ---
@@ -197,7 +197,7 @@ graph LR
     
     subgraph "🎮 Gaming/Creator Economy"
         G1["$200B Gaming Market"]
-        G2["Read-to-Earn Gaming"]
+        G2["Play-to-Earn Model Evolution"]
         G3["Creator Economy Growth"]
     end
     
@@ -265,10 +265,10 @@ journey
    - See author reputation and earnings
    - Preview first 3 chapters free
 
-2. **📚 Read-to-Earn Experience**
+2. **📚 Premium Reading Experience**
    - Progressive onboarding (no wallet required)
-   - Chapter 4+ paywall with clear value prop
-   - Immediate $TIP rewards for completion
+   - Chapter 4+ premium access with TIP tokens
+   - Direct support to creators through purchases
 
 3. **✍️ Creator Dashboard**
    - One-click chapter publishing
@@ -427,11 +427,11 @@ quadrantChart
    - Automated royalty distribution at protocol level
    - Cross-chain IP asset interoperability
 
-2. **💰 Read-to-Earn Economics**
-   - First platform to pay readers for consumption
+2. **💰 Sustainable Token Economics**
+   - Direct creator-to-reader value exchange
    - Sustainable tokenomics through chapter sales
    - Network effects driving adoption
-   - Gamified discovery mechanisms
+   - IP-backed revenue model
 
 3. **📄 Chapter-Level IP Granularity**
    - Revolutionary approach to IP asset creation
