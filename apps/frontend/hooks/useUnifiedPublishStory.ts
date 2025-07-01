@@ -699,6 +699,7 @@ export function useUnifiedPublishStory() {
         console.log("❌ Non-author cannot add chapters to original book");
       }
     }
+      }
 
       // Success!
       setCurrentStep("success");
