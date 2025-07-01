@@ -148,45 +148,45 @@ export function useUnifiedPublishStory() {
     options: PublishOptions,
     bookId?: string,
   ): Promise<UnifiedPublishResult> => {
-    setCurrentStep("unified-registration");
-    console.log("🔗 Executing unified IP registration on client-side...");
-
-    const nftContract = process.env
-      .NEXT_PUBLIC_STORY_SPG_NFT_CONTRACT as Address;
-
-    if (!nftContract) {
-      throw new Error("SPG NFT Contract not configured");
-    }
-
-    // Check if book needs registration
-    let bookMetadata = null;
-    let isDerivativeBook = false;
-
     try {
-    if (bookId) {
-      try {
-        const bookData = await apiClient.getBookById(bookId);
-        bookMetadata = bookData;
+      setCurrentStep("unified-registration");
+      console.log("🔗 Executing unified IP registration on client-side...");
 
-        // Check if this is a derivative book
-        if (bookMetadata.parentBook) {
-          console.log("🌿 Detected derivative book");
-          isDerivativeBook = true;
-          console.log(
-            "📝 Will register this chapter individually (not book-level IP)",
-          );
-          
-          // For derivative books, we don't need book registration
-          // Chapters are registered individually with their own IP
-          console.log("✅ Derivative book - skipping book registration requirement");
-        } else {
-          // Only check registration for original books
-          const registrationStatus =
-            await apiClient.checkBookRegistrationStatus(bookId);
-          if (!registrationStatus.data?.isRegistered) {
-            console.log("⚠️ Original book not registered in revenue controller");
+      const nftContract = process.env
+        .NEXT_PUBLIC_STORY_SPG_NFT_CONTRACT as Address;
 
-            // Return a special result indicating registration is needed for original books
+      if (!nftContract) {
+        throw new Error("SPG NFT Contract not configured");
+      }
+
+      // Check if book needs registration
+      let bookMetadata = null;
+      let isDerivativeBook = false;
+
+      if (bookId) {
+        try {
+          const bookData = await apiClient.getBookById(bookId);
+          bookMetadata = bookData;
+
+          // Check if this is a derivative book
+          if (bookMetadata.parentBook) {
+            console.log("🌿 Detected derivative book");
+            isDerivativeBook = true;
+            console.log(
+              "📝 Will register this chapter individually (not book-level IP)",
+            );
+            
+            // For derivative books, we don't need book registration
+            // Chapters are registered individually with their own IP
+            console.log("✅ Derivative book - skipping book registration requirement");
+          } else {
+            // Only check registration for original books
+            const registrationStatus =
+              await apiClient.checkBookRegistrationStatus(bookId);
+            if (!registrationStatus.data?.isRegistered) {
+              console.log("⚠️ Original book not registered in revenue controller");
+
+              // Return a special result indicating registration is needed for original books
             const result: UnifiedPublishResult = {
               success: false,
               error: "Original book needs to be registered for revenue sharing first",
@@ -195,56 +195,51 @@ export function useUnifiedPublishStory() {
             setPublishResult(result);
             setCurrentStep("error");
             return result;
+            }
           }
+        } catch (error) {
+          console.warn("Could not fetch book metadata:", error);
+        }
+      }
+
+      // Step 1: Generate and store metadata via backend
+      setCurrentStep("generating-metadata");
+      console.log("📝 Generating metadata...");
+
+      const storyForMetadata = {
+        id: bookId || `${address!.toLowerCase()}-${Date.now()}`, // Use bookId if available, otherwise fallback
+        title: storyData.title,
+        content: storyData.content,
+        author: address!,
+        genre: storyData.themes[0] || "Fiction",
+        mood: storyData.themes[1] || "Neutral",
+        createdAt: new Date().toISOString(),
+      };
+
+      let metadataUri: string | undefined;
+      let metadataHash: Hash | undefined;
+
+      try {
+        // Call backend to generate and store metadata only
+        const metadataResult = await apiClient.generateIPMetadata({
+          story: storyForMetadata,
+          licenseTier: options.licenseTier,
+        });
+
+        if (metadataResult.success && metadataResult.data) {
+          metadataUri = metadataResult.data.metadataUri;
+          metadataHash = metadataResult.data.metadataHash as Hash;
+          console.log("✅ Metadata generated:", {
+            uri: metadataUri,
+            hash: metadataHash,
+          });
         }
       } catch (error) {
-        console.warn("Could not fetch book metadata:", error);
+        console.warn(
+          "⚠️ Failed to generate metadata, proceeding without:",
+          error,
+        );
       }
-    }
-    } catch (error) {
-      console.warn("Error in book metadata loading:", error);
-    }
-
-    // Step 1: Generate and store metadata via backend
-    setCurrentStep("generating-metadata");
-    console.log("📝 Generating metadata...");
-
-    const storyForMetadata = {
-      id: bookId || `${address!.toLowerCase()}-${Date.now()}`, // Use bookId if available, otherwise fallback
-      title: storyData.title,
-      content: storyData.content,
-      author: address!,
-      genre: storyData.themes[0] || "Fiction",
-      mood: storyData.themes[1] || "Neutral",
-      createdAt: new Date().toISOString(),
-    };
-
-    let metadataUri: string | undefined;
-    let metadataHash: Hash | undefined;
-
-    try {
-      // Call backend to generate and store metadata only
-      const metadataResult = await apiClient.generateIPMetadata({
-        story: storyForMetadata,
-        licenseTier: options.licenseTier,
-      });
-
-      if (metadataResult.success && metadataResult.data) {
-        metadataUri = metadataResult.data.metadataUri;
-        metadataHash = metadataResult.data.metadataHash as Hash;
-        console.log("✅ Metadata generated:", {
-          uri: metadataUri,
-          hash: metadataHash,
-        });
-      }
-    } catch (error) {
-      console.warn(
-        "⚠️ Failed to generate metadata, proceeding without:",
-        error,
-      );
-    }
-
-    try {
       // Step 2: Execute blockchain transaction with user's wallet
       setCurrentStep("blockchain-transaction");
       console.log("🔗 Executing blockchain transaction with user wallet...");
@@ -667,6 +662,10 @@ export function useUnifiedPublishStory() {
       }
     } else {
       // This is for free chapters (1-3)
+      // Need to check book authorship for free chapters too
+      const book = await apiClient.getBookById(finalBookId);
+      const isBookAuthor = book.author?.toLowerCase() === address?.toLowerCase();
+      
       if (isDerivativeBook || bookMetadata?.parentBook) {
         // Derivative books - free chapters don't need attribution
         console.log("🌿 Derivative book free chapter (1-3) - no attribution needed");
@@ -714,7 +713,7 @@ export function useUnifiedPublishStory() {
           licenseTermsId: registrationResult.licenseTermsId
             ? BigInt(registrationResult.licenseTermsId)
             : undefined,
-          contentUrl: storyData.contentUrl,
+          contentUrl: saveResult.data?.contentUrl,
           explorerUrl: `https://aeneid.storyscan.io/tx/${transactionHash}`,
         },
         metadataUri: metadataUri,
@@ -730,7 +729,6 @@ export function useUnifiedPublishStory() {
         ),
       );
       return unifiedResult;
-    }
     } catch (error) {
       console.error("❌ Unified registration failed:", error);
       throw error;

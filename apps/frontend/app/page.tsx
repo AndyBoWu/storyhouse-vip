@@ -11,45 +11,46 @@ export default function HomePage() {
       {/* Header */}
       <header className="relative z-10 bg-white/10 backdrop-blur-sm border-b border-white/20 shadow-sm">
         <div className="container mx-auto px-6 py-4">
-          <nav className="flex items-center justify-between">
-            {/* Left side - Logo and Main navigation */}
-            <div className="flex items-center gap-8">
-              {/* Logo/Brand */}
-              <Link href="/" className="flex items-center gap-2 group">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-pink-400 flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
-                  <span className="text-white font-bold text-lg">S</span>
+          <div className="max-w-4xl mx-auto">
+            <nav className="flex items-center justify-between">
+              {/* Left side - Logo and Main navigation */}
+              <div className="flex items-center gap-8">
+                {/* Logo/Brand */}
+                <Link href="/" className="group">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-pink-400 flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
+                    <span className="text-white font-bold text-lg">S</span>
+                  </div>
+                </Link>
+                
+                {/* Navigation buttons */}
+                <div className="flex items-center gap-2">
+                  <Link href="/read">
+                    <button className="group flex items-center gap-2.5 rounded-full px-6 py-3 text-sm font-semibold text-gray-800 bg-white/60 backdrop-blur-sm border border-white/40 transition-all hover:bg-white/80 hover:border-white/60 hover:shadow-md hover:scale-105">
+                      <ReadIcon className="transition-transform group-hover:scale-110" />
+                      <span>READ</span>
+                    </button>
+                  </Link>
+
+                  <Link href="/write">
+                    <button className="group flex items-center gap-2.5 rounded-full px-6 py-3 text-sm font-semibold text-gray-800 bg-white/60 backdrop-blur-sm border border-white/40 transition-all hover:bg-white/80 hover:border-white/60 hover:shadow-md hover:scale-105">
+                      <WriteIcon className="transition-transform group-hover:scale-110" />
+                      <span>WRITE</span>
+                    </button>
+                  </Link>
+
+                  <Link href="/own">
+                    <button className="group flex items-center gap-2.5 rounded-full px-6 py-3 text-sm font-semibold text-gray-800 bg-white/60 backdrop-blur-sm border border-white/40 transition-all hover:bg-white/80 hover:border-white/60 hover:shadow-md hover:scale-105">
+                      <OwnIcon className="transition-transform group-hover:scale-110" />
+                      <span>OWN</span>
+                    </button>
+                  </Link>
                 </div>
-                <span className="text-xl font-bold text-gray-800 hidden sm:block">StoryHouse</span>
-              </Link>
-              
-              {/* Navigation buttons */}
-              <div className="flex items-center gap-2">
-              <Link href="/read">
-                <button className="group flex items-center gap-2.5 rounded-full px-6 py-3 text-sm font-semibold text-gray-800 bg-white/60 backdrop-blur-sm border border-white/40 transition-all hover:bg-white/80 hover:border-white/60 hover:shadow-md hover:scale-105">
-                  <ReadIcon className="transition-transform group-hover:scale-110" />
-                  <span>READ</span>
-                </button>
-              </Link>
-
-              <Link href="/write">
-                <button className="group flex items-center gap-2.5 rounded-full px-6 py-3 text-sm font-semibold text-gray-800 bg-white/60 backdrop-blur-sm border border-white/40 transition-all hover:bg-white/80 hover:border-white/60 hover:shadow-md hover:scale-105">
-                  <WriteIcon className="transition-transform group-hover:scale-110" />
-                  <span>WRITE</span>
-                </button>
-              </Link>
-
-              <Link href="/own">
-                <button className="group flex items-center gap-2.5 rounded-full px-6 py-3 text-sm font-semibold text-gray-800 bg-white/60 backdrop-blur-sm border border-white/40 transition-all hover:bg-white/80 hover:border-white/60 hover:shadow-md hover:scale-105">
-                  <OwnIcon className="transition-transform group-hover:scale-110" />
-                  <span>OWN</span>
-                </button>
-              </Link>
               </div>
-            </div>
 
-            {/* Right side - Wallet connection */}
-            <WalletConnect />
-          </nav>
+              {/* Right side - Wallet connection */}
+              <WalletConnect />
+            </nav>
+          </div>
         </div>
       </header>
 

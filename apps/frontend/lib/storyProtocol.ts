@@ -246,7 +246,18 @@ export class StoryProtocolService {
 
       // Use mintAndRegisterIp to create both NFT and IP Asset
       console.log('🚀 Calling Story Protocol mintAndRegisterIp...')
-      const registrationResult = await client.ipAsset.mintAndRegisterIp(registrationParams)
+      console.log('⚠️ Please check MetaMask for transaction approval...')
+      
+      let registrationResult;
+      try {
+        registrationResult = await client.ipAsset.mintAndRegisterIp(registrationParams)
+      } catch (error: any) {
+        console.error('❌ Transaction failed or was rejected:', error)
+        if (error.message?.includes('User rejected') || error.message?.includes('User denied')) {
+          throw new Error('Transaction was rejected in MetaMask')
+        }
+        throw error
+      }
 
       console.log('📝 Raw registration result:', registrationResult)
 
