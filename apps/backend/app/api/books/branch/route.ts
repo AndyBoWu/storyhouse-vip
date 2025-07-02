@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { 
   BookId,
   AuthorAddress,
+  BookMetadata,
   BOOK_SYSTEM_CONSTANTS 
 } from '@/lib/types/book'
 import { BookStorageService } from '@/lib/storage/bookStorage'
@@ -186,19 +187,106 @@ export async function POST(request: NextRequest) {
     const nextChapterNumber = chapterNumber + 1
 
     console.log('✅ Branch validation successful')
-    console.log(`📝 User can write chapter ${nextChapterNumber} as a derivative`)
+    console.log(`📝 Creating derivative book for ${authorAddress}`)
 
-    // Return validation success with the parent book info
-    // The frontend will redirect to write chapter with the original book ID
+    // ===== CREATE DERIVATIVE BOOK =====
+    
+    // Generate a unique slug for the derivative book
+    const timestamp = Date.now()
+    const derivativeSlug = `${parentBook.slug}-${authorAddress.slice(-4).toLowerCase()}-${timestamp}`
+    const derivativeBookId = `${authorAddress.toLowerCase()}/${derivativeSlug}` as BookId
+    
+    console.log('📚 Creating derivative book:', {
+      derivativeBookId,
+      parentBookId,
+      branchPoint,
+      nextChapterNumber
+    })
+    
+    // Extract additional form data for the derivative book
+    const newTitle = formData.get('newTitle') as string || `${parentBook.title} - Remix`
+    const newDescription = formData.get('newDescription') as string || parentBook.description
+    const genres = JSON.parse(formData.get('genres') as string || '[]')
+    const contentRating = formData.get('contentRating') as BookMetadata['contentRating'] || parentBook.contentRating
+    
+    // Create initial metadata for the derivative book
+    const derivativeMetadata = BookStorageService.createInitialBookMetadata(
+      authorAddress,
+      derivativeSlug,
+      newTitle,
+      newDescription,
+      genres.length > 0 ? genres : parentBook.genres,
+      contentRating
+    )
+    
+    // Important: Mark this as a derivative book
+    derivativeMetadata.parentBook = parentBookId
+    derivativeMetadata.isDerivative = true
+    
+    // Copy chapter references from parent book up to branch point
+    const chaptersToCopy = Object.entries(parentBook.chapterMap)
+      .filter(([ch, _]) => {
+        const num = parseInt(ch.replace('ch', ''))
+        return num <= chapterNumber
+      })
+    
+    // Build the chapter map with inherited chapters
+    derivativeMetadata.chapterMap = {}
+    chaptersToCopy.forEach(([ch, chapterPath]) => {
+      derivativeMetadata.chapterMap[ch] = chapterPath
+    })
+    
+    // Update chapter count
+    derivativeMetadata.totalChapters = Object.keys(derivativeMetadata.chapterMap).length
+    derivativeMetadata.chapters = derivativeMetadata.totalChapters
+    
+    // Handle cover image if provided
+    const coverFile = formData.get('newCover') as File
+    if (coverFile) {
+      try {
+        console.log('📸 Processing cover image for derivative book')
+        
+        // Convert file to buffer
+        const coverBuffer = Buffer.from(await coverFile.arrayBuffer())
+        
+        const coverUrl = await BookStorageService.storeBookCover(
+          authorAddress,
+          derivativeSlug,
+          coverBuffer,
+          coverFile.type
+        )
+        derivativeMetadata.coverUrl = coverUrl
+        derivativeMetadata.coverImageUrl = coverUrl // Backward compatibility
+      } catch (error) {
+        console.error('⚠️ Cover upload failed, continuing without cover:', error)
+      }
+    } else {
+      // Use parent book's cover
+      derivativeMetadata.coverUrl = parentBook.coverUrl
+      derivativeMetadata.coverImageUrl = parentBook.coverImageUrl
+    }
+    
+    // Store the derivative book metadata
+    await BookStorageService.storeBookMetadata(
+      authorAddress,
+      derivativeSlug,
+      derivativeMetadata
+    )
+    
+    console.log('✅ Derivative book created successfully:', derivativeBookId)
+
+    // Return the derivative book info
     return NextResponse.json({
       success: true,
-      message: 'Branch validation successful',
+      message: 'Derivative book created successfully',
       book: {
-        bookId: parentBookId,  // Use original book ID
-        title: parentBook.title,
-        coverUrl: parentBook.coverUrl,
-        chapterMap: parentBook.chapterMap,
-        nextChapterNumber
+        bookId: derivativeBookId,  // Return derivative book ID
+        title: newTitle,
+        coverUrl: derivativeMetadata.coverUrl,
+        chapterMap: derivativeMetadata.chapterMap,
+        nextChapterNumber,
+        parentBookId,
+        isDerivative: true
       }
     })
 
