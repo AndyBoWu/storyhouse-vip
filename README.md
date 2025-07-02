@@ -24,7 +24,7 @@
     - Direct partnerships with Spotify Audiobooks, Apple Podcasts, and major streaming platforms
   - **Derivative works**: License remixes, adaptations, and parallel universe stories
   - **Format multiplication**: Each format (text, audio, translation) = separate revenue stream
-- **🤖 AI-Powered Features**: Content fraud detection, translation, text-to-audio, and smart recommendations
+- **🤖 AI-Powered Features** (Planned): Content fraud detection, translation, text-to-audio, and smart recommendations
 - **⚡ 40% Lower Gas Costs**: Single-transaction IP registration saves time and money
 
 ## 🚀 Quick Start
@@ -50,14 +50,14 @@ npm install
 - **Flexible Licensing**: Choose from reading, commercial, or exclusive licenses
 - **Real-Time Analytics**: Track earnings, readers, and derivative works
 - **Direct Wallet Payments**: Receive payments instantly to your wallet
-- **Content Protection**: AI-powered fraud detection prevents plagiarism
+- **Content Protection**: Blockchain-based IP registration prevents unauthorized use
 
 ### For Readers  
 - **Try Before You Buy**: First 3 chapters free for every story
-- **Quality Content**: AI-verified stories with anti-plagiarism protection
-- **Multiple Languages**: Stories available in 10+ languages through AI translation
-- **Audio Experience**: Text-to-audio generation for listening on the go
-- **Smart Recommendations**: AI-powered content suggestions based on your reading
+- **Quality Content**: Community-curated stories with blockchain verification
+- **Multiple Languages**: Support for stories in multiple languages (translation features planned)
+- **Audio Experience**: Audiobook licensing for professional narration
+- **Content Discovery**: Browse stories by genre, popularity, and author
 - **Ownership Options**: Purchase reading licenses or full commercial rights
 - **Direct Support**: 90% of payments go to creators (70% author + 20% curator)
 
@@ -93,7 +93,7 @@ StoryHouse uses a minimal 2-contract architecture integrated with Story Protocol
 | Contract | Address | Purpose |
 |----------|---------|---------|
 | TIP Token | `0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E` | Platform currency |
-| HybridRevenueControllerV2 | `0x99dA048826Bbb8189FBB6C3e62EaA75d0fB36812` | Revenue distribution (70/20/10) |
+| HybridRevenueControllerV2 | `0x995c07920fb8eC57cBA8b0E2be8903cB4434f9D6` | Revenue distribution (70/20/10) |
 
 **Story Protocol Handles**: IP registration, NFT minting, licensing, derivatives, royalties
 
@@ -111,7 +111,6 @@ StoryHouse uses a minimal 2-contract architecture integrated with Story Protocol
 - **Backend**: Next.js API Routes, TypeScript
 - **Blockchain**: Story Protocol SDK v1.3.2, ethers.js
 - **Smart Contracts**: Solidity 0.8.20, Foundry
-- **AI**: OpenAI GPT-4
 - **Storage**: Cloudflare R2
 
 ## 🤝 Contributing

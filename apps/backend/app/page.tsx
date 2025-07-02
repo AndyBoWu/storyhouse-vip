@@ -7,11 +7,11 @@ export default function HomePage() {
       <h2>Available Endpoints:</h2>
       <ul>
         <li><strong>GET /api/stories</strong> - List all published stories</li>
-        <li><strong>POST /api/generate</strong> - Generate story content with AI</li>
         <li><strong>POST /api/upload</strong> - Upload story content to R2</li>
-        <li><strong>POST /api/ip/register</strong> - Register stories as IP assets</li>
-        <li><strong>GET|POST|PUT /api/collections</strong> - Collection management</li>
-        <li><strong>GET|POST /api/security</strong> - Security checks</li>
+        <li><strong>POST /api/ip/register-unified</strong> - Register stories as IP assets (unified method)</li>
+        <li><strong>GET /api/books</strong> - List all published books</li>
+        <li><strong>GET /api/books/[bookId]/chapters</strong> - Get chapters for a book</li>
+        <li><strong>GET /api/books/[bookId]/chapter/[chapterNumber]</strong> - Get specific chapter</li>
       </ul>
 
       <h2>Status:</h2>

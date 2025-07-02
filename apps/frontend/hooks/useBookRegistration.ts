@@ -116,7 +116,7 @@ export function useBookRegistration() {
   })
   
   const { 
-    writeContract: writeSetAttribution, 
+    writeContractAsync: writeSetAttribution, 
     data: attributionHash,
     isError: isAttributionError,
     error: attributionError,
@@ -384,7 +384,10 @@ export function useBookRegistration() {
           }
         })
         
-        writeSetAttribution({
+        // Add a small delay to ensure MetaMask popup appears
+        await new Promise(resolve => setTimeout(resolve, 500))
+        
+        const txHash = await writeSetAttribution({
           address: HYBRID_REVENUE_CONTROLLER_V2_ADDRESS as `0x${string}`,
           abi: HYBRID_V2_ABI,
           functionName: 'setChapterAttribution',
@@ -399,24 +402,19 @@ export function useBookRegistration() {
           gas: estimatedGas, // Use dynamically estimated gas with buffer
         })
         
-        console.log('✅ writeSetAttribution called - check your wallet for transaction prompt')
+        console.log('✅ Attribution transaction submitted:', txHash)
         
-        // Small delay to ensure the transaction is properly initiated
-        await new Promise(resolve => setTimeout(resolve, 100))
-        
-        console.log('📊 Current hook state:', {
-          isAttributionWritePending,
-          isAttributionError,
-          attributionError: attributionError?.message,
-          attributionHash
+        // Wait for transaction confirmation
+        const receipt = await publicClient?.waitForTransactionReceipt({
+          hash: txHash,
+          timeout: 120_000, // 2 minutes timeout
         })
         
-        // Return immediately - the transaction will be handled by wagmi hooks
-        // The parent component should monitor attributionHash and transaction states
-        return { 
-          success: true, 
-          pending: true,
-          message: 'Transaction initiated. Please check your wallet and approve the transaction.'
+        if (receipt?.status === 'success') {
+          console.log('✅ Chapter attribution confirmed!')
+          return { success: true, transactionHash: txHash }
+        } else {
+          throw new Error('Attribution transaction failed')
         }
         
       } catch (writeError) {
@@ -444,9 +442,39 @@ export function useBookRegistration() {
       setIsLoading(false)
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
     }
-  }, [address, writeSetAttribution])
+  }, [address, writeSetAttribution, publicClient])
   
   // Check if the service is supported (contract deployed)
+  /**
+   * Check if chapter attribution is set
+   */
+  const checkChapterAttribution = useCallback(async ({
+    bookId,
+    chapterNumber
+  }: { bookId: string; chapterNumber: number }) => {
+    if (!publicClient) return false;
+    
+    try {
+      const { bytes32Id } = parseBookId(bookId);
+      
+      const result = await publicClient.readContract({
+        address: HYBRID_REVENUE_CONTROLLER_V2_ADDRESS as `0x${string}`,
+        abi: HYBRID_V2_ABI,
+        functionName: 'chapterAttributions',
+        args: [bytes32Id, BigInt(chapterNumber)],
+      });
+      
+      const [originalAuthor] = result as [`0x${string}`, `0x${string}`, bigint, boolean];
+      const isSet = originalAuthor !== '0x0000000000000000000000000000000000000000';
+      
+      console.log(`📋 Chapter ${chapterNumber} attribution check:`, { isSet, originalAuthor });
+      return isSet;
+    } catch (error) {
+      console.error('Failed to check chapter attribution:', error);
+      return false;
+    }
+  }, [publicClient]);
+
   const isSupported = HYBRID_REVENUE_CONTROLLER_V2_ADDRESS && 
                      HYBRID_REVENUE_CONTROLLER_V2_ADDRESS !== '0x...' &&
                      !!publicClient
@@ -455,6 +483,7 @@ export function useBookRegistration() {
     registerBook,
     setChapterAttribution,
     checkBookRegistration,
+    checkChapterAttribution,
     isLoading: isLoading || isRegisterPending || isAttributionPending,
     error,
     isSupported,
@@ -467,7 +496,6 @@ export function useBookRegistration() {
       isConfirming: isAttributionPending,
       isSuccess: isAttributionSuccess
     },
-    // Expose write contract function for direct use if needed
-    writeSetAttribution
+    // Expose write contract function for direct use if needed (not needed anymore since setChapterAttribution handles it)
   }
 }

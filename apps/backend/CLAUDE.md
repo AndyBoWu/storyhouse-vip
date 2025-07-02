@@ -77,8 +77,8 @@ GET    /api/books/[bookId]         # Get book details
 GET    /api/books/[bookId]/cover   # Proxy for book cover images
 POST   /api/books/[bookId]/publish # Create new chapter
 
-GET    /api/chapters/[chapterId]   # Get chapter content
-POST   /api/chapters/[chapterId]/unlock # Record chapter unlock
+GET    /api/books/[bookId]/chapter/[chapterNumber]   # Get chapter content
+POST   /api/books/[bookId]/chapter/[chapterNumber]/unlock # Record chapter unlock
 
 GET    /api/users/[address]/books  # Get user's books
 ```
@@ -86,8 +86,10 @@ GET    /api/users/[address]/books  # Get user's books
 ### Removed Endpoints (Legacy)
 - ❌ `/api/ip/register/*` - Legacy registration
 - ❌ `/api/ip/license/*` - Legacy licensing
-- ❌ `/api/test/*` - Debug endpoints
-- ❌ `/api/debug-*` - Security risk
+- ❌ `/api/test/*` - Debug endpoints (removed for security)
+- ❌ `/api/debug/*` - Test endpoints exposing internal data
+- ❌ `/api/generate` - AI story generation (removed December 2024)
+- ❌ `/api/chapters/[storyId]/[chapterNumber]` - Old chapter pattern (use /api/books/[bookId]/chapter/[chapterNumber])
 
 ## Environment Variables
 

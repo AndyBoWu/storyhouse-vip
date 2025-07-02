@@ -170,15 +170,9 @@ export const apiClient = {
     })
   },
   
-  async licenseIP(data: any) {
-    return apiRequest('/api/ip/license', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    })
-  },
-  
   // Collections - removed (unused)
   // Security - removed (unused)
+  // License IP - removed (legacy workflow)
 
   // Books operations (for new book landing pages)
   async getBooks(authorAddress?: string) {
