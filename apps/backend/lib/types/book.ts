@@ -65,6 +65,10 @@ export interface BookMetadata {
   
   // Legacy/compatibility fields
   status?: string
+  
+  // Derivative book tracking (temporary until full migration)
+  parentBook?: BookId
+  isDerivative?: boolean
 }
 
 export interface ChapterMetadata {

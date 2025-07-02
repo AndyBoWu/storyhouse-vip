@@ -611,13 +611,105 @@ function BranchStoryPageContent() {
                     className="bg-white rounded-xl shadow-lg p-6"
                   >
                     <h3 className="text-lg font-semibold text-gray-800 mb-1">
-                      ✨ Add your chapter to "{selectedStory.title}"
+                      🌟 Create Your Derivative Book
                     </h3>
                     <p className="text-sm text-gray-600 mb-4">
-                      You'll be writing Chapter {(selectedChapter || 0) + 1} as part of the original book
+                      You'll create your own book that inherits chapters 1-{selectedChapter} from "{selectedStory.title}" and adds your Chapter {(selectedChapter || 0) + 1}
                     </p>
 
                     <div className="space-y-4">
+                      {/* Custom Book Title */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Your Book Title
+                        </label>
+                        <input
+                          type="text"
+                          value={newTitle}
+                          onChange={(e) => setNewTitle(e.target.value)}
+                          placeholder={`${selectedStory.title} - Your Version`}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">
+                          This will be the title of your new derivative book
+                        </p>
+                      </div>
+
+                      {/* Custom Book Description */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Book Description
+                        </label>
+                        <textarea
+                          value={newDescription}
+                          onChange={(e) => setNewDescription(e.target.value)}
+                          placeholder={`My take on ${selectedStory.title}, continuing the story with new chapters...`}
+                          rows={3}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
+                        />
+                      </div>
+
+                      {/* Custom Cover Upload */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Custom Cover (Optional)
+                        </label>
+                        <div className="flex items-center gap-4">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleCoverUpload}
+                            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                          />
+                        </div>
+                        {coverFile && (
+                          <p className="text-xs text-green-600 mt-1">
+                            ✓ Cover selected: {coverFile.name}
+                          </p>
+                        )}
+                        <p className="text-xs text-gray-500 mt-1">
+                          Upload your own cover or inherit from the original book
+                        </p>
+                      </div>
+
+                      {/* Genre Selection */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Genres
+                        </label>
+                        <div className="flex flex-wrap gap-2">
+                          {availableGenres.map((genre) => (
+                            <button
+                              key={genre}
+                              onClick={() => handleGenreToggle(genre)}
+                              className={`px-3 py-1 text-sm rounded-full border transition-colors ${
+                                selectedGenres.includes(genre)
+                                  ? 'bg-green-100 border-green-300 text-green-800'
+                                  : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100'
+                              }`}
+                            >
+                              {genre}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Content Rating */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Content Rating
+                        </label>
+                        <select
+                          value={contentRating}
+                          onChange={(e) => setContentRating(e.target.value as 'G' | 'PG' | 'PG-13' | 'R')}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        >
+                          <option value="G">G - General Audiences</option>
+                          <option value="PG">PG - Parental Guidance</option>
+                          <option value="PG-13">PG-13 - Teens and Up</option>
+                          <option value="R">R - Mature Audiences</option>
+                        </select>
+                      </div>
                       {/* Book Info Display */}
                       <div className="bg-gray-50 rounded-lg p-4">
                         <div className="flex items-center gap-3 mb-2">

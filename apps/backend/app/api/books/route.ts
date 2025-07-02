@@ -4,16 +4,17 @@ import { S3Client } from '@aws-sdk/client-s3'
 import { bookIndexService } from '@/lib/services/bookIndexService'
 
 // Use the cleaned R2 client initialization with header sanitization
-let r2Client: S3Client
+let r2Client: S3Client | null = null
 
-function initializeR2Client(): S3Client {
+function initializeR2Client(): S3Client | null {
   console.log('🔧 Initializing R2 client for books with header cleaning...')
   
   const requiredEnvVars = ['R2_ENDPOINT', 'R2_ACCESS_KEY_ID', 'R2_SECRET_ACCESS_KEY', 'R2_BUCKET_NAME']
   const missingVars = requiredEnvVars.filter(varName => !process.env[varName])
   
   if (missingVars.length > 0) {
-    throw new Error(`Missing required R2 environment variables: ${missingVars.join(', ')}`)
+    console.error(`Missing required R2 environment variables: ${missingVars.join(', ')}`)
+    return null
   }
 
   // NUCLEAR CLEANING: Remove ANY potential invisible characters, quotes, whitespace
@@ -34,7 +35,8 @@ function initializeR2Client(): S3Client {
 
   // Additional validation to ensure credentials are clean
   if (!cleanAccessKeyId || !cleanSecretAccessKey || !cleanEndpoint) {
-    throw new Error('R2 credentials are empty after cleaning')
+    console.error('R2 credentials are empty after cleaning')
+    return null
   }
 
   const client = new S3Client({
@@ -66,7 +68,7 @@ function initializeR2Client(): S3Client {
   return client
 }
 
-function getR2Client(): S3Client {
+function getR2Client(): S3Client | null {
   if (!r2Client) {
     r2Client = initializeR2Client()
   }
@@ -84,6 +86,12 @@ async function getChapterCount(authorAddress: string, slug: string): Promise<num
     const cleanAccessKeyId = (process.env.R2_ACCESS_KEY_ID || '').replace(/[^a-zA-Z0-9]/g, '')
     const cleanSecretAccessKey = (process.env.R2_SECRET_ACCESS_KEY || '').replace(/[^a-zA-Z0-9]/g, '')
     const cleanEndpoint = (process.env.R2_ENDPOINT || '').replace(/[^a-zA-Z0-9.-]/g, '')
+
+    // Validate credentials before creating client
+    if (!cleanAccessKeyId || !cleanSecretAccessKey || !cleanEndpoint) {
+      console.warn(`⚠️ R2 credentials missing for chapter count`)
+      return 0
+    }
 
     const freshClient = new S3Client({
       region: 'auto',
@@ -188,14 +196,33 @@ async function getFromIndex(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const authorAddress = searchParams.get('author')
     
-    // Try to get the index
-    let index = await bookIndexService.getBookIndex()
+    // Add timeout protection
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Index fetch timeout')), 10000)
+    )
     
-    // If no index exists or it's stale, rebuild it
+    // Try to get the index with timeout
+    let index = await Promise.race([
+      bookIndexService.getBookIndex(),
+      timeoutPromise
+    ]) as any
+    
+    // If no index exists or it's stale, rebuild it with timeout
     if (!index || bookIndexService.isIndexStale(index)) {
       console.log('🔄 Index is stale or missing, rebuilding...')
-      await bookIndexService.updateBookIndex()
-      index = await bookIndexService.getBookIndex()
+      try {
+        await Promise.race([
+          bookIndexService.updateBookIndex(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Index update timeout')), 15000))
+        ])
+        index = await Promise.race([
+          bookIndexService.getBookIndex(),
+          timeoutPromise
+        ]) as any
+      } catch (updateError) {
+        console.error('Failed to update index:', updateError)
+        return getFromR2Direct(request)
+      }
     }
     
     if (!index) {
@@ -285,6 +312,17 @@ async function getFromR2Direct(request: NextRequest) {
     const authorAddress = searchParams.get('author')
     
     const client = getR2Client()
+    
+    if (!client) {
+      console.error('❌ R2 client not configured')
+      return NextResponse.json({
+        success: true,
+        books: [],
+        stories: [],
+        count: 0,
+        message: 'Storage not configured'
+      })
+    }
 
     // List all objects in the books/ prefix
     const listCommand = new ListObjectsV2Command({

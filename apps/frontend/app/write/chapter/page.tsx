@@ -589,7 +589,7 @@ function ChapterWritingPageContent() {
           onClose={() => setShowRegistrationModal(false)}
           bookId={bookId || ''}
           bookTitle={bookMetadata.title || bookTitle || 'Untitled Book'}
-          totalChapters={bookMetadata.totalChapters || 10}
+          totalChapters={bookMetadata.parentBook ? 100000 : (bookMetadata.totalChapters || 100000)}
           isDerivative={!!bookMetadata.parentBook}
           parentBookId={bookMetadata.parentBook}
           onSuccess={handleRegistrationSuccess}

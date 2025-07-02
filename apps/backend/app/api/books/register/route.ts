@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
       } as BookRegistrationResponse, { status: 400 })
     }
 
-    const bookId = `${authorAddress.toLowerCase()}-${slug}`
+    const bookId = `${authorAddress.toLowerCase()}/${slug}`
     
     console.log('🔗 Generated book ID:', bookId)
 
@@ -331,7 +331,7 @@ export async function GET(request: NextRequest) {
 
     // Generate slug and check availability
     const slug = BookStorageService.generateSlug(title)
-    const bookId = `${authorAddress.toLowerCase()}-${slug}`
+    const bookId = `${authorAddress.toLowerCase()}/${slug}`
 
     try {
       await BookStorageService.getBookMetadata(bookId)
