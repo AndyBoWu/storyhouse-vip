@@ -83,7 +83,7 @@ export class ChapterAccessService {
         const bookData = await this.hybridRevenueControllerV2.books(bytes32Id)
         
         // Check if book is active (registered)
-        const isActive = bookData[4] // isActive is the 5th element
+        const isActive = bookData[2] // isActive is the 3rd element
         if (!isActive) {
           console.error(`❌ Book ${bookId} is not registered in HybridRevenueControllerV2`)
           return { 
