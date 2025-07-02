@@ -60,23 +60,13 @@ export async function apiRequest<T = any>(
  */
 export const apiClient = {
   // Story operations
-  async generateStory(data: any) {
-    return apiRequest('/api/generate', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    })
-  },
-  
   async getStories() {
-    return apiRequest('/api/stories')
+    // Use books endpoint instead of deprecated stories
+    return apiRequest('/api/books')
   },
   
   async getStoryChapters(walletAddress: string, storySlug: string) {
     return apiRequest(`/api/stories/${walletAddress}/${storySlug}/chapters`)
-  },
-  
-  async getChapter(storyId: string, chapterNumber: number) {
-    return apiRequest(`/api/chapters/${storyId}/${chapterNumber}`)
   },
   
   // Upload operations

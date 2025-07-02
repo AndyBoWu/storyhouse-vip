@@ -49,9 +49,7 @@ function ContinueStoryPageContent() {
   const [existingStories, setExistingStories] = useState<ExistingStory[]>([])
   const [isLoadingStories, setIsLoadingStories] = useState(false)
   const [selectedStory, setSelectedStory] = useState<ExistingStory | null>(null)
-  const [plotDescription, setPlotDescription] = useState('')
   const [chapterNumber, setChapterNumber] = useState(1)
-  const [isGenerating, setIsGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
 
@@ -123,16 +121,14 @@ function ContinueStoryPageContent() {
   const handleSelectStory = (story: ExistingStory) => {
     setSelectedStory(story)
     setChapterNumber(story.chapters + 1)
-    // Pre-fill with continuation context
-    setPlotDescription(`Continue the story where ${story.preview}`)
   }
 
   const handleContinueStory = async () => {
-    if (!plotDescription.trim() || !selectedStory) return
+    if (!selectedStory) return
 
-    // Redirect to write page with story context to continue with next chapter
+    // Redirect to chapter writing page to continue with next chapter
     const nextChapter = selectedStory.chapters + 1
-    const continueUrl = `/write?continueStory=${encodeURIComponent(selectedStory.id)}&nextChapter=${nextChapter}&title=${encodeURIComponent(selectedStory.title)}&genre=${encodeURIComponent(selectedStory.genre)}`
+    const continueUrl = `/write/chapter?bookId=${encodeURIComponent(selectedStory.id)}&chapterNumber=${nextChapter}&title=${encodeURIComponent(selectedStory.title)}&genre=${encodeURIComponent(selectedStory.genre)}`
     router.push(continueUrl)
   }
 
@@ -314,7 +310,7 @@ function ContinueStoryPageContent() {
                               ) : (
                                 story.chapters === 0 ? (
                                   <Link 
-                                    href={`/write?continueStory=${encodeURIComponent(story.id)}&nextChapter=1&title=${encodeURIComponent(story.title)}&genre=${encodeURIComponent(story.genre)}`}
+                                    href={`/write/chapter?bookId=${encodeURIComponent(story.id)}&chapterNumber=1&title=${encodeURIComponent(story.title)}&genre=${encodeURIComponent(story.genre)}`}
                                     className="flex-1"
                                     onClick={(e) => e.stopPropagation()}
                                   >
@@ -344,30 +340,20 @@ function ContinueStoryPageContent() {
                     className="bg-white rounded-xl shadow-lg p-6"
                   >
                     <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                      ✨ What happens next in "{selectedStory.title}"?
+                      ✨ Ready to write Chapter {chapterNumber} of "{selectedStory.title}"?
                     </h3>
 
-                    <textarea
-                      value={plotDescription}
-                      onChange={(e) => setPlotDescription(e.target.value)}
-                      placeholder={`Continue from: "${selectedStory.preview}"\n\nDescribe what happens in Chapter ${chapterNumber}...`}
-                      className="w-full h-32 p-4 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-purple-500 focus:border-transparent mb-4"
-                      maxLength={500}
-                    />
+                    <p className="text-gray-600 mb-6">
+                      Continue your story from where you left off. The last chapter ended with: "{selectedStory.preview}"
+                    </p>
 
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-500">{plotDescription.length}/500 characters</span>
+                    <div className="flex items-center justify-end">
                       <button
                         onClick={handleContinueStory}
-                        disabled={!plotDescription.trim() || isGenerating}
-                        className={`inline-flex items-center gap-2 px-6 py-2 rounded-lg font-semibold transition-all ${
-                          plotDescription.trim() && !isGenerating
-                            ? 'bg-purple-600 text-white hover:bg-purple-700'
-                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        }`}
+                        className="inline-flex items-center gap-2 px-6 py-2 rounded-lg font-semibold transition-all bg-purple-600 text-white hover:bg-purple-700"
                       >
                         <Wand2 className="w-4 h-4" />
-                        {isGenerating ? 'Continuing...' : `Continue to Chapter ${chapterNumber}`}
+                        Write Chapter {chapterNumber}
                       </button>
                     </div>
                   </motion.div>

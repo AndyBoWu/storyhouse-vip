@@ -141,12 +141,12 @@ Completely removed the legacy multi-transaction publishing workflow to simplify 
 - No more confusion between unified and legacy flows
 - Cleaner, more maintainable codebase
 
-### 🔥 API Cleanup (December 2024)
+### 🔥 API Cleanup (2025-07-01)
 
 **Status: Completed**
 
 #### Overview
-Removed unused and test API endpoints to improve security and reduce maintenance burden. Cleaned up ~10 endpoints that were either test/debug endpoints exposing sensitive data or unused features.
+Removed unused and test API endpoints to improve security and reduce maintenance burden. Cleaned up ~12 endpoints that were either test/debug endpoints exposing sensitive data or unused features.
 
 #### Removed Endpoints
 - **Test/Debug Endpoints** (security risk):
@@ -159,14 +159,17 @@ Removed unused and test API endpoints to improve security and reduce maintenance
   - `/api/collections` - Collections feature never implemented in UI
   - `/api/unlock-stats` - Statistics endpoint with no UI
   - `/api/stories` - Deprecated in favor of `/api/books`
+  - `/api/generate` - AI story generation (removed - endpoint no longer exists)
+  - `/api/chapters/[storyId]/[chapterNumber]` - Old chapter pattern (replaced with [chapterId])
 
 #### Code Updates
 - Updated `api-client.ts` to redirect `getStories()` to `/api/books`
 - Removed unused methods: `getCollections()`, `createCollection()`, `checkSecurity()`
 - All frontend functionality preserved using existing endpoints
+- Note: `generateStory()` method in api-client.ts and related frontend components (StoryGenerationInterface, write page) still exist but the backend endpoint is removed
 
 #### Results
-- Reduced API surface from 88 to ~78 endpoints
+- Reduced API surface from 88 to ~76 endpoints
 - Eliminated security risk from debug endpoints
 - Removed 1,438 lines of unused code
 - Improved maintainability
@@ -267,8 +270,8 @@ cd packages/contracts
 - **HybridRevenueControllerV2 (December 2024)**: Permissionless book registration - authors manage their own books
 - **No Admin Keys**: All book registration happens through frontend with user's wallet
 - **Security**: Backend validates all access - frontend cannot bypass access control
-- **Read-to-Earn Removed (December 2024)**: Feature removed to simplify platform focus
-- **AI Story Generation Removed (December 2024)**: No longer generating or remixing stories with AI
+- **Read-to-Earn Removed (2025-07-01)**: Feature removed to simplify platform focus
+- **AI Story Generation Removed (December 2024)**: No longer generating or remixing stories with AI - `/api/generate` endpoint removed
 - **AI Role Redefined (December 2024)**: AI features planned for future implementation (content fraud detection, translation, text-to-audio, and content recommendations)
 - **AI Services Status (December 2024)**: Not currently implemented - platform focuses on core IP/payment functionality first
 - **Fair IP Model for Derivatives (December 2024)**: Derivative books do NOT get book-level IP assets - only individual new chapters are registered as IP

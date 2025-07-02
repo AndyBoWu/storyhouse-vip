@@ -75,7 +75,6 @@ export const API_CONFIG = {
     ? 'https://testnet.storyhouse.vip'
     : 'http://localhost:3000',
   endpoints: {
-    generateStory: '/api/generate',
     stories: '/api/stories',
     users: '/api/users',
     rewards: '/api/rewards',

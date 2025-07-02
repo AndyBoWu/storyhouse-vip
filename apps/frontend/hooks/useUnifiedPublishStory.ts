@@ -67,7 +67,7 @@ export function useUnifiedPublishStory() {
   } | null>(null);
 
   const { address } = useAccount();
-  const { setChapterAttribution, checkBookRegistration, registerBook } =
+  const { setChapterAttribution, checkBookRegistration, registerBook, checkChapterAttribution } =
     useBookRegistration();
 
   // Check unified registration support on mount
@@ -373,10 +373,6 @@ export function useUnifiedPublishStory() {
       console.log("📄 License Terms ID:", registrationResult.licenseTermsId);
       console.log("🌐 Metadata URI:", metadataUri);
 
-      // Step 3: Save chapter content to R2 storage
-      setCurrentStep("saving-to-storage");
-      console.log("💾 Saving chapter content to R2 storage...");
-
       // Ensure bookId is in the correct format: authorAddress/slug
       let finalBookId = bookId;
       if (!finalBookId) {
@@ -395,68 +391,14 @@ export function useUnifiedPublishStory() {
         }
       }
 
-      const saveResult = await apiClient.saveBookChapter(finalBookId, {
-        bookId: finalBookId,
-        chapterNumber: storyData.chapterNumber,
-        title: storyData.title,
-        content: storyData.content,
-        wordCount: storyData.wordCount,
-        readingTime: storyData.readingTime,
-        authorAddress: address!.toLowerCase(),
-        authorName: `${address!.slice(-4)}`,
-        ipAssetId: registeredIPAssetId,
-        transactionHash: transactionHash,
-        licenseTermsId: registrationResult.licenseTermsId
-          ? registrationResult.licenseTermsId.toString()
-          : undefined,
-        genre: storyData.themes[0] || "General",
-        generationMethod: "human" as const,
-      });
-
-      console.log(
-        "✅ Chapter content saved to R2:",
-        saveResult.data?.contentUrl,
-      );
-
-      // Step 4: Set chapter attribution for revenue sharing (for paid chapters)
-      if (storyData.chapterNumber > 3) {
-        setCurrentStep("setting-attribution");
-        console.log("💰 Setting chapter attribution for revenue sharing...");
-
-          // For derivative books, skip book registration requirement
-          if (isDerivativeBook || bookMetadata?.parentBook) {
-            console.log("🌿 Derivative book - chapters don't need book registration");
-            console.log("📝 Each chapter has its own IP registration");
-            
-            // Skip to success since derivative chapters don't need attribution setup
-            setCurrentStep("success");
-            const unifiedResult: UnifiedPublishResult = {
-              success: true,
-              method: "unified",
-              gasOptimized: true,
-              data: {
-                transactionHash,
-                ipAssetId: registeredIPAssetId,
-                tokenId: mintedTokenId,
-                licenseTermsId: registrationResult.licenseTermsId
-                  ? BigInt(registrationResult.licenseTermsId)
-                  : undefined,
-                contentUrl: saveResult.data?.contentUrl,
-                explorerUrl: `https://aeneid.storyscan.io/tx/${transactionHash}`,
-              },
-              metadataUri: metadataUri,
-            };
-            setPublishResult(unifiedResult);
-            console.log(
-              "🎉 Derivative chapter published successfully!",
-              JSON.stringify(
-                unifiedResult,
-                (_, v) => (typeof v === "bigint" ? v.toString() : v),
-                2,
-              ),
-            );
-            return unifiedResult;
-          }
+      // Step 3: Set chapter attribution BEFORE saving content
+      // This ensures attribution is always set for all chapters
+      setCurrentStep("setting-attribution");
+      console.log("💰 Setting chapter attribution...");
+      
+      // Handle attribution for ALL chapters (both free and paid)
+      if (!isDerivativeBook && !bookMetadata?.parentBook) {
+        // Original books need attribution for all chapters
 
           // For original books, ensure the book is registered
           const isBookRegistered = await checkBookRegistration(finalBookId);
@@ -534,172 +476,84 @@ export function useUnifiedPublishStory() {
             chapterNumber: storyData.chapterNumber
           });
 
-          // Only set chapter attribution if user is the book author
-          // For derivative authors, skip this step per Fair IP Model
-          
-          // Check if this is a paid chapter (> 3) or free chapter (1-3)
-          if (storyData.chapterNumber > 3) {
-            // Paid chapter - handle attribution with pricing
-            if (isBookAuthor) {
-              try {
-                // Set chapter attribution with pricing
-                // For chapters 1-3: price is 0, for 4+: use the specified price (default 0.5 TIP)
-                const chapterPrice =
-                storyData.chapterNumber <= 3
-                  ? "0"
-                  : (options.chapterPrice || 0.5).toString();
-
-              console.log("📝 Setting attribution with price:", {
-                bookId: finalBookId,
-                chapterNumber: storyData.chapterNumber,
-                price: `${chapterPrice} TIP`,
-                originalAuthor: address,
-              });
-
-              // Alert user about the second transaction
-              alert(
-                `💰 Chapter Pricing Setup\n\nNow you need to set the unlock price (${chapterPrice} TIP) for this chapter. You will see another MetaMask transaction request.`,
-              );
-
-              const attributionResult = await setChapterAttribution({
-                bookId: finalBookId,
-                chapterNumber: storyData.chapterNumber,
-                originalAuthor: address!,
-                unlockPrice: chapterPrice,
-                isOriginalContent: true,
-              });
-
-              if (attributionResult.pending) {
-            console.log(
-              "⏳ Attribution transaction initiated:",
-              attributionResult.message,
+        // Only set chapter attribution if user is the book author
+        if (isBookAuthor) {
+          try {
+            // Determine price based on chapter number
+            // For chapters 1-3: price is 0, for 4+: use the specified price (default 0.5 TIP)
+            const chapterPrice = storyData.chapterNumber <= 3 ? "0" : (options.chapterPrice || 0.5).toString();
+            
+            console.log("📝 Setting attribution:", {
+              bookId: finalBookId,
+              chapterNumber: storyData.chapterNumber,
+              price: `${chapterPrice} TIP`,
+              originalAuthor: address,
+            });
+            
+            // Alert user about the transaction
+            const priceMsg = chapterPrice === "0" 
+              ? "free chapter" 
+              : `chapter with unlock price (${chapterPrice} TIP)`;
+            alert(
+              `📝 Chapter Attribution Setup\n\nNow setting up attribution for this ${priceMsg}. You will see another MetaMask transaction request.`,
             );
-
-            // For paid chapters, give user a chance to complete the transaction
-            if (storyData.chapterNumber > 3) {
-              // Wait a bit for user to interact with wallet
-              console.log(
-                "⏳ Waiting for user to approve transaction in wallet...",
-              );
-              await new Promise((resolve) => setTimeout(resolve, 5000)); // Give user 5 seconds to approve
-
-              // Then start polling for confirmation
-              let attributionSet = false;
-              let attempts = 0;
-              const maxAttempts = 25; // 25 seconds additional wait
-
-              console.log(
-                "🔍 Checking if attribution was set on blockchain...",
-              );
-
-              while (!attributionSet && attempts < maxAttempts) {
-                attempts++;
-
-                try {
-                  // Check attribution directly from blockchain
-                  const checkResult = await apiClient.get(
-                    `/books/${encodeURIComponent(finalBookId)}/chapter/${storyData.chapterNumber}/attribution`,
-                  );
-
-                  // Check if attribution is set on blockchain
-                  if (
-                    checkResult &&
-                    checkResult.attribution &&
-                    checkResult.attribution.isSet
-                  ) {
-                    attributionSet = true;
-                    console.log(
-                      "✅ Chapter attribution confirmed on blockchain!",
-                      checkResult.attribution,
-                    );
-                    break;
-                  }
-                } catch (checkError) {
-                  // Attribution not yet set, continue waiting
-                  if (attempts % 5 === 0) {
-                    console.log(
-                      `Still waiting for attribution confirmation... (${attempts}/${maxAttempts})`,
-                    );
-                  }
-                }
-
-                // Wait 1 second before next check
-                await new Promise((resolve) => setTimeout(resolve, 1000));
-              }
-
-              if (!attributionSet) {
-                // Attribution not confirmed yet, but don't fail the publish
-                console.warn("⚠️ Attribution transaction may still be pending");
-                alert(
-                  "⚠️ Chapter Pricing Transaction Pending\n\n" +
-                    "Your chapter has been published, but the pricing transaction may still be processing.\n\n" +
-                    "Please check your wallet to ensure the transaction was submitted. " +
-                    "Readers will not be able to unlock this chapter until the pricing is confirmed on the blockchain.",
-                );
-              }
-            } else {
-              // For free chapters, just continue
-              console.log(
-                "📝 Free chapter - attribution transaction initiated, continuing...",
+            
+            const attributionResult = await setChapterAttribution({
+              bookId: finalBookId,
+              chapterNumber: storyData.chapterNumber,
+              originalAuthor: address!,
+              unlockPrice: chapterPrice,
+              isOriginalContent: true,
+            });
+            
+            if (!attributionResult.success) {
+              throw new Error(
+                `Failed to set attribution: ${attributionResult.error || 'Unknown error'}`,
               );
             }
-          } else if (attributionResult.success && !attributionResult.pending) {
-            console.log("✅ Chapter attribution set successfully!");
-          } else if (!attributionResult.success) {
-            // Failed to initiate transaction
+            
+            console.log("✅ Attribution successfully set!");
+            console.log("Transaction hash:", attributionResult.transactionHash);
+            
+          } catch (error) {
+            console.error("❌ Attribution setting failed:", error);
             throw new Error(
-              `Failed to set chapter pricing: ${attributionResult.error || "Unknown error"}. The transaction could not be initiated.`,
+              `Attribution must be set for all chapters. Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
             );
           }
-        } catch (attributionError) {
-          console.error("❌ Attribution setting failed:", attributionError);
-          throw attributionError;
+        } else {
+          console.log("❌ Non-author cannot add chapters to original book");
+          throw new Error("Only the book author can add chapters to an original book");
         }
       } else {
-        // Derivative author - skip attribution setting
-        console.log("🌿 Derivative chapter by non-author. Skipping attribution setup per Fair IP Model.");
-        console.log("📝 Derivative chapters maintain their own IP, inherited chapters remain original author's IP.");
+        // Derivative books don't need attribution
+        console.log("🌿 Derivative book - skipping attribution setup");
+        console.log("📝 Each chapter has its own IP registration");
       }
-    } else {
-      // This is for free chapters (1-3)
-      // Need to check book authorship for free chapters too
-      const book = await apiClient.getBookById(finalBookId);
-      const isBookAuthor = book.author?.toLowerCase() === address?.toLowerCase();
       
-      if (isDerivativeBook || bookMetadata?.parentBook) {
-        // Derivative books - free chapters don't need attribution
-        console.log("🌿 Derivative book free chapter (1-3) - no attribution needed");
-      } else if (isBookAuthor) {
-        // Original book author writing free chapter
-        console.log("📝 Original book free chapter (1-3) - setting attribution with 0 price");
-        // Even for free chapters, we should set attribution to track the author
-        try {
-          const attributionResult = await setChapterAttribution({
-            bookId: finalBookId,
-            chapterNumber: storyData.chapterNumber,
-            originalAuthor: address!,
-            unlockPrice: "0",
-            isOriginalContent: true,
-          });
-
-          if (!attributionResult.success) {
-            console.warn(
-              "⚠️ Failed to set attribution for free chapter:",
-              attributionResult.error,
-            );
-          }
-        } catch (error) {
-          console.warn(
-            "⚠️ Non-critical: Failed to set attribution for free chapter",
-            error,
-          );
-        }
-      } else {
-        // Non-author writing to original book - not allowed
-        console.log("❌ Non-author cannot add chapters to original book");
-      }
-    }
-      }
+      // Step 4: Save chapter content to R2 storage
+      setCurrentStep("saving-to-storage");
+      console.log("💾 Saving chapter content to R2 storage...");
+      
+      const saveResult = await apiClient.saveBookChapter(finalBookId, {
+        bookId: finalBookId,
+        chapterNumber: storyData.chapterNumber,
+        title: storyData.title,
+        content: storyData.content,
+        wordCount: storyData.wordCount,
+        readingTime: storyData.readingTime,
+        authorAddress: address!.toLowerCase(),
+        authorName: `${address!.slice(-4)}`,
+        ipAssetId: registeredIPAssetId,
+        transactionHash: transactionHash,
+        licenseTermsId: registrationResult.licenseTermsId
+          ? registrationResult.licenseTermsId.toString()
+          : undefined,
+        genre: storyData.themes[0] || "General",
+        generationMethod: "human" as const,
+      });
+      
+      console.log("✅ Chapter content saved to R2:", saveResult.data?.contentUrl);
 
       // Success!
       setCurrentStep("success");

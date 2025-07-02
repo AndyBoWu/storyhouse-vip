@@ -6,6 +6,7 @@ import WalletConnect from '@/components/WalletConnect'
 import { NotificationBell } from '@/components/providers/NotificationProvider'
 import { useAccount } from 'wagmi'
 import { ReadIcon, WriteIcon, OwnIcon, CreatorIcon, RoyaltiesIcon, AnalyticsIcon, QualityIcon, CollaborateIcon } from './icons'
+import Logo from './Logo'
 
 interface HeaderProps {
   variant?: 'default' | 'minimal'
@@ -30,11 +31,7 @@ export default function Header({ variant = 'default', showNotifications = true }
       <header className="relative z-10 bg-white/90 backdrop-blur-sm border-b border-gray-200 shadow-sm">
         <div className="container mx-auto px-6 py-4">
           <nav className="flex items-center justify-between">
-            <Link href="/" className="group">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-pink-400 flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
-                <span className="text-white font-bold text-lg">S</span>
-              </div>
-            </Link>
+            <Logo />
             <div className="flex items-center gap-4">
               {showNotifications && isConnected && (
                 <NotificationBell />
@@ -55,11 +52,7 @@ export default function Header({ variant = 'default', showNotifications = true }
             {/* Left side - Logo and Main navigation */}
             <div className="flex items-center gap-8">
               {/* Logo/Brand */}
-              <Link href="/" className="group">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-pink-400 flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
-                  <span className="text-white font-bold text-lg">S</span>
-                </div>
-              </Link>
+              <Logo />
               
               {/* Navigation buttons */}
               <div className="flex items-center gap-2">

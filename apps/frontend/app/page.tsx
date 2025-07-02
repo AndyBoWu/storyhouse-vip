@@ -4,6 +4,7 @@ import Link from 'next/link'
 import WalletConnect from '@/components/WalletConnect'
 import FeatureCards from '@/components/features/FeatureCards'
 import { ReadIcon, WriteIcon, OwnIcon } from '@/components/ui/icons'
+import Logo from '@/components/ui/Logo'
 
 export default function HomePage() {
   return (
@@ -16,11 +17,7 @@ export default function HomePage() {
               {/* Left side - Logo and Main navigation */}
               <div className="flex items-center gap-8">
                 {/* Logo/Brand */}
-                <Link href="/" className="group">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-pink-400 flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
-                    <span className="text-white font-bold text-lg">S</span>
-                  </div>
-                </Link>
+                <Logo />
                 
                 {/* Navigation buttons */}
                 <div className="flex items-center gap-2">
