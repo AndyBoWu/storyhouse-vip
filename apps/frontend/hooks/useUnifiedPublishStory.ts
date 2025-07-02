@@ -405,10 +405,7 @@ export function useUnifiedPublishStory() {
           if (!isBookRegistered) {
             console.log("📚 Original book not registered, registration required...");
 
-            // For regular books, use simple alert
-            alert(
-              "📚 Book Registration Required\n\nYour book needs to be registered for revenue sharing. You will see a MetaMask transaction request.",
-            );
+            // Book registration required - user will see MetaMask transaction
 
             const registerResult = await registerBook({
               bookId: finalBookId,
@@ -422,12 +419,7 @@ export function useUnifiedPublishStory() {
                 "⚠️ Book registration pending:",
                 registerResult.message,
               );
-              alert(
-                "⚠️ Book Registration Pending\n\n" +
-                  "Your book registration transaction is still pending. " +
-                  "The chapter has been saved, but pricing may not work until the registration completes.\n\n" +
-                  "Please check your wallet for any pending transactions.",
-              );
+              // Book registration pending - continue without blocking
               // Continue with publishing, but skip attribution for now
               console.log(
                 "📝 Skipping attribution due to pending book registration",
@@ -490,13 +482,7 @@ export function useUnifiedPublishStory() {
               originalAuthor: address,
             });
             
-            // Alert user about the transaction
-            const priceMsg = chapterPrice === "0" 
-              ? "free chapter" 
-              : `chapter with unlock price (${chapterPrice} TIP)`;
-            alert(
-              `📝 Chapter Attribution Setup\n\nNow setting up attribution for this ${priceMsg}. You will see another MetaMask transaction request.`,
-            );
+            // No alert needed - users see MetaMask transaction request
             
             const attributionResult = await setChapterAttribution({
               bookId: finalBookId,
