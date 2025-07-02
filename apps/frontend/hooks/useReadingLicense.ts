@@ -247,9 +247,9 @@ export function useReadingLicense() {
               args: [bytes32Id],
             }) as any
             
-            // bookData is an array: [curator, isDerivative, parentBookId, totalChapters, isActive, ipfsMetadataHash]
+            // bookData is an array: [curator, totalChapters, isActive, ipfsMetadataHash]
             const curator = bookData[0] as string
-            const isActive = bookData[4] as boolean
+            const isActive = bookData[2] as boolean
             
             console.log('📚 Book registration check in useReadingLicense:', {
               bookId,
