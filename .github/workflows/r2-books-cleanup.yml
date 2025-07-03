@@ -48,7 +48,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: apps/backend
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Preview cleanup (dry run)
         working-directory: apps/backend
