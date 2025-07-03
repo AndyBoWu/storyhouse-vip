@@ -59,12 +59,75 @@ async function handleChapterRequest(
       // Parse book ID to get author address and slug
       const { authorAddress, slug } = BookStorageService.parseBookId(bookId as any);
       
-      // First, get chapter metadata to check if it needs access control
-      const chapterData = await BookStorageService.getChapterContent(
-        authorAddress,
-        slug,
-        chapterNum
-      );
+      // Get book metadata to check if it's a derivative book
+      let bookMetadata: any = null;
+      let chapterData: any = null;
+      
+      try {
+        bookMetadata = await BookStorageService.getBookMetadata(bookId as any);
+        console.log(`📚 Book metadata loaded, isDerivative: ${bookMetadata.isDerivative}, parentBook: ${bookMetadata.parentBook}`);
+        
+        // Check if the book has a chapterMap for resolving chapter locations
+        if (bookMetadata.chapterMap && bookMetadata.chapterMap[`ch${chapterNum}`]) {
+          // This is a derivative book with inherited chapters
+          const chapterPath = bookMetadata.chapterMap[`ch${chapterNum}`];
+          console.log(`🔄 Using chapterMap to resolve chapter ${chapterNum} to: ${chapterPath}`);
+          
+          // Extract author and slug from the chapter path
+          // Format: "0x1234-detective/chapters/ch1" -> extract "0x1234" and "detective"
+          const pathMatch = chapterPath.match(/^(0x[a-fA-F0-9]+)[/-]([^/]+)\/chapters\/ch\d+$/);
+          if (pathMatch) {
+            const [, originalAuthor, originalSlug] = pathMatch;
+            console.log(`📖 Fetching inherited chapter from original book: ${originalAuthor}/${originalSlug}`);
+            chapterData = await BookStorageService.getChapterContent(
+              originalAuthor as any,
+              originalSlug,
+              chapterNum
+            );
+          } else {
+            throw new Error(`Invalid chapter path format in chapterMap: ${chapterPath}`);
+          }
+        } else if (bookMetadata.isDerivative && bookMetadata.parentBook) {
+          // Legacy support: If no chapterMap but it's a derivative book
+          console.log(`🔄 Derivative book without chapterMap, checking parent book: ${bookMetadata.parentBook}`);
+          
+          // Parse parent book ID
+          const { authorAddress: parentAuthor, slug: parentSlug } = BookStorageService.parseBookId(bookMetadata.parentBook as any);
+          
+          // Try to fetch from parent book first
+          try {
+            chapterData = await BookStorageService.getChapterContent(
+              parentAuthor as any,
+              parentSlug,
+              chapterNum
+            );
+            console.log(`✅ Found chapter ${chapterNum} in parent book`);
+          } catch (parentError) {
+            console.log(`❌ Chapter ${chapterNum} not found in parent book, trying derivative book`);
+            // If not in parent, try in derivative book (it might be a new chapter)
+            chapterData = await BookStorageService.getChapterContent(
+              authorAddress,
+              slug,
+              chapterNum
+            );
+          }
+        } else {
+          // Regular book - fetch from its own path
+          chapterData = await BookStorageService.getChapterContent(
+            authorAddress,
+            slug,
+            chapterNum
+          );
+        }
+      } catch (error) {
+        console.error(`❌ Error loading book metadata or chapter:`, error);
+        // If metadata fails, try direct chapter fetch as fallback
+        chapterData = await BookStorageService.getChapterContent(
+          authorAddress,
+          slug,
+          chapterNum
+        );
+      }
 
       // Check if chapter data exists
       if (!chapterData) {
