@@ -155,15 +155,66 @@ export default function DiscoveryDashboard() {
 
   const loadSection = async (sectionKey: keyof typeof sections, params: any) => {
     try {
-      const queryParams = new URLSearchParams(params).toString()
-      const data = await apiClient.get(`/discovery?${queryParams}`)
+      // Use the books endpoint instead of non-existent discovery endpoint
+      const data = await apiClient.getBooks()
 
-      if (data.success) {
+      if (data.success && data.books) {
+        // Convert books to BookSummary format
+        const bookSummaries: BookSummary[] = data.books.map((book: any) => ({
+          bookId: book.id,
+          title: book.title,
+          authorName: book.authorName || book.author?.slice(-4) || 'Unknown',
+          authorAddress: book.author || book.authorAddress,
+          coverUrl: book.coverUrl,
+          totalChapters: book.chapters || 0,
+          genres: book.genres || [],
+          averageRating: book.rating || book.averageRating || 0,
+          totalReads: book.totalReads || 0,
+          isRemixable: book.isRemixable !== false, // Default to true
+          createdAt: book.createdAt,
+          parentBook: book.parentBookId,
+          // AI Quality Metrics - placeholder values for now
+          qualityScore: Math.floor(Math.random() * 3) + 7, // 7-10 range
+          similarityScore: Math.random(),
+          influenceScore: Math.random(),
+          aiRecommended: Math.random() > 0.5,
+          qualityTrend: ['rising', 'stable', 'falling'][Math.floor(Math.random() * 3)] as 'rising' | 'stable' | 'falling'
+        }))
+
+        // Apply different sorting/filtering based on section
+        let filteredBooks = [...bookSummaries]
+        
+        switch(sectionKey) {
+          case 'trending':
+            // Sort by reads/engagement
+            filteredBooks.sort((a, b) => b.totalReads - a.totalReads)
+            break
+          case 'mostRemixed':
+            // Filter for books that have derivatives
+            filteredBooks = filteredBooks.filter(book => book.parentBook)
+            break
+          case 'collaborative':
+            // For now, show all books (in future, filter by multiple authors)
+            break
+          case 'newReleases':
+            // Sort by creation date (newest first)
+            filteredBooks.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+            break
+          case 'aiRecommended':
+            // Filter by AI recommended flag
+            filteredBooks = filteredBooks.filter(book => book.aiRecommended)
+            break
+        }
+
+        // Limit results based on params
+        const limit = params.limit || 8
+        filteredBooks = filteredBooks.slice(0, limit)
+
         setSections(prev => ({
           ...prev,
           [sectionKey]: {
             ...prev[sectionKey],
-            books: data.books,
+            books: filteredBooks,
             loading: false,
             error: null
           }
@@ -175,7 +226,7 @@ export default function DiscoveryDashboard() {
             ...prev[sectionKey],
             books: [],
             loading: false,
-            error: data.error || 'Failed to load'
+            error: 'No books found'
           }
         }))
       }
