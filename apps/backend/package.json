@@ -35,7 +35,10 @@
     "clean:test:force": "tsx scripts/clean-test-data.ts --live --force",
     "clean:test:live": "tsx scripts/clean-test-data.ts --live --interactive",
     "deep-clean": "tsx scripts/deep-clean-r2.ts --dry-run",
-    "deep-clean:live": "tsx scripts/deep-clean-r2.ts --live"
+    "deep-clean:live": "tsx scripts/deep-clean-r2.ts --live",
+    "clean:books": "cp .env.testnet .env.local && tsx scripts/clean-books-folder.ts",
+    "clean:books:force": "cp .env.testnet .env.local && tsx scripts/clean-books-folder.ts --force",
+    "clean:books:preview": "cp .env.testnet .env.local && tsx scripts/clean-books-folder.ts --dry-run"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.825.0",

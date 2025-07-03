@@ -1,0 +1,90 @@
+name: 🧹 R2 Books Cleanup (Manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: 'Type "DELETE ALL BOOKS" to confirm'
+        required: true
+        type: string
+      environment:
+        description: 'Environment to clean'
+        required: true
+        type: choice
+        default: 'testnet'
+        options:
+          - testnet
+          - development
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    name: Clean books folder
+    
+    steps:
+      - name: Validate confirmation
+        run: |
+          if [ "${{ github.event.inputs.confirmation }}" != "DELETE ALL BOOKS" ]; then
+            echo "❌ Invalid confirmation text. Expected 'DELETE ALL BOOKS'"
+            echo "Received: '${{ github.event.inputs.confirmation }}'"
+            exit 1
+          fi
+          echo "✅ Confirmation validated"
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: apps/backend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: apps/backend
+        run: npm ci
+
+      - name: Preview cleanup (dry run)
+        working-directory: apps/backend
+        env:
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+        run: |
+          echo "🔍 First, let's see what would be deleted..."
+          npm run clean:books:preview
+
+      - name: Execute cleanup
+        working-directory: apps/backend
+        env:
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+        run: |
+          echo "🧹 Starting books folder cleanup for ${{ github.event.inputs.environment }}..."
+          echo "⚠️  This will permanently delete all books and chapters!"
+          echo "Environment: ${{ github.event.inputs.environment }}"
+          echo "Bucket: ${{ secrets.R2_BUCKET_NAME }}"
+          echo ""
+          
+          # Run the cleanup in force mode (no interactive prompts)
+          npm run clean:books:force
+          
+          echo ""
+          echo "✅ Cleanup completed successfully!"
+          echo "📊 The books folder is now empty and ready for testing"
+
+      - name: Summary
+        run: |
+          echo "📋 Cleanup Summary:"
+          echo "  Environment: ${{ github.event.inputs.environment }}"
+          echo "  Target: books/ folder"
+          echo "  Status: ✅ Complete"
+          echo ""
+          echo "🎯 Next steps:"
+          echo "  - Test environment is now clean"
+          echo "  - You can begin fresh testing"
+          echo "  - All previous books and chapters have been removed"
