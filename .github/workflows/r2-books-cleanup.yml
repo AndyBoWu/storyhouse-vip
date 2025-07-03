@@ -53,18 +53,27 @@ jobs:
       - name: Preview cleanup (dry run)
         working-directory: apps/backend
         env:
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
           R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
         run: |
           echo "🔍 First, let's see what would be deleted..."
+          # Debug: Check if environment variables are set
+          echo "Debug: Checking environment variables..."
+          echo "R2_ENDPOINT is set: $([ -n "$R2_ENDPOINT" ] && echo "YES" || echo "NO")"
+          echo "R2_ACCOUNT_ID is set: $([ -n "$R2_ACCOUNT_ID" ] && echo "YES" || echo "NO")"
+          echo "R2_ACCESS_KEY_ID is set: $([ -n "$R2_ACCESS_KEY_ID" ] && echo "YES" || echo "NO")"
+          echo "R2_SECRET_ACCESS_KEY is set: $([ -n "$R2_SECRET_ACCESS_KEY" ] && echo "YES" || echo "NO")"
+          echo "R2_BUCKET_NAME is set: $([ -n "$R2_BUCKET_NAME" ] && echo "YES" || echo "NO")"
           # Run the script directly with environment variables, bypassing the npm script
           pnpm exec tsx scripts/clean-books-folder.ts --dry-run
 
       - name: Execute cleanup
         working-directory: apps/backend
         env:
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
           R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
