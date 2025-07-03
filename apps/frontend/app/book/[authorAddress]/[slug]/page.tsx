@@ -655,7 +655,7 @@ export default function BookPage() {
           <div className="text-center py-8">
             <p className="text-gray-600 mb-4">No chapters available yet.</p>
             <button
-              onClick={() => router.push(`/write/branch?bookId=${bookId}`)}
+              onClick={() => router.push(`/write/chapter?bookId=${encodeURIComponent(bookId)}&chapterNumber=1`)}
               className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
             >
               Write the First Chapter
