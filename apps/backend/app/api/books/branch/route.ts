@@ -222,6 +222,7 @@ export async function POST(request: NextRequest) {
     // Important: Mark this as a derivative book
     derivativeMetadata.parentBook = parentBookId
     derivativeMetadata.isDerivative = true
+    derivativeMetadata.branchPoint = `ch${chapterNumber}` // Store the branch point
     
     // Copy chapter references from parent book up to branch point
     const chaptersToCopy = Object.entries(parentBook.chapterMap)

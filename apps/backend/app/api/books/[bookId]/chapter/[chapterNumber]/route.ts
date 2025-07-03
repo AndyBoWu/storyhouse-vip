@@ -74,8 +74,8 @@ async function handleChapterRequest(
           console.log(`🔄 Using chapterMap to resolve chapter ${chapterNum} to: ${chapterPath}`);
           
           // Extract author and slug from the chapter path
-          // Format: "0x1234-detective/chapters/ch1" -> extract "0x1234" and "detective"
-          const pathMatch = chapterPath.match(/^(0x[a-fA-F0-9]+)[/-]([^/]+)\/chapters\/ch\d+$/);
+          // Format: "books/0x1234/detective/chapters/ch1/content.json" -> extract "0x1234" and "detective"
+          const pathMatch = chapterPath.match(/^(?:books\/)?(0x[a-fA-F0-9]+)\/([^/]+)\/chapters\/ch\d+(?:\/content\.json)?$/);
           if (pathMatch) {
             const [, originalAuthor, originalSlug] = pathMatch;
             console.log(`📖 Fetching inherited chapter from original book: ${originalAuthor}/${originalSlug}`);
@@ -181,11 +181,11 @@ async function handleChapterRequest(
       }
 
       // Get book metadata for additional info
-      let bookMetadata: any = {};
       try {
         bookMetadata = await BookStorageService.getBookMetadata(bookId as any);
       } catch (err) {
         console.log('Could not fetch book metadata:', err);
+        bookMetadata = {};
       }
 
       console.log(`✅ Chapter ${chapterNumber} loaded:`, {
