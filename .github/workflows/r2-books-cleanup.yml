@@ -59,7 +59,8 @@ jobs:
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
         run: |
           echo "🔍 First, let's see what would be deleted..."
-          pnpm run clean:books:preview
+          # Run the script directly with environment variables, bypassing the npm script
+          pnpm exec tsx scripts/clean-books-folder.ts --dry-run
 
       - name: Execute cleanup
         working-directory: apps/backend
@@ -72,11 +73,11 @@ jobs:
           echo "🧹 Starting books folder cleanup for ${{ github.event.inputs.environment }}..."
           echo "⚠️  This will permanently delete all books and chapters!"
           echo "Environment: ${{ github.event.inputs.environment }}"
-          echo "Bucket: ${{ secrets.R2_BUCKET_NAME }}"
+          echo "Bucket: $R2_BUCKET_NAME"
           echo ""
           
           # Run the cleanup in force mode (no interactive prompts)
-          pnpm run clean:books:force
+          pnpm exec tsx scripts/clean-books-folder.ts --force
           
           echo ""
           echo "✅ Cleanup completed successfully!"

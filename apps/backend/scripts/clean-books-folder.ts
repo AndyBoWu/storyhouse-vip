@@ -21,8 +21,10 @@ import * as readline from 'readline';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 
-// Load environment variables
-dotenv.config({ path: path.join(__dirname, '..', '.env.local') });
+// Load environment variables - try .env.local first, then fall back to process.env
+if (!process.env.R2_ACCESS_KEY_ID) {
+  dotenv.config({ path: path.join(__dirname, '..', '.env.local') });
+}
 
 // Parse command line arguments
 const args = process.argv.slice(2);
@@ -264,7 +266,9 @@ async function cleanBooksFolder() {
 // Validation
 if (!process.env.R2_ACCESS_KEY_ID || !process.env.R2_SECRET_ACCESS_KEY) {
   console.error('❌ Missing required environment variables: R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY');
-  console.error('Please ensure your .env.local file contains these variables.');
+  console.error('Please ensure these environment variables are set.');
+  console.error('In local development, add them to your .env.local file.');
+  console.error('In CI/CD, ensure they are configured in your secrets.');
   process.exit(1);
 }
 
