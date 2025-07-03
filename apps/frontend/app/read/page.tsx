@@ -271,8 +271,12 @@ export default function ReadPage() {
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
               {/* Display all filtered stories */}
-              {filteredStories.map((story) => (
-                <Link key={story.id} href={`/book/${encodeURIComponent(story.id)}`}>
+              {filteredStories.map((story) => {
+                // Parse book ID to get author address and slug
+                const [authorAddress, ...slugParts] = story.id.split('/')
+                const slug = slugParts.join('/')
+                return (
+                <Link key={story.id} href={`/book/${authorAddress}/${slug}`}>
                   <motion.div
                     whileHover={{ scale: 1.02, y: -5 }}
                     className="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200 hover:shadow-xl transition-all cursor-pointer w-full"
@@ -334,7 +338,8 @@ export default function ReadPage() {
                     </div>
                   </motion.div>
                 </Link>
-              ))}
+                )
+              })}
             </div>
           )}
 
