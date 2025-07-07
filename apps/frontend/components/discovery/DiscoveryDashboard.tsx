@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { apiClient } from '@/lib/api-client'
+import { ensureAbsoluteUrl } from '@/lib/utils/url'
 
 interface BookSummary {
   bookId: string
@@ -278,7 +279,7 @@ export default function DiscoveryDashboard() {
             {book.coverUrl ? (
               <div className="aspect-[3/4] bg-gray-100 rounded-lg mb-3 overflow-hidden">
                 <img 
-                  src={book.coverUrl} 
+                  src={ensureAbsoluteUrl(book.coverUrl)} 
                   alt={book.title}
                   className="w-full h-full object-cover"
                   onError={(e) => {

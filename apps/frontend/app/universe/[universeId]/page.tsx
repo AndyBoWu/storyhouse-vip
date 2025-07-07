@@ -6,6 +6,7 @@ import { ArrowLeft, Star, Clock } from 'lucide-react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { apiClient } from '@/lib/api-client'
+import { ensureAbsoluteUrl } from '@/lib/utils/url'
 
 interface PublicStory {
   id: string
