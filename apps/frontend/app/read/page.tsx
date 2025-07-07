@@ -7,6 +7,7 @@ import Link from 'next/link'
 import Fuse from 'fuse.js'
 import Header from '@/components/ui/Header'
 import { apiClient } from '@/lib/api-client'
+import { ensureAbsoluteUrl } from '@/lib/utils/url'
 
 interface PublicStory {
   id: string
@@ -127,7 +128,7 @@ export default function ReadPage() {
             totalReads: book.totalReads || 0,
             rating: book.rating || 0,
             preview: book.description || 'No description available.',
-            coverUrl: book.coverUrl,
+            coverUrl: ensureAbsoluteUrl(book.coverUrl),
             tags: book.genres?.map((g: string) => g.toLowerCase()) || [],
             parentBookId: book.parentBookId,
             isDerivative: !!book.parentBookId

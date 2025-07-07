@@ -250,16 +250,7 @@ async function getFromIndex(request: NextRequest) {
       genre: book.tags?.[0] || 'General',
       moods: [],
       emojis: [],
-      coverUrl: (() => {
-        const isDev = process.env.NODE_ENV === 'development'
-        const baseUrl = isDev ? 'http://localhost:3002' : (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3002')
-        // Always use API endpoint for consistency
-        // This ensures covers are served through our API which handles:
-        // 1. R2 bucket access with proper credentials
-        // 2. Fallback to placeholder if cover doesn't exist
-        // 3. Proper caching headers
-        return `${baseUrl}/api/books/${encodeURIComponent(book.id)}/cover`
-      })(),
+      coverUrl: `/api/books/${encodeURIComponent(book.id)}/cover`,
       createdAt: book.createdAt,
       lastUpdated: book.updatedAt || book.createdAt,
       registeredAt: book.createdAt,
@@ -466,15 +457,13 @@ async function getFromR2Direct(request: NextRequest) {
 
             // Handle cover URL - always use API endpoint for consistency
             const bookId = `${authorFromPrefix}/${bookSlug}`
-            const isDev = process.env.NODE_ENV === 'development'
-            const baseUrl = isDev ? 'http://localhost:3002' : (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3002')
             
-            // Always use API endpoint regardless of what's in metadata
+            // Return relative URL - frontend will prepend the correct base URL
             // This ensures the cover is served through our API which handles:
             // 1. R2 bucket access with proper credentials
             // 2. Fallback to placeholder if cover doesn't exist
             // 3. Proper caching headers
-            const coverUrl = `${baseUrl}/api/books/${encodeURIComponent(bookId)}/cover`
+            const coverUrl = `/api/books/${encodeURIComponent(bookId)}/cover`
 
             const book: RegisteredBook = {
               id: bookId,

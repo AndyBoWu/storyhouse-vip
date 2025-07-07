@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { useAccount } from 'wagmi'
 import { buildChapterUrl } from '@/lib/utils/slugify'
 import { apiClient } from '@/lib/api-client'
+import { ensureAbsoluteUrl } from '@/lib/utils/url'
 import dynamic from 'next/dynamic'
 import Header from '@/components/ui/Header'
 
@@ -264,7 +265,7 @@ export default function MyStoriesPage() {
                           {book.coverUrl && (
                             <div className="mb-4">
                               <img
-                                src={book.coverUrl}
+                                src={ensureAbsoluteUrl(book.coverUrl)}
                                 alt={`${book.title} cover`}
                                 className="w-full h-48 object-cover rounded-lg"
                               />
