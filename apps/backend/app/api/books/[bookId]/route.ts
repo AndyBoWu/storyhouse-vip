@@ -50,7 +50,7 @@ export async function GET(
         const storedUrl = book.coverUrl || book.coverImageUrl
         // Use appropriate base URL for environment
         const isDev = process.env.NODE_ENV === 'development'
-        const baseUrl = isDev ? 'http://localhost:3002' : (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3002')
+        const baseUrl = isDev ? 'http://localhost:3002' : 'https://api-testnet.storyhouse.vip'
         
         if (storedUrl && storedUrl.startsWith('/books/')) {
           // Extract book ID from the cover path (e.g., /books/{authorAddress}/{slug}/cover.jpg)

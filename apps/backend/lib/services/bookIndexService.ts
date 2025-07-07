@@ -161,7 +161,7 @@ export class BookIndexService {
             // Always use API endpoint for cover URLs to ensure consistency
             const bookId = `${authorAddress}/${bookSlug}`
             const isDev = process.env.NODE_ENV === 'development'
-            const baseUrl = isDev ? 'http://localhost:3002' : (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3002')
+            const baseUrl = isDev ? 'http://localhost:3002' : 'https://api-testnet.storyhouse.vip'
             
             // Always use API endpoint regardless of what's in metadata
             // This ensures the cover is served through our API which handles:
