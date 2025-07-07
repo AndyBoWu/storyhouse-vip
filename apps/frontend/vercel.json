@@ -1,6 +1,6 @@
 {
   "framework": "nextjs",
-  "buildCommand": "npm run build",
+  "buildCommand": "cp .env.testnet .env.local && npm run build",
   "installCommand": "echo 'Dependencies already installed'",
   "regions": ["iad1"],
   "headers": [

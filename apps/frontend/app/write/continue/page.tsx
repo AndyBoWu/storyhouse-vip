@@ -7,7 +7,7 @@ import { motion } from 'framer-motion'
 import { useAccount } from 'wagmi'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
-import { apiClient } from '@/lib/api-client'
+import { apiClient, getApiBaseUrl } from '@/lib/api-client'
 
 // Dynamically import WalletConnect to avoid hydration issues
 const WalletConnect = dynamic(() => import('@/components/WalletConnect'), {
@@ -251,7 +251,7 @@ function ContinueStoryPageContent() {
                           <div className="aspect-[3/4] w-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center relative">
                             {story.id && story.id.includes('/') ? (
                               <img 
-                                src={`http://localhost:3002/api/books/${encodeURIComponent(story.id)}/cover`}
+                                src={`${getApiBaseUrl()}/api/books/${encodeURIComponent(story.id)}/cover`}
                                 alt={`${story.title} cover`} 
                                 className="w-full h-full object-cover"
                                 onError={(e) => {
