@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { GitBranch, Star, Clock, ArrowRight, X, BookOpen } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import apiClient from '@/lib/api-client';
+import { ensureAbsoluteUrl } from '@/lib/utils/url';
 
 interface BranchOption {
   bookId: string;
@@ -158,7 +159,7 @@ export default function BranchChoiceModal({
                       <div className="w-24 h-32 bg-gradient-to-br from-green-400 to-emerald-600 rounded-lg flex-shrink-0 flex items-center justify-center overflow-hidden">
                         {branch.coverUrl ? (
                           <img
-                            src={branch.coverUrl}
+                            src={ensureAbsoluteUrl(branch.coverUrl)}
                             alt={branch.title}
                             className="w-full h-full object-cover"
                           />

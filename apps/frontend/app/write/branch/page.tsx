@@ -8,6 +8,7 @@ import { useAccount } from 'wagmi'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { apiClient } from '@/lib/api-client'
+import { ensureAbsoluteUrl } from '@/lib/utils/url'
 import Fuse from 'fuse.js'
 
 // Dynamically import WalletConnect to avoid hydration issues
@@ -462,7 +463,7 @@ function BranchStoryPageContent() {
                           <div className="aspect-[3/4] w-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center relative">
                             {story.coverUrl && (
                               <img
-                                src={story.coverUrl}
+                                src={ensureAbsoluteUrl(story.coverUrl)}
                                 alt={`${story.title} cover`}
                                 className="w-full h-full object-cover"
                                 onError={(e) => {
@@ -543,7 +544,7 @@ function BranchStoryPageContent() {
                       <div className="w-20 h-28 bg-gradient-to-br from-green-500 to-emerald-600 rounded flex items-center justify-center shadow-md flex-shrink-0">
                         {selectedStory.coverUrl ? (
                           <img
-                            src={selectedStory.coverUrl}
+                            src={ensureAbsoluteUrl(selectedStory.coverUrl)}
                             alt={selectedStory.title}
                             className="w-full h-full object-cover rounded"
                           />
