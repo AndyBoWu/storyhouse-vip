@@ -50,10 +50,10 @@ const nextConfig = {
   images: {
     domains: [
       'images.unsplash.com', 
-      'via.placeholder.com',
-      '0da36f4eefbf1078c5a04b966e8cd90d.r2.cloudflarestorage.com'
+      'via.placeholder.com'
     ],
     formats: ['image/avif', 'image/webp'],
+    // Note: R2 domain should be added via environment variable if needed
   },
   
   // API routes will be served from backend domain
