@@ -37,11 +37,22 @@ cd storyhouse-vip
 # Install dependencies
 npm install
 
-# Start development servers
+# Start both development servers
 ./start-local.sh
 # Frontend: http://localhost:3001
 # Backend:  http://localhost:3002
+
+# To stop all services
+./kill-local.sh
+# Or press Ctrl+C in the terminal running start-local.sh
 ```
+
+**Development Scripts**:
+- `./start-local.sh` - Starts both frontend and backend servers in parallel
+- `./kill-local.sh` - Stops all running services and cleans up processes
+
+**Environment Setup**:
+Create `.env.local` files in both `apps/frontend/` and `apps/backend/` directories. See `.env.example` files for required variables.
 
 ## 🎯 Key Features
 
@@ -63,7 +74,7 @@ npm install
 
 ## 🏗️ Architecture
 
-StoryHouse uses a minimal 2-contract architecture integrated with Story Protocol:
+This monorepo uses a minimal 2-contract architecture integrated with Story Protocol:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -90,6 +101,8 @@ StoryHouse uses a minimal 2-contract architecture integrated with Story Protocol
 
 ### Smart Contracts
 
+**Network**: Story Protocol Aeneid Testnet (Chain ID: 1315)
+
 | Contract | Address | Purpose |
 |----------|---------|---------|
 | TIP Token | `0xe5Cd6E2392eB0854F207Ad474ee9FB98d80C934E` | Platform currency |
@@ -105,13 +118,27 @@ StoryHouse uses a minimal 2-contract architecture integrated with Story Protocol
 - [Development Guide](./docs/guides/DEVELOPMENT_GUIDE.md) - Setup and deployment
 - [Smart Contracts](./packages/contracts/README.md) - Contract development with Foundry
 
+## 📁 Monorepo Structure
+
+```
+storyhouse-vip/
+├── apps/
+│   ├── frontend/     # Next.js frontend (port 3001)
+│   └── backend/      # Next.js API backend (port 3002)
+├── packages/
+│   ├── contracts/    # Solidity smart contracts
+│   └── shared/       # Shared TypeScript utilities
+├── docs/            # Comprehensive documentation
+└── scripts/         # Development and utility scripts
+```
+
 ## 🛠️ Tech Stack
 
-- **Frontend**: Next.js 15.3, TypeScript, TailwindCSS
+- **Frontend**: Next.js 15.3.3, TypeScript, TailwindCSS, Wagmi v2
 - **Backend**: Next.js API Routes, TypeScript
-- **Blockchain**: Story Protocol SDK v1.3.2, ethers.js
+- **Blockchain**: Story Protocol SDK v1.3.2, ethers.js v6
 - **Smart Contracts**: Solidity 0.8.20, Foundry
-- **Storage**: Cloudflare R2
+- **Storage**: Cloudflare R2 (private bucket with proxy)
 
 ## 🤝 Contributing
 
