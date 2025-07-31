@@ -3,7 +3,7 @@
 **The Web3 publishing platform where authors own their IP and creators earn 90% of revenue.** Built on Story Protocol, StoryHouse enables chapter-level IP management and automated licensing—with only 10% platform fee.
 
 [![Live Demo](https://img.shields.io/badge/demo-testnet.storyhouse.vip-blue)](https://testnet.storyhouse.vip)
-[![Story Protocol](https://img.shields.io/badge/built%20on-Story%20Protocol-purple)](https://www.storyprotocol.xyz/)
+[![Story Protocol](https://img.shields.io/badge/built%20on-Story%20Protocol-purple)](https://www.story.foundation/)
 [![License](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
 
 ## ✨ Why StoryHouse?
@@ -135,8 +135,8 @@ MIT License - see [LICENSE](./LICENSE) for details.
 ## 🔗 Links
 
 - **Live Demo**: [testnet.storyhouse.vip](https://testnet.storyhouse.vip)
-- **Documentation**: [docs.storyhouse.vip](https://docs.storyhouse.vip)
-- **Story Protocol**: [storyprotocol.xyz](https://www.storyprotocol.xyz)
+- **Documentation**: [docs](./docs)
+- **Story Protocol**: [story.foundation](https://www.story.foundation)
 
 ---
 

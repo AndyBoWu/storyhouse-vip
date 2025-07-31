@@ -727,7 +727,7 @@ const monitoring = {
 ## 📞 Contact & Resources
 
 - **Website**: https://storyhouse.vip
-- **Documentation**: https://docs.storyhouse.vip
+- **Documentation**: https://github.com/andybowu/storyhouse-vip/tree/main/docs
 - **GitHub**: https://github.com/andybowu/storyhouse-vip
 - **Discord**: https://discord.gg/storyhouse
 - **Twitter**: @storyhousevip
