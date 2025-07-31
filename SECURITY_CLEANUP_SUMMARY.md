@@ -39,7 +39,7 @@ Added the following patterns to prevent future exposure:
    git log --all --full-history -- "*.env.testnet" "*.env.vercel"
    
    # Search for any remaining credentials
-   git grep -i "0da36f4eefbf1078c5a04b966e8cd90d"
+   git grep -i "secret\|key\|token\|password"
    ```
 
 3. **Update R2 Credentials**
